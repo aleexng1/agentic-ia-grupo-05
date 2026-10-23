@@ -1,0 +1,6 @@
+# Ajustar a las versiones que use la plataforma del curso.
+langgraph
+langchain-google-genai
+python-dotenv
+jupyter
+nbstripout

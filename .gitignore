@@ -1,0 +1,21 @@
+# Secretos
+.env
+*.pem
+*.key
+credentials*.json
+
+# Entornos virtuales
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Editores y sistema
+.vscode/
+.idea/
+.DS_Store
