@@ -1,0 +1,52 @@
+== Coseno a mano (A) vs índice vectorial (B) · store=redis · n hasta 2000 ==
+
+Vectores reales necesarios: 900
+  Reutilizo las 5 preguntas embebidas de data/preguntas_demo.npy.
+  Reutilizo 900 vectores reales de data/vectores_demo.npy (no se pagan embeddings).
+  900 vectores de 3072 números, más 5 preguntas embebidas.
+Redis: PING=True · índice y claves con prefijo 'AlexNail_bench'
+
+--- n = 200 ---
+  Memoria: ocuparía ~5.0 MB; libre ≈ 122 MB (el servidor no informa maxmemory; uso la cota conservadora used_memory_peak 1092 MB − used_memory 970 MB (el límite es al menos el pico)).
+  Limpieza: índice 'AlexNail_bench' y sus 200 HASH borrados.
+
+  pregunta                          top-3 A             top-3 B             ¿coinciden?            ms A      ms B  vec→Py A  vec→Py B
+  no tengo internet en mi casa      #80 #122 #32        #80 #122 #32        sí                  822.033   137.232       200         0
+  cómo hago pan amasado             #186 #140 #46       #186 #140 #46       sí                  690.724   136.312       200         0
+  quién ganó el partido del domingo #143 #192 #2        #143 #192 #2        sí                  565.319   270.828       200         0
+  qué hago si tengo fiebre          #178 #129 #175      #178 #129 #175      sí                  415.299   133.304       200         0
+  cómo ahorro plata cada mes        #69 #9 #70          #69 #9 #70          sí                  283.404   134.455       200         0
+  top-1 (según B):
+    'no tengo internet en mi casa' → #80 'La señal no da internet en la noche.'
+    'cómo hago pan amasado' → #186 'El pan amasado se amasa hasta que esté suave para la once.'
+    'quién ganó el partido del domingo' → #143 'El arquero ganó el partido el domingo pasado.'
+    'qué hago si tengo fiebre' → #178 'La fiebre requiere ir al médico si no se cuida.'
+    'cómo ahorro plata cada mes' → #69 'El ahorro mensual se reparte en gastos fijos según el asesor.'
+
+--- n = 2000 ---
+  ATENCIÓN: escala SIMULADA. Solo 900 vectores son reales; los otros 1100 son copias con ruido (σ=0.003) renormalizadas a largo 1. Los tiempos valen, los textos se repiten.
+  Memoria: ocuparía ~49.8 MB; libre ≈ 104 MB (el servidor no informa maxmemory; uso la cota conservadora used_memory_peak 1092 MB − used_memory 988 MB (el límite es al menos el pico)).
+  Limpieza: índice 'AlexNail_bench' y sus 2000 HASH borrados.
+
+  pregunta                          top-3 A             top-3 B             ¿coinciden?            ms A      ms B  vec→Py A  vec→Py B
+  no tengo internet en mi casa      #839 #841 #577      #839 #841 #577      sí                 2246.433   269.739      2000         0
+  cómo hago pan amasado             #275 #1175 #186     #275 #1175 #186     sí                 2215.337   138.493      2000         0
+  quién ganó el partido del domingo #395 #611 #1295     #395 #611 #1295     sí                 2218.861   140.065      2000         0
+  qué hago si tengo fiebre          #531 #204 #719      #531 #204 #719      sí                 2090.760   147.624      2000         0
+  cómo ahorro plata cada mes        #542 #587 #896      #542 #587 #896      sí                 2080.992   141.117      2000         0
+  top-1 (según B):
+    'no tengo internet en mi casa' → #839 'El internet no da internet desde ayer.'
+    'cómo hago pan amasado' → #275 'El pan amasado se amasa hasta que esté suave con ingredientes simples.'
+    'quién ganó el partido del domingo' → #395 'El equipo local ganó el partido el domingo pasado.'
+    'qué hago si tengo fiebre' → #531 'La fiebre se alivia con descanso durante la semana.'
+    'cómo ahorro plata cada mes' → #542 'El ahorro mensual conviene revisarlo cada mes este año.'
+
+== Cómo crece el tiempo (mediana de las 5 preguntas) ==
+        n        ms A        ms B    A / B  vec→Py A  vec→Py B
+      200     565.319     136.312      4.1       200         0
+     2000    2215.337     141.117     15.7      2000         0   (datos ×10: A ×3.9, B ×1.0)
+  (en redis la forma A descarga cada vez todos los HASH; la B solo recibe 3 claves y su distancia)
+
+== Conclusión ==
+De n=200 a n=2000 (×10 datos) la forma A pasó de 565.32 a 2215.34 ms (×3.9) y la B de 136.31 a 141.12 ms (×1.0); con n=2000 B es 15.7× más rápida que A, y ambas dieron el mismo top-3 en 10/10 búsquedas.
+Incluso con n=200 A tarda 565.319 ms vs 136.312 ms de B (traer 200 vectores por la red ya cuesta más que el KNN en el servidor): A solo conviene con muy pocos vectores que ya estén en memoria, o para verificar los resultados del índice.

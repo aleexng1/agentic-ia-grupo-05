@@ -1,0 +1,13 @@
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=800 · CHUNK_OVERLAP=120 · ingesta en redis ==
+
+Páginas cargadas: 29
+Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
+Fragmentos: 96 · ya en caché: 0 · NO están en caché (gastan cuota): 96
+--reset: índice 'AlexNail' y sus documentos borrados (solo ese índice).
+
+Embebiendo 96 fragmentos nuevos en lotes de 100...
+
+DETENIDO: Gemini agotó la cuota DIARIA de embeddings (plan gratuito: ~1000 textos por día).
+  0 de 96 embeddings nuevos alcanzaron a quedar en la caché (data/cache_embeddings/).
+  No se guardó nada en la base. Al reintentar mañana con el mismo comando, la caché evita volver
+  a pagar lo ya convertido y solo se embeben los 96 que faltan.

@@ -1,0 +1,64 @@
+== Coseno a mano (A) vs índice vectorial (B) · store=faiss · n hasta 20000 ==
+
+Vectores reales necesarios: 900
+  Reutilizo las 5 preguntas embebidas de data/preguntas_demo.npy.
+  Reutilizo 900 vectores reales de data/vectores_demo.npy (no se pagan embeddings).
+  900 vectores de 3072 números, más 5 preguntas embebidas.
+
+--- n = 200 ---
+
+  pregunta                          top-3 A             top-3 B             ¿coinciden?            ms A      ms B  vec→Py A  vec→Py B
+  no tengo internet en mi casa      #80 #122 #32        #80 #122 #32        sí                    0.266     0.153       200         0
+  cómo hago pan amasado             #186 #140 #46       #186 #140 #46       sí                    0.059     0.127       200         0
+  quién ganó el partido del domingo #143 #192 #2        #143 #192 #2        sí                    0.040     0.132       200         0
+  qué hago si tengo fiebre          #178 #129 #175      #178 #129 #175      sí                    0.042     0.131       200         0
+  cómo ahorro plata cada mes        #69 #9 #70          #69 #9 #70          sí                    0.038     0.116       200         0
+  top-1 (según B):
+    'no tengo internet en mi casa' → #80 'La señal no da internet en la noche.'
+    'cómo hago pan amasado' → #186 'El pan amasado se amasa hasta que esté suave para la once.'
+    'quién ganó el partido del domingo' → #143 'El arquero ganó el partido el domingo pasado.'
+    'qué hago si tengo fiebre' → #178 'La fiebre requiere ir al médico si no se cuida.'
+    'cómo ahorro plata cada mes' → #69 'El ahorro mensual se reparte en gastos fijos según el asesor.'
+
+--- n = 2000 ---
+  ATENCIÓN: escala SIMULADA. Solo 900 vectores son reales; los otros 1100 son copias con ruido (σ=0.003) renormalizadas a largo 1. Los tiempos valen, los textos se repiten.
+
+  pregunta                          top-3 A             top-3 B             ¿coinciden?            ms A      ms B  vec→Py A  vec→Py B
+  no tengo internet en mi casa      #839 #841 #577      #839 #841 #577      sí                    0.694     1.563      2000         0
+  cómo hago pan amasado             #275 #1175 #186     #275 #1175 #186     sí                    0.648     1.605      2000         0
+  quién ganó el partido del domingo #395 #611 #1295     #395 #611 #1295     sí                   10.823     1.593      2000         0
+  qué hago si tengo fiebre          #531 #204 #719      #531 #204 #719      sí                    0.802     1.542      2000         0
+  cómo ahorro plata cada mes        #542 #587 #896      #542 #587 #896      sí                    0.738     1.596      2000         0
+  top-1 (según B):
+    'no tengo internet en mi casa' → #839 'El internet no da internet desde ayer.'
+    'cómo hago pan amasado' → #275 'El pan amasado se amasa hasta que esté suave con ingredientes simples.'
+    'quién ganó el partido del domingo' → #395 'El equipo local ganó el partido el domingo pasado.'
+    'qué hago si tengo fiebre' → #531 'La fiebre se alivia con descanso durante la semana.'
+    'cómo ahorro plata cada mes' → #542 'El ahorro mensual conviene revisarlo cada mes este año.'
+
+--- n = 20000 ---
+  ATENCIÓN: escala SIMULADA. Solo 900 vectores son reales; los otros 19100 son copias con ruido (σ=0.003) renormalizadas a largo 1. Los tiempos valen, los textos se repiten.
+
+  pregunta                          top-3 A             top-3 B             ¿coinciden?            ms A      ms B  vec→Py A  vec→Py B
+  no tengo internet en mi casa      #839 #841 #577      #839 #841 #577      sí                   19.518    65.582     20000         0
+  cómo hago pan amasado             #275 #3875 #19175   #275 #3875 #19175   sí                   21.157    78.814     20000         0
+  quién ganó el partido del domingo #395 #10295 #12995  #395 #10295 #12995  sí                   15.771    76.195     20000         0
+  qué hago si tengo fiebre          #531 #204 #5931     #531 #204 #5931     sí                   18.613    75.397     20000         0
+  cómo ahorro plata cada mes        #542 #587 #896      #542 #587 #896      sí                   16.193    87.759     20000         0
+  top-1 (según B):
+    'no tengo internet en mi casa' → #839 'El internet no da internet desde ayer.'
+    'cómo hago pan amasado' → #275 'El pan amasado se amasa hasta que esté suave con ingredientes simples.'
+    'quién ganó el partido del domingo' → #395 'El equipo local ganó el partido el domingo pasado.'
+    'qué hago si tengo fiebre' → #531 'La fiebre se alivia con descanso durante la semana.'
+    'cómo ahorro plata cada mes' → #542 'El ahorro mensual conviene revisarlo cada mes este año.'
+
+== Cómo crece el tiempo (mediana de las 5 preguntas) ==
+        n        ms A        ms B    A / B  vec→Py A  vec→Py B
+      200       0.042       0.131      0.3       200         0
+     2000       0.738       1.593      0.5      2000         0   (datos ×10: A ×17.8, B ×12.2)
+    20000      18.613      76.195      0.2     20000         0   (datos ×10: A ×25.2, B ×47.8)
+  (en faiss los vectores ya están en la RAM de Python: 'vec→Py A' = cuántos recorre numpy; B solo devuelve 3 ids)
+
+== Conclusión ==
+De n=200 a n=20000 (×100 datos) la forma A pasó de 0.04 a 18.61 ms (×447.9) y la B de 0.13 a 76.19 ms (×581.2); con n=20000 A es 4.1× más rápida que B, y ambas dieron el mismo top-3 en 15/15 búsquedas.
+Con n=200 A tarda 0.042 ms vs 0.131 ms de B: con pocos vectores ya en memoria A conviene (igual de exacta y sin mantener un índice); en estas mediciones siguió ganando hasta n=20000.
