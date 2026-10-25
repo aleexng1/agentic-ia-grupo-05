@@ -1,0 +1,38 @@
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=1200 · CHUNK_OVERLAP=200 · solo cortar (sin embeber ni guardar) ==
+
+Páginas cargadas: 29
+Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
+Fragmentos: 66 · ya en caché: 0 · NO están en caché (gastan cuota): 66
+
+--solo-cortar: no se embebió ni guardó nada. La ingesta real gastaría 66 embeddings (+1 consulta para medir la dimensión del índice, solo la primera vez).
+
+== Resumen ==
+  Páginas leídas:          29
+  Fragmentos generados:    66
+  Tamaño promedio:         922 caracteres (mín. 54, máx. 1199)
+  Pares consecutivos de una misma página: 37, de los cuales 30 comparten texto
+
+== Fragmentos 1 y 2 ==
+  fragmento 1 (pág. 1, 1111 car.)                            │ fragmento 2 (pág. 1, 387 car.)
+  ───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────
+  Instead of trying to produce a programme to simulate the   │ ⟦This paper aims to provide an introductory overview of
+  adult mind, why not rather try to produce one which        │ the most commonly used methods for humor detection, in
+  simulates the child’s? If this were then subjected to an   │ order to offer a broad perspective on automatic humor
+  appropriate course of education one would obtain the adult │ recognition.⟧ The studies analyzed share a common
+  brain. Turing, A. M. (1950). Computing machinery and       │ criterion: the inclusion of ambiguity and incongruity as
+  intelligence . RESUMEN El humor sigue siendo uno de los    │ key elements of humor. Keywords: Humor, ambiguity,
+  mayores desafíos para el procesamiento del lenguaje        │ incongruity, machine learning, natural language processing
+  natural. El presente trabajo tiene como objetivo presentar │ (NLP) 1
+  de forma introductoria los métodos de detección de humor   │ 
+  más utilizados, con el fin de ofrecer un panorama amplio   │ 
+  sobre la detección automática del humor. Los estudios      │ 
+  analizados comparten como criterio principal la inclusión  │ 
+  de la ambigüedad y la incongruencia como claves            │ 
+  humorísticas. Palabras Clave: Humor, ambigüedad,           │ 
+  incongruencia, aprendizaje automático, procesamiento del   │ 
+  lenguaje natural (PLN) ABSTRACT Humor remains one of the   │ 
+  greatest challenges for natural language processing. ⟦This │ 
+  paper aims to provide an introductory overview of the most │ 
+  commonly used methods for humor detection, in order to     │ 
+  offer a broad perspective on automatic humor recognition.⟧ │ 
+  ⟦…⟧ = texto repetido entre ambos (solape de 176 caracteres)

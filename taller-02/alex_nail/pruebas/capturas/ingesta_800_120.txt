@@ -1,13 +1,54 @@
-== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=800 · CHUNK_OVERLAP=120 · ingesta en redis ==
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=800 · CHUNK_OVERLAP=120 · solo cortar (sin embeber ni guardar) ==
 
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
 Fragmentos: 96 · ya en caché: 0 · NO están en caché (gastan cuota): 96
---reset: índice 'AlexNail' y sus documentos borrados (solo ese índice).
 
-Embebiendo 96 fragmentos nuevos en lotes de 100...
+--solo-cortar: no se embebió ni guardó nada. La ingesta real gastaría 96 embeddings (+1 consulta para medir la dimensión del índice, solo la primera vez).
 
-DETENIDO: Gemini agotó la cuota DIARIA de embeddings (plan gratuito: ~1000 textos por día).
-  0 de 96 embeddings nuevos alcanzaron a quedar en la caché (data/cache_embeddings/).
-  No se guardó nada en la base. Al reintentar mañana con el mismo comando, la caché evita volver
-  a pagar lo ya convertido y solo se embeben los 96 que faltan.
+== Resumen ==
+  Páginas leídas:          29
+  Fragmentos generados:    96
+  Tamaño promedio:         614 caracteres (mín. 60, máx. 796)
+  Pares consecutivos de una misma página: 67, de los cuales 33 comparten texto
+
+== Fragmentos 1 y 2 ==
+  fragmento 1 (pág. 1, 732 car.)                             │ fragmento 2 (pág. 1, 589 car.)
+  ───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────
+  Instead of trying to produce a programme to simulate the   │ Palabras Clave: Humor, ambigüedad, incongruencia,
+  adult mind, why not rather try to produce one which        │ aprendizaje automático, procesamiento del lenguaje natural
+  simulates the child’s? If this were then subjected to an   │ (PLN) ABSTRACT Humor remains one of the greatest
+  appropriate course of education one would obtain the adult │ challenges for natural language processing. This paper
+  brain. Turing, A. M. (1950). Computing machinery and       │ aims to provide an introductory overview of the most
+  intelligence . RESUMEN El humor sigue siendo uno de los    │ commonly used methods for humor detection, in order to
+  mayores desafíos para el procesamiento del lenguaje        │ offer a broad perspective on automatic humor recognition.
+  natural. El presente trabajo tiene como objetivo presentar │ The studies analyzed share a common criterion: the
+  de forma introductoria los métodos de detección de humor   │ inclusion of ambiguity and incongruity as key elements of
+  más utilizados, con el fin de ofrecer un panorama amplio   │ humor. Keywords: Humor, ambiguity, incongruity, machine
+  sobre la detección automática del humor. Los estudios      │ learning, natural language processing (NLP) 1
+  analizados comparten como criterio principal la inclusión  │ 
+  de la ambigüedad y la incongruencia como claves            │ 
+  humorísticas.                                              │ 
+  (no hay texto repetido entre estos dos fragmentos)
+  Están en la misma página pero no repiten texto: el solape se arma con trozos completos (oraciones, o
+  palabras si una oración no cabe) que sumen a lo más CHUNK_OVERLAP caracteres; si la última oración
+  del fragmento es más larga que eso, no se repite nada.
+
+== Primer par de fragmentos consecutivos de una misma página con texto repetido ==
+  fragmento 10 (pág. 4, 603 car.)                            │ fragmento 11 (pág. 4, 788 car.)
+  ───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────
+  Existen también otras teorías, como la funcionalista o la  │ ⟦Encontramos este tipo de humor en la sátira, la ironía o
+  interaccionista, sin embargo muchas de ellas toman las     │ los chistes racistas, sexistas o de carácter político.⟧
+  tres teorías clásicas de referencia. Cabe apuntar que      │ Sin embargo, esta superioridad no tiene que dirigirse
+  estas no son excluyentes, sino que se complementan para    │ necesariamente hacia otros, también puede orientarse hacia
+  cubrir una gran cantidad de expresión humorística. La      │ uno mismo en retrospectiva, como cuando nos reímos de
+  teoría de la superioridad se establece con el pensamiento  │ nuestros propios errores pasados. La teoría de alivio, por
+  de autores como Hobbes (1588-1679). Según esta teoría, nos │ otra parte, interpreta el humor como una forma de
+  reímos cuando nos sentimos por encima de los demás, al     │ liberación individual o social. Aunque pueden encontrarse
+  darse cuenta de su torpeza o inferioridad. ⟦Encontramos    │ precedentes en la antigua Grecia, Lord Shaftesbury formuló
+  este tipo de humor en la sátira, la ironía o los chistes   │ esta hipótesis en el siglo XVIII. El sociólogo H. Spencer
+  racistas, sexistas o de carácter político.⟧                │ adoptó esta teoría con un enfoque más fisiológico, al
+                                                             │ comienzo del siglo XX. No obstante, Sigmund Freud fue el
+                                                             │ encargado de sistematizar la teoría y difundirla con su
+                                                             │ ensayo El chiste y su relación con el inconsciente (1905).
+  ⟦…⟧ = texto repetido entre ambos (solape de 111 caracteres)
