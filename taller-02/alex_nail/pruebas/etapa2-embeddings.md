@@ -4,15 +4,15 @@
 
 Condiciones: dos frases que digan **lo mismo con palabras distintas** (que casi no compartan palabras) y una de **otro tema**. De mi dominio de trabajo.
 
-- Frase 1: ____
-- Frase 2 (lo mismo que la 1, con otras palabras): ____
-- Frase 3 (otro tema): ____
+- Frase 1: ¿Puedo rendir el almuerzo con un cliente?
+- Frase 2 (lo mismo que la 1, con otras palabras): ¿Me devuelven lo que gasté en una comida de negocios?
+- Frase 3 (otro tema): El inventario de anclas se cuenta en la bodega central
 
 ## 2. Mi predicción (antes de correr nada)
 
-- Par más parecido: ____
-- Parecido que espero para ese par: ____
-- Parecido que espero para los pares con la frase 3: ____
+- Par más parecido: 1 y 2
+- Parecido que espero para ese par: ~0,90
+- Parecido que espero para los pares con la frase 3: ~0,40, porque hablan de temas que no tienen nada que ver.
 
 Dato que ya conozco de la demo del Prompt 2: con este modelo, incluso frases sin relación dan cerca de 0,75 (router ↔ pan amasado = 0,788). Lo que importa es la **diferencia** entre pares, no el número solo.
 
@@ -25,9 +25,11 @@ python scripts/demo_embeddings.py "frase 1" "frase 2" "frase 3"
 
 | Par | Parecido |
 |---|---|
-|  |  |
-|  |  |
-|  |  |
+| Frase 1 ↔ Frase 2 ("¿Puedo rendir el almuerzo con un cliente?" ↔ "¿Me devuelven lo que gasté en una comida de negocios?") | 0,8718 (más parecido) |
+| Frase 1 ↔ Frase 3 ("¿Puedo rendir el almuerzo con un cliente?" ↔ "El inventario de anclas se cuenta en la bodega central") | 0,6897 |
+| Frase 2 ↔ Frase 3 ("¿Me devuelven lo que gasté en una comida de negocios?" ↔ "El inventario de anclas se cuenta en la bodega central") | 0,6891 |
+
+Captura: `capturas/etapa2_mis_frases.txt`.
 
 ¿Acerté?: ____
 
@@ -50,7 +52,7 @@ Qué esperar: si el parecido es de **significado**, "banco cerró" ↔ "sucursal
 
 Captura: `capturas/etapa2_banco.txt`.
 
-Conclusión: ____
+Conclusión: Sí, el parecido es de significado y no de palabras: la frase sobre el banco que cerró quedó más cerca de la sucursal que no atiende (0,865) que de la frase con la misma palabra "banco" (0,808).
 
 ## 5. Índice vectorial vs coseno a mano (ya medido)
 
@@ -73,4 +75,4 @@ Evidencia en `capturas/indice_vs_coseno_redis.txt` y `capturas/indice_vs_coseno_
 
 Nota: por la cuota diaria de Gemini, en n = 2000 hay 900 vectores reales y 1100 simulados (copias con un pequeño ruido). Los tiempos no cambian, porque el cálculo cuesta lo mismo con vectores reales o simulados.
 
-**Mi regla (una línea, ajústala con tus palabras):** si los vectores están en un servidor remoto, siempre el índice, porque A tiene que bajarlos todos por la red en cada pregunta (16 veces más lento con 2000). El coseno a mano solo sirve para entender el cálculo o para pocos vectores que ya están en memoria. Con un índice FAISS plano, numpy incluso gana, y la ventaja del índice aparece con índices aproximados (HNSW) y muchos datos.
+**Mi regla (una línea, ajústala con tus palabras):** Si los vectores están en un servidor remoto, siempre el índice, porque el coseno a mano tiene que bajarlos todos por la red en cada pregunta (16 veces más lento con 2.000). El coseno a mano solo sirve para entender el cálculo o para pocos vectores que ya están en memoria. Con un índice FAISS plano, numpy incluso gana: la ventaja del índice aparece con índices aproximados (HNSW) y muchos datos.

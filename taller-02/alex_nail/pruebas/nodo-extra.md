@@ -118,4 +118,4 @@ Capturas: `capturas/etapa6_antes_q1.txt`, `etapa6_antes_q2.txt`, `etapa6_despues
 
 Capturas: `capturas/etapa6_control_F.txt`, `etapa6_control_S.txt` y `etapa6_control_trampa.txt`.
 
-¿Mejoró? ____
+¿Mejoró? No en lo principal. La pregunta 1 pasó de 0,699 a 0,700: la bibliografía bajó de 2 a 1 fragmento, pero el resumen (p. 1) salió del top-3. Creo que es porque "¿De qué trata el documento?" pregunta por el documento mismo, y el texto nunca habla de sí mismo con esas palabras. La pregunta 2 mejoró un poco (+0,024). Costos: la F subió de 0,648 a 0,652 (con el umbral anterior de 0,65 habría sido un falso positivo) y cada pregunta gasta una llamada más al modelo. Lo siguiente que probaría: que reformular cambie "el documento" por "el objetivo del trabajo".

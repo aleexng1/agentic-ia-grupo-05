@@ -69,8 +69,8 @@ Rango sin falsos positivos ni falsos negativos, recalculado para cada base (a 3 
 
 ## Párrafo 1
 
-____
+Repetí la batería de 12 preguntas en Redis y en FAISS con el agente final (incluye reformular). Cuando la pregunta reescrita fue la misma (preguntas 1, 2 y F), las dos bases dieron exactamente el mismo parecido, el mismo top-3 y la misma página citada. Las demás diferencias vienen de que reformular reescribió distinto en cada corrida, no de la base. Con UMBRAL 0,68 ninguna pregunta cambió de ruta, así que la decisión del umbral se mantiene. Lo que sí aprendí es que reformular le quita repetibilidad al agente: la pregunta 9 quedó en 0,748 en una base y 0,751 en la otra.
 
 ## Párrafo 2
 
-____
+En tiempo, la búsqueda sola tarda 141 ms en Redis y 0,9 ms en FAISS: es la diferencia entre ir a un servidor remoto y buscar en la memoria del propio computador. La mediana del agente en Redis fue de 2,6 s, pero el 94% de ese tiempo se iba en abrir conexiones nuevas al servidor en cada pregunta, no en buscar. Mi regla: FAISS para trabajar solo y probar rápido; Redis cuando varias personas o máquinas tienen que compartir el mismo índice, reutilizando la conexión.

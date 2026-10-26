@@ -47,4 +47,4 @@ Fragmento con mejor parecido en cada configuración (todos de la p. 4):
 - B · 1200/200: empieza en "El sociólogo H. Spencer adoptó esta teoría…" (la respuesta queda dentro de un fragmento que también trae la teoría del alivio).
 - 800/120: empieza en "El humor, según esta obra actúa de válvula de escape…" (la respuesta queda dentro, junto con parte de la teoría del alivio).
 
-Elegimos: 800/120   Porque: ____
+Elegimos: 800/120   Porque: Porque es el punto de equilibrio en mi PDF: fragmentos lo bastante grandes para traer la razón completa, sin migajas como 400/50 ni la mezcla de temas de 1200/200, y con el parecido más alto de las tres (0,822).

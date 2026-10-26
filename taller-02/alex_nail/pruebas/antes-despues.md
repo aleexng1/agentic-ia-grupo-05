@@ -32,4 +32,4 @@ Observación:
 - Lo único que le seguía indicando usar el contexto era el `USER_PROMPT` (los fragmentos dentro de `<contexto>`) y la regla 2, que habla de "afirmar algo del contexto".
 - Diferencia con las dos corridas anteriores: esta ya pasó por el nodo `reformular` de la Etapa 6. La búsqueda usó "cotización actual de Bitcoin", así que los fragmentos fueron otros (p.22, p.29 y p.15; mejor parecido 0,598).
 - Después se restauró el `SYSTEM_PROMPT` copiando el respaldo; `diff` sin diferencias.
-Qué aprendí: ____
+Qué aprendí: El taller anticipaba que, sin la regla 1, el modelo inventaría con seguridad. No pasó: respondió que el contexto no tenía información sobre el bitcoin, incluso sin la primera línea ni la regla 3. Aprendí que el efecto de una regla depende del modelo, y que hay que probarlo en vez de suponerlo.

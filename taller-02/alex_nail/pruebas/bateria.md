@@ -42,17 +42,17 @@ Las "dentro" están verificadas contra el texto del PDF: la frase clave aparece 
 
 | # | Pregunta | Tipo (dentro/fuera/ambigua) | Ruta (--saltos) | Mejor parecido | ¿Respondió o no_se? | ¿Cita correcta? | Comentario |
 |---|----------|-----------------------------|-----------------|----------------|---------------------|-----------------|------------|
-| 1 | Primera conferencia de humor computacional | dentro | buscar → responder | 0,757 | Respondió | cita p.6, esperada p.6 ✓ — revisar | Bibliografía en el top-3: p.26 y p.25 (puestos 2 y 3). La respuesta repite el fragmento, sin inventar. |
-| 2 | Tres teorías principales del humor | dentro | buscar → responder | 0,783 | Respondió | cita p.3 y p.4, esperada p.3 (detalle p.4) ✓ — revisar | Sin bibliografía. Junta dos páginas en una cita ("[… p.3, 4]"). Sin invenciones. |
-| 3 | Por qué la incongruencia es la más usada | dentro | buscar → responder | 0,822 | Respondió | cita p.4, esperada p.4 ✓ — revisar | Sin bibliografía (p.4, p.2, p.1). Trae la razón completa. |
-| 4 | K usado por Liu et al. (2018a) | dentro | buscar → responder | 0,789 | Respondió | cita p.19, esperada p.19 ✓ — revisar | Sin bibliografía: no apareció la entrada de la p.26. "Puns y one-liners" está literal en el fragmento. Escribe "$K=5$" en formato LaTeX. |
-| 5 | Qué mide la entropía (Kao et al.) | dentro | buscar → responder | 0,743 | Respondió | cita p.15 y p.16, esperada p.15 y p.16 ✓ — revisar | Sin bibliografía. Usa las dos páginas; "equilibradas" está literal en el fragmento de la p.15. |
+| 1 | Primera conferencia de humor computacional | dentro | buscar → responder | 0,757 | Respondió | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía en el top-3: p.26 y p.25 (puestos 2 y 3). La respuesta repite el fragmento, sin inventar. |
+| 2 | Tres teorías principales del humor | dentro | buscar → responder | 0,783 | Respondió | cita p.3 y p.4, esperada p.3 (detalle p.4) ✓ verificada en el texto de la página | Sin bibliografía. Junta dos páginas en una cita ("[… p.3, 4]"). Sin invenciones. |
+| 3 | Por qué la incongruencia es la más usada | dentro | buscar → responder | 0,822 | Respondió | cita p.4, esperada p.4 ✓ verificada en el texto de la página | Sin bibliografía (p.4, p.2, p.1). Trae la razón completa. |
+| 4 | K usado por Liu et al. (2018a) | dentro | buscar → responder | 0,789 | Respondió | cita p.19, esperada p.19 ✓ verificada en el texto de la página | Sin bibliografía: no apareció la entrada de la p.26. "Puns y one-liners" está literal en el fragmento. Escribe "$K=5$" en formato LaTeX. |
+| 5 | Qué mide la entropía (Kao et al.) | dentro | buscar → responder | 0,743 | Respondió | cita p.15 y p.16, esperada p.15 y p.16 ✓ verificada en el texto de la página | Sin bibliografía. Usa las dos páginas; "equilibradas" está literal en el fragmento de la p.15. |
 | 6 | Precio del bitcoin | fuera | buscar → no_se | 0,573 | no_se | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
 | 7 | IVA de una factura en Chile | fuera | buscar → no_se | 0,559 | no_se | — (no cita) | Sin bibliografía. |
 | 8 | Último Mundial de fútbol | fuera | buscar → no_se | 0,548 | no_se | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
-| 9 | BERT o GPT en español | ambigua | buscar → responder | 0,749 | Respondió que el contexto no alcanza | cita p.24, esperada "roza p.21 y p.22" ✗ — revisar | Sin bibliografía. Dice "el contexto no menciona ni a BERT ni a GPT", que es cierto para lo que recibió (p.16, p.24, p.1). El PDF sí los nombra en la p.22, pero ese fragmento no entró al top-3. |
-| 10| Porcentaje de acierto de los transformers | ambigua | buscar → responder | 0,803 | Respondió que no hay cifras | cita p.22 y p.24, esperada "roza p.24" ✓ — revisar | Sin bibliografía. Dice correctamente que no hay porcentaje; cita páginas para una afirmación negativa. |
-| S | (sinónimos) Primer congreso de humor por computadora | dentro | buscar → responder | 0,737 | Respondió | cita p.6, esperada p.6 ✓ — revisar | Bibliografía (p.26) en los puestos 2 y 3. Funciona con sinónimos, pero es el parecido más bajo de las "dentro". |
+| 9 | BERT o GPT en español | ambigua | buscar → responder | 0,749 | Respondió que el contexto no alcanza | cita p.24, esperada "roza p.21 y p.22" ✗ (esas páginas no entraron al top-3); lo que afirma la respuesta ("supremacía de los transformers", "mecanismo de atención") ✓ verificado en el texto de la p.24 | Sin bibliografía. Dice "el contexto no menciona ni a BERT ni a GPT", que es cierto para lo que recibió (p.16, p.24, p.1). El PDF sí los nombra en la p.22, pero ese fragmento no entró al top-3. |
+| 10| Porcentaje de acierto de los transformers | ambigua | buscar → responder | 0,803 | Respondió que no hay cifras | cita p.22 y p.24, esperada "roza p.24" ✓ verificada en el texto de la página (las dos hablan de transformers y ninguna da porcentajes; la p.24 dice "insuperables") | Sin bibliografía. Dice correctamente que no hay porcentaje; cita páginas para una afirmación negativa. |
+| S | (sinónimos) Primer congreso de humor por computadora | dentro | buscar → responder | 0,737 | Respondió | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía (p.26) en los puestos 2 y 3. Funciona con sinónimos, pero es el parecido más bajo de las "dentro". |
 | F | (palabras del PDF) Índice HNSW con KNN en Redis | fuera | buscar → no_se | 0,648 | no_se | — (no cita) | Bibliografía (p.29) en el puesto 1. Quedó a 0,002 del umbral: casi un falso positivo. |
 
 Capturas: `capturas/etapa4_q01.txt` … `etapa4_q10.txt`, `etapa4_qS.txt` y `etapa4_qF.txt`.
@@ -96,4 +96,8 @@ Las 12 preguntas ordenadas por mejor parecido (valores exactos, sin redondear):
 
 Capturas: TOP_K=3 en `capturas/etapa4_q01.txt` … `etapa4_q05.txt`; TOP_K=1 en `capturas/etapa4_topk1_q01.txt` …; TOP_K=5 en `capturas/etapa4_topk5_q01.txt` …
 
-UMBRAL elegido: ____   TOP_K elegido: ____   Por qué: ____
+UMBRAL elegido: 0,68   TOP_K elegido: 3   Por qué:
+
+UMBRAL 0,68: las "dentro" sacaron entre 0,737 y 0,822 y las "fuera" entre 0,548 y 0,648, así que cualquier valor entre 0,648 y 0,737 separa sin errores. El 0,65 original quedaba a 0,002 de la pregunta F. Elegí 0,68 para tener margen hacia los dos lados sin perder "¿De qué trata el documento?" (0,699).
+
+TOP_K 3: con 1, la pregunta 2 no nombró las tres teorías y la 5 perdió la mitad de la respuesta (estaba en la p. 16). Con 5 no se pierde nada, pero entra mucha bibliografía (4 de 5 en la pregunta 1). Con 3, las cinco respuestas salen completas y con menos ruido.

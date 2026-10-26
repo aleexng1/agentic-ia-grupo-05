@@ -1,0 +1,20 @@
+== Vectores ==
+[1] '¿Puedo rendir el almuerzo con un cliente?'
+    3072 números · primeros 5: [-0.0221, +0.0437, +0.0101, -0.0796, +0.0042, ...]
+[2] '¿Me devuelven lo que gasté en una comida de negocios?'
+    3072 números · primeros 5: [-0.0163, +0.0247, +0.0359, -0.0672, +0.0082, ...]
+[3] 'El inventario de anclas se cuenta en la bodega central'
+    3072 números · primeros 5: [-0.0121, -0.0127, +0.0145, -0.0665, -0.0052, ...]
+
+== Parecido coseno entre pares (1 = idénticas; importa la comparación entre pares, no el valor absoluto) ==
+par       parecido
+[1]-[2]      0.8718  ← más parecido
+[1]-[3]      0.6897
+[2]-[3]      0.6891
+
+== Pregunta: 'no tengo internet' ==
+  0.6034  [1] ¿Puedo rendir el almuerzo con un cliente?
+  0.5974  [2] ¿Me devuelven lo que gasté en una comida de negocios?
+  0.5847  [3] El inventario de anclas se cuenta en la bodega central
+
+La frase más cercana a la pregunta es [1] '¿Puedo rendir el almuerzo con un cliente?' (parecido 0.6034).
