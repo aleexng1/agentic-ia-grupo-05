@@ -4,13 +4,12 @@
 
 - Grupo: 05
 - Integrantes: Eduardo Basaure, Matías Muñoz, Alex Nail, Sebastián Mardones
-- Esta versión: Alex Nail
 - Material de un compañero: el PDF del taller lo propuso Matías Muñoz.
 - Ayudante de programación: Claude Code (en lugar de OpenCode).
 
 ## Cómo correrlo
 
-Desde esta carpeta (`taller-02/alex_nail/proyecto/`):
+Desde la carpeta `proyecto/`:
 
 ```bash
 # 1. Entorno virtual e instalación
