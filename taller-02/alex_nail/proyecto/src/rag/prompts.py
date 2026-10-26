@@ -29,7 +29,7 @@ Reglas:
 {pregunta}
 </pregunta>"""
 
-# Cómo se presenta cada fragmento dentro de <contexto>; la etiqueta es la misma que debe usar la cita.
+# Etiqueta con que el modelo ve cada fragmento dentro de <contexto>; la regla 2 le pide citar en formato (p. N).
 FRAGMENTO = "[{fuente} p.{pagina}]\n{texto}"
 
 NO_SE = "No encontré evidencia en los documentos para responder eso"

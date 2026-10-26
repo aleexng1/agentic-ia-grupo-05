@@ -69,7 +69,7 @@ Rango sin falsos positivos ni falsos negativos, recalculado para cada base (a 3 
 
 ## Párrafo 1
 
-Repetí la batería de 12 preguntas en Redis y en FAISS con el agente final (incluye reformular). Cuando la pregunta reescrita fue la misma (preguntas 1, 2 y F), las dos bases dieron exactamente el mismo parecido, el mismo top-3 y la misma página citada. Las demás diferencias vienen de que reformular reescribió distinto en cada corrida, no de la base. Con UMBRAL 0,68 ninguna pregunta cambió de ruta, así que la decisión del umbral se mantiene. Lo que sí aprendí es que reformular le quita repetibilidad al agente: la pregunta 9 quedó en 0,748 en una base y 0,751 en la otra.
+Repetí la batería de 12 preguntas en Redis y en FAISS con el agente final (incluye reformular). Cuando la pregunta reescrita fue la misma (preguntas 1, 2 y F), las dos bases dieron exactamente el mismo parecido, el mismo top-3 y la misma página citada. Las demás diferencias vienen de que reformular reescribió distinto en cada corrida, no de la base. Con UMBRAL 0,68 ninguna pregunta cambió de ruta, así que la decisión del umbral se mantiene. Lo que sí aprendí es que reformular le quita repetibilidad al agente: la pregunta 9 quedó en 0,748 en una base y 0,751 en la otra. Lo confirma la Etapa 3: sin reformular de por medio, las configuraciones 400/50 y 1200/200 dieron el mismo top-3, en el mismo orden y con el mismo parecido (0,782) en Redis y en FAISS.
 
 ## Párrafo 2
 

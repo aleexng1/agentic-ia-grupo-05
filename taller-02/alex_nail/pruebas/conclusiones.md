@@ -1,6 +1,6 @@
 E1. Armé el agente solo con prompts a Claude Code, adaptados a Linux y al Redis compartido. A la primera pregunta respondió citando el resumen (p. 1), pero con solo 0,699 de parecido y dos fragmentos de bibliografía arriba. Los tropiezos fueron del entorno, no del código: la cuota diaria de Gemini y el Redis lleno obligaron a agregar caché de embeddings y a corregir el orden del --reset.
 
-E2. Los embeddings miden significado: [resultado de mis frases]. En la prueba del banco, la frase con otras palabras y el mismo sentido (0,865) superó a la que compartía "banco" (0,808). Para buscar, el índice gana siempre que los datos estén en un servidor.
+E2. Los embeddings miden significado: las dos frases sobre reembolsar una comida dieron 0,872 sin compartir palabras, frente a ~0,69 con la frase de otro tema. En la prueba del banco, la frase con otras palabras y el mismo sentido (0,865) superó a la que compartía "banco" (0,808). Para buscar, el índice gana siempre que los datos estén en un servidor.
 
 E3. Las tres configuraciones respondieron bien citando la p. 4, así que la diferencia estuvo en los detalles: 400/50 deja fragmentos muy chicos y casi sin solape (16% de los pares), y 1200/200 mezcla temas. Elegí 800/120 por su parecido más alto (0,822). También aprendí que el solape repite oraciones completas, no un número fijo de caracteres.
 

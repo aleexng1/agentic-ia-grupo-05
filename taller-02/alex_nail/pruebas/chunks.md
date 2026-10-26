@@ -14,7 +14,9 @@ Documento: `docs/humor-computacional.pdf` (29 páginas). Antes de cortar, la ing
 | B · 1200/200  | 54            | 1199          | 1                                      | 30 de 37 (81%)                                |
 | 800/120       | 60            | 796           | 1                                      | 33 de 67 (49%)                                |
 
-Capturas: `capturas/ingesta_400_50.txt`, `capturas/ingesta_1200_200.txt` y `capturas/ingesta_800_120.txt` (solo cortar, sin embeber).
+Capturas: `capturas/ingesta_400_50.txt`, `capturas/ingesta_1200_200.txt` y `capturas/ingesta_800_120.txt` (ingestas reales en Redis). Las de FAISS tienen sufijo `_faiss`: `capturas/ingesta_400_50_faiss.txt`, `capturas/ingesta_1200_200_faiss.txt` y `capturas/ingesta_800_120_faiss.txt`.
+
+Nota: el taller pide cambiar CHUNK_SIZE y CHUNK_OVERLAP en el .env; aquí se pasaron en cada comando (mismo efecto), para que el .env quedara siempre en la configuración elegida (800/120).
 
 **Hallazgo con 800/120:** el solape no es "los últimos 120 caracteres". El cortador repite solo **oraciones completas** que quepan en el solape, y por eso solo 33 de los 67 pares de una misma página comparten texto. Captura del par que sí lo muestra (fragmentos 10 y 11, p. 4): `capturas/ingesta_800_120.txt`.
 
@@ -47,4 +49,4 @@ Fragmento con mejor parecido en cada configuración (todos de la p. 4):
 - B · 1200/200: empieza en "El sociólogo H. Spencer adoptó esta teoría…" (la respuesta queda dentro de un fragmento que también trae la teoría del alivio).
 - 800/120: empieza en "El humor, según esta obra actúa de válvula de escape…" (la respuesta queda dentro, junto con parte de la teoría del alivio).
 
-Elegimos: 800/120   Porque: Porque es el punto de equilibrio en mi PDF: fragmentos lo bastante grandes para traer la razón completa, sin migajas como 400/50 ni la mezcla de temas de 1200/200, y con el parecido más alto de las tres (0,822).
+Elegimos: 800/120   Porque es el punto de equilibrio en mi PDF: fragmentos lo bastante grandes para traer la razón completa, sin migajas como 400/50 (6 fragmentos de menos de 100 caracteres) y con menos mezcla de temas que 1200/200, y con el parecido más alto de las tres (0,822). Con esta sola pregunta las tres respondieron bien, así que la diferencia está en el parecido y en la calidad de los fragmentos, no en la respuesta.

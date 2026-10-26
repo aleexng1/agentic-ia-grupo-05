@@ -298,12 +298,13 @@ El repo del grupo es público. Antes de subir, se le pidió al ayudante revisar 
 
 ---
 
-## Pendiente para cerrar la Etapa 1
+## Cierre de la Etapa 1
 
-- [ ] `python scripts/test_storage.py` (repetir en el orden del deck)
-- [ ] `python scripts/ingest.py docs/humor-computacional.pdf --reset` con la cuota nueva
-- [ ] `python main.py rag "¿De qué trata el documento?" --saltos` y **captura de pantalla** con la ruta y una respuesta citada
-- [ ] Anotar aquí si alguno de esos comandos necesitó corrección
+- `python scripts/test_storage.py` dio OK: guardó y buscó en un índice de prueba, la fórmula de `a_parecido()` coincidió con el coseno calculado a mano, y el índice de prueba se borró al terminar (`capturas/etapa1_test_storage.txt`).
+- `python scripts/ingest.py docs/humor-computacional.pdf --reset` (800/120) guardó 96 fragmentos en el índice `AlexNail` (`capturas/ingesta_800_120.txt`).
+- `python main.py rag "¿De qué trata el documento?" --saltos` falló una vez con 429 por el límite por minuto, justo después de la ingesta. Se repitió y respondió citando el resumen (p. 1), con parecido 0,699 (`capturas/etapa1_pregunta1.txt`).
+- La captura `capturas/etapa1_saltos.png` se generó desde esa salida real (`etapa1_pregunta1.txt`).
+- La corrección que hizo falta (el 429) está detallada en "Correcciones durante las etapas 2 a 4", punto (a).
 
 ---
 
@@ -390,4 +391,52 @@ CIERRE
 7) Revisión de secretos como las anteriores; si está limpia: git add taller-02/alex_nail/, commit "Taller 2: etapa 6 (nodo reformular) y prueba sin barreras" y git push.
 
 AL FINAL muéstrame: las preguntas reescritas, la tabla de nodo-extra.md, los controles de daños, el resultado del paso 6, el gasto y git log --oneline -3.
+```
+
+
+---
+
+## Prompts dentro del agente (prompts.py final)
+
+Copiados tal cual desde `src/rag/prompts.py`.
+
+### SYSTEM_PROMPT
+
+```
+Eres un asistente que responde preguntas usando únicamente fragmentos de documentos.
+
+Reglas:
+1. Responde SOLO con lo que está en el contexto.
+2. Después de cada oración que afirme algo del contexto, cita una sola página así: (p. N). Si una idea usa dos páginas, divídela en dos oraciones. No pongas cita en las oraciones que dicen que algo no está en el contexto.
+3. Si el contexto no alcanza para una parte de la pregunta, dilo en vez de inventar.
+4. Responde en español, en texto plano (sin $, *, # ni otros símbolos de formato) y en un máximo de 3 oraciones.
+```
+
+### USER_PROMPT
+
+```
+<contexto>
+{contexto}
+</contexto>
+
+<pregunta>
+{pregunta}
+</pregunta>
+```
+
+### PROMPT_REFORMULAR
+
+```
+Reescribe la pregunta del usuario para buscarla en un documento. No la respondas.
+
+Reglas:
+1. Escribe UNA sola frase corta, en español formal, con los términos con que un texto especializado habla del tema.
+2. Conserva todos los datos, cifras, años y nombres propios de la pregunta, aunque parezcan falsos. No los corrijas.
+3. Si la pregunta ya es precisa, devuélvela casi igual.
+4. No agregues temas que la pregunta no menciona.
+5. Devuelve solo la pregunta reescrita, sin comillas ni explicaciones.
+
+<pregunta>
+{pregunta}
+</pregunta>
 ```

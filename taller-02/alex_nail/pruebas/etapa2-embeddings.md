@@ -1,8 +1,6 @@
 # Etapa 2 · Embeddings: predice antes de medir
 
-## 1. Mis tres frases (las escribo yo)
-
-Condiciones: dos frases que digan **lo mismo con palabras distintas** (que casi no compartan palabras) y una de **otro tema**. De mi dominio de trabajo.
+## 1. Mis tres frases
 
 - Frase 1: ¿Puedo rendir el almuerzo con un cliente?
 - Frase 2 (lo mismo que la 1, con otras palabras): ¿Me devuelven lo que gasté en una comida de negocios?
@@ -14,13 +12,11 @@ Condiciones: dos frases que digan **lo mismo con palabras distintas** (que casi 
 - Parecido que espero para ese par: ~0,90
 - Parecido que espero para los pares con la frase 3: ~0,40, porque hablan de temas que no tienen nada que ver.
 
-Dato que ya conozco de la demo del Prompt 2: con este modelo, incluso frases sin relación dan cerca de 0,75 (router ↔ pan amasado = 0,788). Lo que importa es la **diferencia** entre pares, no el número solo.
-
 ## 3. Resultado real
 
 Comando:
 ```
-python scripts/demo_embeddings.py "frase 1" "frase 2" "frase 3"
+python scripts/demo_embeddings.py "¿Puedo rendir el almuerzo con un cliente?" "¿Me devuelven lo que gasté en una comida de negocios?" "El inventario de anclas se cuenta en la bodega central"
 ```
 
 | Par | Parecido |
@@ -31,9 +27,9 @@ python scripts/demo_embeddings.py "frase 1" "frase 2" "frase 3"
 
 Captura: `capturas/etapa2_mis_frases.txt`.
 
-¿Acerté?: ____
+¿Acerté?: A medias. Acerté el orden: el par 1 ↔ 2 fue el más parecido (0,872, cerca del ~0,90 que esperaba). Pero fallé los números de la frase 3: esperaba ~0,40 y salió ~0,69.
 
-**Conclusión (2 líneas):** ____
+**Conclusión (2 líneas):** El modelo reconoce que "rendir el almuerzo" y "me devuelven la comida de negocios" son lo mismo aunque casi no compartan palabras. Pero con este modelo ni siquiera frases sin relación bajan de ~0,7, así que lo que importa es la distancia entre pares (0,87 frente a 0,69), no el número solo; por eso el umbral no puede elegirse a ojo.
 
 ## 4. Prueba: mismas palabras, sentido distinto
 
@@ -54,7 +50,7 @@ Captura: `capturas/etapa2_banco.txt`.
 
 Conclusión: Sí, el parecido es de significado y no de palabras: la frase sobre el banco que cerró quedó más cerca de la sucursal que no atiende (0,865) que de la frase con la misma palabra "banco" (0,808).
 
-## 5. Índice vectorial vs coseno a mano (ya medido)
+## 5. Índice vectorial vs coseno a mano
 
 Evidencia en `capturas/indice_vs_coseno_redis.txt` y `capturas/indice_vs_coseno_faiss.txt`. Mediana de 5 preguntas. El top-3 de A y de B coincidió en las 25 búsquedas.
 
@@ -75,4 +71,4 @@ Evidencia en `capturas/indice_vs_coseno_redis.txt` y `capturas/indice_vs_coseno_
 
 Nota: por la cuota diaria de Gemini, en n = 2000 hay 900 vectores reales y 1100 simulados (copias con un pequeño ruido). Los tiempos no cambian, porque el cálculo cuesta lo mismo con vectores reales o simulados.
 
-**Mi regla (una línea, ajústala con tus palabras):** Si los vectores están en un servidor remoto, siempre el índice, porque el coseno a mano tiene que bajarlos todos por la red en cada pregunta (16 veces más lento con 2.000). El coseno a mano solo sirve para entender el cálculo o para pocos vectores que ya están en memoria. Con un índice FAISS plano, numpy incluso gana: la ventaja del índice aparece con índices aproximados (HNSW) y muchos datos.
+**Mi regla:** Si los vectores están en un servidor remoto, siempre el índice, porque el coseno a mano tiene que bajarlos todos por la red en cada pregunta (16 veces más lento con 2.000). El coseno a mano solo sirve para entender el cálculo o para pocos vectores que ya están en memoria. Con un índice FAISS plano, numpy incluso gana: la ventaja del índice aparece con índices aproximados (HNSW) y muchos datos.

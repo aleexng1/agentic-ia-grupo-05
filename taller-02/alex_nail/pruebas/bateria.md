@@ -2,9 +2,9 @@
 
 Documento: `docs/humor-computacional.pdf` (29 páginas). Las páginas son las **del visor de PDF**, que es lo que cita el agente (`[archivo p.N]`). El número impreso al pie de cada página es **el del visor + 1** desde la p. 2 (por ejemplo, la p. 6 del visor dice "7" abajo).
 
-## Borrador de preguntas (revisar antes de correr)
+## Borrador de preguntas
 
-Las "dentro" están verificadas contra el texto del PDF: la frase clave aparece literal en la página indicada. Las "fuera" y "ambiguas" las tienes que revisar tú, porque el criterio es tuyo.
+Las "dentro" están verificadas contra el texto del PDF: la frase clave aparece literal en la página indicada.
 
 | # | Pregunta | Tipo | Dónde está la respuesta (visor) | Frase clave del PDF / por qué |
 |---|----------|------|------|------|
@@ -38,27 +38,32 @@ Las "dentro" están verificadas contra el texto del PDF: la frase clave aparece 
 
 ---
 
-## Tabla de resultados (plantilla del taller)
+## Tabla de resultados
 
-| # | Pregunta | Tipo (dentro/fuera/ambigua) | Ruta (--saltos) | Mejor parecido | ¿Respondió o no_se? | ¿Cita correcta? | Comentario |
-|---|----------|-----------------------------|-----------------|----------------|---------------------|-----------------|------------|
-| 1 | Primera conferencia de humor computacional | dentro | buscar → responder | 0,757 | Respondió | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía en el top-3: p.26 y p.25 (puestos 2 y 3). La respuesta repite el fragmento, sin inventar. |
-| 2 | Tres teorías principales del humor | dentro | buscar → responder | 0,783 | Respondió | cita p.3 y p.4, esperada p.3 (detalle p.4) ✓ verificada en el texto de la página | Sin bibliografía. Junta dos páginas en una cita ("[… p.3, 4]"). Sin invenciones. |
-| 3 | Por qué la incongruencia es la más usada | dentro | buscar → responder | 0,822 | Respondió | cita p.4, esperada p.4 ✓ verificada en el texto de la página | Sin bibliografía (p.4, p.2, p.1). Trae la razón completa. |
-| 4 | K usado por Liu et al. (2018a) | dentro | buscar → responder | 0,789 | Respondió | cita p.19, esperada p.19 ✓ verificada en el texto de la página | Sin bibliografía: no apareció la entrada de la p.26. "Puns y one-liners" está literal en el fragmento. Escribe "$K=5$" en formato LaTeX. |
-| 5 | Qué mide la entropía (Kao et al.) | dentro | buscar → responder | 0,743 | Respondió | cita p.15 y p.16, esperada p.15 y p.16 ✓ verificada en el texto de la página | Sin bibliografía. Usa las dos páginas; "equilibradas" está literal en el fragmento de la p.15. |
-| 6 | Precio del bitcoin | fuera | buscar → no_se | 0,573 | no_se | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
-| 7 | IVA de una factura en Chile | fuera | buscar → no_se | 0,559 | no_se | — (no cita) | Sin bibliografía. |
-| 8 | Último Mundial de fútbol | fuera | buscar → no_se | 0,548 | no_se | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
-| 9 | BERT o GPT en español | ambigua | buscar → responder | 0,749 | Respondió que el contexto no alcanza | cita p.24, esperada "roza p.21 y p.22" ✗ (esas páginas no entraron al top-3); lo que afirma la respuesta ("supremacía de los transformers", "mecanismo de atención") ✓ verificado en el texto de la p.24 | Sin bibliografía. Dice "el contexto no menciona ni a BERT ni a GPT", que es cierto para lo que recibió (p.16, p.24, p.1). El PDF sí los nombra en la p.22, pero ese fragmento no entró al top-3. |
-| 10| Porcentaje de acierto de los transformers | ambigua | buscar → responder | 0,803 | Respondió que no hay cifras | cita p.22 y p.24, esperada "roza p.24" ✓ verificada en el texto de la página (las dos hablan de transformers y ninguna da porcentajes; la p.24 dice "insuperables") | Sin bibliografía. Dice correctamente que no hay porcentaje; cita páginas para una afirmación negativa. |
-| S | (sinónimos) Primer congreso de humor por computadora | dentro | buscar → responder | 0,737 | Respondió | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía (p.26) en los puestos 2 y 3. Funciona con sinónimos, pero es el parecido más bajo de las "dentro". |
-| F | (palabras del PDF) Índice HNSW con KNN en Redis | fuera | buscar → no_se | 0,648 | no_se | — (no cita) | Bibliografía (p.29) en el puesto 1. Quedó a 0,002 del umbral: casi un falso positivo. |
+| # | Pregunta | Tipo (dentro/fuera/ambigua) | Ruta (--saltos) | Mejor parecido | ¿Respondió o no_se? | Respuesta del agente | ¿Cita correcta? | Comentario |
+|---|----------|-----------------------------|-----------------|----------------|---------------------|---|-----------------|------------|
+| 1 | Primera conferencia de humor computacional | dentro | buscar → responder | 0,757 | Respondió | La primera conferencia dedicada solamente al humor computacional tuvo lugar en 1996 [humor-computacional.pdf p.6]. | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía en el top-3: p.26 y p.25 (puestos 2 y 3). La respuesta repite el fragmento, sin inventar. |
+| 2 | Tres teorías principales del humor | dentro | buscar → responder | 0,783 | Respondió | Las tres teorías principales del humor son: 1. La teoría de la incongruencia [humor-computacional.pdf p.3, 4]. 2. La teoría de la superioridad [humor-computacional.pdf p.3, 4]. 3. La teoría del alivio [humor-computacional.pdf p.3, 4]. | cita p.3 y p.4, esperada p.3 (detalle p.4) ✓ verificada en el texto de la página | Sin bibliografía. Junta dos páginas en una cita ("[… p.3, 4]"). Sin invenciones. |
+| 3 | Por qué la incongruencia es la más usada | dentro | buscar → responder | 0,822 | Respondió | La teoría de la incongruencia es la más utilizada en los estudios de detección automática de humor porque requiere un menor grado de conocimiento extralingüístico y resulta más accesible para los sistemas computacionales en comparación con las otras teorías [humor-computacional.pdf p.4]. | cita p.4, esperada p.4 ✓ verificada en el texto de la página | Sin bibliografía (p.4, p.2, p.1). Trae la razón completa. |
+| 4 | K usado por Liu et al. (2018a) | dentro | buscar → responder | 0,789 | Respondió | Liu et al. (2018a) utilizaron $K=5$ (identificando cinco vecinos más próximos) para calcular la similitud semántica en su análisis sintáctico de los *puns* y *one-liners* [humor-computacional.pdf p.19]. | cita p.19, esperada p.19 ✓ verificada en el texto de la página | Sin bibliografía: no apareció la entrada de la p.26. "Puns y one-liners" está literal en el fragmento. Escribe "$K=5$" en formato LaTeX. |
+| 5 | Qué mide la entropía (Kao et al.) | dentro | buscar → responder | 0,743 | Respondió | En el modelo bayesiano de Kao et al. (2016), la entropía mide la incertidumbre entre varias interpretaciones posibles [humor-computacional.pdf p.15] o el grado de ambigüedad de la frase (cuanto más equilibradas están las dos interpretaciones, más ambigua resulta) [humor-computacional.pdf p.15, 16]. | cita p.15 y p.16, esperada p.15 y p.16 ✓ verificada en el texto de la página | Sin bibliografía. Usa las dos páginas; "equilibradas" está literal en el fragmento de la p.15. |
+| 6 | Precio del bitcoin | fuera | buscar → no_se | 0,573 | no_se | No encontré evidencia en los documentos para responder eso | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
+| 7 | IVA de una factura en Chile | fuera | buscar → no_se | 0,559 | no_se | No encontré evidencia en los documentos para responder eso | — (no cita) | Sin bibliografía. |
+| 8 | Último Mundial de fútbol | fuera | buscar → no_se | 0,548 | no_se | No encontré evidencia en los documentos para responder eso | — (no cita) | Bibliografía (p.29) en el top-3, pero bajo el umbral. |
+| 9 | BERT o GPT en español | ambigua | buscar → responder | 0,749 | Respondió que el contexto no alcanza | El contexto proporcionado no menciona ni a BERT ni a GPT, por lo que no es posible responder a esta pregunta con la información disponible. Únicamente se señala la supremacía de los transformers en general para la detección de humor gracias a su mecanismo de atención [humor-computacional.pdf p.24]. | ✓ la p. 24 respalda lo que afirma ("supremacía de los transformers", "mecanismo de atención") | Hallazgo: el agente dijo "el contexto no menciona ni a BERT ni a GPT", pero el PDF sí los nombra en la p. 22. Esa página no entró al top-3, así que el "no está" se debe a la búsqueda, no al documento. Es un límite del RAG: solo puede decir lo que recupera. No cambia la decisión (la pregunta es ambigua y no inventó nada), pero muestra que un "no sé" no siempre significa que la información no exista. |
+| 10| Porcentaje de acierto de los transformers | ambigua | buscar → responder | 0,803 | Respondió que no hay cifras | El contexto proporcionado no contiene información sobre el porcentaje de acierto que logran los transformers detectando humor [humor-computacional.pdf p. 22, 24]. | cita p.22 y p.24, esperada "roza p.24" ✓ verificada en el texto de la página (las dos hablan de transformers y ninguna da porcentajes; la p.24 dice "insuperables") | Sin bibliografía. Dice correctamente que no hay porcentaje; cita páginas para una afirmación negativa. |
+| S | (sinónimos) Primer congreso de humor por computadora | dentro | buscar → responder | 0,737 | Respondió | La primera conferencia dedicada solamente al humor computacional tuvo lugar en 1996 [humor-computacional.pdf p.6]. | cita p.6, esperada p.6 ✓ verificada en el texto de la página | Bibliografía (p.26) en los puestos 2 y 3. Funciona con sinónimos, pero es el parecido más bajo de las "dentro". |
+| F | (palabras del PDF) Índice HNSW con KNN en Redis | fuera | buscar → no_se | 0,648 | no_se | No encontré evidencia en los documentos para responder eso | — (no cita) | Bibliografía (p.29) en el puesto 1. Quedó a 0,002 del umbral: casi un falso positivo. |
 
 Capturas: `capturas/etapa4_q01.txt` … `etapa4_q10.txt`, `etapa4_qS.txt` y `etapa4_qF.txt`.
 
+La batería se corrió con UMBRAL 0,65. Con el 0,68 elegido ninguna ruta cambia: todas las "dentro" quedan sobre 0,737 y todas las "fuera" bajo 0,648 (el bonus lo confirmó corriendo con 0,68).
+
+Citas verificadas con el texto de cada página (extracción con pypdf) y revisión manual en el visor de las p. 6 y p. 19.
+
 **Falsos positivos** (una "fuera" que respondió): ninguno con UMBRAL = 0,65. Pero la F (HNSW, KNN y Redis) quedó en 0,648, solo 0,002 bajo el umbral: comparte palabras con el PDF ("KNN", "vectores") y casi pasa.
 **Falsos negativos** (una "dentro" que fue a no_se): ninguno. La "dentro" más baja es la S (sinónimos), con 0,737, 0,087 sobre el umbral.
+Ninguno en las "dentro". En la ambigua 9 hubo un "no está" parcial por falta de recuperación (ver comentario).
 
 ### Lectura de los datos
 
@@ -98,6 +103,6 @@ Capturas: TOP_K=3 en `capturas/etapa4_q01.txt` … `etapa4_q05.txt`; TOP_K=1 en 
 
 UMBRAL elegido: 0,68   TOP_K elegido: 3   Por qué:
 
-UMBRAL 0,68: las "dentro" sacaron entre 0,737 y 0,822 y las "fuera" entre 0,548 y 0,648, así que cualquier valor entre 0,648 y 0,737 separa sin errores. El 0,65 original quedaba a 0,002 de la pregunta F. Elegí 0,68 para tener margen hacia los dos lados sin perder "¿De qué trata el documento?" (0,699).
+UMBRAL 0,68: las "dentro" sacaron entre 0,737 y 0,822 y las "fuera" entre 0,548 y 0,648, así que cualquier valor entre 0,648 y 0,737 separa sin errores. El 0,65 original quedaba a 0,002 de la pregunta F. Elegí 0,68 para tener margen hacia los dos lados sin perder "¿De qué trata el documento?" (0,699) (pregunta de la Etapa 1).
 
 TOP_K 3: con 1, la pregunta 2 no nombró las tres teorías y la 5 perdió la mitad de la respuesta (estaba en la p. 16). Con 5 no se pierde nada, pero entra mucha bibliografía (4 de 5 en la pregunta 1). Con 3, las cinco respuestas salen completas y con menos ruido.
