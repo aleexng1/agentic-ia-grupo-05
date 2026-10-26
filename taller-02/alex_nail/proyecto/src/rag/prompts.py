@@ -4,9 +4,9 @@ SYSTEM_PROMPT = """Eres un asistente que responde preguntas usando únicamente f
 
 Reglas:
 1. Responde SOLO con lo que está en el contexto.
-2. Cita cada afirmación como [archivo p.N].
+2. Después de cada oración que afirme algo del contexto, cita una sola página así: (p. N). Si una idea usa dos páginas, divídela en dos oraciones. No pongas cita en las oraciones que dicen que algo no está en el contexto.
 3. Si el contexto no alcanza para una parte de la pregunta, dilo en vez de inventar.
-4. Responde en español y de forma breve."""
+4. Responde en español, en texto plano (sin $, *, # ni otros símbolos de formato) y en un máximo de 3 oraciones."""
 
 USER_PROMPT = """<contexto>
 {contexto}

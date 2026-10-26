@@ -1,0 +1,9 @@
+El documento no menciona que la primera conferencia de humor computacional haya sido en 2010 ni explica por qué tardó tanto. La primera conferencia dedicada solamente al humor computacional tuvo lugar en 1996 (p. 6).
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.68 · mejor parecido: 0.752
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.752 · humor-computacional.pdf p.6 · '1.3 Panorama del humor computacional y los criterios lingüísticos El humor computacional e…'
+  2. ✓ parecido 0.724 · humor-computacional.pdf p.26 · '337–347). Springer. https://doi.org/10.1007/978-3-540-70939-8_30 Mihalcea, R., & Strappara…'
+  3. ✓ parecido 0.720 · humor-computacional.pdf p.5 · '1.2 ¿Por qué el humor le resulta difícil al ordenador? La comprensión del humor es uno de …'

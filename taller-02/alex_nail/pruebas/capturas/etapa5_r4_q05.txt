@@ -1,0 +1,9 @@
+En el modelo bayesiano de Kao et al. (2016), la entropía se utiliza como una medida de la incertidumbre entre varias interpretaciones posibles (p. 15). También mide el grado de ambigüedad, de modo que cuanto más alta es la entropía, más ambigua resulta la frase (p. 16).
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.68 · mejor parecido: 0.743
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.743 · humor-computacional.pdf p.15 · 'Figura 3. Cada token está asociado bien a la negatividad, bien a la positividad. El cálcul…'
+  2. ✗ parecido 0.678 · humor-computacional.pdf p.16 · 'por lo tanto, el modelo mide su distinción calculando la distancia entre los significados.…'
+  3. ✗ parecido 0.673 · humor-computacional.pdf p.16 · 'Morales y Zhai (2017) utilizaron su clasificador supervisado para detectar humor en reseña…'

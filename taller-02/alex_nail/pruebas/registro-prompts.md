@@ -321,3 +321,28 @@ El repo del grupo es público. Antes de subir, se le pidió al ayudante revisar 
 ```
 
 No cambia el comportamiento del agente: el número es el mismo, solo cambia su tipo a `float` de Python. En Redis ya era `float`, así que ahí no cambia nada. Se arregló en `tools.py` y no en `storage.py` porque es justo donde el dato entra al estado del grafo.
+
+---
+
+## Etapa 5
+
+**Quién hizo qué:** las reglas nuevas las definí yo (redacción incluida). Claude Code las editó en `src/rag/prompts.py`, sin cambiar su redacción, y corrió las pruebas. Copia del prompt original: `capturas/etapa5_prompt_original.txt`.
+
+**Regla 2 (ronda 1)**
+- Antes: "2. Cita cada afirmación como [archivo p.N]."
+- Después: "2. Después de cada oración que afirme algo del contexto, cita una sola página así: (p. N). Si una idea usa dos páginas, divídela en dos oraciones. No pongas cita en las oraciones que dicen que algo no está en el contexto."
+
+**Regla 4 (ronda 2, manteniendo la regla 2 nueva)**
+- Antes: "4. Responde en español y de forma breve."
+- Después: "4. Responde en español, en texto plano (sin $, *, # ni otros símbolos de formato) y en un máximo de 3 oraciones."
+
+Las reglas 1 y 3 quedaron idénticas (verificado con `diff` contra la copia del original). La regla 1 se quitó temporalmente para la prueba del bitcoin y se repuso exactamente igual.
+
+**Lo que salió distinto de lo esperado**
+- **La trampa ya se rechazaba con el prompt original** (corrigió 2010 → 1996 con cita a la p.6), así que no hizo falta agregar una regla. Con el prompt final la sigue rechazando.
+- **Sin la regla 1, el modelo tampoco inventó el precio del bitcoin** (UMBRAL=0): las dos respuestas fueron idénticas. La primera línea del prompt ("usando únicamente fragmentos de documentos") y la regla 3 siguen limitándolo. Fue una sola pregunta y una sola corrida.
+- **Con solo la regla 2, la pregunta 5 dejó de juntar "p.15, 16", pero perdió la relación** "más entropía, más ambigüedad". En la ronda 2 apareció de nuevo. La pregunta 4 también perdió "puns y one-liners" en la ronda 1 y lo recuperó en la ronda 2. Como cada configuración se corrió una sola vez, parte de estas diferencias puede ser variación normal del modelo entre corridas, no efecto de la regla.
+- **Regla 4:** desaparecieron "$K=5$" y "*puns*" (ahora "K igual a cinco"). El límite de 3 oraciones no cortó información en ninguna de las 4 preguntas; todas usaron 1 o 2.
+- **Detalle de forma:** en la pregunta 3 (ronda 2) la cita quedó después del punto (". (p. 4)").
+- **Las etiquetas del contexto siguen en el formato viejo:** `prompts.FRAGMENTO` todavía presenta cada fragmento como "[humor-computacional.pdf p.N]", mientras la regla 2 pide citar "(p. N)". El modelo igual citó con el formato nuevo en todas las respuestas. No se cambió porque en esta etapa solo se editaban las reglas.
+- **UMBRAL distinto entre etapas:** en la Etapa 5 el `.env` tenía UMBRAL 0,68, mientras que la batería de la Etapa 4 se corrió con 0,65. En las 4 preguntas de la tabla no cambió nada: el umbral solo decide entre `responder` y `no_se`, y las cuatro superan 0,68.
