@@ -1,0 +1,20 @@
+== Vectores ==
+[1] 'El banco cerró temprano hoy'
+    3072 números · primeros 5: [-0.0214, +0.0058, -0.0119, -0.0847, +0.0051, ...]
+[2] 'Me senté en el banco de la plaza'
+    3072 números · primeros 5: [-0.0189, +0.0022, +0.0007, -0.1017, -0.0000, ...]
+[3] 'La sucursal bancaria ya no atiende'
+    3072 números · primeros 5: [-0.0246, +0.0001, -0.0127, -0.0814, -0.0070, ...]
+
+== Parecido coseno entre pares (1 = idénticas; importa la comparación entre pares, no el valor absoluto) ==
+par       parecido
+[1]-[3]      0.8646  ← más parecido
+[1]-[2]      0.8081
+[2]-[3]      0.7725
+
+== Pregunta: 'no tengo internet' ==
+  0.6466  [3] La sucursal bancaria ya no atiende
+  0.6351  [2] Me senté en el banco de la plaza
+  0.6276  [1] El banco cerró temprano hoy
+
+La frase más cercana a la pregunta es [3] 'La sucursal bancaria ya no atiende' (parecido 0.6466).

@@ -1,10 +1,11 @@
-== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=800 · CHUNK_OVERLAP=120 · solo cortar (sin embeber ni guardar) ==
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=800 · CHUNK_OVERLAP=120 · ingesta en redis ==
 
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
-Fragmentos: 96 · ya en caché: 0 · NO están en caché (gastan cuota): 96
+Fragmentos: 96 · ya en caché: 96 · NO están en caché (gastan cuota): 0
+--reset: el índice 'AlexNail' no existía.
 
---solo-cortar: no se embebió ni guardó nada. La ingesta real gastaría 96 embeddings (+1 consulta para medir la dimensión del índice, solo la primera vez).
+Guardados 96 fragmentos en el índice Redis 'AlexNail' (COSINE)
 
 == Resumen ==
   Páginas leídas:          29
@@ -52,3 +53,5 @@ Fragmentos: 96 · ya en caché: 0 · NO están en caché (gastan cuota): 96
                                                              │ encargado de sistematizar la teoría y difundirla con su
                                                              │ ensayo El chiste y su relación con el inconsciente (1905).
   ⟦…⟧ = texto repetido entre ambos (solape de 111 caracteres)
+
+OK

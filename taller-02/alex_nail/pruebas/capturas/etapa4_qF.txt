@@ -1,0 +1,9 @@
+No encontré evidencia en los documentos para responder eso
+
+--- saltos ---
+Ruta: buscar → no_se
+UMBRAL: 0.65 · mejor parecido: 0.648
+Fragmentos recuperados: 3
+  1. ✗ parecido 0.648 · humor-computacional.pdf p.29 · '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to text classification . Medium. …'
+  2. ✗ parecido 0.638 · humor-computacional.pdf p.19 · '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un algoritmo que usa una base de …'
+  3. ✗ parecido 0.636 · humor-computacional.pdf p.19 · 'Figura 4. La distancia entre el punto desconocido y los más cercanos a él (Peterson, 2007)…'

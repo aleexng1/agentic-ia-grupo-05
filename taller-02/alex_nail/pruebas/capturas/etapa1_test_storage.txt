@@ -1,0 +1,18 @@
+Motor: redis · índice de prueba: AlexNail_test (el índice real 'AlexNail' no se toca)
+
+PING a Redis: True
+Vector store listo: RedisVectorStore (índice 'AlexNail_test')
+Guardados 3 documentos con metadata {'fuente': 'demo'}
+
+Pregunta: 'no tengo internet' → 2 fragmentos más cercanos
+  puntaje  = lo que entrega redis: distancia coseno = 1 − parecido (0 = idéntico, 2 = opuesto)  → menor es mejor
+  parecido = a_parecido(puntaje), entre 0 y 1                         → mayor es mejor
+
+   puntaje  parecido  coseno real  fragmento
+    0.2298    0.7702       0.7702  'El router no da internet' {'fuente': 'demo'}
+    0.3092    0.6908       0.6908  '¿Cómo reinicio el router?' {'fuente': 'demo'}
+
+  (coseno real = calculado con numpy; coincide con 'parecido', así que la fórmula de a_parecido es correcta)
+Limpieza: índice 'AlexNail_test' y sus documentos borrados.
+
+OK: el vector store redis guarda, busca y convierte puntajes correctamente.

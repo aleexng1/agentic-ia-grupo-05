@@ -44,9 +44,11 @@ Qué esperar: si el parecido es de **significado**, "banco cerró" ↔ "sucursal
 
 | Par | Parecido |
 |---|---|
-|  |  |
-|  |  |
-|  |  |
+| "El banco cerró temprano hoy" ↔ "La sucursal bancaria ya no atiende" | 0,8646 (más parecido) |
+| "El banco cerró temprano hoy" ↔ "Me senté en el banco de la plaza" | 0,8081 |
+| "Me senté en el banco de la plaza" ↔ "La sucursal bancaria ya no atiende" | 0,7725 |
+
+Captura: `capturas/etapa2_banco.txt`.
 
 Conclusión: ____
 

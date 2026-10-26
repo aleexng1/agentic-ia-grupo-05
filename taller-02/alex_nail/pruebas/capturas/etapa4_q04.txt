@@ -1,0 +1,9 @@
+Liu et al. (2018a) utilizaron $K=5$ (identificando cinco vecinos más próximos) para calcular la similitud semántica en su análisis sintáctico de los *puns* y *one-liners* [humor-computacional.pdf p.19].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.789
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.789 · humor-computacional.pdf p.19 · 'Figura 4. La distancia entre el punto desconocido y los más cercanos a él (Peterson, 2007)…'
+  2. ✓ parecido 0.751 · humor-computacional.pdf p.20 · 'En otro trabajo de Liu et al. (2018b), KNN fue utilizado para la asociación del sentimient…'
+  3. ✓ parecido 0.746 · humor-computacional.pdf p.19 · '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un algoritmo que usa una base de …'

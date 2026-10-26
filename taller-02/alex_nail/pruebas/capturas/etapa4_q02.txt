@@ -1,0 +1,13 @@
+Las tres teorías principales del humor son:
+
+1. La teoría de la incongruencia [humor-computacional.pdf p.3, 4].
+2. La teoría de la superioridad [humor-computacional.pdf p.3, 4].
+3. La teoría del alivio [humor-computacional.pdf p.3, 4].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.783
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.783 · humor-computacional.pdf p.4 · 'Existen también otras teorías, como la funcionalista o la interaccionista, sin embargo muc…'
+  2. ✓ parecido 0.769 · humor-computacional.pdf p.3 · 'patrones generales que se han producido en la evolución del procesamiento del lenguaje nat…'
+  3. ✓ parecido 0.762 · humor-computacional.pdf p.4 · 'El humor, según esta obra actúa de válvula de escape para rebajar la tensión acumulada por…'

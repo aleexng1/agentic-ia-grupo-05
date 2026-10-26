@@ -1,0 +1,11 @@
+La teoría de la incongruencia es la más utilizada en los estudios de detección automática de humor porque requiere un menor grado de conocimiento extralingüístico y resulta más accesible para los sistemas computacionales en comparación con las otras teorías [humor-computacional.pdf p. 4].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.822
+Fragmentos recuperados: 5
+  1. ✓ parecido 0.822 · humor-computacional.pdf p.4 · 'El humor, según esta obra actúa de válvula de escape para rebajar la tensión acumulada por…'
+  2. ✓ parecido 0.770 · humor-computacional.pdf p.2 · '1. Introducción El humor forma parte de nuestra vida cotidiana y, sin embargo, muchas vece…'
+  3. ✓ parecido 0.769 · humor-computacional.pdf p.1 · 'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaje automático, procesamiento de…'
+  4. ✓ parecido 0.763 · humor-computacional.pdf p.24 · 'Por su parte, la supremacía de los transformers en la detección de humor se debe principal…'
+  5. ✓ parecido 0.750 · humor-computacional.pdf p.23 · 'establecer las desviaciones socioculturales. Para los rasgos latentes se emplearon: ambigü…'

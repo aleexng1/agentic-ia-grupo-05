@@ -1,0 +1,7 @@
+El contexto menciona la teoría de la superioridad y señala que existen otras teorías como la funcionalista o la interaccionista, además de hacer referencia a "tres teorías clásicas" [humor-computacional.pdf p.4]. Sin embargo, el texto proporcionado **no** lista ni nombra cuáles son esas tres teorías principales completas, por lo que no es posible responder a la pregunta con la información disponible.
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.783
+Fragmentos recuperados: 1
+  1. ✓ parecido 0.783 · humor-computacional.pdf p.4 · 'Existen también otras teorías, como la funcionalista o la interaccionista, sin embargo muc…'

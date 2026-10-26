@@ -24,8 +24,15 @@ Pregunta: "¿Por qué la teoría de la incongruencia es la más usada en la dete
 
 | Configuración | Ruta | Mejor parecido | Página citada | ¿La respuesta trae la razón completa? |
 |---|---|---|---|---|
-| A · 400/50 |  |  |  |  |
-| B · 1200/200 |  |  |  |  |
-| 800/120 |  |  |  |  |
+| A · 400/50 | buscar → responder | 0,782 | p. 4 | Sí ("requiere un menor grado de conocimiento extralingüístico") |
+| B · 1200/200 | buscar → responder | 0,782 | p. 4 | Sí ("requiere un menor grado de conocimiento extralingüístico") |
+| 800/120 | buscar → responder | 0,822 | p. 4 | Sí ("requiere un menor grado de conocimiento extralingüístico") |
 
-Elegimos: ____   Porque: ____
+Capturas: `capturas/etapa3_400_50.txt`, `capturas/etapa3_1200_200.txt` y `capturas/etapa3_800_120.txt`. A y B se midieron en FAISS (local) porque el Redis compartido se llenó durante la ingesta de A; 800/120 se midió en Redis. El parecido es el mismo número en ambos motores (verificado con `test_storage.py`), así que la comparación es válida. Al final el índice de Redis quedó de nuevo en 800/120.
+
+Fragmento con mejor parecido en cada configuración (todos de la p. 4):
+- A · 400/50: empieza en "Aun así, esta teoría es la que más se ha utilizado en los estudios de detección automática…" (la oración de la respuesta abre el fragmento).
+- B · 1200/200: empieza en "El sociólogo H. Spencer adoptó esta teoría…" (la respuesta queda dentro de un fragmento que también trae la teoría del alivio).
+- 800/120: empieza en "El humor, según esta obra actúa de válvula de escape…" (la respuesta queda dentro, junto con parte de la teoría del alivio).
+
+Elegimos: 800/120   Porque: ____

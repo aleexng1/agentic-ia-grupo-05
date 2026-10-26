@@ -1,0 +1,9 @@
+El contexto proporcionado no menciona ni a BERT ni a GPT, por lo que no es posible responder a esta pregunta con la información disponible. Únicamente se señala la supremacía de los transformers en general para la detección de humor gracias a su mecanismo de atención [humor-computacional.pdf p.24].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.749
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.749 · humor-computacional.pdf p.16 · 'por lo tanto, el modelo mide su distinción calculando la distancia entre los significados.…'
+  2. ✓ parecido 0.748 · humor-computacional.pdf p.24 · 'Por su parte, la supremacía de los transformers en la detección de humor se debe principal…'
+  3. ✓ parecido 0.739 · humor-computacional.pdf p.1 · 'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaje automático, procesamiento de…'

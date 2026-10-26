@@ -40,7 +40,7 @@ def buscar_fragmentos(pregunta: str, k: int | None = None) -> list[dict]:
             "texto": doc.page_content,
             "fuente": doc.metadata.get("fuente", "?"),
             "pagina": doc.metadata.get("pagina", "?"),
-            "parecido": a_parecido(puntaje, motor),
+            "parecido": float(a_parecido(puntaje, motor)),  # FAISS entrega numpy.float32, que la memoria no serializa
         }
         for doc, puntaje in resultados
     ]

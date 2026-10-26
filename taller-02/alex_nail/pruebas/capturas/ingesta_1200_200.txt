@@ -1,10 +1,14 @@
-== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=1200 · CHUNK_OVERLAP=200 · solo cortar (sin embeber ni guardar) ==
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=1200 · CHUNK_OVERLAP=200 · ingesta en faiss ==
 
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
-Fragmentos: 66 · ya en caché: 0 · NO están en caché (gastan cuota): 66
+Fragmentos: 66 · ya en caché: 4 · NO están en caché (gastan cuota): 62
 
---solo-cortar: no se embebió ni guardó nada. La ingesta real gastaría 66 embeddings (+1 consulta para medir la dimensión del índice, solo la primera vez).
+Embebiendo 62 fragmentos nuevos en lotes de 100...
+    avance: 62/62 embeddings nuevos
+--reset: borrado el índice FAISS en data/AlexNail/.
+
+Guardados 66 fragmentos en el índice FAISS data/AlexNail/
 
 == Resumen ==
   Páginas leídas:          29
@@ -36,3 +40,5 @@ Fragmentos: 66 · ya en caché: 0 · NO están en caché (gastan cuota): 66
   commonly used methods for humor detection, in order to     │ 
   offer a broad perspective on automatic humor recognition.⟧ │ 
   ⟦…⟧ = texto repetido entre ambos (solape de 176 caracteres)
+
+OK

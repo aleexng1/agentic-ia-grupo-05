@@ -1,10 +1,11 @@
-== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=400 · CHUNK_OVERLAP=50 · solo cortar (sin embeber ni guardar) ==
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=400 · CHUNK_OVERLAP=50 · ingesta en faiss ==
 
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
-Fragmentos: 188 · ya en caché: 0 · NO están en caché (gastan cuota): 188
+Fragmentos: 188 · ya en caché: 188 · NO están en caché (gastan cuota): 0
+--reset: no había índice FAISS en data/AlexNail/.
 
---solo-cortar: no se embebió ni guardó nada. La ingesta real gastaría 188 embeddings (+1 consulta para medir la dimensión del índice, solo la primera vez).
+Guardados 188 fragmentos en el índice FAISS data/AlexNail/
 
 == Resumen ==
   Páginas leídas:          29
@@ -39,3 +40,5 @@ Fragmentos: 188 · ya en caché: 0 · NO están en caché (gastan cuota): 188
   desfavorables. ⟦Otros autores, como Zhang et al.⟧          │ (2015) distinguieron frases subjetivas y objetivas
                                                              │ empleando un conjunto de términos valorativos.
   ⟦…⟧ = texto repetido entre ambos (solape de 32 caracteres)
+
+OK

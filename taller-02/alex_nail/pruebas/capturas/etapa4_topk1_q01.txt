@@ -1,0 +1,7 @@
+La primera conferencia dedicada solamente al humor computacional tuvo lugar en 1996 [humor-computacional.pdf p.6].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.757
+Fragmentos recuperados: 1
+  1. ✓ parecido 0.757 · humor-computacional.pdf p.6 · '1.3 Panorama del humor computacional y los criterios lingüísticos El humor computacional e…'

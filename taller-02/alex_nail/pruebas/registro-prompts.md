@@ -304,3 +304,20 @@ El repo del grupo es público. Antes de subir, se le pidió al ayudante revisar 
 - [ ] `python scripts/ingest.py docs/humor-computacional.pdf --reset` con la cuota nueva
 - [ ] `python main.py rag "¿De qué trata el documento?" --saltos` y **captura de pantalla** con la ruta y una respuesta citada
 - [ ] Anotar aquí si alguno de esos comandos necesitó corrección
+
+---
+
+## Correcciones durante las etapas 2 a 4
+
+**(a) 429 por límite por minuto al preguntar justo después de la ingesta.** La primera pregunta de la Etapa 1 ("¿De qué trata el documento?") falló con 429, 17 segundos después de que la ingesta embebiera 96 fragmentos. No era la cuota diaria (iban ~103 de ~1000), sino el límite de ~100 textos por minuto. `ingest.py` reintenta solo ante ese límite, pero `main.py` no: muestra el error y termina. No se llamó al modelo, porque falló el embedding de la pregunta. Se repitió dos minutos después y funcionó. Desde entonces se deja una pausa después de cada ingesta grande, y la batería se corrió con pausas entre preguntas.
+
+**(b) El Redis compartido se llenó durante la ingesta 400/50.** El `--reset` borró el índice 800/120, y la ingesta alcanzó a guardar 166 de 188 fragmentos antes de que Redis respondiera "command not allowed when used memory > 'maxmemory'" (1074 MB usados). Los embeddings sí quedaron en la caché. Se revisó que el índice propio solo cubría claves `AlexNail:` y se borró con `FT.DROPINDEX AlexNail DD`, para devolver memoria al servidor y no dejar un índice a medias. Las configuraciones 400/50 y 1200/200 se midieron en FAISS local (`VECTOR_STORE=faiss` solo en esos comandos); el parecido es el mismo número en ambos motores. Al final se reconstruyó 800/120 en Redis desde la caché, sin gastar cuota.
+
+**(c) Error de `tools.py` con FAISS.** Con FAISS, la pregunta fallaba con `TypeError: Type is not msgpack serializable: numpy.float32`. FAISS entrega el puntaje como `numpy.float32`, `a_parecido()` conserva ese tipo, y la memoria de LangGraph (`MemorySaver`) no sabe guardarlo al terminar el nodo `buscar`. Con Redis no pasaba porque langchain-redis entrega `float` de Python, y las pruebas sin cuota usaban números falsos de Python, por eso no se detectó antes. Se cambió una línea de `buscar_fragmentos()`:
+
+```diff
+-            "parecido": a_parecido(puntaje, motor),
++            "parecido": float(a_parecido(puntaje, motor)),  # FAISS entrega numpy.float32, que la memoria no serializa
+```
+
+No cambia el comportamiento del agente: el número es el mismo, solo cambia su tipo a `float` de Python. En Redis ya era `float`, así que ahí no cambia nada. Se arregló en `tools.py` y no en `storage.py` porque es justo donde el dato entra al estado del grafo.

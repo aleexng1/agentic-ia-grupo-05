@@ -1,0 +1,9 @@
+El documento ofrece una visión general introductoria de los métodos más utilizados para la detección de humor, con el fin de proporcionar una perspectiva amplia sobre el reconocimiento automático del humor [humor-computacional.pdf p.1].
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.65 · mejor parecido: 0.699
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.699 · humor-computacional.pdf p.29 · 'Zhang, D., Song, W., Liu, X., Liu, L., & Zhao, X. (2018). Research on humor recognition. E…'
+  2. ✓ parecido 0.691 · humor-computacional.pdf p.29 · '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to text classification . Medium. …'
+  3. ✓ parecido 0.689 · humor-computacional.pdf p.1 · 'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaje automático, procesamiento de…'
