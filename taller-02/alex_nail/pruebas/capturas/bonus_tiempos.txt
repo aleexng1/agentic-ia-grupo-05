@@ -1,0 +1,26 @@
+Tiempo de buscar_fragmentos() (sin modelo), mediana de 5 repeticiones, en ms.
+Mismo texto en ambas bases: la pregunta reescrita de la corrida en Redis (embedding desde la caché).
+Incluye lo que hace el agente en cada búsqueda: revisar el índice, abrir el store (Redis: conexión y RedisVectorStore; FAISS: cargar data/AlexNail/ desde disco) y buscar.
+
+#      Redis ms  FAISS ms  pregunta reescrita
+q01      2653.2      85.3  Año de celebración de la primera conferencia dedicada exclusivamente al humor computacional
+q02      2590.5      83.9  Tres teorías principales del humor
+q03      2622.5      84.6  factores de uso de la teoría de la incongruencia en detección automática de humor
+q04      2571.2      84.2  Valor de K y propósito de su uso en el algoritmo KNN por Liu et al. (2018a)
+q05      2709.2      84.4  Interpretación de la entropía en el modelo bayesiano de Kao et al. (2016)
+q06      2620.9      86.9  Cotización actual del bitcoin
+q07      2623.7      86.9  Metodología de cálculo del Impuesto al Valor Agregado (IVA) en facturación en Chile
+q08      2584.4      88.6  Selección ganadora de la Copa Mundial de Fútbol de la FIFA vigente
+q09      2602.7      87.3  Evaluación comparativa del rendimiento de BERT y GPT en la detección de humor en español
+q10      2655.2      88.1  Tasa de precisión de los modelos transformer en la detección de humor
+qS       2616.7      85.2  Año de celebración del primer congreso especializado en humor por computadora
+qF       2623.5      84.0  Configuración de índice HNSW con búsqueda k-NN y vectores en Redis
+
+mediana de las 12 Redis 2621.7 ms · FAISS 85.3 ms
+arranque (1.ª llamada) Redis 4131.4 ms · FAISS 136.4 ms
+
+--- Desglose extra: dónde se va el tiempo (mismas 12 preguntas, mediana de 5 por pregunta y luego mediana de las 12) ---
+redis  contar documentos:  1107.2 ms · abrir el store:  1347.5 ms · solo buscar (store ya abierto):  141.0 ms
+faiss  contar documentos:     0.2 ms · abrir el store:    85.1 ms · solo buscar (store ya abierto):    0.9 ms
+En Redis casi todo el tiempo es abrir conexiones nuevas al servidor remoto en cada llamada (buscar_fragmentos lo hace dos veces);
+la búsqueda KNN en sí es la última columna.

@@ -1,0 +1,11 @@
+No encontré evidencia en los documentos para responder eso
+
+--- saltos ---
+Ruta: reformular → buscar → no_se
+Pregunta original:  ¿Quién ganó el último Mundial de fútbol?
+Pregunta reescrita: Selección ganadora de la Copa Mundial de Fútbol FIFA
+UMBRAL: 0.68 · mejor parecido: 0.572
+Fragmentos recuperados: 3
+  1. ✗ parecido 0.572 · humor-computacional.pdf p.15 · 'Hay algunas palabras específicas que apoyan cada sentido, 16'
+  2. ✗ parecido 0.562 · humor-computacional.pdf p.22 · 'El modelo ALBERT codificó el contexto junto con el remate para asegurar una comprensión gl…'
+  3. ✗ parecido 0.558 · humor-computacional.pdf p.29 · '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to text classification . Medium. …'

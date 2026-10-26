@@ -1,0 +1,11 @@
+El contexto no menciona ni a BERT ni a GPT.
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Qué detecta mejor el humor en español, BERT o GPT?
+Pregunta reescrita: Evaluación comparativa del rendimiento de BERT y GPT en la detección de humor en español
+UMBRAL: 0.68 · mejor parecido: 0.748
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.748 · humor-computacional.pdf p.24 · 'Por su parte, la supremacía de los transformers en la detección de humor se debe principal…'
+  2. ✓ parecido 0.746 · humor-computacional.pdf p.1 · 'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaje automático, procesamiento de…'
+  3. ✓ parecido 0.739 · humor-computacional.pdf p.26 · '2: Short Papers) (pp. 586–591). Lopatovska, I. (2020). Classification of humorous interact…'

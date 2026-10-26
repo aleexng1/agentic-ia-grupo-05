@@ -1,0 +1,11 @@
+No encontré evidencia en los documentos para responder eso
+
+--- saltos ---
+Ruta: reformular → buscar → no_se
+Pregunta original:  ¿Cómo se calcula el IVA de una factura en Chile?
+Pregunta reescrita: Metodología de cálculo del Impuesto al Valor Agregado (IVA) en facturación en Chile
+UMBRAL: 0.68 · mejor parecido: 0.602
+Fragmentos recuperados: 3
+  1. ✗ parecido 0.602 · humor-computacional.pdf p.2 · 'Además, se explicarán los métodos aplicados a otros rasgos complementarios incluidos en lo…'
+  2. ✗ parecido 0.593 · humor-computacional.pdf p.9 · 'Como nota final, es interesante señalar que los algoritmos tradicionales son “transparente…'
+  3. ✗ parecido 0.588 · humor-computacional.pdf p.7 · '2. Los enfoques algorítmicos Dependiendo del campo en el que se considere el término “algo…'

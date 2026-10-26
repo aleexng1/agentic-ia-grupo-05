@@ -1,0 +1,11 @@
+El contexto proporcionado no menciona el porcentaje de acierto que logran los transformers detectando humor.
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Qué porcentaje de acierto logran los transformers detectando humor?
+Pregunta reescrita: Rendimiento porcentual de precisión de los modelos transformers en la detección de humor
+UMBRAL: 0.68 · mejor parecido: 0.766
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.766 · humor-computacional.pdf p.24 · 'Por su parte, la supremacía de los transformers en la detección de humor se debe principal…'
+  2. ✓ parecido 0.753 · humor-computacional.pdf p.22 · 'Lo que destaca en los transformers es la escala masiva de datos con la que operan. Por otr…'
+  3. ✓ parecido 0.736 · humor-computacional.pdf p.22 · 'Además, aplicaron el mecanismo de atención a las CNN. Estas últimas no conservan el orden …'

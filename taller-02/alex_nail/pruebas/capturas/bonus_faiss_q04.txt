@@ -1,0 +1,11 @@
+Liu et al. (2018a) utilizaron un valor de K igual a cinco para calcular la similitud semántica identificando cinco vecinos más próximos (p. 19). Con esto buscaron observar cuántos de los cinco vecinos resultaban humorísticos y cuántos no para crear una característica de conciencia contextual (p. 19).
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Qué valor de K usaron Liu et al. (2018a) con KNN y para qué?
+Pregunta reescrita: Valor del parámetro K y aplicación en el algoritmo KNN por Liu et al. (2018a)
+UMBRAL: 0.68 · mejor parecido: 0.781
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.781 · humor-computacional.pdf p.19 · 'Figura 4. La distancia entre el punto desconocido y los más cercanos a él (Peterson, 2007)…'
+  2. ✓ parecido 0.757 · humor-computacional.pdf p.19 · '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un algoritmo que usa una base de …'
+  3. ✓ parecido 0.738 · humor-computacional.pdf p.20 · 'En otro trabajo de Liu et al. (2018b), KNN fue utilizado para la asociación del sentimient…'

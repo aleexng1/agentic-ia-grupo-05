@@ -1,0 +1,11 @@
+Las tres teorías principales que intentan explicar el funcionamiento del humor son la teoría de la incongruencia, la teoría de la superioridad y la teoría del alivio (p. 3).
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Cuáles son las tres teorías principales del humor?
+Pregunta reescrita: Tres teorías principales del humor
+UMBRAL: 0.68 · mejor parecido: 0.795
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.795 · humor-computacional.pdf p.4 · 'Existen también otras teorías, como la funcionalista o la interaccionista, sin embargo muc…'
+  2. ✓ parecido 0.786 · humor-computacional.pdf p.3 · 'patrones generales que se han producido en la evolución del procesamiento del lenguaje nat…'
+  3. ✓ parecido 0.777 · humor-computacional.pdf p.4 · 'El humor, según esta obra actúa de válvula de escape para rebajar la tensión acumulada por…'
