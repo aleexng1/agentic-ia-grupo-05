@@ -1,0 +1,11 @@
+El humor depende del conocimiento del mundo, información implícita y modelos computacionales que no entienden el humor en sentido humano (p. 5). Además, el humor depende del contexto, del marco cultural y de inferencias pragmáticas (p. 5). También existe una limitación por la falta de una definición clara y universal del humor (p. 5).
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Por qué a los computadores les cuesta cachar los chistes?
+Pregunta reescrita: Dificultad de los sistemas computacionales para la comprensión del humor
+UMBRAL: 0.68 · mejor parecido: 0.825
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.825 · humor-computacional.pdf p.5 · '1.2 ¿Por qué el humor le resulta difícil al ordenador? La comprensión del humor es uno de …'
+  2. ✓ parecido 0.792 · humor-computacional.pdf p.5 · 'Así, se reconocen las desviaciones de expectativas necesarias para identificar los signifi…'
+  3. ✓ parecido 0.779 · humor-computacional.pdf p.5 · 'Cada uno de ellos opera con mecanismos distintos y suceden en contextos diferentes. Yang (…'

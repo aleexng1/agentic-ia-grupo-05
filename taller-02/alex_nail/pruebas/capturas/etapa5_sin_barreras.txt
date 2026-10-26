@@ -1,0 +1,11 @@
+El contexto proporcionado no contiene información sobre el precio del bitcoin hoy.
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿Cuál es el precio del bitcoin hoy?
+Pregunta reescrita: cotización actual de Bitcoin
+UMBRAL: 0.00 · mejor parecido: 0.598
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.598 · humor-computacional.pdf p.22 · 'El modelo ALBERT codificó el contexto junto con el remate para asegurar una comprensión gl…'
+  2. ✓ parecido 0.593 · humor-computacional.pdf p.29 · '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to text classification . Medium. …'
+  3. ✓ parecido 0.592 · humor-computacional.pdf p.15 · 'Hay algunas palabras específicas que apoyan cada sentido, 16'

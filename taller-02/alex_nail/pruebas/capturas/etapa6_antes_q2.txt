@@ -1,0 +1,9 @@
+El humor depende del conocimiento del mundo, de información implícita, del contexto y del marco cultural (p. 5). Los modelos computacionales basados en aprendizaje automático y procesamiento estadístico detectan patrones de probabilidad pero no entienden el humor en un sentido humano (p. 5). Además, el sistema necesita una teoría humorística representable algorítmicamente y capacidad de razonar sobre el texto para reconocer desviaciones de expectativas (p. 5).
+
+--- saltos ---
+Ruta: buscar → responder
+UMBRAL: 0.68 · mejor parecido: 0.801
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.801 · humor-computacional.pdf p.5 · '1.2 ¿Por qué el humor le resulta difícil al ordenador? La comprensión del humor es uno de …'
+  2. ✓ parecido 0.751 · humor-computacional.pdf p.5 · 'Así, se reconocen las desviaciones de expectativas necesarias para identificar los signifi…'
+  3. ✓ parecido 0.750 · humor-computacional.pdf p.2 · '1. Introducción El humor forma parte de nuestra vida cotidiana y, sin embargo, muchas vece…'

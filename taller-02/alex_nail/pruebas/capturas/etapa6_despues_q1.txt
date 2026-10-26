@@ -1,0 +1,11 @@
+El documento trata sobre la detección computacional del humor (p. 2). En la introducción teórica se abordan las principales teorías del humor, la dificultad de los ordenadores para asumirlas y un panorama del humor computacional (p. 2). En el desarrollo se analizan los métodos empleados para la detección de la incongruencia y la ambigüedad (p. 2).
+
+--- saltos ---
+Ruta: reformular → buscar → responder
+Pregunta original:  ¿De qué trata el documento?
+Pregunta reescrita: Objeto de estudio y contenido general del documento
+UMBRAL: 0.68 · mejor parecido: 0.700
+Fragmentos recuperados: 3
+  1. ✓ parecido 0.700 · humor-computacional.pdf p.2 · 'La selección bibliográfica se basa en los criterios establecidos por Kalloniatis y Adamidi…'
+  2. ✓ parecido 0.692 · humor-computacional.pdf p.2 · 'En el desarrollo del trabajo se analizarán los métodos empleados para la detección de esto…'
+  3. ✓ parecido 0.686 · humor-computacional.pdf p.27 · '(2004). Ontological Semantics . MIT Press. Ortega-Bueno, R., Muniz-Cuz, C. E., Pagola, J. …'

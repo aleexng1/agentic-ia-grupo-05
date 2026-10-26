@@ -348,3 +348,46 @@ Las reglas 1 y 3 quedaron idénticas (verificado con `diff` contra la copia del 
 - **Detalle de forma:** en la pregunta 3 (ronda 2) la cita quedó después del punto (". (p. 4)").
 - **Las etiquetas del contexto siguen en el formato viejo:** `prompts.FRAGMENTO` todavía presenta cada fragmento como "[humor-computacional.pdf p.N]", mientras la regla 2 pide citar "(p. N)". El modelo igual citó con el formato nuevo en todas las respuestas. No se cambió porque en esta etapa solo se editaban las reglas.
 - **UMBRAL distinto entre etapas:** en la Etapa 5 el `.env` tenía UMBRAL 0,68, mientras que la batería de la Etapa 4 se corrió con 0,65. En las 4 preguntas de la tabla no cambió nada: el umbral solo decide entre `responder` y `no_se`, y las cuatro superan 0,68.
+
+---
+
+## 6 Nodo extra
+
+**Prompt exacto usado**
+
+```
+Sigue AGENTS.md. No leas ni imprimas el .env. Guarda cada salida en ../pruebas/capturas/ con tee. Si aparece un 429, espera 60 s y reintenta una vez. Antes de empezar, copia este prompt completo, tal cual, a la sección "6 Nodo extra" de ../pruebas/registro-prompts.md (es un entregable).
+
+ANTES DEL CAMBIO
+0) Confirma que ../pruebas/capturas/diagrama_antes.txt corresponde al grafo actual (compáralo con python main.py rag --diagrama); si no, regénéralo.
+1) Corre con el agente actual:
+   python main.py rag "¿De qué trata el documento?" --saltos → etapa6_antes_q1.txt
+   python main.py rag "¿Por qué a los computadores les cuesta cachar los chistes?" --saltos → etapa6_antes_q2.txt
+
+EL NODO
+Agrega al agente rag un nodo nuevo llamado reformular.
+- Por qué existe: en mi batería, las preguntas generales o coloquiales buscan mal: "¿De qué trata el documento?" sacó un parecido de solo 0,699 (cerca de mi UMBRAL de 0,68) y sus dos fragmentos más parecidos fueron de la bibliografía (p. 29), no del resumen.
+- Para qué sirve: que buscar reciba una pregunta más precisa, con los términos con que el documento habla del tema, para que suba el parecido con el fragmento correcto y baje el ruido de la bibliografía.
+- Qué hace exactamente: reescribe la pregunta del usuario en UNA frase corta, en español formal, con los términos del tema, SIN responderla. Conserva todos los datos, cifras, años y nombres propios que traiga la pregunta, aunque parezcan falsos (no los corrige: eso lo hace responder). Si la pregunta ya es precisa, la devuelve casi igual. No agrega temas que la pregunta no menciona.
+- Dónde va en el grafo: START → reformular → buscar. buscar usa la pregunta reformulada para el embedding; responder recibe la pregunta ORIGINAL del usuario (más los fragmentos).
+- Su prompt va en prompts.py con nombre PROMPT_REFORMULAR (todas sus reglas ahí, nada de reglas en graph.py).
+- --saltos debe mostrar el nodo nuevo en la ruta (reformular → buscar → responder / no_se) e imprimir la pregunta original y la reescrita.
+No cambies el comportamiento de los otros nodos ni las reglas del SYSTEM_PROMPT. Agrega un campo pregunta_reformulada al estado. Muéstrame el diff de graph.py, prompts.py y main.py.
+
+DESPUÉS DEL CAMBIO
+2) python main.py rag --diagrama → ../pruebas/capturas/diagrama_despues.txt
+3) Repite las dos preguntas del paso 1 → etapa6_despues_q1.txt y etapa6_despues_q2.txt.
+4) Control de daños, para ver que el nodo no rompe lo que ya funcionaba:
+   - pregunta F de la batería (índice HNSW con KNN en Redis): debe seguir yendo a no_se → etapa6_control_F.txt
+   - pregunta S de la batería (sinónimos): debe seguir citando la p. 6 → etapa6_control_S.txt
+   - la trampa del 2010: debe seguir corrigiendo con la p. 6 y la pregunta reescrita debe conservar el "2010" → etapa6_control_trampa.txt
+5) Crea ../pruebas/nodo-extra.md con: la definición del nodo (por qué, para qué, qué hace), el PROMPT_REFORMULAR final, los dos Mermaid (antes y después), y una tabla para las dos preguntas con: pregunta original, pregunta reescrita, ruta, mejor parecido antes y después, si hubo bibliografía en el top-3 antes y después, y la respuesta antes y después. Agrega la tabla de control de daños (F, S y trampa). Deja una línea "¿Mejoró? ____" en blanco (la conclusión la escribo yo). Si alguna no mejoró o empeoró, dilo claramente con los números.
+
+OPCIONAL (etapa 5, 1 llamada)
+6) Quita TEMPORALMENTE del SYSTEM_PROMPT la primera línea, la regla 1 y la regla 3, y corre: UMBRAL=0 python main.py rag "¿Cuál es el precio del bitcoin hoy?" --saltos → etapa5_sin_barreras.txt. Restaura el SYSTEM_PROMPT EXACTAMENTE (compara con un diff que no queden diferencias) y agrega el resultado a la sección "Prueba sin la regla 1" de antes-despues.md como "variante sin las tres barreras".
+
+CIERRE
+7) Revisión de secretos como las anteriores; si está limpia: git add taller-02/alex_nail/, commit "Taller 2: etapa 6 (nodo reformular) y prueba sin barreras" y git push.
+
+AL FINAL muéstrame: las preguntas reescritas, la tabla de nodo-extra.md, los controles de daños, el resultado del paso 6, el gasto y git log --oneline -3.
+```

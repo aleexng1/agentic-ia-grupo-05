@@ -1,4 +1,4 @@
-# Grafo LangGraph del agente RAG: buscar → (¿evidencia?) → responder | no_se.
+# Grafo LangGraph del agente RAG: reformular → buscar → (¿evidencia?) → responder | no_se.
 import os
 from typing import Annotated, TypedDict
 
@@ -8,11 +8,12 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.graph.message import add_messages
 
 from src.rag import tools
-from src.rag.prompts import FRAGMENTO, NO_SE, SYSTEM_PROMPT, USER_PROMPT
+from src.rag.prompts import FRAGMENTO, NO_SE, PROMPT_REFORMULAR, SYSTEM_PROMPT, USER_PROMPT
 
 
 class Estado(TypedDict, total=False):
     pregunta: str
+    pregunta_reformulada: str  # la que usa buscar para el embedding; responder usa la original
     fragmentos: list[dict]  # cada uno: texto, fuente, pagina, parecido
     mejor_parecido: float
     respuesta: str
@@ -29,9 +30,14 @@ def crear_modelo():
     return ChatGoogleGenerativeAI(model=os.getenv("MODELO"))
 
 
+def reformular(estado: Estado) -> dict:
+    salida = crear_modelo().invoke([HumanMessage(PROMPT_REFORMULAR.format(pregunta=estado["pregunta"]))])
+    return {"pregunta_reformulada": salida.text.strip() or estado["pregunta"]}
+
+
 def buscar(estado: Estado) -> dict:
     try:
-        fragmentos = tools.buscar_fragmentos(estado["pregunta"])
+        fragmentos = tools.buscar_fragmentos(estado.get("pregunta_reformulada") or estado["pregunta"])
     except tools.IndiceVacio as e:
         # Sin índice no hay nada que buscar: la respuesta es el aviso y el grafo termina aquí.
         return {"fragmentos": [], "mejor_parecido": 0.0, "respuesta": str(e),
@@ -59,10 +65,12 @@ def no_se(estado: Estado) -> dict:
 
 def construir_grafo(checkpointer=None):
     grafo = StateGraph(Estado)
+    grafo.add_node("reformular", reformular)
     grafo.add_node("buscar", buscar)
     grafo.add_node("responder", responder)
     grafo.add_node("no_se", no_se)
-    grafo.add_edge(START, "buscar")
+    grafo.add_edge(START, "reformular")
+    grafo.add_edge("reformular", "buscar")
     grafo.add_conditional_edges("buscar", evidencia, {"responder": "responder", "no_se": "no_se", "fin": END})
     grafo.add_edge("responder", END)
     grafo.add_edge("no_se", END)
@@ -71,7 +79,11 @@ def construir_grafo(checkpointer=None):
 
 def detalle_saltos(estado: dict) -> list[str]:
     """Líneas extra que main.py muestra con --saltos."""
-    lineas = [f"UMBRAL: {umbral():.2f} · mejor parecido: {estado.get('mejor_parecido', 0):.3f}"]
+    lineas = [
+        f"Pregunta original:  {estado.get('pregunta', '')}",
+        f"Pregunta reescrita: {estado.get('pregunta_reformulada', '')}",
+        f"UMBRAL: {umbral():.2f} · mejor parecido: {estado.get('mejor_parecido', 0):.3f}",
+    ]
     fragmentos = estado.get("fragmentos", [])
     lineas.append(f"Fragmentos recuperados: {len(fragmentos)}")
     for i, f in enumerate(fragmentos, 1):

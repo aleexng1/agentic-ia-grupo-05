@@ -16,6 +16,19 @@ USER_PROMPT = """<contexto>
 {pregunta}
 </pregunta>"""
 
+PROMPT_REFORMULAR = """Reescribe la pregunta del usuario para buscarla en un documento. No la respondas.
+
+Reglas:
+1. Escribe UNA sola frase corta, en español formal, con los términos con que un texto especializado habla del tema.
+2. Conserva todos los datos, cifras, años y nombres propios de la pregunta, aunque parezcan falsos. No los corrijas.
+3. Si la pregunta ya es precisa, devuélvela casi igual.
+4. No agregues temas que la pregunta no menciona.
+5. Devuelve solo la pregunta reescrita, sin comillas ni explicaciones.
+
+<pregunta>
+{pregunta}
+</pregunta>"""
+
 # Cómo se presenta cada fragmento dentro de <contexto>; la etiqueta es la misma que debe usar la cita.
 FRAGMENTO = "[{fuente} p.{pagina}]\n{texto}"
 

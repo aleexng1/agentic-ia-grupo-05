@@ -24,4 +24,12 @@ Pregunta "fuera": "¿Cuál es el precio del bitcoin hoy?" (UMBRAL=0 solo en el c
 Respuesta sin la regla: "El contexto proporcionado no contiene información sobre el precio del bitcoin hoy." (`capturas/etapa5_sin_regla1.txt`)
 Respuesta con la regla repuesta: "El contexto proporcionado no contiene información sobre el precio del bitcoin hoy." (`capturas/etapa5_con_regla1.txt`)
 Observación: las dos respuestas son idénticas. Sin la regla 1, el modelo igual no inventó el precio. El prompt mantiene otras dos limitaciones: la primera línea ("Eres un asistente que responde preguntas usando únicamente fragmentos de documentos") y la regla 3 ("Si el contexto no alcanza…, dilo en vez de inventar"). Es una sola pregunta y una sola corrida.
+
+**Variante sin las tres barreras** (Etapa 6): se quitaron temporalmente la primera línea ("Eres un asistente que responde preguntas usando únicamente fragmentos de documentos."), la regla 1 y la regla 3. Solo quedaron las reglas 2 (citas) y 4 (formato). Mismo comando, con UMBRAL=0.
+Respuesta sin las tres barreras: "El contexto proporcionado no contiene información sobre el precio del bitcoin hoy." (`capturas/etapa5_sin_barreras.txt`)
+Observación:
+- Aun sin ninguna de las tres barreras, el modelo no inventó un precio. Respondió igual que en las dos corridas anteriores.
+- Lo único que le seguía indicando usar el contexto era el `USER_PROMPT` (los fragmentos dentro de `<contexto>`) y la regla 2, que habla de "afirmar algo del contexto".
+- Diferencia con las dos corridas anteriores: esta ya pasó por el nodo `reformular` de la Etapa 6. La búsqueda usó "cotización actual de Bitcoin", así que los fragmentos fueron otros (p.22, p.29 y p.15; mejor parecido 0,598).
+- Después se restauró el `SYSTEM_PROMPT` copiando el respaldo; `diff` sin diferencias.
 Qué aprendí: ____
