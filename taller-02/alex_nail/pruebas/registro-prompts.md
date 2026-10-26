@@ -322,6 +322,8 @@ El repo del grupo es público. Antes de subir, se le pidió al ayudante revisar 
 
 No cambia el comportamiento del agente: el número es el mismo, solo cambia su tipo a `float` de Python. En Redis ya era `float`, así que ahí no cambia nada. Se arregló en `tools.py` y no en `storage.py` porque es justo donde el dato entra al estado del grafo.
 
+**(d) 400/50 y 1200/200 se repitieron en Redis cuando el servidor se corrigió.** Con ~155 MB libres (cota conservadora: pico − usado), se ingestó cada configuración en Redis desde la caché, sin gastar embeddings: 188 y 66 documentos, verificados con `FT.INFO`. Se repitió la pregunta de la Etapa 3 y al final se dejó el índice de nuevo en 800/120 (96 documentos, todos de `humor-computacional.pdf`). Los resultados coincidieron con FAISS: mismo parecido (0,782 en ambas), mismo top-3 y misma página citada. Las corridas de FAISS se conservaron con sufijo `_faiss` (`etapa3_400_50_faiss.txt`, `etapa3_1200_200_faiss.txt`, `ingesta_400_50_faiss.txt`, `ingesta_1200_200_faiss.txt`) como evidencia para el bonus. Las respuestas en Redis ya usan el prompt de la Etapa 5.
+
 ---
 
 ## Etapa 5

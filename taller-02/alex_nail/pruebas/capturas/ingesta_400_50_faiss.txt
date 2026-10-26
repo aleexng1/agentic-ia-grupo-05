@@ -1,0 +1,44 @@
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=400 · CHUNK_OVERLAP=50 · ingesta en faiss ==
+
+Páginas cargadas: 29
+Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
+Fragmentos: 188 · ya en caché: 188 · NO están en caché (gastan cuota): 0
+--reset: no había índice FAISS en data/AlexNail/.
+
+Guardados 188 fragmentos en el índice FAISS data/AlexNail/
+
+== Resumen ==
+  Páginas leídas:          29
+  Fragmentos generados:    188
+  Tamaño promedio:         302 caracteres (mín. 54, máx. 399)
+  Pares consecutivos de una misma página: 159, de los cuales 25 comparten texto
+
+== Fragmentos 1 y 2 ==
+  fragmento 1 (pág. 1, 394 car.)                             │ fragmento 2 (pág. 1, 337 car.)
+  ───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────
+  Instead of trying to produce a programme to simulate the   │ El presente trabajo tiene como objetivo presentar de forma
+  adult mind, why not rather try to produce one which        │ introductoria los métodos de detección de humor más
+  simulates the child’s? If this were then subjected to an   │ utilizados, con el fin de ofrecer un panorama amplio sobre
+  appropriate course of education one would obtain the adult │ la detección automática del humor. Los estudios analizados
+  brain. Turing, A. M. (1950). Computing machinery and       │ comparten como criterio principal la inclusión de la
+  intelligence . RESUMEN El humor sigue siendo uno de los    │ ambigüedad y la incongruencia como claves humorísticas.
+  mayores desafíos para el procesamiento del lenguaje        │ 
+  natural.                                                   │ 
+  (no hay texto repetido entre estos dos fragmentos)
+  Están en la misma página pero no repiten texto: el solape se arma con trozos completos (oraciones, o
+  palabras si una oración no cabe) que sumen a lo más CHUNK_OVERLAP caracteres; si la última oración
+  del fragmento es más larga que eso, no se repite nada.
+
+== Primer par de fragmentos consecutivos de una misma página con texto repetido ==
+  fragmento 42 (pág. 7, 322 car.)                            │ fragmento 43 (pág. 7, 370 car.)
+  ───────────────────────────────────────────────────────────┼───────────────────────────────────────────────────────────
+  ● Rasgos emocionales ( Emotion based features ): los       │ ⟦Otros autores, como Zhang et al.⟧ (2018) incorporaron
+  sentimientos intensos con frecuencia se encuentran en la   │ dimensiones que expresan el conflicto o el lenguaje
+  expresión cómica. Reyes et al. (2012) además de rasgos que │ marcado afectivamente. ● La subjetividad ( Subjectivity
+  simplemente apuntan a una polaridad positiva o negativa,   │ features ): es considerada un rasgo clave, puesto que está
+  diferenciaron contextos emocionales favorables y           │ relacionada con una percepción personal. Yang et al.
+  desfavorables. ⟦Otros autores, como Zhang et al.⟧          │ (2015) distinguieron frases subjetivas y objetivas
+                                                             │ empleando un conjunto de términos valorativos.
+  ⟦…⟧ = texto repetido entre ambos (solape de 32 caracteres)
+
+OK

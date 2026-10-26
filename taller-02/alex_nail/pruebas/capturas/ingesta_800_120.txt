@@ -3,7 +3,7 @@
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
 Fragmentos: 96 · ya en caché: 96 · NO están en caché (gastan cuota): 0
---reset: el índice 'AlexNail' no existía.
+--reset: índice 'AlexNail' y sus documentos borrados (solo ese índice).
 
 Guardados 96 fragmentos en el índice Redis 'AlexNail' (COSINE)
 

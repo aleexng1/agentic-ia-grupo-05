@@ -1,14 +1,11 @@
-== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=1200 · CHUNK_OVERLAP=200 · ingesta en faiss ==
+== Ingesta de docs/humor-computacional.pdf · CHUNK_SIZE=1200 · CHUNK_OVERLAP=200 · ingesta en redis ==
 
 Páginas cargadas: 29
 Limpieza de espacios: 73295 → 56299 caracteres (16996 espacios/saltos sobrantes quitados)
-Fragmentos: 66 · ya en caché: 4 · NO están en caché (gastan cuota): 62
+Fragmentos: 66 · ya en caché: 66 · NO están en caché (gastan cuota): 0
+--reset: índice 'AlexNail' y sus documentos borrados (solo ese índice).
 
-Embebiendo 62 fragmentos nuevos en lotes de 100...
-    avance: 62/62 embeddings nuevos
---reset: borrado el índice FAISS en data/AlexNail/.
-
-Guardados 66 fragmentos en el índice FAISS data/AlexNail/
+Guardados 66 fragmentos en el índice Redis 'AlexNail' (COSINE)
 
 == Resumen ==
   Páginas leídas:          29

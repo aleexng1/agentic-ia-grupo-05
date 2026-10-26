@@ -28,7 +28,19 @@ Pregunta: "¿Por qué la teoría de la incongruencia es la más usada en la dete
 | B · 1200/200 | buscar → responder | 0,782 | p. 4 | Sí ("requiere un menor grado de conocimiento extralingüístico") |
 | 800/120 | buscar → responder | 0,822 | p. 4 | Sí ("requiere un menor grado de conocimiento extralingüístico") |
 
-Capturas: `capturas/etapa3_400_50.txt`, `capturas/etapa3_1200_200.txt` y `capturas/etapa3_800_120.txt`. A y B se midieron en FAISS (local) porque el Redis compartido se llenó durante la ingesta de A; 800/120 se midió en Redis. El parecido es el mismo número en ambos motores (verificado con `test_storage.py`), así que la comparación es válida. Al final el índice de Redis quedó de nuevo en 800/120.
+Capturas: `capturas/etapa3_400_50.txt`, `capturas/etapa3_1200_200.txt` y `capturas/etapa3_800_120.txt`. Las tres configuraciones se midieron en Redis. Al final el índice quedó de nuevo en 800/120 (96 documentos).
+Nota: A y B se repitieron en Redis después de la Etapa 5, así que sus respuestas usan el prompt nuevo (citas "(p. N)") y UMBRAL 0,68. La de 800/120 es de antes (prompt original, UMBRAL 0,65). Lo que recupera la búsqueda (ruta, parecido y fragmentos) no depende del prompt, así que la comparación de las tres sigue siendo válida; solo cambia el formato de la respuesta.
+
+### Redis vs FAISS (para el bonus)
+
+Misma pregunta, mismos fragmentos y mismos embeddings (desde la caché); solo cambia el motor del índice.
+
+| Configuración | Parecido en Redis | Parecido en FAISS | ¿Mismo top-3? | ¿Misma página citada? |
+|---|---|---|---|---|
+| A · 400/50 | 0,782 | 0,782 | Sí: p.4 (0,782), p.1 (0,777), p.2 (0,769), mismos fragmentos y mismo orden | Sí, p. 4 |
+| B · 1200/200 | 0,782 | 0,782 | Sí: p.4 (0,782), p.2 (0,769), p.2 (0,765), mismos fragmentos y mismo orden | Sí, p. 4 |
+
+Capturas FAISS: `capturas/etapa3_400_50_faiss.txt`, `capturas/etapa3_1200_200_faiss.txt`, `capturas/ingesta_400_50_faiss.txt` e `capturas/ingesta_1200_200_faiss.txt`. Redis entrega distancia coseno y FAISS distancia L2² con vectores normalizados; después de `a_parecido()` dan el mismo número (coinciden en los 3 decimales que muestra `--saltos`). Las respuestas de FAISS son del prompt original y las de Redis del prompt de la Etapa 5, por eso cambia el formato de la cita.
 
 Fragmento con mejor parecido en cada configuración (todos de la p. 4):
 - A · 400/50: empieza en "Aun así, esta teoría es la que más se ha utilizado en los estudios de detección automática…" (la oración de la respuesta abre el fragmento).
