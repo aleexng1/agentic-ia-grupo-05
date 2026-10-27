@@ -27,20 +27,27 @@ def a_texto(contenido) -> str:
     return str(contenido)
 
 
-def imprimir_salto(nodo: str, mensajes: list, pendientes: dict) -> None:
-    print(f"[nodo] {nodo}")
-    for msg in mensajes:
+def imprimir_salto(ruta: str, nodo: str, update: dict, pendientes: dict) -> None:
+    sangria = "  " if "/" in ruta else ""
+    print(f"{sangria}[nodo] {ruta}")
+    veredicto = update.get("veredicto")
+    if veredicto:
+        print(f"{sangria}  veredicto: permitido={veredicto['permitido']} categoria={veredicto['categoria']}")
+        print(f"{sangria}    motivo: {veredicto['motivo']}")
+    if "/" not in ruta and nodo not in ("guardia_entrada",):
+        # el nodo exterior de un subgrafo repite los mensajes del interior: solo se imprimen en el interior
+        return
+    for msg in update.get("messages", []):
         if isinstance(msg, AIMessage):
             for llamada in msg.tool_calls:
                 pendientes[llamada["id"]] = llamada
         elif isinstance(msg, ToolMessage):
             texto = a_texto(msg.content)
-            llamada = pendientes.get(msg.tool_call_id, {})
-            args = llamada.get("args", {})
+            args = pendientes.get(msg.tool_call_id, {}).get("args", {})
             resumen = texto[:RESUMEN_CHARS].replace("\n", " ")
-            print(f"  tool: {msg.name}({args})")
-            print(f"    resultado: {resumen}{'...' if len(texto) > RESUMEN_CHARS else ''}")
-            print(f"    caracteres devueltos: {len(texto)}")
+            print(f"{sangria}  tool: {msg.name}({args})")
+            print(f"{sangria}    resultado: {resumen}{'...' if len(texto) > RESUMEN_CHARS else ''}")
+            print(f"{sangria}    caracteres devueltos: {len(texto)}")
 
 
 async def ejecutar(agente, mensaje: str, thread_id: str, saltos: bool) -> str | None:
@@ -50,14 +57,19 @@ async def ejecutar(agente, mensaje: str, thread_id: str, saltos: bool) -> str | 
     respuesta = None
     if saltos:
         print("[nodo] __start__")
-    async for paso in agente.astream(entrada, config, stream_mode="updates"):
+    async for espacio, paso in agente.astream(
+        entrada, config, stream_mode="updates", subgraphs=True
+    ):
         for nodo, update in paso.items():
-            mensajes = (update or {}).get("messages", [])
+            update = update or {}
             if saltos:
-                imprimir_salto(nodo, mensajes, pendientes)
-            for msg in mensajes:
-                if isinstance(msg, AIMessage) and not msg.tool_calls:
-                    respuesta = a_texto(msg.content)
+                padre = espacio[0].split(":")[0] if espacio else None
+                ruta = f"{padre}/{nodo}" if padre else nodo
+                imprimir_salto(ruta, nodo, update, pendientes)
+            if not espacio:  # solo el grafo exterior define la respuesta final
+                for msg in update.get("messages", []):
+                    if isinstance(msg, AIMessage) and not msg.tool_calls:
+                        respuesta = a_texto(msg.content)
     if saltos:
         print("[nodo] __end__")
     return respuesta
