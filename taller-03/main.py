@@ -9,22 +9,10 @@ from dotenv import load_dotenv
 from langchain_core.messages import AIMessage, ToolMessage
 from langgraph.errors import GraphRecursionError
 
+from src.ejecucion import MAX_LLAMADAS_TOOLS, a_texto, ejecutar_grafo
+
 RAIZ = Path(__file__).resolve().parent
-MAX_LLAMADAS_TOOLS = 6
-# cada vuelta (modelo -> tools) cuenta 2 pasos, más el paso final del modelo
-RECURSION_LIMIT = MAX_LLAMADAS_TOOLS * 2 + 1
 RESUMEN_CHARS = 200
-
-
-def a_texto(contenido) -> str:
-    if isinstance(contenido, str):
-        return contenido
-    if isinstance(contenido, list):
-        return "\n".join(
-            b["text"] if isinstance(b, dict) and "text" in b else str(b)
-            for b in contenido
-        )
-    return str(contenido)
 
 
 def imprimir_salto(ruta: str, nodo: str, update: dict, pendientes: dict) -> None:
@@ -34,6 +22,17 @@ def imprimir_salto(ruta: str, nodo: str, update: dict, pendientes: dict) -> None
     if veredicto:
         print(f"{sangria}  veredicto: permitido={veredicto['permitido']} categoria={veredicto['categoria']}")
         print(f"{sangria}    motivo: {veredicto['motivo']}")
+    revision = update.get("revision")
+    if revision:
+        print(f"{sangria}  revisión: aprobada={revision['aprobada']} problemas={revision['problemas']}")
+        print(f"{sangria}    detalle: {revision['detalle']}")
+        aviso = "  ¡SUPERA 100.000!" if revision["chars_enviados"] > 100_000 else ""
+        print(f"{sangria}    caracteres enviados a la guardia: {revision['chars_enviados']}{aviso}")
+        if revision["accion"] == "reintentar":
+            reintento = "pedido ahora"
+        else:
+            reintento = "ya usado antes en esta pregunta" if revision["reintento_previo"] else "no hubo"
+        print(f"{sangria}    reintento: {reintento}")
     if "/" not in ruta and nodo not in ("guardia_entrada",):
         # el nodo exterior de un subgrafo repite los mensajes del interior: solo se imprimen en el interior
         return
@@ -51,28 +50,15 @@ def imprimir_salto(ruta: str, nodo: str, update: dict, pendientes: dict) -> None
 
 
 async def ejecutar(agente, mensaje: str, thread_id: str, saltos: bool) -> str | None:
-    config = {"configurable": {"thread_id": thread_id}, "recursion_limit": RECURSION_LIMIT}
-    entrada = {"messages": [{"role": "user", "content": mensaje}]}
     pendientes: dict = {}
-    respuesta = None
+    al_paso = None
     if saltos:
         print("[nodo] __start__")
-    async for espacio, paso in agente.astream(
-        entrada, config, stream_mode="updates", subgraphs=True
-    ):
-        for nodo, update in paso.items():
-            update = update or {}
-            if saltos:
-                padre = espacio[0].split(":")[0] if espacio else None
-                ruta = f"{padre}/{nodo}" if padre else nodo
-                imprimir_salto(ruta, nodo, update, pendientes)
-            if not espacio:  # solo el grafo exterior define la respuesta final
-                for msg in update.get("messages", []):
-                    if isinstance(msg, AIMessage) and not msg.tool_calls:
-                        respuesta = a_texto(msg.content)
+        al_paso = lambda ruta, nodo, update: imprimir_salto(ruta, nodo, update, pendientes)
+    resultado = await ejecutar_grafo(agente, mensaje, thread_id, al_paso)
     if saltos:
         print("[nodo] __end__")
-    return respuesta
+    return resultado.respuesta
 
 
 async def principal(args) -> int:
