@@ -1,0 +1,56 @@
+Servidor MCP: https://api-colombia.com/api/v1/mcp
+
+== Herramientas (11) — conexión y listado: 2171 ms ==
+NOMBRE                                   ARGUMENTOS                                              DESCRIPCIÓN
+get_api_reference                        resource: ['string', 'null']?                           Returns usage guidance for the API Colombia data tools: shared conventions (sorting, pagination, keyword search) and per-resource details. Pass a 'resource' key to scope it to one resource, or omit it to get the full reference.
+get_cities_by_department                 departmentId: integer                                   Returns the cities that belong to a department, identified by the department's numeric Id.
+get_country_info                         -                                                       Returns general information about Colombia (time zone, languages, currency, surface, population, etc.).
+get_item_by_id                           resource: string, id: integer                           Returns a single item of a resource by its numeric Id.
+get_items_by_name                        resource: string, name: string                          Returns items of a resource whose Name contains the given text (case-insensitive). Only valid for resources that expose a Name field.
+get_natural_areas_by_department          departmentId: integer                                   Returns the natural areas located in a department, identified by the department's numeric Id.
+get_touristic_attractions_by_department  departmentId: integer                                   Returns the tourist attractions located in a department, identified by the department's numeric Id.
+list_colombia_resources                  -                                                       Lists every resource the API Colombia MCP server exposes, with its key, description, REST route, and the operations it supports. Call this first to discover valid 'resource' values for the data tools.
+list_items                               resource: string, sortBy: ['string', 'null']?, sortDirection: ['string', 'null']? Lists all items of a resource. Optionally sorted by 'sortBy' (a field of the resource) and 'sortDirection' ('asc' or 'desc').
+list_items_paged                         resource: string, page: integer?, pageSize: integer?, sortBy: ['string', 'null']?, sortDirection: ['string', 'null']? Returns a page of items of a resource. Includes page, pageSize, totalRecords, pageCount and data. Supports optional sorting.
+search_items                             resource: string, keyword: string                       Searches a resource for a keyword across its text fields (accent-insensitive) and returns the matches.
+
+== Recursos disponibles ==
+list_colombia_resources({}) — 2719 ms
+[{"resource":"airport","description":"Airports located in Colombia.","route":"api/v1/Airport","operations":["list","byId","byName","search","paged"]},{"resource":"categorynaturalarea","description":"Categories used to classify natural areas.","route":"api/v1/CategoryNaturalArea","operations":["list","byId","byName","search","paged"]},{"resource":"city","description":"Cities of Colombia, including the department they belong to.","route":"api/v1/City","operations":["list","byId","byName","search","paged"]},{"resource":"constitutionarticle","description":"Articles of the Colombian constitution.",... [recortado, 4010 caracteres en total]
+
+Claves y descripciones:
+  airport                      Airports located in Colombia.
+  categorynaturalarea          Categories used to classify natural areas.
+  city                         Cities of Colombia, including the department they belong to.
+  constitutionarticle          Articles of the Colombian constitution.
+  country                      General information about Colombia (time zone, languages, currency, etc.).
+  department                   Departments (states) of Colombia, including their capital city.
+  heritagecity                 Heritage cities of Colombia.
+  holiday                      Public holidays of Colombia.
+  indigenousreservation        Indigenous reservations of Colombia.
+  intangibleheritage           Intangible cultural heritage of Colombia.
+  invasivespecie               Invasive species found in Colombia.
+  map                          Maps of Colombia.
+  nativecommunity              Native communities of Colombia.
+  naturalarea                  Protected natural areas of Colombia.
+  postalcode                   Postal codes of Colombia.
+  president                    Presidents of Colombia and their governing periods.
+  radio                        Radio stations of Colombia.
+  region                       Natural regions of Colombia.
+  touristattraction            Tourist attractions across Colombia, including the city they are in.
+  traditionalfairandfestival   Traditional fairs and festivals of Colombia.
+  typicaldish                  Typical dishes of Colombian gastronomy.
+  urbancenter                  Urban centers of Colombia (municipal heads and populated centers).
+  volcano                      Volcanoes of the Colombian territory, including their elevation, coordinates, type, activity level and the department and city they belong to.
+
+== Convenciones de búsqueda y paginación ==
+get_api_reference({'resource': 'department'}) — 3530 ms
+{"conventions":{"baseUrl":"https://api-colombia.com","authentication":"None. All data is public and read-only (GET only).","sorting":"list_items and list_items_paged accept 'sortBy' (any field of the resource, e.g. Id, name) and 'sortDirection' ('asc' or 'desc').","pagination":"list_items_paged accepts 'page' (1-based) and 'pageSize'; it returns page, pageSize, totalRecords, pageCount and data.","search":"search_items matches a keyword against the resource's text fields (accent-insensitive). get_items_by_name matches the Name field only."},"resource":{"key":"department","description":"Departme... [recortado, 741 caracteres en total]
+
+== Prueba 1: buscar Antioquia ==
+search_items({'resource': 'department', 'keyword': 'Antioquia'}) — 3560 ms
+[{"id":4,"name":"Atlántico","description":"El Atlántico es uno de los treinta y dos departamentos que, junto a Bogotá, Distrito Capital, forman la República de Colombia. Su capital es Barranquilla. Ubicado en la región Caribe, limita al norte con el mar Caribe, al Oriente con el río Magdalena y al Sur y al Occidente con el departamento de Bolívar. Con unos 2 500 000 habitantes en 2015, es el cuarto departamento más poblado (por detrás de Antioquia, Valle del Cauca y Cundinamarca); con 3019 km² es el tercero menos extenso (por delante de Quindío y San Andrés y Providencia, el menos extenso) y c... [recortado, 13883 caracteres en total]
+
+== Prueba 2: áreas naturales del departamento 2 ==
+get_natural_areas_by_department({'departmentId': 2}) — 3367 ms
+[{"id":342,"areaGroupId":106,"categoryNaturalAreaId":7,"name":"Las Orquídeas","departmentId":2,"daneCode":5,"landArea":21112.85396968,"maritimeArea":null,"department":null,"categoryNaturalArea":null},{"id":343,"areaGroupId":106,"categoryNaturalAreaId":7,"name":"Las Orquídeas","departmentId":2,"daneCode":5,"landArea":1120.315259247,"maritimeArea":null,"department":null,"categoryNaturalArea":null},{"id":344,"areaGroupId":106,"categoryNaturalAreaId":7,"name":"Las Orquídeas","departmentId":2,"daneCode":5,"landArea":6519.7681563691,"maritimeArea":null,"department":null,"categoryNaturalArea":null},{... [recortado, 86475 caracteres en total]
