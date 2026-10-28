@@ -1,0 +1,7 @@
+# Saltos de línea uniformes entre Windows y Linux.
+* text=auto
+*.ipynb text eol=lf
+
+# Archivos antiguos del taller 1 guardados con saltos de Windows: se dejan tal cual.
+taller-01/eduardo_basaure/plan.json -text
+taller-01/eduardo_basaure/.opencode/agents/implementador.md -text

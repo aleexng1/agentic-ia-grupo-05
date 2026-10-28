@@ -1,0 +1,63 @@
+{
+  "version": "0.1-borrador",
+  "descripcion": "Casos de prueba con la respuesta esperada. Datos ficticios. Alex completa la versión final (20 a 30 casos).",
+  "casos": [
+    {
+      "id": "GS-01",
+      "entrada": {
+        "id": "G-001",
+        "fecha_gasto": "2026-10-02",
+        "fecha_rendicion": "2026-10-06",
+        "monto": 45000,
+        "tipo_documento": "boleta",
+        "proveedor": "Estación de Servicio El Roble",
+        "glosa": "Carga de bencina camioneta de reparto",
+        "politica_declarada": "Vehículos Propios",
+        "categoria_declarada": "Combustible",
+        "unidad_negocio": "Operaciones",
+        "patente": "KXLT21",
+        "id_fondo": "FR-01"
+      },
+      "esperado": {"decision": "aprobar", "politica": "Vehículos Propios", "categoria": "Combustible"},
+      "criterio": "Caso normal: política bien elegida, documento permitido, dentro de plazo y con patente."
+    },
+    {
+      "id": "GS-02",
+      "entrada": {
+        "id": "G-002",
+        "fecha_gasto": "2026-10-05",
+        "fecha_rendicion": "2026-10-09",
+        "monto": 120000,
+        "tipo_documento": "factura",
+        "proveedor": "Arriendos Patagonia Ltda.",
+        "glosa": "Arriendo de auto mientras la camioneta está en mantención",
+        "politica_declarada": "Viajes Internos",
+        "categoria_declarada": "Traslados locales",
+        "unidad_negocio": "Operaciones",
+        "patente": "KXLT21",
+        "id_fondo": "FR-01"
+      },
+      "esperado": {"decision": "observar", "politica": "Vehículos Propios", "categoria": "Arriendo de vehículo"},
+      "criterio": "Política mal asignada: el arriendo de auto de reemplazo se reclasifica a Vehículos Propios (CTA-1004)."
+    },
+    {
+      "id": "GS-03",
+      "entrada": {
+        "id": "G-004",
+        "fecha_gasto": "2026-08-01",
+        "fecha_rendicion": "2026-10-15",
+        "monto": 32000,
+        "tipo_documento": "boleta",
+        "proveedor": "Hotel Vista Lago",
+        "glosa": "Alojamiento visita a cliente en Puerto Varas",
+        "politica_declarada": "Viajes Internos",
+        "categoria_declarada": "Alojamiento",
+        "unidad_negocio": "Ventas",
+        "patente": null,
+        "id_fondo": "FR-01"
+      },
+      "esperado": {"decision": "rechazar", "politica": "Viajes Internos", "categoria": "Alojamiento"},
+      "criterio": "Regla de plazo: se rindió 75 días después del gasto (máximo 30)."
+    }
+  ]
+}

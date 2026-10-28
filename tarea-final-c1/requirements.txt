@@ -1,0 +1,21 @@
+# Versiones fijas, tomadas del curso (clase-05/proyecto-rag y clase-04).
+# Python 3.12. NO cambiar sin acuerdo del grupo (archivo compartido).
+
+# Agente (ReAct + historial)
+langgraph==1.2.16
+langchain==1.4.6
+langchain-core==1.6.12
+langchain-google-genai==4.4.2
+
+# RAG con Redis
+langchain-redis==0.2.6
+redis==8.1.0
+redisvl==0.28.0
+
+# Configuración
+python-dotenv==1.2.4
+
+# Notebook de entrega
+nbformat==5.11.1
+ipykernel==7.4.0
+nbconvert==7.17.2
