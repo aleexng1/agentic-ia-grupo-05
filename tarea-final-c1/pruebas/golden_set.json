@@ -11,15 +11,17 @@
         "monto": 45000,
         "tipo_documento": "boleta",
         "proveedor": "Estación de Servicio El Roble",
-        "glosa": "Carga de bencina camioneta de reparto",
+        "glosa": "Bencina auto propio para visitar tiendas de Temuco",
         "politica_declarada": "Vehículos Propios",
-        "categoria_declarada": "Combustible",
-        "unidad_negocio": "Operaciones",
-        "patente": "KXLT21",
+        "categoria_declarada": "Gasolina (vehículo propio)",
+        "unidad_negocio": "TIE",
+        "patente": null,
+        "numero_ot": null,
+        "vb_gerente_general": false,
         "id_fondo": "FR-01"
       },
-      "esperado": {"decision": "aprobar", "politica": "Vehículos Propios", "categoria": "Combustible"},
-      "criterio": "Caso normal: política bien elegida, documento permitido, dentro de plazo y con patente."
+      "esperado": {"decision": "aprobar", "politica": "Vehículos Propios", "categoria": "Gasolina (vehículo propio)"},
+      "criterio": "Caso normal: política bien elegida (P01, CTA-5100), boleta válida (RG-01) y rendido dentro del mes (RG-03)."
     },
     {
       "id": "GS-02",
@@ -30,34 +32,38 @@
         "monto": 120000,
         "tipo_documento": "factura",
         "proveedor": "Arriendos Patagonia Ltda.",
-        "glosa": "Arriendo de auto mientras la camioneta está en mantención",
+        "glosa": "Arriendo de auto sedán para visitar tiendas de Osorno",
         "politica_declarada": "Viajes Internos",
-        "categoria_declarada": "Traslados locales",
-        "unidad_negocio": "Operaciones",
-        "patente": "KXLT21",
+        "categoria_declarada": "Arriendo de camioneta o furgón",
+        "unidad_negocio": "TIE",
+        "patente": null,
+        "numero_ot": null,
+        "vb_gerente_general": false,
         "id_fondo": "FR-01"
       },
-      "esperado": {"decision": "observar", "politica": "Vehículos Propios", "categoria": "Arriendo de vehículo"},
-      "criterio": "Política mal asignada: el arriendo de auto de reemplazo se reclasifica a Vehículos Propios (CTA-1004)."
+      "esperado": {"decision": "observar", "politica": "Vehículos Propios", "categoria": "Arriendo de auto liviano"},
+      "criterio": "RG-06 y RG-09: un sedán es auto liviano, su arriendo se reclasifica de P02 a P01 Vehículos Propios (CTA-5100)."
     },
     {
       "id": "GS-03",
       "entrada": {
         "id": "G-004",
-        "fecha_gasto": "2026-08-01",
+        "fecha_gasto": "2026-08-14",
         "fecha_rendicion": "2026-10-15",
-        "monto": 32000,
+        "monto": 52000,
         "tipo_documento": "boleta",
         "proveedor": "Hotel Vista Lago",
-        "glosa": "Alojamiento visita a cliente en Puerto Varas",
+        "glosa": "Noche de hotel por visita a la tienda de Puerto Varas",
         "politica_declarada": "Viajes Internos",
-        "categoria_declarada": "Alojamiento",
-        "unidad_negocio": "Ventas",
+        "categoria_declarada": "Hotel",
+        "unidad_negocio": "TIE",
         "patente": null,
+        "numero_ot": null,
+        "vb_gerente_general": false,
         "id_fondo": "FR-01"
       },
-      "esperado": {"decision": "rechazar", "politica": "Viajes Internos", "categoria": "Alojamiento"},
-      "criterio": "Regla de plazo: se rindió 75 días después del gasto (máximo 30)."
+      "esperado": {"decision": "rechazar", "politica": "Viajes Internos", "categoria": "Hotel"},
+      "criterio": "RG-03: gasto de agosto rendido el 15 de octubre (plazo máximo: 10 de septiembre) y sin visto bueno del Gerente General."
     }
   ]
 }

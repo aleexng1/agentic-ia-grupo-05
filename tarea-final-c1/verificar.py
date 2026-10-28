@@ -12,6 +12,7 @@ import argparse
 import contextlib
 import copy
 import csv
+import functools
 import importlib
 import inspect
 import io
@@ -24,6 +25,7 @@ from unittest import mock
 
 CARPETA = Path(__file__).resolve().parent
 sys.path.insert(0, str(CARPETA))
+RUTA_POLITICA = CARPETA / "datos" / "politica_ficticia.md"
 
 # Lista de resultados: True = pasó, False = falló.
 resultados: list[bool] = []
@@ -76,27 +78,29 @@ GASTO_EJEMPLO = {
     "monto": 45000,
     "tipo_documento": "boleta",
     "proveedor": "Estación de Servicio El Roble",
-    "glosa": "Carga de bencina camioneta de reparto",
+    "glosa": "Bencina auto propio para visitar tiendas de Temuco",
     "politica_declarada": "Vehículos Propios",
-    "categoria_declarada": "Combustible",
-    "unidad_negocio": "Operaciones",
-    "patente": "KXLT21",
+    "categoria_declarada": "Gasolina (vehículo propio)",
+    "unidad_negocio": "TIE",
+    "patente": None,
+    "numero_ot": None,
+    "vb_gerente_general": False,
     "id_fondo": "FR-01",
 }
 
 FRAGMENTO_EJEMPLO = {
     "politica": "Vehículos Propios",
-    "texto": "Combustible, cuenta CTA-1001.",
-    "fuente": "datos/politica_ficticia.md",
+    "texto": "Bono de Traslado | Gasolina (vehículo propio) | CTA-5100.",
+    "fuente": "datos/politica_ficticia.md#P01",
     "puntaje": 0.9,
 }
 
 CLASIFICACION_EJEMPLO = {
     "politica": "Vehículos Propios",
-    "categoria": "Combustible",
-    "cuenta": "CTA-1001",
+    "categoria": "Gasolina (vehículo propio)",
+    "cuenta": "CTA-5100",
     "coincide_con_declarada": True,
-    "razon": "Bencina para vehículo de la empresa.",
+    "razon": "Bencina del auto propio para un traslado de trabajo.",
     "fragmentos": [FRAGMENTO_EJEMPLO],
 }
 
@@ -104,15 +108,16 @@ VEREDICTO_EJEMPLO = {
     "decision": "aprobar",
     "motivo": "Cumple todas las reglas.",
     "politica_sugerida": "Vehículos Propios",
-    "categoria_sugerida": "Combustible",
-    "cuenta_sugerida": "CTA-1001",
+    "categoria_sugerida": "Gasolina (vehículo propio)",
+    "cuenta_sugerida": "CTA-5100",
 }
 
 # Claves que debe tener cada tipo del contrato (src/contrato.py).
 CLAVES_CONTRATO = {
     "Gasto": {
         "id", "fecha_gasto", "fecha_rendicion", "monto", "tipo_documento", "proveedor", "glosa",
-        "politica_declarada", "categoria_declarada", "unidad_negocio", "patente", "id_fondo",
+        "politica_declarada", "categoria_declarada", "unidad_negocio", "patente", "numero_ot",
+        "vb_gerente_general", "id_fondo",
     },
     "Fragmento": {"politica", "texto", "fuente", "puntaje"},
     "Clasificacion": {"politica", "categoria", "cuenta", "coincide_con_declarada", "razon", "fragmentos"},
@@ -142,6 +147,9 @@ FIRMAS = {
 # Estas dos son herramientas de LangChain (@tool), el LLM las puede pedir.
 HERRAMIENTAS = {("herramientas", "validar_gasto"), ("rag", "buscar_politica")}
 
+# Campos del Gasto que pueden faltar (NotRequired en el contrato).
+CAMPOS_OPCIONALES_GASTO = {"patente", "numero_ot", "vb_gerente_general"}
+
 
 # ---------------------------------------------------------------------------
 # Ayudas para revisar formatos
@@ -152,7 +160,7 @@ def revisar_claves(datos, tipo: str) -> None:
     """Revisa que `datos` sea un diccionario con exactamente las claves del tipo del contrato."""
     exigir(isinstance(datos, dict), f"{tipo} debe ser un diccionario, llegó {type(datos).__name__}")
     esperadas = CLAVES_CONTRATO[tipo]
-    obligatorias = esperadas - {"patente"} if tipo == "Gasto" else esperadas
+    obligatorias = esperadas - CAMPOS_OPCIONALES_GASTO if tipo == "Gasto" else esperadas
     faltan = obligatorias - set(datos)
     sobran = set(datos) - esperadas
     exigir(not faltan, f"{tipo}: faltan las claves {sorted(faltan)}")
@@ -174,6 +182,62 @@ def revisar_gasto(gasto: dict, donde: str) -> None:
         gasto["tipo_documento"] in contrato.TIPOS_DOCUMENTO,
         f"{donde}: tipo_documento='{gasto['tipo_documento']}' no es uno de {contrato.TIPOS_DOCUMENTO}",
     )
+    exigir(
+        isinstance(gasto.get("numero_ot"), (str, type(None))), f"{donde}: numero_ot debe ser texto o vacío"
+    )
+    exigir(
+        isinstance(gasto.get("vb_gerente_general", False), bool),
+        f"{donde}: vb_gerente_general debe ser true o false",
+    )
+    unidades = leer_politica()["unidades"]
+    exigir(
+        gasto["unidad_negocio"] in unidades,
+        f"{donde}: unidad_negocio='{gasto['unidad_negocio']}' no es uno de {sorted(unidades)}",
+    )
+    revisar_politica_categoria(gasto["politica_declarada"], gasto["categoria_declarada"], donde)
+
+
+@functools.cache
+def leer_politica() -> dict:
+    """Lee datos/politica_ficticia.md y devuelve lo que se usa para comparar nombres.
+
+    - "politicas": {nombre de política: {categoría: cuenta}}, de los títulos '## P01 — <nombre>'
+      y de sus tablas Grupo / Categoría / Cuenta.
+    - "unidades": códigos de la tabla de unidades de negocio (TIE, CD, ...).
+    - "secciones": todos los títulos '## ...' (sin el código Pxx), por ejemplo "Reglas generales".
+    """
+    politicas, unidades, secciones = {}, set(), set()
+    seccion_actual, en_tabla_unidades = None, False
+    for linea in RUTA_POLITICA.read_text(encoding="utf-8").splitlines():
+        if linea.startswith("#"):
+            # Un título nuevo: vemos si es una política, la tabla de unidades u otra sección.
+            titulo = re.match(r"^## (?:P\d{2} — )?(.+)$", linea)
+            if titulo:
+                secciones.add(titulo.group(1).strip())
+            politica = re.match(r"^## P\d{2} — (.+)$", linea)
+            seccion_actual = politicas.setdefault(politica.group(1).strip(), {}) if politica else None
+            en_tabla_unidades = linea.startswith("### Unidades de negocio")
+        elif fila := re.match(r"^\|[^|]+\|([^|]+)\|\s*(CTA-\d{4})\s*\|$", linea):
+            if seccion_actual is not None:
+                seccion_actual[fila.group(1).strip()] = fila.group(2)
+        elif en_tabla_unidades and (fila := re.match(r"^\|\s*([A-Z]{2,4})\s*\|", linea)):
+            unidades.add(fila.group(1))
+    return {"politicas": politicas, "unidades": unidades, "secciones": secciones}
+
+
+def revisar_politica_categoria(politica: str, categoria: str, donde: str) -> None:
+    """Revisa que la política exista y que la categoría sea de esa política (nombres exactos)."""
+    politicas = leer_politica()["politicas"]
+    exigir(politica in politicas, f"{donde}: la política '{politica}' no existe. Válidas: {sorted(politicas)}")
+    exigir(
+        categoria in politicas[politica],
+        f"{donde}: '{categoria}' no es una categoría de '{politica}'. Válidas: {sorted(politicas[politica])}",
+    )
+
+
+def cuentas_validas() -> set:
+    """Todas las cuentas contables (CTA-xxxx) que aparecen en las tablas de la política."""
+    return {cuenta for categorias in leer_politica()["politicas"].values() for cuenta in categorias.values()}
 
 
 def funcion_real(objeto):
@@ -216,7 +280,11 @@ class LLMFalso:
         if self.siempre_pide_herramienta or not recien_observo:
             pedido = {
                 "name": "validar_gasto",
-                "args": {"gasto": GASTO_EJEMPLO, "politica": "Vehículos Propios", "categoria": "Combustible"},
+                "args": {
+                    "gasto": GASTO_EJEMPLO,
+                    "politica": CLASIFICACION_EJEMPLO["politica"],
+                    "categoria": CLASIFICACION_EJEMPLO["categoria"],
+                },
                 "id": f"llamada-{self.llamadas}",
                 "type": "tool_call",
             }
@@ -312,10 +380,15 @@ def bloque_4_llamadas() -> None:
 
     def validar():
         resultado = herramientas.validar_gasto.invoke(
-            {"gasto": GASTO_EJEMPLO, "politica": "Vehículos Propios", "categoria": "Combustible"}
+            {
+                "gasto": GASTO_EJEMPLO,
+                "politica": CLASIFICACION_EJEMPLO["politica"],
+                "categoria": CLASIFICACION_EJEMPLO["categoria"],
+            }
         )
         revisar_claves(resultado, "Validacion")
         exigir(isinstance(resultado["cumple"], bool), "cumple debe ser True o False")
+        exigir(resultado["cuenta"] in cuentas_validas(), f"la cuenta '{resultado['cuenta']}' no está en la política")
         exigir(isinstance(resultado["incumplimientos"], list), "incumplimientos debe ser una lista")
         for incumplimiento in resultado["incumplimientos"]:
             revisar_claves(incumplimiento, "Incumplimiento")
@@ -324,11 +397,16 @@ def bloque_4_llamadas() -> None:
     punto("validar_gasto devuelve una Validacion", validar)
 
     def buscar():
-        resultado = rag.buscar_politica.invoke({"consulta": "bencina camioneta de la empresa", "k": 3})
+        resultado = rag.buscar_politica.invoke({"consulta": "bencina auto propio visita a tiendas", "k": 3})
         exigir(isinstance(resultado, list) and resultado, "debe devolver una lista con al menos un Fragmento")
         exigir(len(resultado) <= 3, f"pidió k=3 y devolvió {len(resultado)}")
+        secciones = leer_politica()["secciones"]
         for fragmento in resultado:
             revisar_claves(fragmento, "Fragmento")
+            exigir(
+                fragmento["politica"] in secciones,
+                f"politica='{fragmento['politica']}' no es un título de la política. Válidos: {sorted(secciones)}",
+            )
         return f"{len(resultado)} fragmento(s), primero: {resultado[0]['politica']}"
 
     punto("buscar_politica devuelve Fragmentos", buscar, opcional_sin_servicios=True)
@@ -373,12 +451,21 @@ def bloque_5_datos() -> None:
     contrato = modulos["contrato"]
 
     def politica():
-        texto = (CARPETA / "datos" / "politica_ficticia.md").read_text(encoding="utf-8")
-        politicas = re.findall(r"^## Política: (.+)$", texto, flags=re.MULTILINE)
-        exigir(politicas, "no hay títulos '## Política: <nombre>'")
-        exigir(re.search(r"^## Reglas generales", texto, flags=re.MULTILINE), "falta la sección '## Reglas generales'")
-        exigir(re.search(r"CTA-\d{4}", texto), "no hay cuentas contables del tipo CTA-1001")
-        return f"{len(politicas)} políticas: {', '.join(politicas)}"
+        texto = RUTA_POLITICA.read_text(encoding="utf-8")
+        leida = leer_politica()
+        politicas, unidades = leida["politicas"], leida["unidades"]
+        exigir(politicas, "no hay títulos '## P01 — <nombre>'")
+        sin_tabla = [nombre for nombre, categorias in politicas.items() if not categorias]
+        exigir(not sin_tabla, f"políticas sin tabla Grupo / Categoría / Cuenta: {sin_tabla}")
+        exigir(unidades, "falta la tabla '### Unidades de negocio' con códigos (TIE, CD, ...)")
+        exigir("Reglas generales" in leida["secciones"], "falta la sección '## Reglas generales'")
+        reglas = re.findall(r"^\*\*(RG-\d{2})", texto, flags=re.MULTILINE)
+        exigir(reglas, "no hay reglas generales con formato **RG-01 — ...**")
+        categorias = sum(len(c) for c in politicas.values())
+        return (
+            f"{len(politicas)} políticas, {categorias} categorías, {len(reglas)} reglas "
+            f"({reglas[0]} a {reglas[-1]}), unidades {', '.join(sorted(unidades))}"
+        )
 
     punto("datos/politica_ficticia.md", politica)
 
@@ -395,6 +482,10 @@ def bloque_5_datos() -> None:
             except ValueError:
                 raise AssertionError(f"línea {numero}: monto '{fila['monto']}' no es un entero") from None
             fila["patente"] = fila["patente"] or None
+            fila["numero_ot"] = fila["numero_ot"] or None
+            vb = fila["vb_gerente_general"].strip().lower()
+            exigir(vb in ("true", "false", ""), f"línea {numero}: vb_gerente_general debe ser true, false o vacío")
+            fila["vb_gerente_general"] = vb == "true"
             revisar_gasto(fila, f"línea {numero}")
         return f"{len(filas)} gastos"
 
@@ -417,6 +508,7 @@ def bloque_5_datos() -> None:
             )
             for campo in ("politica", "categoria"):
                 exigir(isinstance(esperado.get(campo), str) and esperado[campo], f"caso {caso['id']}: falta {campo}")
+            revisar_politica_categoria(esperado["politica"], esperado["categoria"], f"caso {caso['id']} (esperado)")
         return f"versión {datos['version']}, {len(casos)} casos"
 
     punto("pruebas/golden_set.json", golden)

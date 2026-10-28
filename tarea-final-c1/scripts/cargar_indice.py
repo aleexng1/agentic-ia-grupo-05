@@ -4,6 +4,7 @@ Dueño: rol Conocimiento y seguridad.
 Uso (desde tarea-final-c1):  python scripts/cargar_indice.py
 """
 
+import re
 import sys
 from pathlib import Path
 
@@ -12,10 +13,13 @@ RUTA_POLITICA = CARPETA_PROYECTO / "datos" / "politica_ficticia.md"
 
 
 def separar_politicas(texto: str) -> list[dict]:
-    """Corta el documento en un trozo por cada título '## ...' (una política o las reglas)."""
+    """Corta el documento en un trozo por cada título '## ...' (una política o las reglas).
+
+    En '## P01 — Vehículos Propios' el nombre de la política es 'Vehículos Propios'.
+    """
     trozos = []
     for bloque in texto.split("\n## ")[1:]:
-        titulo = bloque.splitlines()[0].replace("Política:", "").strip()
+        titulo = re.sub(r"^P\d{2} — ", "", bloque.splitlines()[0]).strip()
         trozos.append({"politica": titulo, "texto": "## " + bloque.strip()})
     return trozos
 

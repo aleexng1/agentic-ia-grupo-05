@@ -24,4 +24,4 @@ def validar_gasto(gasto: Gasto, politica: str, categoria: str) -> Validacion:
         categoria: nombre de la categoría dentro de esa política.
     """
     # TODO(herramientas): reemplazar stub por las reglas leídas de datos/politica_ficticia.md
-    return {"cumple": True, "incumplimientos": [], "cuenta": "CTA-1001"}
+    return {"cumple": True, "incumplimientos": [], "cuenta": "CTA-5100"}

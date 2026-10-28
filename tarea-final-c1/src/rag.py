@@ -17,15 +17,16 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
     conversación o si la pregunta no trata de gastos.
 
     Args:
-        consulta: qué buscar, en palabras simples (por ejemplo "bencina auto de la empresa").
+        consulta: qué buscar, en palabras simples (por ejemplo "bencina auto propio visita a tiendas").
         k: cuántos trozos devolver (por defecto 3).
     """
     # TODO(conocimiento-seguridad): reemplazar stub por la búsqueda en Redis
     return [
         {
             "politica": "Vehículos Propios",
-            "texto": "Combustible para vehículos de la empresa. Categoría Combustible, cuenta CTA-1001.",
-            "fuente": "datos/politica_ficticia.md#vehiculos-propios",
+            "texto": "Gastos de traslado por trabajo usando un vehículo personal del colaborador. "
+                     "Bono de Traslado | Gasolina (vehículo propio) | CTA-5100.",
+            "fuente": "datos/politica_ficticia.md#P01",
             "puntaje": 0.9,
         }
     ]

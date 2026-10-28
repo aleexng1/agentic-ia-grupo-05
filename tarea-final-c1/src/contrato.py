@@ -42,8 +42,10 @@ class Gasto(TypedDict):
     glosa: str  # descripción escrita por el trabajador
     politica_declarada: str  # política que eligió el trabajador
     categoria_declarada: str  # categoría que eligió el trabajador
-    unidad_negocio: str
-    patente: NotRequired[str | None]  # opcional: solo gastos de vehículos
+    unidad_negocio: str  # código de la unidad: TIE, CD, TMA, CAF, OYM o ADM
+    patente: NotRequired[str | None]  # opcional: obligatoria en P04 y P05
+    numero_ot: NotRequired[str | None]  # opcional: número de orden de trabajo, obligatorio en P06
+    vb_gerente_general: NotRequired[bool]  # opcional: visto bueno del Gerente General (RG-03)
     id_fondo: str  # fondo por rendir del que sale el dinero
 
 
