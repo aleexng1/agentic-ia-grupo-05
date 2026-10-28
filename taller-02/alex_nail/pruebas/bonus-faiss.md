@@ -6,7 +6,7 @@ Capturas: `capturas/bonus_redis_qNN.txt` y `capturas/bonus_faiss_qNN.txt` (q01 �
 
 > **Nota importante:** la batería de la Etapa 4 se corrió sin `reformular`. Aquí las dos bases usan el agente actual, así que cada pregunta pasa primero por `reformular`, que llama al modelo y no siempre reescribe igual. En 3 de las 12 preguntas (1, 2 y F) la reescritura fue idéntica en las dos corridas, y ahí el resultado fue **idéntico** (mismo top-3, mismos parecidos). En las otras 9 la reescritura cambió entre corridas, y las diferencias de esas filas se deben a eso, no a la base. Van marcadas con ⚠.
 
-## Resultados por pregunta
+## Comparación con el agente completo (cada base reformuló por su cuenta)
 
 | # | Tipo | Pregunta reescrita · Redis | Pregunta reescrita · FAISS | Mejor parecido R / F | Ruta R / F | ¿Mismo top-3? | Página citada R / F |
 |---|---|---|---|---|---|---|---|
@@ -67,9 +67,41 @@ Rango sin falsos positivos ni falsos negativos, recalculado para cada base (a 3 
 - **Comparado con la Etapa 4,** con `reformular` las "dentro" subieron (la más baja pasó de 0,737 a ~0,755) y la F subió poco (de 0,648 a 0,652). El rango quedó algo más ancho.
 - **Ambiguas, aparte:** la 9 (0,748 / 0,751) y la 10 (0,789 / 0,766) siguen sobre 0,68 en las dos bases y van a `responder`. En ambas el modelo dijo que el contexto no alcanza, sin citar. La 9 queda dentro del rango sin errores. Un UMBRAL entre 0,749 y 0,751 la mandaría a `no_se` en Redis (0,748) y a `responder` en FAISS (0,751), por cómo `reformular` la reescribió en cada corrida, no por la base.
 
+## Comparación limpia (misma pregunta reescrita en las dos bases)
+
+**Por qué:** un compañero observó que en la tabla anterior 9 de 12 preguntas se reformularon distinto en cada base, así que esas filas no aíslan el efecto del motor.
+
+**Cómo:** se tomaron las 12 preguntas reescritas de la corrida en Redis (`capturas/bonus_redis_qNN.txt`) y se buscó **exactamente ese texto** con `buscar_fragmentos()` de `src/rag/tools.py`, primero con `VECTOR_STORE=redis` y luego con `VECTOR_STORE=faiss`. Mismo índice 800/120, mismos fragmentos, mismos embeddings desde la caché (las llamadas a Gemini quedaron bloqueadas durante la prueba). Ruta calculada con UMBRAL 0,68. Salida completa en `capturas/bonus_comparacion_limpia.txt`.
+
+| # | Tipo | Pregunta reescrita usada | Mejor parecido Redis | Mejor parecido FAISS | ¿Mismo top-3 en el mismo orden? | Ruta Redis | Ruta FAISS |
+|---|---|---|---|---|---|---|---|
+| 1 | dentro | Año de celebración de la primera conferencia dedicada exclusivamente al humor computacional | 0,775239 | 0,775239 | Sí | responder | responder |
+| 2 | dentro | Tres teorías principales del humor | 0,794506 | 0,794506 | Sí | responder | responder |
+| 3 | dentro | factores de uso de la teoría de la incongruencia en detección automática de humor | 0,803817 | 0,803817 | Sí | responder | responder |
+| 4 | dentro | Valor de K y propósito de su uso en el algoritmo KNN por Liu et al. (2018a) | 0,783256 | 0,783256 | Sí | responder | responder |
+| 5 | dentro | Interpretación de la entropía en el modelo bayesiano de Kao et al. (2016) | 0,755718 | 0,755718 | Sí | responder | responder |
+| 6 | fuera | Cotización actual del bitcoin | 0,596985 | 0,596985 | Sí | no_se | no_se |
+| 7 | fuera | Metodología de cálculo del Impuesto al Valor Agregado (IVA) en facturación en Chile | 0,601759 | 0,601759 | Sí | no_se | no_se |
+| 8 | fuera | Selección ganadora de la Copa Mundial de Fútbol de la FIFA vigente | 0,559441 | 0,559441 | Sí | no_se | no_se |
+| 9 | ambigua | Evaluación comparativa del rendimiento de BERT y GPT en la detección de humor en español | 0,748196 | 0,748196 | Sí | responder | responder |
+| 10 | ambigua | Tasa de precisión de los modelos transformer en la detección de humor | 0,789386 | 0,789386 | Sí | responder | responder |
+| S | dentro | Año de celebración del primer congreso especializado en humor por computadora | 0,761822 | 0,761822 | Sí | responder | responder |
+| F | fuera | Configuración de índice HNSW con búsqueda k-NN y vectores en Redis | 0,652146 | 0,652146 | Sí | no_se | no_se |
+
+**Resumen:** en **12 de 12** preguntas coinciden el parecido (a 3 decimales, y de hecho a 6), el top-3 en el mismo orden (mismas páginas y mismos fragmentos) y la ruta. La única diferencia está en el sexto decimal del tercer fragmento de la pregunta 10 (0,751384 en Redis frente a 0,751383 en FAISS): es redondeo de la aritmética de punto flotante de cada motor y no cambia ni el orden ni la ruta. Con la pregunta fija, el motor no cambia el resultado; las diferencias de la tabla anterior venían de `reformular`.
+
+**Evidencia de que la base cambió:**
+- En `capturas/bonus_comparacion_limpia.txt`, cada búsqueda registra el store que se abrió de verdad: "store usado: RedisVectorStore (índice 'AlexNail')" con `VECTOR_STORE=redis` y "store usado: FAISS (índice 'AlexNail')" con `VECTOR_STORE=faiss`.
+- Con el agente completo, la línea nueva de `--saltos` (tomada del store que el agente abrió durante la corrida):
+  - `capturas/bonus_saltos_redis_q01.txt`: "Base: redis · índice: AlexNail"
+  - `capturas/bonus_saltos_faiss_q01.txt`: "Base: faiss · índice: AlexNail"
+  - `capturas/bonus_saltos_redis_qF.txt`: "Base: redis · índice: AlexNail"
+  - `capturas/bonus_saltos_faiss_qF.txt`: "Base: faiss · índice: AlexNail"
+- En esas cuatro corridas, `reformular` reescribió igual en las dos bases, y la pregunta 1 dio 0,775 en ambas (ruta responder, cita p. 6) y la F 0,652 en ambas (ruta no_se).
+
 ## Párrafo 1
 
-Repetí la batería de 12 preguntas en Redis y en FAISS con el agente final (incluye reformular). Cuando la pregunta reescrita fue la misma (preguntas 1, 2 y F), las dos bases dieron exactamente el mismo parecido, el mismo top-3 y la misma página citada. Las demás diferencias vienen de que reformular reescribió distinto en cada corrida, no de la base. Con UMBRAL 0,68 ninguna pregunta cambió de ruta, así que la decisión del umbral se mantiene. Lo que sí aprendí es que reformular le quita repetibilidad al agente: la pregunta 9 quedó en 0,748 en una base y 0,751 en la otra. Lo confirma la Etapa 3: sin reformular de por medio, las configuraciones 400/50 y 1200/200 dieron el mismo top-3, en el mismo orden y con el mismo parecido (0,782) en Redis y en FAISS.
+Repetí la batería de 12 preguntas en Redis y en FAISS con el agente final (incluye reformular). Cuando la pregunta reescrita fue la misma (preguntas 1, 2 y F), las dos bases dieron exactamente el mismo parecido, el mismo top-3 y la misma página citada. Las demás diferencias vienen de que reformular reescribió distinto en cada corrida, no de la base. Con UMBRAL 0,68 ninguna pregunta cambió de ruta, así que la decisión del umbral se mantiene. Lo que sí aprendí es que reformular le quita repetibilidad al agente: la pregunta 9 quedó en 0,748 en una base y 0,751 en la otra. Lo confirma la Etapa 3: sin reformular de por medio, las configuraciones 400/50 y 1200/200 dieron el mismo top-3, en el mismo orden y con el mismo parecido (0,782) en Redis y en FAISS. Para aislar el motor, repetí la búsqueda con exactamente la misma pregunta reescrita en las dos bases: en 12 de 12 preguntas coincidieron el parecido, el top-3 y la ruta.
 
 ## Párrafo 2
 

@@ -18,6 +18,27 @@ def cargar_agente(nombre: str):
     return importlib.import_module(f"src.{nombre}.graph")
 
 
+def anotar_bases(nombre: str) -> list:
+    """Envuelve get_vector_store del agente (si la usa) para registrar qué store se abrió de verdad en la corrida."""
+    try:
+        tools = importlib.import_module(f"src.{nombre}.tools")
+    except ModuleNotFoundError:
+        return []
+    abrir = getattr(tools, "get_vector_store", None)
+    usadas = []
+    if abrir is not None:
+        def abrir_y_anotar(prefijo):
+            store = abrir(prefijo)
+            usadas.append((type(store).__name__, prefijo))
+            return store
+        tools.get_vector_store = abrir_y_anotar
+    return usadas
+
+
+def nombre_base(clase: str) -> str:
+    return "redis" if "redis" in clase.lower() else "faiss" if "faiss" in clase.lower() else clase
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description="Ejecuta un agente LangGraph del proyecto")
     parser.add_argument("agente", help="nombre del agente (carpeta en src/)")
@@ -36,6 +57,7 @@ def main() -> int:
     if not args.pregunta:
         parser.error("falta la pregunta (o usa --diagrama)")
 
+    bases = anotar_bases(args.agente) if args.saltos else []
     config = {"configurable": {"thread_id": args.hilo}}
     ruta = []
     try:
@@ -53,6 +75,8 @@ def main() -> int:
     if args.saltos:
         print("\n--- saltos ---")
         print("Ruta: " + " → ".join(ruta))
+        for clase, prefijo in dict.fromkeys(bases):
+            print(f"Base: {nombre_base(clase)} · índice: {prefijo}")
         if hasattr(modulo, "detalle_saltos"):
             for linea in modulo.detalle_saltos(estado):
                 print(linea)

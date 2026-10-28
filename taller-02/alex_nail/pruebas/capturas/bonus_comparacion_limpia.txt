@@ -1,0 +1,139 @@
+Comparación limpia: la MISMA pregunta reescrita (la de la corrida en Redis del bonus) buscada en Redis y en FAISS.
+buscar_fragmentos() de src/rag/tools.py · 800/120 · TOP_K 3 · ruta con UMBRAL 0.68 · embeddings solo desde la caché (Gemini bloqueado).
+
+=== q01 (dentro) · pregunta reescrita usada: 'Año de celebración de la primera conferencia dedicada exclusivamente al humor computacional'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.775239 · ruta responder
+      1. p.6   0.775239  '1.3 Panorama del humor computacional y los criterios lingüís'
+      2. p.26  0.735479  '337–347). Springer. https://doi.org/10.1007/978-3-540-70939-'
+      3. p.25  0.724857  '565–576). Springer, Cham. Gladence, L. M., Karthi, M., & Anu'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.775239 · ruta responder
+      1. p.6   0.775239  '1.3 Panorama del humor computacional y los criterios lingüís'
+      2. p.26  0.735479  '337–347). Springer. https://doi.org/10.1007/978-3-540-70939-'
+      3. p.25  0.724857  '565–576). Springer, Cham. Gladence, L. M., Karthi, M., & Anu'
+
+=== q02 (dentro) · pregunta reescrita usada: 'Tres teorías principales del humor'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.794506 · ruta responder
+      1. p.4   0.794506  'Existen también otras teorías, como la funcionalista o la in'
+      2. p.3   0.785707  'patrones generales que se han producido en la evolución del '
+      3. p.4   0.777185  'El humor, según esta obra actúa de válvula de escape para re'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.794506 · ruta responder
+      1. p.4   0.794506  'Existen también otras teorías, como la funcionalista o la in'
+      2. p.3   0.785707  'patrones generales que se han producido en la evolución del '
+      3. p.4   0.777185  'El humor, según esta obra actúa de válvula de escape para re'
+
+=== q03 (dentro) · pregunta reescrita usada: 'factores de uso de la teoría de la incongruencia en detección automática de humor'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.803817 · ruta responder
+      1. p.2   0.803817  '1. Introducción El humor forma parte de nuestra vida cotidia'
+      2. p.4   0.798628  'El humor, según esta obra actúa de válvula de escape para re'
+      3. p.23  0.797428  'establecer las desviaciones socioculturales. Para los rasgos'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.803817 · ruta responder
+      1. p.2   0.803817  '1. Introducción El humor forma parte de nuestra vida cotidia'
+      2. p.4   0.798628  'El humor, según esta obra actúa de válvula de escape para re'
+      3. p.23  0.797428  'establecer las desviaciones socioculturales. Para los rasgos'
+
+=== q04 (dentro) · pregunta reescrita usada: 'Valor de K y propósito de su uso en el algoritmo KNN por Liu et al. (2018a)'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.783256 · ruta responder
+      1. p.19  0.783256  'Figura 4. La distancia entre el punto desconocido y los más '
+      2. p.19  0.769539  '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un '
+      3. p.20  0.738852  'En otro trabajo de Liu et al. (2018b), KNN fue utilizado par'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.783256 · ruta responder
+      1. p.19  0.783256  'Figura 4. La distancia entre el punto desconocido y los más '
+      2. p.19  0.769539  '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un '
+      3. p.20  0.738852  'En otro trabajo de Liu et al. (2018b), KNN fue utilizado par'
+
+=== q05 (dentro) · pregunta reescrita usada: 'Interpretación de la entropía en el modelo bayesiano de Kao et al. (2016)'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.755718 · ruta responder
+      1. p.15  0.755718  'Figura 3. Cada token está asociado bien a la negatividad, bi'
+      2. p.16  0.691893  'por lo tanto, el modelo mide su distinción calculando la dis'
+      3. p.17  0.689685  'predicción. El modelo bayesiano no tiene el mejor rendimient'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.755718 · ruta responder
+      1. p.15  0.755718  'Figura 3. Cada token está asociado bien a la negatividad, bi'
+      2. p.16  0.691893  'por lo tanto, el modelo mide su distinción calculando la dis'
+      3. p.17  0.689685  'predicción. El modelo bayesiano no tiene el mejor rendimient'
+
+=== q06 (fuera) · pregunta reescrita usada: 'Cotización actual del bitcoin'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.596985 · ruta no_se
+      1. p.22  0.596985  'El modelo ALBERT codificó el contexto junto con el remate pa'
+      2. p.29  0.595506  '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to '
+      3. p.11  0.591043  'Sin embargo, gracias a la creación de técnicas como Word2Vec'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.596985 · ruta no_se
+      1. p.22  0.596985  'El modelo ALBERT codificó el contexto junto con el remate pa'
+      2. p.29  0.595506  '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to '
+      3. p.11  0.591043  'Sin embargo, gracias a la creación de técnicas como Word2Vec'
+
+=== q07 (fuera) · pregunta reescrita usada: 'Metodología de cálculo del Impuesto al Valor Agregado (IVA) en facturación en Chile'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.601759 · ruta no_se
+      1. p.2   0.601759  'Además, se explicarán los métodos aplicados a otros rasgos c'
+      2. p.9   0.593145  'Como nota final, es interesante señalar que los algoritmos t'
+      3. p.7   0.588279  '2. Los enfoques algorítmicos Dependiendo del campo en el que'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.601759 · ruta no_se
+      1. p.2   0.601759  'Además, se explicarán los métodos aplicados a otros rasgos c'
+      2. p.9   0.593145  'Como nota final, es interesante señalar que los algoritmos t'
+      3. p.7   0.588279  '2. Los enfoques algorítmicos Dependiendo del campo en el que'
+
+=== q08 (fuera) · pregunta reescrita usada: 'Selección ganadora de la Copa Mundial de Fútbol de la FIFA vigente'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.559441 · ruta no_se
+      1. p.22  0.559441  'El modelo ALBERT codificó el contexto junto con el remate pa'
+      2. p.15  0.556059  'Hay algunas palabras específicas que apoyan cada sentido, 16'
+      3. p.9   0.547164  'Algunos recurren a un etiquetado manual, otros a crowdsourci'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.559441 · ruta no_se
+      1. p.22  0.559441  'El modelo ALBERT codificó el contexto junto con el remate pa'
+      2. p.15  0.556059  'Hay algunas palabras específicas que apoyan cada sentido, 16'
+      3. p.9   0.547164  'Algunos recurren a un etiquetado manual, otros a crowdsourci'
+
+=== q09 (ambigua) · pregunta reescrita usada: 'Evaluación comparativa del rendimiento de BERT y GPT en la detección de humor en español'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.748196 · ruta responder
+      1. p.24  0.748196  'Por su parte, la supremacía de los transformers en la detecc'
+      2. p.1   0.745941  'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaj'
+      3. p.26  0.739044  '2: Short Papers) (pp. 586–591). Lopatovska, I. (2020). Class'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.748196 · ruta responder
+      1. p.24  0.748196  'Por su parte, la supremacía de los transformers en la detecc'
+      2. p.1   0.745941  'Palabras Clave: Humor, ambigüedad, incongruencia, aprendizaj'
+      3. p.26  0.739044  '2: Short Papers) (pp. 586–591). Lopatovska, I. (2020). Class'
+
+=== q10 (ambigua) · pregunta reescrita usada: 'Tasa de precisión de los modelos transformer en la detección de humor'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.789386 · ruta responder
+      1. p.24  0.789386  'Por su parte, la supremacía de los transformers en la detecc'
+      2. p.22  0.761530  'Lo que destaca en los transformers es la escala masiva de da'
+      3. p.22  0.751384  'Además, aplicaron el mecanismo de atención a las CNN. Estas '
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.789386 · ruta responder
+      1. p.24  0.789386  'Por su parte, la supremacía de los transformers en la detecc'
+      2. p.22  0.761530  'Lo que destaca en los transformers es la escala masiva de da'
+      3. p.22  0.751383  'Además, aplicaron el mecanismo de atención a las CNN. Estas '
+
+=== qS (dentro) · pregunta reescrita usada: 'Año de celebración del primer congreso especializado en humor por computadora'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.761822 · ruta responder
+      1. p.6   0.761822  '1.3 Panorama del humor computacional y los criterios lingüís'
+      2. p.26  0.724172  '337–347). Springer. https://doi.org/10.1007/978-3-540-70939-'
+      3. p.25  0.715617  '565–576). Springer, Cham. Gladence, L. M., Karthi, M., & Anu'
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.761822 · ruta responder
+      1. p.6   0.761822  '1.3 Panorama del humor computacional y los criterios lingüís'
+      2. p.26  0.724172  '337–347). Springer. https://doi.org/10.1007/978-3-540-70939-'
+      3. p.25  0.715617  '565–576). Springer, Cham. Gladence, L. M., Karthi, M., & Anu'
+
+=== qF (fuera) · pregunta reescrita usada: 'Configuración de índice HNSW con búsqueda k-NN y vectores en Redis'
+  [redis] VECTOR_STORE=redis → store usado: RedisVectorStore (índice 'AlexNail') · mejor parecido 0.652146 · ruta no_se
+      1. p.29  0.652146  '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to '
+      2. p.19  0.646264  'Figura 4. La distancia entre el punto desconocido y los más '
+      3. p.19  0.641482  '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un '
+  [faiss] VECTOR_STORE=faiss → store usado: FAISS (índice 'AlexNail') · mejor parecido 0.652146 · ruta no_se
+      1. p.29  0.652146  '(2023, 24 de mayo). Naive Bayes: A Bag of Words approach to '
+      2. p.19  0.646264  'Figura 4. La distancia entre el punto desconocido y los más '
+      3. p.19  0.641482  '2.2.5 K Nearest Neighbor (KNN) K vecinos más próximos es un '
+
+=== Resumen
+#    tipo          Redis     FAISS  ¿mismo parecido (3 dec.)?  ¿mismo top-3 y orden?  ruta R / F
+q01  dentro     0.775239  0.775239  sí                         sí                     responder / responder
+q02  dentro     0.794506  0.794506  sí                         sí                     responder / responder
+q03  dentro     0.803817  0.803817  sí                         sí                     responder / responder
+q04  dentro     0.783256  0.783256  sí                         sí                     responder / responder
+q05  dentro     0.755718  0.755718  sí                         sí                     responder / responder
+q06  fuera      0.596985  0.596985  sí                         sí                     no_se / no_se
+q07  fuera      0.601759  0.601759  sí                         sí                     no_se / no_se
+q08  fuera      0.559441  0.559441  sí                         sí                     no_se / no_se
+q09  ambigua    0.748196  0.748196  sí                         sí                     responder / responder
+q10  ambigua    0.789386  0.789386  sí                         sí                     responder / responder
+qS   dentro     0.761822  0.761822  sí                         sí                     responder / responder
+qF   fuera      0.652146  0.652146  sí                         sí                     no_se / no_se
+
+Coinciden parecido (3 decimales), top-3 en el mismo orden y ruta en 12 de 12 preguntas.
