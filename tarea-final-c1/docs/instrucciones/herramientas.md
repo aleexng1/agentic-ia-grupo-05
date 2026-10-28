@@ -1,5 +1,7 @@
 # Guía del rol: Herramientas y estado
 
+Responsable: Sebastián Mardones
+
 > Rama de trabajo: **`tf/herramientas`** · Reglas generales: [AGENTS.md](../../AGENTS.md)
 
 ## Tu rol en una frase

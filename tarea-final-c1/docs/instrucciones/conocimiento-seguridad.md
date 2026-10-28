@@ -1,5 +1,7 @@
 # Guía del rol: Conocimiento y seguridad
 
+Responsable: Eduardo Basaure
+
 > Rama de trabajo: **`tf/conocimiento-seguridad`** · Reglas generales: [AGENTS.md](../../AGENTS.md)
 
 ## Tu rol en una frase

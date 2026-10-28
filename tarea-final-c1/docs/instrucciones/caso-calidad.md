@@ -1,5 +1,7 @@
 # Guía del rol: Caso y calidad
 
+Responsable: Alex Nail
+
 > Rama de trabajo: **`tf/caso-calidad`** · Reglas generales: [AGENTS.md](../../AGENTS.md)
 
 ## Tu rol en una frase

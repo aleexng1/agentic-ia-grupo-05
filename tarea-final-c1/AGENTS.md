@@ -16,10 +16,10 @@ explicando la regla aplicada. Hecho con LangGraph (ciclo ReAct) y Gemini. Todo d
 
 | Rol | Persona | Rama |
 |---|---|---|
-| Caso y calidad | alex | `tf/caso-calidad` |
-| Núcleo (ReAct) | por definir | `tf/nucleo` |
-| Herramientas y estado | por definir | `tf/herramientas` |
-| Conocimiento y seguridad | por definir | `tf/conocimiento-seguridad` |
+| Caso y calidad | Alex Nail | `tf/caso-calidad` |
+| Núcleo (ReAct) | Matías Muñoz | `tf/nucleo` |
+| Herramientas y estado | Sebastián Mardones | `tf/herramientas` |
+| Conocimiento y seguridad | Eduardo Basaure | `tf/conocimiento-seguridad` |
 
 Para saber tu rol, mira la rama actual (`git branch --show-current`) y búscala en esta tabla.
 Guía de cada rol: `docs/instrucciones/<rol>.md`.
@@ -28,10 +28,10 @@ Guía de cada rol: `docs/instrucciones/<rol>.md`.
 
 | Dueño | Archivos |
 |---|---|
-| Caso y calidad | `datos/`, `pruebas/`, `README.md`, `docs/` |
-| Núcleo | `src/grafo.py`, `src/config.py`, `agente.ipynb` |
-| Herramientas y estado | `src/herramientas.py`, `src/memoria.py`, `src/registro.py` |
-| Conocimiento y seguridad | `src/rag.py`, `src/seguridad.py`, `scripts/cargar_indice.py` |
+| Caso y calidad (Alex Nail) | `datos/`, `pruebas/`, `README.md`, `docs/` |
+| Núcleo (Matías Muñoz) | `src/grafo.py`, `src/config.py`, `agente.ipynb` |
+| Herramientas y estado (Sebastián Mardones) | `src/herramientas.py`, `src/memoria.py`, `src/registro.py` |
+| Conocimiento y seguridad (Eduardo Basaure) | `src/rag.py`, `src/seguridad.py`, `scripts/cargar_indice.py` |
 | COMPARTIDOS (solo con acuerdo del grupo) | `src/contrato.py`, `src/__init__.py`, `AGENTS.md`, `CLAUDE.md`, `requirements.txt`, `.env.example`, `verificar.py` |
 
 Fuera de `tarea-final-c1/`: los talleres anteriores (`taller-01/`, `taller-02/`, ...) no se tocan.

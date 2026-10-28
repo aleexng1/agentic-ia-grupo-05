@@ -1,5 +1,7 @@
 # Guía del rol: Núcleo (ReAct)
 
+Responsable: Matías Muñoz
+
 > Rama de trabajo: **`tf/nucleo`** · Reglas generales: [AGENTS.md](../../AGENTS.md)
 
 ## Tu rol en una frase
