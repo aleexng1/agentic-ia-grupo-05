@@ -31,17 +31,22 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 ## Qué entregas y cómo sabes que terminaste
 
 - [ ] `validar_gasto(gasto, politica, categoria)` revisa con **reglas exactas** (código, no LLM):
-  - [ ] tipo de documento permitido (incluidas excepciones y la política solo con facturas);
-  - [ ] plazo de rendición (días entre `fecha_gasto` y `fecha_rendicion`);
-  - [ ] campos obligatorios (patente en Vehículos Propios);
+  - [ ] tipo de documento permitido (RG-01: voucher solo en taxi, apps de transporte y bus
+        interurbano, y puede venir como "Otros"; P07 solo factura);
+  - [ ] plazo de rendición (RG-03: mismo mes o hasta el día 10 del mes siguiente; con visto bueno
+        del Gerente General, `vb_gerente_general`, queda observado en vez de rechazado);
+  - [ ] campos obligatorios (RG-10: patente en P04 y P05, con un código de la tabla de equipos en
+        P05; número de OT en P06);
   - [ ] exclusividad de unidad de negocio;
   - [ ] devuelve la `cuenta` correcta según la tabla de la política.
   Las reglas y cuentas se **leen** de `datos/politica_ficticia.md` (no se copian a mano en el código).
+  Nota de la política v1.1: los topes de P02, P03 y P08 son **por documento** y distintos por
+  categoría (RG-05).
 - [ ] Cada incumplimiento dice qué `regla` falló y un `detalle` entendible.
 - [ ] **Memoria del fondo**: `fondo_inicial` entrega un fondo ficticio; `aplicar_veredicto` descuenta
       el monto si se aprueba y anota el id (sin modificar el fondo recibido); `resumen_fondo` lo
       describe. Demostrar en el notebook (sección 7) que un gasto posterior se decide distinto por
-      el saldo (ej. se rechaza o se observa porque ya no alcanza).
+      el saldo (según RG-08, se observa porque ya no alcanza).
 - [ ] **Registro SQLite** (`registro_veredictos.db`, Git lo ignora): `registrar_veredicto` guarda y
       devuelve `antes`/`despues`; `reiniciar_registro` deja la base vacía sin borrar nada más.
       Mostrarlo en la sección 8 del notebook.
@@ -49,8 +54,8 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 
 ## De quién dependes y quién depende de ti
 
-- **Dependes de:** Caso y calidad (la política final con sus reglas). Mientras tanto usa el
-  borrador de `datos/politica_ficticia.md`: el formato de las tablas no cambia.
+- **Dependes de:** Caso y calidad (la política con sus reglas). La versión vigente es la **v1.1**
+  de `datos/politica_ficticia.md`.
 - **Dependen de ti:** Núcleo (el agente llama a `validar_gasto` y usa la memoria y el registro) y
   Caso y calidad (el golden set mide tus reglas).
 
@@ -133,7 +138,7 @@ Abre OpenCode dentro de `tarea-final-c1`, en tu rama, y pega esto:
 ```text
 Lee AGENTS.md y docs/instrucciones/herramientas.md. Soy del rol Herramientas y estado, en la
 rama tf/herramientas. Quiero reemplazar el stub de validar_gasto en src/herramientas.py por
-reglas exactas leídas de datos/politica_ficticia.md (documento permitido, plazo, patente,
+reglas exactas leídas de datos/politica_ficticia.md (documento permitido, plazo, campos obligatorios,
 exclusividad de unidad) y que devuelva la cuenta según la tabla. Primero explícame en simple
 cómo leerías las reglas y las tablas del archivo, y espera mi visto bueno. No cambies la firma
 ni los tipos de src/contrato.py. Solo toca mis archivos. Al final corre python verificar.py.

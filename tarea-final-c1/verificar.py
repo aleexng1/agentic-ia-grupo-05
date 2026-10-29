@@ -85,7 +85,7 @@ GASTO_EJEMPLO = {
     "patente": None,
     "numero_ot": None,
     "vb_gerente_general": False,
-    "id_fondo": "FR-01",
+    "id_fondo": "FR-001",
 }
 
 FRAGMENTO_EJEMPLO = {
@@ -150,6 +150,15 @@ HERRAMIENTAS = {("herramientas", "validar_gasto"), ("rag", "buscar_politica")}
 # Campos del Gasto que pueden faltar (NotRequired en el contrato).
 CAMPOS_OPCIONALES_GASTO = {"patente", "numero_ot", "vb_gerente_general"}
 
+# Formato del golden set (ver pruebas/README.md).
+CAMPOS_CASO_GOLDEN = {"id", "grupo", "origen", "descripcion", "componentes", "turnos", "criterio"}
+GRUPOS_GOLDEN = ("A-limpio", "B-mal-clasificado", "C-regla", "D-fondo", "E-seguridad", "F-conversacion")
+ORIGENES_GOLDEN = ("patron_real", "mutacion", "diseñado")
+LISTAS_ESPERADO = (
+    "reglas", "debe_contener", "debe_contener_alguno",
+    "herramientas_esperadas", "herramientas_prohibidas", "acciones_prohibidas",
+)
+
 
 # ---------------------------------------------------------------------------
 # Ayudas para revisar formatos
@@ -205,24 +214,30 @@ def leer_politica() -> dict:
       y de sus tablas Grupo / Categoría / Cuenta.
     - "unidades": códigos de la tabla de unidades de negocio (TIE, CD, ...).
     - "secciones": todos los títulos '## ...' (sin el código Pxx), por ejemplo "Reglas generales".
+    - "codigos": {código de política: nombre}, por ejemplo {"P01": "Vehículos Propios"}.
+    - "reglas": códigos de las reglas generales escritas como '**RG-01 — ...'.
     """
-    politicas, unidades, secciones = {}, set(), set()
+    texto = RUTA_POLITICA.read_text(encoding="utf-8")
+    politicas, unidades, secciones, codigos = {}, set(), set(), {}
+    reglas = set(re.findall(r"^\*\*(RG-\d{2})", texto, flags=re.MULTILINE))
     seccion_actual, en_tabla_unidades = None, False
-    for linea in RUTA_POLITICA.read_text(encoding="utf-8").splitlines():
+    for linea in texto.splitlines():
         if linea.startswith("#"):
             # Un título nuevo: vemos si es una política, la tabla de unidades u otra sección.
             titulo = re.match(r"^## (?:P\d{2} — )?(.+)$", linea)
             if titulo:
                 secciones.add(titulo.group(1).strip())
-            politica = re.match(r"^## P\d{2} — (.+)$", linea)
-            seccion_actual = politicas.setdefault(politica.group(1).strip(), {}) if politica else None
+            politica = re.match(r"^## (P\d{2}) — (.+)$", linea)
+            if politica:
+                codigos[politica.group(1)] = politica.group(2).strip()
+            seccion_actual = politicas.setdefault(politica.group(2).strip(), {}) if politica else None
             en_tabla_unidades = linea.startswith("### Unidades de negocio")
         elif fila := re.match(r"^\|[^|]+\|([^|]+)\|\s*(CTA-\d{4})\s*\|$", linea):
             if seccion_actual is not None:
                 seccion_actual[fila.group(1).strip()] = fila.group(2)
         elif en_tabla_unidades and (fila := re.match(r"^\|\s*([A-Z]{2,4})\s*\|", linea)):
             unidades.add(fila.group(1))
-    return {"politicas": politicas, "unidades": unidades, "secciones": secciones}
+    return {"politicas": politicas, "unidades": unidades, "secciones": secciones, "codigos": codigos, "reglas": reglas}
 
 
 def revisar_politica_categoria(politica: str, categoria: str, donde: str) -> None:
@@ -233,6 +248,36 @@ def revisar_politica_categoria(politica: str, categoria: str, donde: str) -> Non
         categoria in politicas[politica],
         f"{donde}: '{categoria}' no es una categoría de '{politica}'. Válidas: {sorted(politicas[politica])}",
     )
+
+
+def revisar_turno_golden(turno: dict, donde: str) -> None:
+    """Revisa un turno del golden set: gasto válido, decisión permitida y nombres que existen."""
+    exigir("mensaje" in turno or "gasto" in turno, f"{donde}: el turno necesita 'mensaje' o 'gasto'")
+    esperado = turno.get("esperado")
+    exigir(isinstance(esperado, dict), f"{donde}: falta 'esperado'")
+    if "gasto" in turno:
+        revisar_gasto(turno["gasto"], donde)
+        decisiones = modulos["contrato"].DECISIONES
+        exigir(esperado.get("decision") in decisiones, f"{donde}: decision '{esperado.get('decision')}' no es una de {decisiones}")
+    if "politica" in esperado:
+        # En "esperado" la política va con su código (P02) y debe calzar con categoría y cuenta.
+        codigos = leer_politica()["codigos"]
+        exigir(esperado["politica"] in codigos, f"{donde}: política '{esperado['politica']}' no es un código {sorted(codigos)}")
+        nombre = codigos[esperado["politica"]]
+        revisar_politica_categoria(nombre, esperado.get("categoria"), f"{donde} (esperado)")
+        cuenta = leer_politica()["politicas"][nombre][esperado["categoria"]]
+        exigir(esperado.get("cuenta") == cuenta, f"{donde}: la cuenta de '{esperado['categoria']}' es {cuenta}, no {esperado.get('cuenta')}")
+    for lista in LISTAS_ESPERADO:
+        exigir(isinstance(esperado.get(lista, []), list), f"{donde}: '{lista}' debe ser una lista")
+    # Reglas: RG-xx de las reglas generales o Pxx (regla propia de una política).
+    validas = leer_politica()["reglas"] | set(leer_politica()["codigos"])
+    for regla in esperado.get("reglas", []):
+        exigir(regla in validas, f"{donde}: la regla '{regla}' no existe en la política")
+    # Herramientas: deben ser nombres de funciones acordadas en src/ (ver FIRMAS).
+    conocidas = {nombre for _, nombre in FIRMAS}
+    for lista in ("herramientas_esperadas", "herramientas_prohibidas"):
+        for herramienta in esperado.get(lista, []):
+            exigir(herramienta in conocidas, f"{donde}: '{herramienta}' no es una función de src/")
 
 
 def cuentas_validas() -> set:
@@ -412,9 +457,9 @@ def bloque_4_llamadas() -> None:
     punto("buscar_politica devuelve Fragmentos", buscar, opcional_sin_servicios=True)
 
     def fondo():
-        inicial = memoria.fondo_inicial("FR-01")
+        inicial = memoria.fondo_inicial("FR-001")
         revisar_claves(inicial, "EstadoFondo")
-        exigir(inicial["id_fondo"] == "FR-01", "el fondo devuelto debe tener el id pedido")
+        exigir(inicial["id_fondo"] == "FR-001", "el fondo devuelto debe tener el id pedido")
         copia = copy.deepcopy(inicial)
         nuevo = memoria.aplicar_veredicto(inicial, GASTO_EJEMPLO, VEREDICTO_EJEMPLO)
         revisar_claves(nuevo, "EstadoFondo")
@@ -492,24 +537,25 @@ def bloque_5_datos() -> None:
     punto("datos/rendiciones_prueba.csv", rendiciones)
 
     def golden():
+        # Formato v1.0 (ver pruebas/README.md): cada caso tiene uno o más turnos; cada turno trae
+        # un "esperado" y, si corresponde, un "mensaje" y/o un "gasto".
         datos = json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))
         exigir(isinstance(datos.get("version"), str), "falta el campo 'version'")
         casos = datos.get("casos")
         exigir(isinstance(casos, list) and casos, "falta la lista 'casos'")
         ids = [caso.get("id") for caso in casos]
         exigir(len(ids) == len(set(ids)), "hay ids de casos repetidos")
+        turnos = 0
         for caso in casos:
-            exigir(set(caso) >= {"id", "entrada", "esperado", "criterio"}, f"caso {caso.get('id')}: faltan campos")
-            revisar_gasto(caso["entrada"], f"caso {caso['id']}")
-            esperado = caso["esperado"]
-            exigir(
-                esperado.get("decision") in contrato.DECISIONES,
-                f"caso {caso['id']}: decision '{esperado.get('decision')}' no es una de {contrato.DECISIONES}",
-            )
-            for campo in ("politica", "categoria"):
-                exigir(isinstance(esperado.get(campo), str) and esperado[campo], f"caso {caso['id']}: falta {campo}")
-            revisar_politica_categoria(esperado["politica"], esperado["categoria"], f"caso {caso['id']} (esperado)")
-        return f"versión {datos['version']}, {len(casos)} casos"
+            faltan = CAMPOS_CASO_GOLDEN - set(caso)
+            exigir(not faltan, f"caso {caso.get('id')}: faltan los campos {sorted(faltan)}")
+            exigir(caso["grupo"] in GRUPOS_GOLDEN, f"caso {caso['id']}: grupo '{caso['grupo']}' no es uno de {GRUPOS_GOLDEN}")
+            exigir(caso["origen"] in ORIGENES_GOLDEN, f"caso {caso['id']}: origen '{caso['origen']}' no es uno de {ORIGENES_GOLDEN}")
+            exigir(isinstance(caso["turnos"], list) and caso["turnos"], f"caso {caso['id']}: 'turnos' debe ser una lista no vacía")
+            for numero, turno in enumerate(caso["turnos"], start=1):
+                revisar_turno_golden(turno, f"caso {caso['id']} turno {numero}")
+                turnos += 1
+        return f"versión {datos['version']}, {len(casos)} casos, {turnos} turnos"
 
     punto("pruebas/golden_set.json", golden)
 

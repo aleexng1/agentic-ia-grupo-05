@@ -6,7 +6,7 @@
 |---|---|
 | Empresa | Comercial Los Alerces SpA |
 | Código | POL-RG-01 |
-| Versión | 1.0 (2026-10) |
+| Versión | 1.1 (2026-10) |
 | Dueño | Gerencia de Administración y Finanzas |
 | Revisión inicial | Control de Gestión |
 
@@ -33,15 +33,15 @@ Al rendir, el colaborador debe elegir la **política** y la **categoría** de ca
 
 Estas reglas aplican a todas las políticas, además de las reglas propias de cada una.
 
-**RG-01 — Documentos válidos.** Solo se aceptan **boleta** o **factura**. Se acepta **voucher** únicamente en taxi, aplicaciones de transporte (tipo Uber) y bus interurbano. Un voucher de cualquier otro tipo de comercio no es válido.
+**RG-01 — Documentos válidos.** Solo se aceptan **boleta** o **factura**. Se acepta **voucher** únicamente en taxi, aplicaciones de transporte (tipo Uber) y bus interurbano. Un voucher de cualquier otro tipo de comercio no es válido. En algunos sistemas el voucher aparece como tipo de documento **"Otros"**; se trata igual que un voucher. Un gasto con un documento no válido (según esta regla o según los documentos que exige cada política) se **rechaza**.
 
-**RG-02 — Solo gastos laborales.** Se prohíbe rendir gastos personales: compras para uso propio, alcohol, regalos personales, multas de tránsito de vehículos personales o de arriendo, propinas sobre el 10%.
+**RG-02 — Solo gastos laborales.** Se prohíbe rendir gastos personales: compras para uso propio, alcohol, regalos personales, multas de tránsito de vehículos personales o de arriendo, propinas sobre el 10%. Un gasto personal se **rechaza**.
 
 **RG-03 — Plazo de rendición.** El gasto se rinde en el mismo mes en que se hizo o, como máximo, hasta el **día 10 del mes siguiente**. Fuera de ese plazo el gasto se **rechaza**, salvo que el informe incluya el visto bueno escrito del Gerente General; en ese caso queda **observado** para revisión.
 
 **RG-04 — Segregación de funciones.** Quien hizo el gasto nunca puede aprobar su propia rendición.
 
-**RG-05 — Topes.** Algunas categorías tienen un monto máximo. Si el gasto supera el tope, queda **observado** y el colaborador debe justificar el exceso.
+**RG-05 — Topes.** Algunas categorías tienen un monto máximo **por documento**. Si el monto por documento supera el tope, el gasto queda **observado** y el colaborador debe justificar el exceso.
 
 **RG-06 — Reclasificación de arriendo de autos livianos.** Si se arrienda un auto liviano (sedán, hatchback, station wagon o similar), el arriendo y **todos sus gastos asociados** (combustible, peajes, estacionamiento, transbordador) se rinden en la política **P01 Vehículos Propios**, aunque el viaje sea de trabajo. El arriendo de camionetas o furgones sí va en P02 o P03 según el viaje.
 
@@ -50,6 +50,8 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 **RG-08 — Fondos por rendir.** Un gasto pagado con un fondo por rendir no puede superar el saldo disponible del fondo. Si lo supera, queda **observado**.
 
 **RG-09 — Gasto mal clasificado.** Si el gasto es válido pero el colaborador eligió una política o categoría incorrecta, queda **observado** con la política, categoría y cuenta correctas sugeridas.
+
+**RG-10 — Campos obligatorios.** Si falta un campo obligatorio de la política (patente, número de OT) o su valor no es válido (por ejemplo, un código de grúa que no está en la tabla de equipos), el gasto queda **observado** hasta que se corrija.
 
 ---
 
@@ -87,7 +89,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
 **Campos obligatorios.** Ninguno adicional.
-**Topes.** Hotel u hostal: $65.000 por noche. Desayuno: $8.000. Almuerzo o cena: $15.000 cada uno, por persona.
+**Topes (por documento).** Desayuno: $10.000. Almuerzo: $20.000. Cena: $45.000. Hotel: $445.000. Hostal: $295.000.
 
 | Grupo | Categoría | Cuenta |
 |---|---|---|
@@ -118,7 +120,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
 **Campos obligatorios.** Ninguno adicional.
-**Topes.** Hotel u hostal: $80.000 por noche. Desayuno: $8.000. Almuerzo o cena: $18.000 cada uno, por persona.
+**Topes (por documento).** Desayuno: $20.000. Almuerzo: $45.000. Cena: $50.000. Hotel: $325.000. Hostal: $265.000.
 
 | Grupo | Categoría | Cuenta |
 |---|---|---|
@@ -252,7 +254,7 @@ Un código que no esté en esta tabla no es válido.
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura.
 **Campos obligatorios.** Ninguno adicional.
-**Topes.** Coffee break: $5.000 por persona. Cumpleaños o festividades: $10.000 por persona.
+**Topes (por documento).** Coffee break: $30.000. Cumpleaños: $50.000. Festividades: $110.000.
 
 | Grupo | Categoría | Cuenta |
 |---|---|---|
@@ -302,3 +304,12 @@ Un código que no esté en esta tabla no es válido.
 | Instalaciones | Materiales de mantención | CTA-6302 |
 | Instalaciones | Servicios menores de reparación | CTA-6302 |
 | Combustible | Combustible de generadores | CTA-6903 |
+
+---
+
+## Historial de cambios
+
+| Versión | Cambios |
+|---|---|
+| 1.0 | Versión inicial. |
+| 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
