@@ -28,11 +28,15 @@ Guía de cada rol: `docs/instrucciones/<rol>.md`.
 
 | Dueño | Archivos |
 |---|---|
-| Caso y calidad (Alex Nail) | `datos/`, `pruebas/`, `README.md`, `docs/` |
+| Caso y calidad (Alex Nail) | `datos/`, `pruebas/`, `README.md`, `docs/` (salvo `docs/prompts_desarrollo/`) |
 | Núcleo (Matías Muñoz) | `src/grafo.py`, `src/config.py`, `agente.ipynb` |
 | Herramientas y estado (Sebastián Mardones) | `src/herramientas.py`, `src/memoria.py`, `src/registro.py` |
 | Conocimiento y seguridad (Eduardo Basaure) | `src/rag.py`, `src/seguridad.py`, `scripts/cargar_indice.py` |
 | COMPARTIDOS (solo con acuerdo del grupo) | `src/contrato.py`, `src/__init__.py`, `AGENTS.md`, `CLAUDE.md`, `requirements.txt`, `.env.example`, `verificar.py` |
+
+**Excepción:** `docs/prompts_desarrollo/` es una carpeta compartida donde cada persona es dueña
+**solo de su archivo**: `caso-calidad.md` (Alex), `nucleo.md` (Matías), `herramientas.md`
+(Sebastián) y `conocimiento-seguridad.md` (Eduardo). `_plantilla.md` es COMPARTIDO.
 
 Fuera de `tarea-final-c1/`: los talleres anteriores (`taller-01/`, `taller-02/`, ...) no se tocan.
 `.gitattributes`, `.gitignore`, `.opencode/` y `.claude/` de la raíz también son COMPARTIDOS.
