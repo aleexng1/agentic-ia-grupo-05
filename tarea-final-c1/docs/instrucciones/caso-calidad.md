@@ -35,9 +35,9 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 - [ ] **Caso y criterio de éxito** escritos en `README.md` (y sección 1 del notebook): qué problema
       resuelve, para quién, y una meta medible (ej. "≥ 85 % de decisiones correctas en el golden set").
 - [ ] **Política ficticia completa** en `datos/politica_ficticia.md`, de **8 a 10 políticas**, cada
-      una con `## Política: <nombre>`, descripción y tabla Grupo / Categoría / Cuenta. Con "trampas":
-  - [ ] la misma categoría en varias políticas (ej. "Alimentación" en Viajes y en Representación);
-  - [ ] excepciones de documento (ej. peajes aceptan voucher);
+      una con `## P01 — <nombre>`, descripción y tabla Grupo / Categoría / Cuenta. Con "trampas":
+  - [ ] la misma categoría en varias políticas (ej. "Peajes" en P01, P02, P03 y P06);
+  - [ ] excepciones de documento (ej. voucher solo en taxi, apps de transporte y bus, RG-01);
   - [ ] una política que acepta **solo facturas**;
   - [ ] el arriendo de auto que se **reclasifica a Vehículos Propios**;
   - [ ] una política **exclusiva de una unidad de negocio**.
@@ -53,6 +53,17 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 
 Recuerda: `tipo_documento` solo puede ser `boleta`, `factura` o `voucher` (lo exige el contrato).
 Los casos de "documento no permitido" se arman con políticas que exigen un tipo específico.
+
+**Política vigente: v1.1** (`datos/politica_ficticia.md`). Lo que más cambia las decisiones:
+
+- **Plazo (RG-03):** se rinde en el mismo mes o hasta el **día 10 del mes siguiente**. Fuera de plazo
+  se rechaza; con visto bueno del Gerente General (`vb_gerente_general`) queda observado.
+- **Campos obligatorios (RG-10):** **patente** en P04 y P05 (en P05, un código de la tabla de
+  equipos) y **número de OT** en P06. Si falta o no es válido, queda observado.
+- **Topes (RG-05):** son **por documento** y distintos por categoría (P02, P03 y P08). Si se
+  superan, queda observado.
+- **Documentos (RG-01):** boleta o factura; voucher solo en taxi, apps de transporte y bus
+  interurbano (puede venir como "Otros"); P07 solo factura. Un documento no válido se rechaza.
 
 ## De quién dependes y quién depende de ti
 
@@ -147,7 +158,7 @@ Abre OpenCode dentro de `tarea-final-c1`, en tu rama, y pega esto:
 ```text
 Lee AGENTS.md y docs/instrucciones/caso-calidad.md. Soy del rol Caso y calidad, en la rama
 tf/caso-calidad. Quiero completar datos/politica_ficticia.md con 8 a 10 políticas
-FICTICIAS de Comercial Los Alerces SpA, manteniendo el formato actual (## Política: <nombre>,
+FICTICIAS de Comercial Los Alerces SpA, manteniendo el formato actual (## P01 — <nombre>,
 descripción y tabla Grupo / Categoría / Cuenta con cuentas CTA-XXXX) y las reglas generales.
 Incluye las trampas de la guía. Primero muéstrame una propuesta de la lista de políticas y
 trampas, y espera mi visto bueno antes de escribir. No toques archivos fuera de mi rol.

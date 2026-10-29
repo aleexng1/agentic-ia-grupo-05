@@ -50,7 +50,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 ## De quién dependes y quién depende de ti
 
 - **Dependes de:** Caso y calidad (la política final para indexar) y de la coordinación (la
-  instancia de Redis). Mientras tanto indexa el borrador: el formato no cambia.
+  instancia de Redis). Mientras tanto indexa la política v1.1 (datos/politica_ficticia.md), excluyendo la sección Historial de cambios: el formato no cambia.
 - **Dependen de ti:** Núcleo (usa `buscar_politica` y `PROMPT_SISTEMA` en el grafo) y Caso y
   calidad (casos adversariales del golden set y juez).
 
