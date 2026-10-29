@@ -12,22 +12,29 @@ PATRON_POLITICA = re.compile(r"(?m)^## (P\d{2}) — (.+?)\s*$")
 
 
 def separar_politicas(texto: str) -> list[dict]:
-    """Devuelve P01-P10, adjuntando RG-01-RG-09 a cada fragmento."""
+    """Devuelve P01-P10, adjuntando RG-01-RG-10 a cada fragmento."""
+    encabezado_historial = re.search(r"(?m)^## Historial de cambios\s*$", texto)
+    texto_indexable = texto[:encabezado_historial.start()] if encabezado_historial else texto
+
     encabezado_reglas = re.search(r"(?m)^## Reglas generales\s*$", texto)
     if encabezado_reglas is None:
         raise ValueError("No se encontró la sección de reglas generales.")
     inicio_reglas = encabezado_reglas.start()
-    siguiente_seccion = re.search(r"(?m)^## ", texto[encabezado_reglas.end():])
+    siguiente_seccion = re.search(
+        r"(?m)^## ", texto_indexable[encabezado_reglas.end():]
+    )
     fin_reglas = (
         encabezado_reglas.end() + siguiente_seccion.start()
         if siguiente_seccion
-        else len(texto)
+        else len(texto_indexable)
     )
-    reglas = texto[inicio_reglas:fin_reglas].strip()
-    if not all(re.search(rf"\bRG-{numero:02d}\b", reglas) for numero in range(1, 10)):
-        raise ValueError("La sección general debe contener RG-01 a RG-09.")
+    reglas = texto_indexable[inicio_reglas:fin_reglas].strip()
+    codigos_regla = re.findall(r"(?m)^\*\*RG-(\d{2}) —", reglas)
+    esperados = [f"{numero:02d}" for numero in range(1, 11)]
+    if codigos_regla != esperados:
+        raise ValueError("La sección general debe contener RG-01 a RG-10 exactamente una vez.")
 
-    encabezados = list(PATRON_POLITICA.finditer(texto))
+    encabezados = list(PATRON_POLITICA.finditer(texto_indexable))
     if [coincidencia.group(1) for coincidencia in encabezados] != [
         f"P{numero:02d}" for numero in range(1, 11)
     ]:
@@ -35,10 +42,14 @@ def separar_politicas(texto: str) -> list[dict]:
 
     fragmentos = []
     for indice, encabezado in enumerate(encabezados):
-        fin = encabezados[indice + 1].start() if indice + 1 < len(encabezados) else len(texto)
+        fin = (
+            encabezados[indice + 1].start()
+            if indice + 1 < len(encabezados)
+            else len(texto_indexable)
+        )
         politica = encabezado.group(1)
         nombre = encabezado.group(2).strip()
-        texto_politica = texto[encabezado.start():fin].strip()
+        texto_politica = texto_indexable[encabezado.start():fin].strip()
         fragmentos.append({
             "politica": nombre,
             "codigo": politica,
