@@ -133,6 +133,23 @@ no he usado otros prompts
 
 ---
 
+## 4. Completar la comprobación segura del entorno en el notebook
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Identificar qué trabajo de Núcleo podía avanzar sin depender de otros roles y completar la comprobación segura de `.env` en el notebook.
+
+**Prompt completo:**
+
+````text
+ok, pero si entiendo bien todas las tareas pendientes de nucleo necesitan del resto del equipo o podemos seguir avanzando?
+````
+
+**Resultado (una línea):** La sección de configuración informa modelos y presencia de variables, ocultando la clave y la URL de Redis; se validó el notebook y `verificar.py` pasó (41 ✅, 0 ❌).
+
+---
+
 ## Estado de prompts de implementación
 
-La primera tarea de Núcleo modificó solo la demostración de historial en `agente.ipynb`; aún no se ha cambiado `src/grafo.py` ni `src/config.py`. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración e historial en `agente.ipynb`; aún no se ha cambiado `src/grafo.py` ni `src/config.py`. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
