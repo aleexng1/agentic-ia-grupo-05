@@ -150,6 +150,23 @@ ok, pero si entiendo bien todas las tareas pendientes de nucleo necesitan del re
 
 ---
 
+## 5. Avanzar las tareas independientes de Núcleo
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Avanzar las partes de Núcleo que no requieren que los demás roles terminen sus componentes y preparar el mensaje de coordinación del equipo.
+
+**Prompt completo:**
+
+````text
+quiero que avancemos en todo lo que podamos ahora y cuando terminemos de hacer todo lo que podemos hacer, redactar un mensaje de whatapp explicando todo lo que hicimos y lo que queda pendiente, que necesitamos y quien tiene que ejecutar
+````
+
+**Resultado (una línea):** El grafo guarda gasto, clasificación, validación y veredicto explícito, y ofrece `conversar_con_fondo` sin cambiar la firma de `conversar`; el notebook incluye G-001 y la comprobación segura del entorno; notebook compila y `verificar.py` pasó (41 ✅, 0 ❌). La prueba normal con herramientas reales queda pendiente porque RAG y validación siguen siendo stubs.
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración e historial en `agente.ipynb`; aún no se ha cambiado `src/grafo.py` ni `src/config.py`. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se actualizó el estado en `src/grafo.py`; `src/config.py` no requirió cambios. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
