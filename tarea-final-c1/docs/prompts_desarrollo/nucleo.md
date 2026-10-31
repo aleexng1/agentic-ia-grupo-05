@@ -215,6 +215,26 @@ No cambies firmas existentes, src/contrato.py, verificar.py, PROMPT_SISTEMA, mod
 
 ---
 
+## 8. Demostrar memoria de fondos y registro SQLite en el notebook
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Completar las demostraciones independientes del notebook usando la memoria y el registro SQLite ya integrados por Sebastián, sin depender de Gemini, Redis ni tocar bases locales.
+
+**Prompt de trabajo:**
+
+````text
+En agente.ipynb completa las secciones 7 y 8 sin modificar módulos de otros roles:
+- Para GS-26, carga el fondo indicado por el contexto, valida ambos gastos con P02, incorpora RG-08 al segundo, aplica cada veredicto al mismo estado y comprueba aprobar/observar con saldo final de $20.000.
+- Para el registro, usa una base SQLite dentro de un directorio temporal, demuestra inserción e idempotencia y ejecuta reiniciar_registro sobre esa base temporal; restaura siempre la ruta original.
+Valida el notebook y ejecuta ambas celdas sin llamar a Gemini ni Redis.
+````
+
+**Resultado (una línea):** GS-26 produjo aprobar y luego observar por RG-08, con saldo final de $20.000; el registro insertó una vez, reconoció la repetición y reinició solo la base temporal.
+
+---
+
 ## Estado de prompts de implementación
 
 Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se integraron cambios de estado, fondos y política en `src/grafo.py`. La salida estructurada queda pendiente de acuerdo con Eduardo. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
