@@ -18,7 +18,8 @@ from langgraph.prebuilt import ToolNode
 
 from src.config import obtener_llm, registrar_traza
 from src.contrato import MAX_PASOS, EstadoAgente, EstadoFondo
-from src.herramientas import validar_gasto
+from src.herramientas import resolver_categoria, resolver_politica, validar_gasto
+from src.memoria import anexar_revision_saldo, aplicar_veredicto
 from src.rag import buscar_politica
 from src.seguridad import PROMPT_SISTEMA
 
@@ -53,15 +54,36 @@ def _leer_resultado_herramienta(mensaje: ToolMessage):
         return None
 
 
+def _inicio_turno_actual(mensajes: list) -> int:
+    """Devuelve la posición del último mensaje del usuario."""
+    for indice in range(len(mensajes) - 1, -1, -1):
+        if isinstance(mensajes[indice], HumanMessage):
+            return indice
+    return 0
+
+
 def _fragmentos_en_historial(mensajes: list) -> list[dict]:
-    """Recupera los fragmentos RAG ya devueltos en este hilo."""
+    """Recupera solo los fragmentos RAG del gasto consultado en este turno."""
     fragmentos = []
-    for mensaje in mensajes:
+    inicio = _inicio_turno_actual(mensajes)
+    for mensaje in mensajes[inicio + 1 :]:
         if isinstance(mensaje, ToolMessage) and mensaje.name == "buscar_politica":
             resultado = _leer_resultado_herramienta(mensaje)
             if isinstance(resultado, list):
                 fragmentos.extend(item for item in resultado if isinstance(item, dict))
     return fragmentos
+
+
+def _hay_validacion_exitosa_en_turno(mensajes: list) -> bool:
+    """Evita reutilizar la validación de un gasto anterior en un turno nuevo."""
+    inicio = _inicio_turno_actual(mensajes)
+    for mensaje in mensajes[inicio + 1 :]:
+        if not isinstance(mensaje, ToolMessage) or mensaje.name != "validar_gasto":
+            continue
+        resultado = _leer_resultado_herramienta(mensaje)
+        if isinstance(resultado, dict) and {"cumple", "incumplimientos", "cuenta"} <= resultado.keys():
+            return True
+    return False
 
 
 def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dict:
@@ -74,66 +96,107 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
         llamada.get("id"): llamada
         for llamada in getattr(ultima_respuesta, "tool_calls", [])
     }
+    mensajes_actualizados = list(mensajes)
     fragmentos = _fragmentos_en_historial(estado["messages"])
+    for mensaje in mensajes_actualizados:
+        if isinstance(mensaje, ToolMessage) and mensaje.name == "buscar_politica":
+            resultado = _leer_resultado_herramienta(mensaje)
+            if isinstance(resultado, list):
+                fragmentos.extend(item for item in resultado if isinstance(item, dict))
     actualizaciones = {}
 
-    for mensaje in mensajes:
+    for indice, mensaje in enumerate(mensajes_actualizados):
         if not isinstance(mensaje, ToolMessage):
             continue
         llamada = llamadas.get(mensaje.tool_call_id, {})
         argumentos = llamada.get("args", {})
         resultado = _leer_resultado_herramienta(mensaje)
 
-        if mensaje.name == "buscar_politica" and isinstance(resultado, list):
-            fragmentos.extend(item for item in resultado if isinstance(item, dict))
-
         if mensaje.name != "validar_gasto" or not isinstance(resultado, dict):
             continue
 
         gasto = argumentos.get("gasto")
-        politica = str(argumentos.get("politica", ""))
-        categoria = str(argumentos.get("categoria", ""))
         if not isinstance(gasto, dict):
             continue
 
-        actualizaciones["gasto"] = gasto
-        actualizaciones["validacion"] = resultado
-        politica_declarada = str(gasto.get("politica_declarada", "")).strip().casefold()
+        validacion = anexar_revision_saldo(resultado, estado.get("fondo"), gasto)
+        mensajes_actualizados[indice] = ToolMessage(
+            content=json.dumps(validacion, ensure_ascii=False),
+            tool_call_id=mensaje.tool_call_id,
+            name=mensaje.name,
+            status=mensaje.status,
+        )
+        politica = resolver_politica(str(argumentos.get("politica", "")))
+        codigo_politica = politica["codigo"]
+        categoria = resolver_categoria(politica, str(argumentos.get("categoria", "")))
+        try:
+            codigo_declarado = resolver_politica(str(gasto.get("politica_declarada", "")))["codigo"]
+        except ValueError:
+            codigo_declarado = ""
         categoria_declarada = str(gasto.get("categoria_declarada", "")).strip().casefold()
+
+        actualizaciones["gasto"] = gasto
+        actualizaciones["validacion"] = validacion
+        # Un gasto nuevo invalida el veredicto anterior mientras se decide este.
+        actualizaciones["veredicto"] = None
         actualizaciones["clasificacion"] = {
-            "politica": politica,
+            "politica": codigo_politica,
             "categoria": categoria,
-            "cuenta": str(resultado.get("cuenta", "")),
+            "cuenta": str(validacion.get("cuenta", "")),
             "coincide_con_declarada": (
-                politica_declarada == politica.strip().casefold()
+                codigo_declarado == codigo_politica
                 and categoria_declarada == categoria.strip().casefold()
             ),
             "razon": "Clasificación y validación solicitadas por el agente.",
             "fragmentos": fragmentos,
         }
 
+    actualizaciones["messages"] = mensajes_actualizados
     return actualizaciones
 
 
-def _actualizar_estado_veredicto(estado: EstadoAgente, texto: str) -> dict:
+def _actualizar_estado_veredicto(estado: EstadoAgente, texto: str) -> tuple[dict, str | None]:
     """Guarda un veredicto solo si el texto declara explícitamente una decisión."""
     clasificacion = estado.get("clasificacion")
     if not clasificacion:
-        return {}
+        return {}, None
 
     actualizaciones = {"clasificacion": {**clasificacion, "razon": texto}}
     coincidencia = _DECISION_EXPLICITA.search(texto)
     if not coincidencia:
-        return actualizaciones
+        return actualizaciones, None
 
-    actualizaciones["veredicto"] = {
+    veredicto = {
         "decision": coincidencia.group(1).casefold(),
         "motivo": texto.strip(),
         "politica_sugerida": clasificacion["politica"],
         "categoria_sugerida": clasificacion["categoria"],
         "cuenta_sugerida": clasificacion["cuenta"],
     }
-    return actualizaciones
+    respuesta_ajustada = None
+    fondo = estado.get("fondo")
+    gasto = estado.get("gasto")
+    if fondo and gasto:
+        try:
+            actualizaciones["fondo"] = aplicar_veredicto(fondo, gasto, veredicto)
+        except ValueError as error:
+            # Aunque el modelo aprobara, nunca dejamos el fondo bajo cero.
+            veredicto["decision"] = "observar"
+            veredicto["motivo"] = f"Decisión ajustada a OBSERVAR: {error}"
+            respuesta_ajustada = f"Decisión: OBSERVAR. {error}"
+            actualizaciones["fondo"] = fondo
+            registrar_traza("fondo_aprobacion_bloqueada", {"gasto": gasto.get("id"), "motivo": str(error)})
+        else:
+            registrar_traza(
+                "fondo_actualizado",
+                {"id_fondo": fondo["id_fondo"], "saldo_actual": actualizaciones["fondo"]["saldo_actual"]},
+            )
+    actualizaciones["veredicto"] = veredicto
+    actualizaciones["clasificacion"] = {
+        **clasificacion,
+        "razon": respuesta_ajustada or texto,
+    }
+    return actualizaciones, respuesta_ajustada
 
 
 def _trazar_observaciones(mensajes: list) -> None:
@@ -159,8 +222,15 @@ def construir_agente():
             {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
         )
         actualizaciones = {"messages": [respuesta], "pasos": pasos}
-        if not respuesta.tool_calls:
-            actualizaciones.update(_actualizar_estado_veredicto(estado, respuesta.text))
+        if not respuesta.tool_calls and _hay_validacion_exitosa_en_turno(estado["messages"]):
+            cambios_veredicto, respuesta_ajustada = _actualizar_estado_veredicto(
+                estado, respuesta.text
+            )
+            actualizaciones.update(cambios_veredicto)
+            if respuesta_ajustada:
+                actualizaciones["messages"] = [
+                    respuesta.model_copy(update={"content": respuesta_ajustada})
+                ]
         return actualizaciones
 
     def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:

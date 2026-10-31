@@ -167,6 +167,54 @@ quiero que avancemos en todo lo que podamos ahora y cuando terminemos de hacer t
 
 ---
 
+## 6. Integrar correcciones acordadas tras los PR #2 y #3
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Adaptar Núcleo a los cambios ya integrados de Herramientas y a las decisiones del equipo, sin editar módulos ajenos.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, actualiza solo src/grafo.py para:
+- representar la política por código Pxx y comparar la política declarada por código;
+- usar solo los fragmentos RAG del turno actual;
+- no reutilizar ni sobrescribir el veredicto anterior en turnos sin una validación nueva;
+- incorporar RG-08 a la observación de validar_gasto usando anexar_revision_saldo;
+- aplicar el veredicto al fondo una sola vez y, si aplicar_veredicto rechaza una aprobación por falta de saldo, devolver OBSERVAR sin descontar.
+
+Conserva las firmas públicas, el contrato compartido, el modelo y la temperatura. No modifiques PROMPT_SISTEMA ni uses salida estructurada hasta acordar con Eduardo el esquema y cómo se actualizará el LLM falso de verificar.py. Prueba los casos con fondos, turnos sin gasto y cambio de hilo; ejecuta verificar.py.
+````
+
+**Resultado (una línea):** Se implementaron los cinco puntos en `src/grafo.py`; `verificar.py` pasó (41 ✅, 0 ❌) y una prueba local sin internet confirmó códigos, RG-08, saldo, conservación del veredicto y aislamiento de fragmentos. La salida estructurada aún requiere coordinación con Eduardo.
+
+---
+
+## 7. Integrar la memoria y aislar el estado por turno
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Aplicar en Núcleo los cambios ya integrados de Sebastián y las decisiones de Alex, dejando documentada la coordinación pendiente con Eduardo.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, actualiza solo src/grafo.py para integrar las herramientas y memoria ya disponibles:
+- canonicaliza la política declarada y la sugerida como código Pxx al guardar Clasificacion;
+- limita los fragmentos RAG al turno actual;
+- guarda o limpia el veredicto solo cuando hay una validación exitosa del gasto actual, y conserva el anterior en turnos sin gasto;
+- añade anexar_revision_saldo al resultado de validar_gasto para que RG-08 llegue al LLM;
+- después de una decisión explícita, llama aplicar_veredicto una vez; si falla por falta de saldo u otro error de fondo, fuerza OBSERVAR y no descuenta.
+
+No cambies firmas existentes, src/contrato.py, verificar.py, PROMPT_SISTEMA, modelo ni temperatura. Coordina con Eduardo antes de implementar salida estructurada; acuerden el esquema y cómo adaptarán el LLM falso compartido. Prueba los casos de cambio de nombre/código, fragmentos de dos gastos, aprobación con saldo, gasto que excede el saldo y turno sin gasto.
+````
+
+**Resultado (una línea):** Se integraron los cambios en `src/grafo.py`; `verificar.py` pasó (41 ✅, 0 ❌) y una prueba aislada confirmó P01, RG-08, saldo, conservación del veredicto y fragmentos por turno. La salida estructurada sigue pendiente de acuerdo con Eduardo.
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se actualizó el estado en `src/grafo.py`; `src/config.py` no requirió cambios. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se integraron cambios de estado, fondos y política en `src/grafo.py`. La salida estructurada queda pendiente de acuerdo con Eduardo. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
