@@ -129,7 +129,7 @@ me parece bien que avancemos con la primera tarea. apruebo el plan. Entiendo que
 no he usado otros prompts
 ````
 
-**Resultado (una línea):** Se completó la celda de historial de `agente.ipynb` con GS-31 y GS-32; el notebook valida y `verificar.py` pasó (41 ✅, 0 ❌); falta probar las respuestas con Gemini real.
+**Resultado (una línea):** Se completó la celda de historial de `agente.ipynb`; GS-31 y los dos turnos de GS-32 pasaron con Gemini real sin llamadas a herramientas, y el segundo turno recordó a Pedro y su unidad; `verificar.py` pasó (41 ✅, 0 ❌).
 
 ---
 
