@@ -18,10 +18,23 @@ from langgraph.prebuilt import ToolNode
 
 from src.config import obtener_llm, registrar_traza
 from src.contrato import MAX_PASOS, EstadoAgente, EstadoFondo
-from src.herramientas import resolver_categoria, resolver_politica, validar_gasto
-from src.memoria import anexar_revision_saldo, aplicar_veredicto
+from src.herramientas import (
+    GRAVEDAD,
+    decision_sugerida,
+    efecto_de,
+    resolver_categoria,
+    resolver_politica,
+    validar_gasto,
+)
+from src.memoria import (
+    anexar_revision_saldo,
+    aplicar_veredicto,
+    fondo_inicial,
+    resumen_fondo,
+)
 from src.rag import buscar_politica
-from src.seguridad import PROMPT_SISTEMA
+from src.registro import registrar_veredicto
+from src.seguridad import PROMPT_SISTEMA, juzgar
 
 # Herramientas que el LLM puede pedir.
 HERRAMIENTAS = [buscar_politica, validar_gasto]
@@ -119,7 +132,10 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
         if not isinstance(gasto, dict):
             continue
 
-        validacion = anexar_revision_saldo(resultado, estado.get("fondo"), gasto)
+        fondo = estado.get("fondo")
+        if not fondo or fondo["id_fondo"] != gasto.get("id_fondo"):
+            fondo = fondo_inicial(gasto["id_fondo"])
+        validacion = anexar_revision_saldo(resultado, fondo, gasto)
         mensajes_actualizados[indice] = ToolMessage(
             content=json.dumps(validacion, ensure_ascii=False),
             tool_call_id=mensaje.tool_call_id,
@@ -136,6 +152,7 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
         categoria_declarada = str(gasto.get("categoria_declarada", "")).strip().casefold()
 
         actualizaciones["gasto"] = gasto
+        actualizaciones["fondo"] = fondo
         actualizaciones["validacion"] = validacion
         # Un gasto nuevo invalida el veredicto anterior mientras se decide este.
         actualizaciones["veredicto"] = None
@@ -155,48 +172,25 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
     return actualizaciones
 
 
-def _actualizar_estado_veredicto(estado: EstadoAgente, texto: str) -> tuple[dict, str | None]:
+def _actualizar_estado_veredicto(estado: EstadoAgente, texto: str) -> dict:
     """Guarda un veredicto solo si el texto declara explícitamente una decisión."""
     clasificacion = estado.get("clasificacion")
-    if not clasificacion:
-        return {}, None
+    if not clasificacion or not _hay_validacion_exitosa_en_turno(estado["messages"]):
+        return {}
 
     actualizaciones = {"clasificacion": {**clasificacion, "razon": texto}}
     coincidencia = _DECISION_EXPLICITA.search(texto)
     if not coincidencia:
-        return actualizaciones, None
+        return actualizaciones
 
-    veredicto = {
+    actualizaciones["veredicto"] = {
         "decision": coincidencia.group(1).casefold(),
         "motivo": texto.strip(),
         "politica_sugerida": clasificacion["politica"],
         "categoria_sugerida": clasificacion["categoria"],
         "cuenta_sugerida": clasificacion["cuenta"],
     }
-    respuesta_ajustada = None
-    fondo = estado.get("fondo")
-    gasto = estado.get("gasto")
-    if fondo and gasto:
-        try:
-            actualizaciones["fondo"] = aplicar_veredicto(fondo, gasto, veredicto)
-        except ValueError as error:
-            # Aunque el modelo aprobara, nunca dejamos el fondo bajo cero.
-            veredicto["decision"] = "observar"
-            veredicto["motivo"] = f"Decisión ajustada a OBSERVAR: {error}"
-            respuesta_ajustada = f"Decisión: OBSERVAR. {error}"
-            actualizaciones["fondo"] = fondo
-            registrar_traza("fondo_aprobacion_bloqueada", {"gasto": gasto.get("id"), "motivo": str(error)})
-        else:
-            registrar_traza(
-                "fondo_actualizado",
-                {"id_fondo": fondo["id_fondo"], "saldo_actual": actualizaciones["fondo"]["saldo_actual"]},
-            )
-    actualizaciones["veredicto"] = veredicto
-    actualizaciones["clasificacion"] = {
-        **clasificacion,
-        "razon": respuesta_ajustada or texto,
-    }
-    return actualizaciones, respuesta_ajustada
+    return actualizaciones
 
 
 def _trazar_observaciones(mensajes: list) -> None:
@@ -223,14 +217,7 @@ def construir_agente():
         )
         actualizaciones = {"messages": [respuesta], "pasos": pasos}
         if not respuesta.tool_calls and _hay_validacion_exitosa_en_turno(estado["messages"]):
-            cambios_veredicto, respuesta_ajustada = _actualizar_estado_veredicto(
-                estado, respuesta.text
-            )
-            actualizaciones.update(cambios_veredicto)
-            if respuesta_ajustada:
-                actualizaciones["messages"] = [
-                    respuesta.model_copy(update={"content": respuesta_ajustada})
-                ]
+            actualizaciones.update(_actualizar_estado_veredicto(estado, respuesta.text))
         return actualizaciones
 
     def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
@@ -238,6 +225,104 @@ def construir_agente():
         mensajes = resultado.get("messages", [])
         actualizaciones = {"messages": mensajes}
         actualizaciones.update(_actualizar_estado_herramientas(estado, mensajes))
+        return actualizaciones
+
+    def nodo_cerrar(estado: EstadoAgente) -> dict:
+        """Aplica el piso de reglas, el juez, el fondo y el registro al veredicto final."""
+        texto = estado["messages"][-1].text
+        if not _hay_validacion_exitosa_en_turno(estado["messages"]):
+            registrar_traza("cerrar", {"registrado": False, "motivo": "sin validar_gasto en este turno"})
+            decision = _DECISION_EXPLICITA.search(texto)
+            if decision and decision.group(1).casefold() == "aprobar":
+                return {
+                    "messages": [
+                        AIMessage(
+                            "Decisión: OBSERVAR\n\n"
+                            "No puedo aprobar ni registrar un gasto que no se validó en este turno."
+                        )
+                    ]
+                }
+            return {}
+
+        veredicto = estado.get("veredicto")
+        gasto = estado.get("gasto")
+        validacion = estado.get("validacion")
+        clasificacion = estado.get("clasificacion")
+        if not veredicto or not gasto or not validacion or not clasificacion:
+            registrar_traza("cerrar", {"registrado": False, "motivo": "faltan datos estructurados"})
+            return {}
+
+        veredicto = dict(veredicto)
+        propuesta = veredicto["decision"]
+        ajustes = []
+        piso = decision_sugerida(validacion)
+        incumplimientos = validacion.get("incumplimientos", [])
+        if (incumplimientos or not validacion.get("cumple", True)) and veredicto["decision"] == "aprobar":
+            decision_segura = piso if piso != "aprobar" else "observar"
+            veredicto["decision"] = decision_segura
+            reglas = ", ".join(item.get("regla", "regla sin código") for item in incumplimientos)
+            registrar_traza(
+                "aprobacion_bloqueada",
+                {"decision_sugerida": decision_segura, "reglas": reglas},
+            )
+            ajustes.append(
+                "validar_gasto encontró incumplimientos"
+                + (f" ({reglas})" if reglas else "")
+            )
+        if GRAVEDAD[veredicto["decision"]] < GRAVEDAD[piso]:
+            registrar_traza("piso_reglas", {"llm": veredicto["decision"], "reglas": piso})
+            veredicto["decision"] = piso
+            reglas = ", ".join(
+                incumplimiento["regla"]
+                for incumplimiento in validacion["incumplimientos"]
+                if efecto_de(incumplimiento) == piso
+            )
+            ajustes.append(f"las reglas exactas exigen {piso.upper()} ({reglas})")
+
+        juicio = juzgar(gasto, clasificacion, veredicto)
+        registrar_traza("juez", juicio)
+        if not juicio["valido"] and veredicto["decision"] == "aprobar":
+            veredicto["decision"] = "observar"
+            ajustes.append(f"el juez no validó la aprobación: {juicio['razon']}")
+
+        fondo = estado.get("fondo") or fondo_inicial(gasto["id_fondo"])
+        try:
+            nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
+        except ValueError as error:
+            registrar_traza("fondo_error", {"error": str(error)})
+            veredicto["decision"] = "observar"
+            ajustes.append(f"el fondo no permite aprobar ({error})")
+            nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
+
+        respuesta_ajustada = None
+        if ajustes:
+            veredicto["motivo"] += (
+                f" [Ajustado de {propuesta.upper()} a {veredicto['decision'].upper()}: "
+                f"{'; '.join(ajustes)}.]"
+            )
+            respuesta_ajustada = (
+                f"Decisión: {veredicto['decision'].upper()}\n\n"
+                f"Ajusté la propuesta del agente ({propuesta.upper()}): {'; '.join(ajustes)}."
+            )
+
+        registro = registrar_veredicto(gasto, veredicto)
+        registrar_traza(
+            "fondo",
+            {"antes": resumen_fondo(fondo), "despues": resumen_fondo(nuevo_fondo)},
+        )
+        registrar_traza(
+            "registro",
+            {clave: registro[clave] for clave in ("id_gasto", "decision", "operacion")},
+        )
+        actualizaciones = {
+            "veredicto": veredicto,
+            "fondo": nuevo_fondo,
+            "clasificacion": {**clasificacion, "razon": respuesta_ajustada or veredicto["motivo"]},
+        }
+        if respuesta_ajustada:
+            actualizaciones["messages"] = [
+                estado["messages"][-1].model_copy(update={"content": respuesta_ajustada})
+            ]
         return actualizaciones
 
     def nodo_parada(estado: EstadoAgente) -> dict:
@@ -252,8 +337,10 @@ def construir_agente():
         return {"messages": [*cierres, aviso]}
 
     def elegir_siguiente(estado: EstadoAgente) -> str:
-        # Condición de parada: sin herramientas pedidas → fin; demasiados pasos → parada.
+        # Una decisión explícita se cierra con reglas, juez, fondo y registro.
         if not estado["messages"][-1].tool_calls:
+            if _DECISION_EXPLICITA.search(estado["messages"][-1].text):
+                return "cerrar"
             return END
         if estado.get("pasos", 0) >= MAX_PASOS:
             return "parada"
@@ -262,10 +349,12 @@ def construir_agente():
     grafo = StateGraph(EstadoAgente)
     grafo.add_node("llm", nodo_llm)
     grafo.add_node("herramientas", nodo_ejecutar_herramientas)
+    grafo.add_node("cerrar", nodo_cerrar)
     grafo.add_node("parada", nodo_parada)
     grafo.add_edge(START, "llm")
-    grafo.add_conditional_edges("llm", elegir_siguiente, ["herramientas", "parada", END])
+    grafo.add_conditional_edges("llm", elegir_siguiente, ["herramientas", "cerrar", "parada", END])
     grafo.add_edge("herramientas", "llm")
+    grafo.add_edge("cerrar", END)
     grafo.add_edge("parada", END)
     return grafo.compile(checkpointer=InMemorySaver())
 

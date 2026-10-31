@@ -235,6 +235,29 @@ Valida el notebook y ejecuta ambas celdas sin llamar a Gemini ni Redis.
 
 ---
 
+## 9. Integrar el cierre propuesto para el grafo
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Integrar la propuesta de Sebastián sobre el nodo de cierre sin reemplazar las correcciones existentes de política por código, fragmentos por turno y estado del veredicto.
+
+**Prompt de trabajo:**
+
+````text
+Integra manualmente en src/grafo.py el flujo de cierre propuesto por Sebastián, conservando los cambios actuales de Núcleo:
+- tras una decisión explícita y una validación exitosa del turno, aplica el piso de decision_sugerida, llama a juzgar, actualiza el fondo y registra el veredicto;
+- nunca registra APROBAR si validar_gasto devolvió incumplimientos, aunque el sugeridor de decisión falle;
+- si RG-08 u otro error impide aprobar, transforma la decisión en OBSERVAR, conserva el saldo y muestra el motivo;
+- no cierres ni registres turnos sin validar_gasto; preserva el veredicto anterior en esos turnos;
+- conserva la política canónica Pxx y limita los fragmentos RAG al turno actual.
+Mantén las firmas existentes y no edites módulos ajenos. La salida estructurada queda pendiente de coordinación con Eduardo. Prueba GS-26 con LLM falso y base SQLite temporal, y ejecuta verificar.py.
+````
+
+**Resultado (una línea):** El parche no aplicó directamente porque se basaba en una versión anterior; se integró manualmente. GS-26 pasó con segundo gasto observado por RG-08, saldo sin sobregiro y registro idempotente; el cierre bloquea aprobaciones con incumplimientos; `verificar.py` pasó (41 ✅, 0 ❌).
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se integraron cambios de estado, fondos y política en `src/grafo.py`. La salida estructurada queda pendiente de acuerdo con Eduardo. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` incorpora el nodo de cierre. La salida estructurada y la prueba con Gemini/RAG real siguen pendientes de coordinación con Eduardo. Nunca se registrará el contenido de `.env` ni una clave.
