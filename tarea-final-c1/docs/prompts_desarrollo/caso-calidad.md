@@ -892,3 +892,53 @@ Usa Gemini real y consume cuota: usen --caso para probar uno o dos casos a la ve
 ````
 
 **Resultado (una línea):** Las reglas se buscan solo en `veredicto["motivo"]` (en un turno sin decisión esperada, como GS-33, en la respuesta), con pruebas nuevas en la autoprueba.
+
+---
+
+## 13. Golden set v1.2 y prioridades del grupo
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Dejar de exigir `buscar_politica` en GS-26, antes de la línea base, y actualizar las prioridades del grupo.
+
+**Prompt completo:**
+
+````text
+Une el PR #8 ahora (PASO 5): gh pr merge 8 --merge, git switch main, git pull,
+verificar.py y lleva main a las 4 ramas.
+
+Antes de la línea base, golden set v1.2 (en tf/caso-calidad, trayendo main):
+- GS-26 turno 2: quita buscar_politica de herramientas_esperadas. Revisa si el turno 1
+  también la exige; si la exige, quítala igual: el caso prueba la memoria del fondo, no
+  la búsqueda, y no buscar cuando no hace falta es lo que pide la pauta.
+- Revisa si algún otro caso de varios turnos tiene la misma exigencia y muéstramelo
+  antes de cambiarlo.
+- Historial dentro del JSON: "1.2: GS-26 ya no exige buscar_politica; la búsqueda no es
+  necesaria cuando el agente ya conoce la política del gasto. Ninguna decisión esperada
+  cambió." Actualiza golden_set_revision.md y el README.
+- --autoprueba debe seguir pasando. Commit, PR y únelo.
+
+Luego sigue con la pausa del PASO 5 (estimación de llamadas y cuota) y espera mi visto
+bueno para la corrida 1.
+
+En el mensaje del grupo, prioridades actualizadas:
+🔴 Matías (antes de la entrega): si el LLM escribe "Decisión: APROBAR" sin validar, ese
+   texto llega al usuario tal cual (main antes lo corregía a OBSERVAR). En la prueba de
+   jailbreak del revisor esto puede costar los 0,5 de seguridad básica. Además, un
+   emitir_veredicto con política o categoría inválida, o con el motivo vacío, no debe
+   cortar el turno: el LLM debe poder corregir.
+🔴 Eduardo + Matías: el juez se equivocó en 3 de 6 veredictos (en GS-01 bloqueó una
+   aprobación correcta pidiendo P04, que ni siquiera tiene categoría de peaje).
+   juzgar_con_validacion, con el resultado de validar_gasto (que ya incluye RG-08 y el
+   saldo), es lo siguiente a integrar. Que juzgar() llame a la nueva para no dejar dos
+   jueces.
+🟠 Matías: los 3 cambios a buscar_fondo del PR #9 (FR-999 sigue cortando el turno).
+🟠 Matías + Sebastián: el cierre y validar_gasto siguen revisando la copia del gasto que
+   escribió el LLM, no el original.
+✅ Buenas noticias: emitir_veredicto funcionó en los 6 casos aun sin el ajuste de
+   PROMPT_SISTEMA; GS-07 y GS-16 ya pasan, y en GS-27 el agente no obedeció la orden
+   escondida en la glosa.
+````
+
+**Resultado (una línea):** Golden set v1.2: GS-26 ya no exige `buscar_politica` en sus dos turnos; era el único caso de varios turnos con esa exigencia y ninguna decisión esperada cambió.
