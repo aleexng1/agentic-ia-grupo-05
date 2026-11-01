@@ -270,16 +270,17 @@ Mantén las firmas existentes y no edites módulos ajenos. La salida estructurad
 ````text
 En tf/nucleo, usa emitir_veredicto(decision, politica, categoria, cuenta, motivo) como la única vía estructurada para cerrar un gasto.
 - Mantén el contrato Veredicto existente: decision, motivo, politica_sugerida, categoria_sugerida y cuenta_sugerida; normaliza la política a Pxx.
+- Conserva en el estado el Gasto original recibido por el caso; antes de ejecutar validar_gasto, reemplaza cualquier copia alterada en los argumentos de la herramienta por ese original.
 - Tras validar_gasto, el LLM debe llamar emitir_veredicto; captura su ToolMessage y enrútalo directamente a nodo_cerrar, sin interpretar la decisión desde texto.
 - nodo_cerrar debe conservar el piso de reglas, el candado, el juez, el fondo y SQLite; no registres un turno sin validación exitosa.
 - El LLM falso de verificar.py también debe cerrar mediante emitir_veredicto.
 No cambies src/contrato.py ni PROMPT_SISTEMA; coordina con Eduardo la instrucción del prompt y con él/Alex la entrada de validación al juez. Conserva modelo y temperatura. Ejecuta verificar.py sin servicios y reporta por separado las pruebas reales pendientes.
 ````
 
-**Resultado (una línea):** `emitir_veredicto` se integró en el grafo y el LLM falso ya lo llama; `verificar.py` pasa con 41 ✅ y 0 ❌ en modo aislado. La llamada real de Gemini queda pendiente de que Eduardo actualice PROMPT_SISTEMA; el juez aún requiere recibir también la validación.
+**Resultado (una línea):** `emitir_veredicto` se integró en el grafo y el LLM falso ya lo llama; una prueba confirmó que validar_gasto y SQLite usan el gasto original pese a cambios propuestos por el LLM; `verificar.py` pasa con 41 ✅ y 0 ❌ en modo aislado. La llamada real de Gemini queda pendiente de que Eduardo actualice PROMPT_SISTEMA; el juez aún requiere recibir también la validación.
 
 ---
 
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` cierra con `emitir_veredicto`. Sigue pendiente coordinar con Eduardo el prompt real y que el juez reciba `validacion`. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` cierra con `emitir_veredicto` y protege el gasto original. Sigue pendiente coordinar con Eduardo el prompt real y que el juez reciba `validacion`. Nunca se registrará el contenido de `.env` ni una clave.

@@ -9,7 +9,6 @@ El ciclo es:
 """
 
 import json
-import re
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import tool
@@ -18,7 +17,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from src.config import obtener_llm, registrar_traza
-from src.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Veredicto
+from src.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
 from src.herramientas import (
     GRAVEDAD,
     decision_sugerida,
@@ -134,6 +133,37 @@ def _emitio_veredicto_en_turno(mensajes: list) -> bool:
     )
 
 
+def _estado_con_gasto_original(estado: EstadoAgente) -> tuple[EstadoAgente, AIMessage | None]:
+    """Sustituye los argumentos del LLM por el gasto original recibido en el estado."""
+    gasto_original = estado.get("gasto")
+    mensajes = estado.get("messages", [])
+    if not gasto_original or not mensajes or not isinstance(mensajes[-1], AIMessage):
+        return estado, None
+
+    respuesta = mensajes[-1]
+    llamadas_actualizadas = []
+    cambio = False
+    for llamada in getattr(respuesta, "tool_calls", []):
+        llamada = dict(llamada)
+        argumentos = llamada.get("args", {})
+        if llamada.get("name") == "validar_gasto" and isinstance(argumentos, dict):
+            if argumentos.get("gasto") != gasto_original:
+                llamada["args"] = {**argumentos, "gasto": gasto_original}
+                cambio = True
+        llamadas_actualizadas.append(llamada)
+
+    if not cambio:
+        return estado, None
+
+    respuesta_corregida = respuesta.model_copy(update={"tool_calls": llamadas_actualizadas})
+    mensajes_corregidos = [*mensajes[:-1], respuesta_corregida]
+    registrar_traza(
+        "gasto_original_restaurado",
+        {"gasto": gasto_original.get("id"), "motivo": "se ignoraron cambios propuestos por el LLM"},
+    )
+    return {**estado, "messages": mensajes_corregidos}, respuesta_corregida
+
+
 def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dict:
     """Guarda los datos estructurados que devolvieron las herramientas."""
     if not mensajes or not estado.get("messages"):
@@ -247,10 +277,13 @@ def construir_agente():
         return {"messages": [respuesta], "pasos": pasos}
 
     def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
-        resultado = nodo_herramientas.invoke(estado)
+        estado_para_herramientas, respuesta_corregida = _estado_con_gasto_original(estado)
+        resultado = nodo_herramientas.invoke(estado_para_herramientas)
         mensajes = resultado.get("messages", [])
+        if respuesta_corregida is not None:
+            mensajes = [respuesta_corregida, *mensajes]
         actualizaciones = {"messages": mensajes}
-        actualizaciones.update(_actualizar_estado_herramientas(estado, mensajes))
+        actualizaciones.update(_actualizar_estado_herramientas(estado_para_herramientas, mensajes))
         return actualizaciones
 
     def nodo_cerrar(estado: EstadoAgente) -> dict:
@@ -431,6 +464,20 @@ def conversar_con_fondo(
     LangGraph conservará el fondo junto con el historial.
     """
     return _conversar_con_estado(agente, mensaje, hilo, {"fondo": fondo})
+
+
+def conversar_con_caso(
+    agente,
+    mensaje: str,
+    hilo: str,
+    gasto: Gasto,
+    fondo: EstadoFondo | None = None,
+) -> str:
+    """Inicia un hilo con el gasto original y, si corresponde, su fondo inicial."""
+    estado_inicial = {"gasto": gasto}
+    if fondo is not None:
+        estado_inicial["fondo"] = fondo
+    return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
 
 
 def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict) -> str:
