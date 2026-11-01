@@ -278,8 +278,49 @@ def construir_agente():
 
     def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
         estado_para_herramientas, respuesta_corregida = _estado_con_gasto_original(estado)
-        resultado = nodo_herramientas.invoke(estado_para_herramientas)
-        mensajes = resultado.get("messages", [])
+        respuesta = estado_para_herramientas["messages"][-1]
+        llamadas = getattr(respuesta, "tool_calls", [])
+        nombres_bloqueados = {"validar_gasto", "emitir_veredicto"}
+        llamadas_bloqueadas = []
+        if not estado_para_herramientas.get("gasto"):
+            llamadas_bloqueadas = [
+                llamada for llamada in llamadas if llamada.get("name") in nombres_bloqueados
+            ]
+
+        if llamadas_bloqueadas:
+            llamadas_permitidas = [
+                llamada for llamada in llamadas if llamada.get("name") not in nombres_bloqueados
+            ]
+            mensajes_por_id = {}
+            if llamadas_permitidas:
+                nombres_permitidos = {llamada["name"] for llamada in llamadas_permitidas}
+                herramientas_permitidas = [
+                    herramienta for herramienta in HERRAMIENTAS
+                    if herramienta.name in nombres_permitidos
+                ]
+                respuesta_segura = respuesta.model_copy(update={"tool_calls": llamadas_permitidas})
+                estado_seguro = {
+                    **estado_para_herramientas,
+                    "messages": [*estado_para_herramientas["messages"][:-1], respuesta_segura],
+                }
+                resultado = ToolNode(herramientas_permitidas).invoke(estado_seguro)
+                mensajes_por_id.update({m.tool_call_id: m for m in resultado.get("messages", [])})
+            for llamada in llamadas_bloqueadas:
+                mensajes_por_id[llamada["id"]] = ToolMessage(
+                    "No ejecutada: carga el Gasto original con conversar_con_caso antes de validar o emitir el veredicto.",
+                    tool_call_id=llamada["id"],
+                    name=llamada["name"],
+                    status="error",
+                )
+            mensajes = [mensajes_por_id[llamada["id"]] for llamada in llamadas if llamada["id"] in mensajes_por_id]
+            for llamada in llamadas_bloqueadas:
+                registrar_traza(
+                    "herramienta_bloqueada",
+                    {"herramienta": llamada["name"], "motivo": "falta el Gasto original en el estado"},
+                )
+        else:
+            resultado = nodo_herramientas.invoke(estado_para_herramientas)
+            mensajes = resultado.get("messages", [])
         if respuesta_corregida is not None:
             mensajes = [respuesta_corregida, *mensajes]
         actualizaciones = {"messages": mensajes}
@@ -450,7 +491,9 @@ def construir_agente():
 def conversar(agente, mensaje: str, hilo: str) -> str:
     """Envía un mensaje al agente y devuelve su respuesta en texto.
 
-    El mismo `hilo` mantiene el historial entre turnos (segundo turno, tercero, ...).
+    Úsala para turnos conversacionales sin un gasto estructurado. El mismo `hilo`
+    mantiene mensajes y fondo, pero no reutiliza el gasto de un turno anterior.
+    Para revisar un gasto usa `conversar_con_caso` con el objeto original.
     """
     return _conversar_con_estado(agente, mensaje, hilo, {})
 
@@ -460,8 +503,8 @@ def conversar_con_fondo(
 ) -> str:
     """Inicia un turno cargando el fondo en el estado antes de llamar al LLM.
 
-    Para los siguientes turnos del mismo caso, usa `conversar` con el mismo hilo;
-    LangGraph conservará el fondo junto con el historial.
+    Úsala solo para turnos sin gasto. Si el turno incluye un gasto, usa
+    `conversar_con_caso` para cargar también el gasto original.
     """
     return _conversar_con_estado(agente, mensaje, hilo, {"fondo": fondo})
 
@@ -473,7 +516,7 @@ def conversar_con_caso(
     gasto: Gasto,
     fondo: EstadoFondo | None = None,
 ) -> str:
-    """Inicia un hilo con el gasto original y, si corresponde, su fondo inicial."""
+    """Inicia un turno con el gasto original y, opcionalmente, el fondo inicial."""
     estado_inicial = {"gasto": gasto}
     if fondo is not None:
         estado_inicial["fondo"] = fondo
@@ -485,6 +528,16 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
     # recursion_limit es un freno de respaldo de LangGraph, por si falla la parada propia.
     configuracion = {"configurable": {"thread_id": hilo}, "recursion_limit": 3 * MAX_PASOS}
     # pasos vuelve a 0 en cada turno: el límite es por turno, no por conversación.
-    entrada = {"messages": [HumanMessage(mensaje)], "pasos": 0, **estado_inicial}
+    entrada = {
+        "messages": [HumanMessage(mensaje)],
+        "pasos": 0,
+        "gasto": None,
+        "clasificacion": None,
+        "validacion": None,
+        **estado_inicial,
+    }
+    if estado_inicial.get("gasto") is not None:
+        # Un gasto nuevo nunca hereda el veredicto del gasto anterior.
+        entrada["veredicto"] = None
     resultado = agente.invoke(entrada, configuracion)
     return resultado["messages"][-1].text
