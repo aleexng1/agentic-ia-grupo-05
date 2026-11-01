@@ -3,7 +3,7 @@
 Dueño: rol Herramientas y estado.
 
 Idea central: las reglas NO están escritas a mano en este archivo. Se leen de
-datos/politica_ficticia.md (versión vigente 1.1): las reglas generales RG-01 a RG-10
+datos/politica_ficticia.md (versión vigente 1.2): las reglas generales RG-01 a RG-10
 con su efecto (rechaza u observa), y de cada política P01 a P10 sus unidades
 permitidas, documentos, campos obligatorios, topes por documento, tabla de cuentas,
 equipos vigentes y regla especial. Si Caso y calidad cambia la política, la
@@ -18,7 +18,8 @@ Qué revisa validar_gasto (código, no LLM):
     RG-05        tope por documento de la categoría
     RG-06/RG-09  política o categoría declarada distinta de la correcta
     RG-07        política exclusiva de otra unidad de negocio
-    RG-10        campos obligatorios (patente, código de equipo, número de OT)
+    RG-10        campos obligatorios (patente, código de equipo, número de OT, fondo
+                 registrado) y fechas inconsistentes (rendición anterior al gasto, v1.2)
     Pxx          regla especial de la política (por ejemplo, multas en P04)
 Qué NO revisa (lo decide el LLM con el RAG, o lo revisa otra pieza):
     RG-02 gasto personal (requiere entender la glosa), RG-04 segregación (no hay dato),
@@ -26,6 +27,7 @@ Qué NO revisa (lo decide el LLM con el RAG, o lo revisa otra pieza):
 """
 
 import functools
+import json
 import re
 import unicodedata
 from datetime import date
@@ -37,6 +39,9 @@ from src.contrato import DECISIONES, Decision, Gasto, Incumplimiento, Validacion
 
 # Archivo de la política (dueño: Caso y calidad).
 RUTA_POLITICA = CARPETA_PROYECTO / "datos" / "politica_ficticia.md"
+
+# Fondos por rendir ficticios (dueño: Caso y calidad). También los lee src/memoria.py.
+RUTA_FONDOS = CARPETA_PROYECTO / "datos" / "fondos_ficticios.json"
 
 # ---------------------------------------------------------------------------
 # SUPUESTOS: puentes entre el texto de la política y los campos del gasto.
@@ -155,7 +160,7 @@ def leer_politica() -> dict:
     """Lee datos/politica_ficticia.md y devuelve reglas generales, políticas y plazo.
 
     Devuelve:
-        "version":   versión de la política (por ejemplo "1.1 (2026-10)"),
+        "version":   versión de la política (por ejemplo "1.2 (2026-11)"),
         "reglas":    {"RG-01": {...}, ...} con su efecto leído del texto,
         "politicas": {"P01": {...}, ...} con unidades, documentos, campos, topes, cuentas,
         "dia_limite": día del mes siguiente hasta el que se puede rendir (RG-03).
@@ -181,6 +186,13 @@ def leer_politica() -> dict:
         "politicas": politicas,
         "dia_limite": int(plazo.group(1)) if plazo else 10,
     }
+
+
+@functools.cache
+def _fondos_registrados() -> tuple[str, ...]:
+    """Ids de los fondos por rendir de datos/fondos_ficticios.json ("FR-001", ...)."""
+    datos = json.loads(RUTA_FONDOS.read_text(encoding="utf-8"))
+    return tuple(fondo["id_fondo"] for fondo in datos["fondos"])
 
 
 # ---------------------------------------------------------------------------
@@ -379,6 +391,20 @@ def _revisar_campos(gasto: dict, politica: dict) -> list[Incumplimiento]:
     return incumplimientos
 
 
+def _revisar_fondo(gasto: dict) -> list[Incumplimiento]:
+    """RG-10: el gasto debe salir de un fondo por rendir registrado (id_fondo válido)."""
+    id_fondo = str(gasto.get("id_fondo") or "")
+    if id_fondo in _fondos_registrados():
+        return []
+    vigentes = ", ".join(_fondos_registrados())
+    detalle = (
+        f"El fondo por rendir '{id_fondo}' no existe (fondos vigentes: {vigentes})."
+        if id_fondo.strip()
+        else f"Falta el campo obligatorio 'id fondo' (fondos vigentes: {vigentes})."
+    )
+    return [crear_incumplimiento("RG-10", detalle, _efecto_regla("RG-10"))]
+
+
 def _revisar_clasificacion(gasto: dict, politica: dict, categoria: str, cuenta: str) -> list[Incumplimiento]:
     """RG-09 (y RG-06 en arriendo de auto liviano): lo declarado distinto de lo correcto."""
     try:
@@ -449,6 +475,7 @@ def _validar(gasto: Gasto, politica: str, categoria: str) -> Validacion:
         *_revisar_plazo(gasto),
         *_revisar_unidad(gasto, datos_politica),
         *_revisar_campos(gasto, datos_politica),
+        *_revisar_fondo(gasto),
         *_revisar_tope(gasto, datos_politica, categoria_exacta),
         *_revisar_regla_especial(datos_politica, categoria_exacta),
     ]
