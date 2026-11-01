@@ -29,7 +29,7 @@ from src.herramientas import (
 from src.memoria import (
     anexar_revision_saldo,
     aplicar_veredicto,
-    fondo_inicial,
+    buscar_fondo,
     resumen_fondo,
 )
 from src.rag import buscar_politica
@@ -199,7 +199,7 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
 
         fondo = estado.get("fondo")
         if not fondo or fondo["id_fondo"] != gasto.get("id_fondo"):
-            fondo = fondo_inicial(gasto["id_fondo"])
+            fondo = buscar_fondo(gasto.get("id_fondo"))
         validacion = anexar_revision_saldo(resultado, fondo, gasto)
         mensajes_actualizados[indice] = ToolMessage(
             content=json.dumps(validacion, ensure_ascii=False),
@@ -358,7 +358,7 @@ def construir_agente():
             veredicto["decision"] = "observar"
             ajustes.append(f"el juez no validó la aprobación: {juicio['razon']}")
 
-        fondo = estado.get("fondo") or fondo_inicial(gasto["id_fondo"])
+        fondo = estado.get("fondo") or buscar_fondo(gasto.get("id_fondo"))
         try:
             nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
         except ValueError as error:

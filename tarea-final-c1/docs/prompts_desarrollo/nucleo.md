@@ -281,6 +281,23 @@ No cambies src/contrato.py ni PROMPT_SISTEMA; coordina con Eduardo la instrucci�
 
 ---
 
+## 11. Manejar fondos inexistentes sin detener el turno
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Integrar el nuevo `buscar_fondo` de Sebastián para que un `id_fondo` inexistente se observe por RG-10 y se registre sin tumbar el grafo.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, sustituye en src/grafo.py las llamadas a fondo_inicial por buscar_fondo en la carga del fondo tras validar_gasto y en nodo_cerrar. Trata un resultado None como fondo inexistente: validar_gasto debe aportar RG-10, aplicar_veredicto no debe aprobar ni descontar, y el registro debe guardar OBSERVAR sin lanzar excepción. No modifiques src/memoria.py ni otros archivos de Sebastián. Verifica con un caso de fondo inexistente y ejecutar verificar.py.
+````
+
+**Resultado (una línea):** El grafo ahora usa `buscar_fondo`; FR-999 termina observado por RG-10, conserva fondo `None` y queda registrado sin error. `verificar.py` pasó con 41 ✅ y 0 ❌ en modo aislado.
+
+---
+
 ## Estado de prompts de implementación
 
 Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` cierra con `emitir_veredicto` y protege el gasto original. Sigue pendiente coordinar con Eduardo el prompt real y que el juez reciba `validacion`. Nunca se registrará el contenido de `.env` ni una clave.
