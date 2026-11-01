@@ -167,6 +167,97 @@ quiero que avancemos en todo lo que podamos ahora y cuando terminemos de hacer t
 
 ---
 
+## 6. Integrar correcciones acordadas tras los PR #2 y #3
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Adaptar Núcleo a los cambios ya integrados de Herramientas y a las decisiones del equipo, sin editar módulos ajenos.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, actualiza solo src/grafo.py para:
+- representar la política por código Pxx y comparar la política declarada por código;
+- usar solo los fragmentos RAG del turno actual;
+- no reutilizar ni sobrescribir el veredicto anterior en turnos sin una validación nueva;
+- incorporar RG-08 a la observación de validar_gasto usando anexar_revision_saldo;
+- aplicar el veredicto al fondo una sola vez y, si aplicar_veredicto rechaza una aprobación por falta de saldo, devolver OBSERVAR sin descontar.
+
+Conserva las firmas públicas, el contrato compartido, el modelo y la temperatura. No modifiques PROMPT_SISTEMA ni uses salida estructurada hasta acordar con Eduardo el esquema y cómo se actualizará el LLM falso de verificar.py. Prueba los casos con fondos, turnos sin gasto y cambio de hilo; ejecuta verificar.py.
+````
+
+**Resultado (una línea):** Se implementaron los cinco puntos en `src/grafo.py`; `verificar.py` pasó (41 ✅, 0 ❌) y una prueba local sin internet confirmó códigos, RG-08, saldo, conservación del veredicto y aislamiento de fragmentos. La salida estructurada aún requiere coordinación con Eduardo.
+
+---
+
+## 7. Integrar la memoria y aislar el estado por turno
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Aplicar en Núcleo los cambios ya integrados de Sebastián y las decisiones de Alex, dejando documentada la coordinación pendiente con Eduardo.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, actualiza solo src/grafo.py para integrar las herramientas y memoria ya disponibles:
+- canonicaliza la política declarada y la sugerida como código Pxx al guardar Clasificacion;
+- limita los fragmentos RAG al turno actual;
+- guarda o limpia el veredicto solo cuando hay una validación exitosa del gasto actual, y conserva el anterior en turnos sin gasto;
+- añade anexar_revision_saldo al resultado de validar_gasto para que RG-08 llegue al LLM;
+- después de una decisión explícita, llama aplicar_veredicto una vez; si falla por falta de saldo u otro error de fondo, fuerza OBSERVAR y no descuenta.
+
+No cambies firmas existentes, src/contrato.py, verificar.py, PROMPT_SISTEMA, modelo ni temperatura. Coordina con Eduardo antes de implementar salida estructurada; acuerden el esquema y cómo adaptarán el LLM falso compartido. Prueba los casos de cambio de nombre/código, fragmentos de dos gastos, aprobación con saldo, gasto que excede el saldo y turno sin gasto.
+````
+
+**Resultado (una línea):** Se integraron los cambios en `src/grafo.py`; `verificar.py` pasó (41 ✅, 0 ❌) y una prueba aislada confirmó P01, RG-08, saldo, conservación del veredicto y fragmentos por turno. La salida estructurada sigue pendiente de acuerdo con Eduardo.
+
+---
+
+## 8. Demostrar memoria de fondos y registro SQLite en el notebook
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Completar las demostraciones independientes del notebook usando la memoria y el registro SQLite ya integrados por Sebastián, sin depender de Gemini, Redis ni tocar bases locales.
+
+**Prompt de trabajo:**
+
+````text
+En agente.ipynb completa las secciones 7 y 8 sin modificar módulos de otros roles:
+- Para GS-26, carga el fondo indicado por el contexto, valida ambos gastos con P02, incorpora RG-08 al segundo, aplica cada veredicto al mismo estado y comprueba aprobar/observar con saldo final de $20.000.
+- Para el registro, usa una base SQLite dentro de un directorio temporal, demuestra inserción e idempotencia y ejecuta reiniciar_registro sobre esa base temporal; restaura siempre la ruta original.
+Valida el notebook y ejecuta ambas celdas sin llamar a Gemini ni Redis.
+````
+
+**Resultado (una línea):** GS-26 produjo aprobar y luego observar por RG-08, con saldo final de $20.000; el registro insertó una vez, reconoció la repetición y reinició solo la base temporal.
+
+---
+
+## 9. Integrar el cierre propuesto para el grafo
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Integrar la propuesta de Sebastián sobre el nodo de cierre sin reemplazar las correcciones existentes de política por código, fragmentos por turno y estado del veredicto.
+
+**Prompt de trabajo:**
+
+````text
+Integra manualmente en src/grafo.py el flujo de cierre propuesto por Sebastián, conservando los cambios actuales de Núcleo:
+- tras una decisión explícita y una validación exitosa del turno, aplica el piso de decision_sugerida, llama a juzgar, actualiza el fondo y registra el veredicto;
+- nunca registra APROBAR si validar_gasto devolvió incumplimientos, aunque el sugeridor de decisión falle;
+- si RG-08 u otro error impide aprobar, transforma la decisión en OBSERVAR, conserva el saldo y muestra el motivo;
+- no cierres ni registres turnos sin validar_gasto; preserva el veredicto anterior en esos turnos;
+- conserva la política canónica Pxx y limita los fragmentos RAG al turno actual.
+Mantén las firmas existentes y no edites módulos ajenos. La salida estructurada queda pendiente de coordinación con Eduardo. Prueba GS-26 con LLM falso y base SQLite temporal, y ejecuta verificar.py.
+````
+
+**Resultado (una línea):** El parche no aplicó directamente porque se basaba en una versión anterior; se integró manualmente. GS-26 pasó con segundo gasto observado por RG-08, saldo sin sobregiro y registro idempotente; el cierre bloquea aprobaciones con incumplimientos; `verificar.py` pasó (41 ✅, 0 ❌).
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración e historial en `agente.ipynb` y se actualizó el estado en `src/grafo.py`; `src/config.py` no requirió cambios. Los próximos prompts importantes se agregarán aquí junto con su resultado. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` incorpora el nodo de cierre. La salida estructurada y la prueba con Gemini/RAG real siguen pendientes de coordinación con Eduardo. Nunca se registrará el contenido de `.env` ni una clave.
