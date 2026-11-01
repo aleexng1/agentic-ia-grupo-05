@@ -68,3 +68,32 @@ Después aprobé las correcciones ("Sí, corrígelos") y la subida ("Sí, súbel
 
 **Resultado (una línea):** `verificar.py` 41 ✅ 0 ❌ y `probar_herramientas.py` 45 ✅ 0 ❌
 (2 pruebas nuevas del piso); el parche aplica limpio sobre el PR #2.
+
+---
+
+## 3. Pendientes del mensaje de Alex tras unir los PR #2 y #3
+
+- **Fecha:** 2026-10-31
+- **Herramienta:** Claude Code (app de escritorio)
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** ponerme al día con `main`, agregar las pruebas del rol a `pruebas/` (con permiso
+  de Alex solo para ese archivo) y ajustar el parche de `grafo.py` antes de pasárselo a Matías.
+
+**Prompt completo:**
+
+````text
+[adjunto: captura del mensaje de Alex con las decisiones y los pendientes de cada rol]
+Sí, avanza
+````
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- Agregar `pruebas/probar_herramientas.py` en un PR propio, como autorizó Alex.
+- Ajustar el parche para Matías: un turno sin `validar_gasto` ya no borra ni sobrescribe el veredicto
+  anterior (se revisa en los mensajes del turno, sin reiniciar el estado), y si `aplicar_veredicto`
+  falla por falta de saldo el gasto queda observado en vez de cortar el turno.
+- La decisión escrita con asteriscos ("**Decisión:** APROBAR") sigue sin reconocerse: se resuelve con
+  la salida estructurada que coordinan Matías y Eduardo.
+
+**Resultado (una línea):** `verificar.py` 41 ✅ 0 ❌, `probar_herramientas.py` 45 ✅ 0 ❌ y 6 de 6
+escenarios del parche correctos con LLM falso; el parche aplica limpio sobre `main`.
