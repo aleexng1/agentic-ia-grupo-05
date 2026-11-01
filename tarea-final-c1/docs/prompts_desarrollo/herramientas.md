@@ -97,3 +97,36 @@ Sí, avanza
 
 **Resultado (una línea):** `verificar.py` 41 ✅ 0 ❌, `probar_herramientas.py` 45 ✅ 0 ❌ y 6 de 6
 escenarios del parche correctos con LLM falso; el parche aplica limpio sobre `main`.
+
+---
+
+## 4. Política v1.2 e id_fondo inexistente
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code (app de escritorio)
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** traer a mi rama lo unido en `main` (PR #4 a #7), pasar mis archivos a la política
+  v1.2 y resolver el pendiente del `id_fondo` inexistente del resumen de Alex.
+
+**Prompt completo:**
+
+````text
+[adjuntas: capturas del grupo con el resumen de Alex tras unir los PR #4 a #7]
+¿Qué debería ejecutar?
+````
+
+Después le pedí al asistente que hiciera el pull y los cambios ("Sí, hazlos").
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- La regla nueva de la v1.2 (rendición anterior al gasto) ya la revisaba `validar_gasto` como RG-10:
+  solo cambié las menciones a la versión y agregué una prueba.
+- Un `id_fondo` inexistente queda observado por RG-10 en `validar_gasto`, que lee los fondos de
+  `datos/fondos_ficticios.json` (no van copiados en el código).
+- `memoria.buscar_fondo` devuelve `None` en vez de cortar el turno, y `aplicar_veredicto` y
+  `resumen_fondo` aceptan `None` (sin fondo no se puede aprobar). Para cerrar el pendiente, Matías
+  cambia en `grafo.py` las 2 llamadas a `fondo_inicial` por `buscar_fondo`; se lo paso como propuesta.
+
+**Resultado (una línea):** `verificar.py` 40 ✅ 0 ❌ (1 ⚠️ porque a mi `.env` le falta `REDIS_URL`),
+`probar_herramientas.py` 50 ✅ 0 ❌, y con el cambio de Matías probado en una copia, GS-01 con `FR-999`
+termina en OBSERVAR y queda registrado.
