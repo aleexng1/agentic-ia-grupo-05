@@ -24,6 +24,9 @@ Qué revisa validar_gasto (código, no LLM):
 Qué NO revisa (lo decide el LLM con el RAG, o lo revisa otra pieza):
     RG-02 gasto personal (requiere entender la glosa), RG-04 segregación (no hay dato),
     RG-08 saldo del fondo (src/memoria.py: revisar_saldo, lo aplica el Núcleo).
+Ayuda para el Núcleo (no es herramienta del LLM):
+    campos_alterados  qué campos cambió el LLM en su copia del gasto. El grafo valida
+                      siempre el gasto original; esto queda en la traza y como evidencia.
 """
 
 import functools
@@ -262,6 +265,51 @@ def _efecto_regla(codigo: str, excepcion: bool = False) -> Decision:
 def _clp(monto: int) -> str:
     """45000 → '$45.000'."""
     return "$" + f"{monto:,}".replace(",", ".")
+
+
+# ---------------------------------------------------------------------------
+# Gasto original contra la copia del LLM (lo usa el Núcleo, src/grafo.py)
+# ---------------------------------------------------------------------------
+
+
+def _es_vacio(valor) -> bool:
+    """Ausente, None, "" o False cuentan igual: un campo opcional puede llegar como null
+    u omitirse (sin vb_gerente_general es lo mismo que vb_gerente_general = False)."""
+    return valor is None or valor is False or (isinstance(valor, str) and not valor.strip())
+
+
+def _es_numero(valor) -> bool:
+    """int o float, sin contar True/False (en Python bool también es int)."""
+    return isinstance(valor, (int, float)) and not isinstance(valor, bool)
+
+
+def _mismo_valor(original, copia) -> bool:
+    """Compara un campo sin avisar por diferencias de forma.
+
+    Vacío es igual a vacío; 30000, 30000.0 y "30000" son iguales (Gemini suele mandar
+    los enteros como decimales); los textos se comparan sin espacios a los lados.
+    """
+    if _es_vacio(original) or _es_vacio(copia):
+        return _es_vacio(original) and _es_vacio(copia)
+    if _es_numero(original) or _es_numero(copia):
+        try:
+            return float(str(original).strip()) == float(str(copia).strip())
+        except ValueError:
+            return False
+    if isinstance(original, str) and isinstance(copia, str):
+        return original.strip() == copia.strip()
+    return original == copia
+
+
+def campos_alterados(gasto_original: Gasto, gasto_llm: dict) -> list[str]:
+    """Campos que el LLM cambió, agregó o quitó en su copia del gasto, ordenados.
+
+    Devuelve [] si la copia es igual al original. No modifica ninguno de los dos.
+    Si la copia ni siquiera es un diccionario, devuelve todos los campos con valor.
+    """
+    copia = gasto_llm if isinstance(gasto_llm, dict) else {}
+    campos = set(gasto_original) | set(copia)
+    return sorted(campo for campo in campos if not _mismo_valor(gasto_original.get(campo), copia.get(campo)))
 
 
 # ---------------------------------------------------------------------------
