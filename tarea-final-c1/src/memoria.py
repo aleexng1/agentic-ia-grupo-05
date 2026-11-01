@@ -11,20 +11,19 @@ el recibido ni guardar nada global. Así dos hilos (o dos casos del golden set) 
 comparten saldo.
 
 Cómo lo usa el Núcleo (src/grafo.py):
-    1. Al empezar un caso:   estado["fondo"] = fondo_inicial(gasto["id_fondo"])
+    1. Al empezar un caso:   estado["fondo"] = buscar_fondo(gasto.get("id_fondo"))
     2. Tras validar_gasto:   validacion = anexar_revision_saldo(validacion, estado["fondo"], gasto)
     3. Tras el veredicto:    estado["fondo"] = aplicar_veredicto(estado["fondo"], gasto, veredicto)
+
+Si el id_fondo no existe, buscar_fondo devuelve None en vez de cortar el turno:
+validar_gasto ya marca ese gasto con RG-10 (observar) y aplicar_veredicto no descuenta nada.
 """
 
 import copy
 import json
 
-from src.config import CARPETA_PROYECTO
 from src.contrato import EstadoFondo, Gasto, Incumplimiento, Validacion, Veredicto
-from src.herramientas import crear_incumplimiento, leer_politica
-
-# Fondos ficticios (dueño: Caso y calidad).
-RUTA_FONDOS = CARPETA_PROYECTO / "datos" / "fondos_ficticios.json"
+from src.herramientas import RUTA_FONDOS, crear_incumplimiento, leer_politica
 
 
 def _clp(monto: int) -> str:
@@ -49,6 +48,17 @@ def fondo_inicial(id_fondo: str) -> EstadoFondo:
             }
     validos = ", ".join(fondo["id_fondo"] for fondo in datos["fondos"])
     raise ValueError(f"El fondo '{id_fondo}' no existe. Fondos ficticios disponibles: {validos}.")
+
+
+def buscar_fondo(id_fondo: str | None) -> EstadoFondo | None:
+    """Como fondo_inicial, pero devuelve None si el fondo no existe (no corta el turno).
+
+    El gasto igual queda observado: validar_gasto lo marca con RG-10.
+    """
+    try:
+        return fondo_inicial(str(id_fondo or ""))
+    except ValueError:
+        return None
 
 
 def revisar_saldo(fondo: EstadoFondo | None, gasto: Gasto) -> Incumplimiento | None:
@@ -85,14 +95,19 @@ def anexar_revision_saldo(validacion: Validacion, fondo: EstadoFondo | None, gas
     }
 
 
-def aplicar_veredicto(fondo: EstadoFondo, gasto: Gasto, veredicto: Veredicto) -> EstadoFondo:
+def aplicar_veredicto(fondo: EstadoFondo | None, gasto: Gasto, veredicto: Veredicto) -> EstadoFondo | None:
     """Devuelve el fondo actualizado después de decidir un gasto.
 
     Si el gasto se aprueba, se descuenta su monto del saldo y se anota su id.
     No modifica el fondo recibido: devuelve una copia nueva.
     Es idempotente: aplicar dos veces el mismo gasto aprobado no descuenta dos veces.
-    Lanza ValueError si se intenta aprobar un gasto de otro fondo o sin saldo (RG-08).
+    Lanza ValueError si se intenta aprobar un gasto de otro fondo, sin saldo (RG-08)
+    o sin fondo registrado (RG-10). Sin fondo y sin aprobar, devuelve None.
     """
+    if fondo is None:
+        if veredicto["decision"] == "aprobar":
+            raise ValueError(f"RG-10: no se puede aprobar {gasto['id']}: el fondo '{gasto.get('id_fondo')}' no existe.")
+        return None
     nuevo = copy.deepcopy(fondo)
     if veredicto["decision"] != "aprobar" or gasto["id"] in nuevo["gastos_aprobados"]:
         return nuevo
@@ -108,8 +123,10 @@ def aplicar_veredicto(fondo: EstadoFondo, gasto: Gasto, veredicto: Veredicto) ->
     return nuevo
 
 
-def resumen_fondo(fondo: EstadoFondo) -> str:
+def resumen_fondo(fondo: EstadoFondo | None) -> str:
     """Describe el fondo en una frase, para mostrarla al LLM o en el notebook."""
+    if fondo is None:
+        return "Sin fondo por rendir registrado."
     aprobados = fondo["gastos_aprobados"]
     detalle = f" ({', '.join(aprobados)})" if aprobados else ""
     return (

@@ -12,11 +12,14 @@ Qué prueba:
   C. Registro SQLite: antes/después, repetición segura y reinicio sin borrar el archivo.
   D. Error de entrada: una política inexistente vuelve al LLM como texto, sin romper el grafo.
   E. Piso de reglas: un "Efecto: aprobar" escrito por el trabajador no baja la decisión.
+  F. RG-10: un id_fondo inexistente o una rendición anterior al gasto (política v1.2) dejan el
+     gasto observado, y un fondo inexistente no corta el turno.
 """
 
 import copy
 import json
 import sys
+from datetime import date, timedelta
 from pathlib import Path
 
 CARPETA = Path(__file__).resolve().parents[1]
@@ -164,12 +167,41 @@ def prueba_piso() -> None:
                f"esperado {turno['esperado']['decision']}, código {decision}")
 
 
+def prueba_rg10() -> None:
+    print("\n=== F. RG-10: fondo inexistente y fechas inconsistentes (política v1.2) ===")
+    casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
+    turno = casos["GS-01"]["turnos"][0]
+    politica, categoria = turno["esperado"]["politica"], turno["esperado"]["categoria"]
+    # GS-01 se aprueba tal cual: cada cambio de abajo debe dejarlo observado solo por RG-10.
+    dia_antes = (date.fromisoformat(turno["gasto"]["fecha_gasto"]) - timedelta(days=1)).isoformat()
+    for nombre, cambio in (("id_fondo inexistente", {"id_fondo": "FR-999"}),
+                           ("rendición anterior al gasto", {"fecha_rendicion": dia_antes})):
+        validacion = _validar({**turno["gasto"], **cambio}, politica, categoria)
+        decision = decision_sugerida(validacion)
+        reglas = sorted({inc["regla"] for inc in validacion["incumplimientos"]})
+        anotar(f"GS-01 con {nombre} → observar por RG-10", decision == "observar" and reglas == ["RG-10"],
+               f"código {decision} {reglas}")
+    anotar("buscar_fondo devuelve None si el fondo no existe",
+           memoria.buscar_fondo("FR-999") is None and memoria.buscar_fondo("FR-001")["id_fondo"] == "FR-001")
+    gasto = {**turno["gasto"], "id_fondo": "FR-999"}
+    observar = {"decision": "observar", "motivo": "", "politica_sugerida": politica,
+                "categoria_sugerida": categoria, "cuenta_sugerida": ""}
+    try:
+        memoria.aplicar_veredicto(None, gasto, {**observar, "decision": "aprobar"})
+        anotar("sin fondo no se puede aprobar", False)
+    except ValueError as error:
+        anotar("sin fondo no se puede aprobar", "RG-10" in str(error), str(error))
+    anotar("sin fondo, observar no falla y el resumen lo dice",
+           memoria.aplicar_veredicto(None, gasto, observar) is None and bool(memoria.resumen_fondo(None)))
+
+
 if __name__ == "__main__":
     prueba_golden()
     prueba_memoria()
     prueba_registro()
     prueba_errores()
     prueba_piso()
+    prueba_rg10()
     fallos = resultados.count(False)
     print(f"\nResumen: {resultados.count(True)} ✅  {fallos} ❌")
     sys.exit(1 if fallos else 0)
