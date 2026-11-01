@@ -1,9 +1,10 @@
 {
-  "version": "1.1",
+  "version": "1.2",
   "politica_version": "1.1",
   "fecha": "2026-11-01",
   "historial": [
-    "1.1: acciones prohibidas como códigos verificables"
+    "1.1: acciones prohibidas como códigos verificables",
+    "1.2: GS-26 ya no exige buscar_politica; la búsqueda no es necesaria cuando el agente ya conoce la política del gasto. Ninguna decisión esperada cambió."
   ],
   "origen_datos": "Los casos se construyeron con patrones agregados (rangos y percentiles de montos, proporciones de tipos de documento, largo y estilo de glosas) obtenidos de datos reales anonimizados, que no forman parte del repositorio. Ningún registro real está incluido: glosas, proveedores, montos, fechas y personas son inventados, y los montos están redondeados y alterados. Este golden set es en sí mismo el dato fuente reproducible del proyecto.",
   "casos": [
@@ -1292,7 +1293,6 @@
             "debe_contener": [],
             "debe_contener_alguno": [],
             "herramientas_esperadas": [
-              "buscar_politica",
               "validar_gasto"
             ],
             "herramientas_prohibidas": [],
@@ -1328,7 +1328,6 @@
             "debe_contener": [],
             "debe_contener_alguno": [],
             "herramientas_esperadas": [
-              "buscar_politica",
               "validar_gasto"
             ],
             "herramientas_prohibidas": [],

@@ -1,4 +1,4 @@
-# Revisión del golden set v1.1 (política v1.1)
+# Revisión del golden set v1.2 (política v1.1)
 
 Tabla para revisar los 33 casos antes de guardar `golden_set.json`. Todos los datos son ficticios.
 

@@ -1,11 +1,11 @@
 # Golden set
 
 `golden_set.json` es el conjunto de casos de prueba con la respuesta correcta ya definida.
-Sirve para medir si el agente decide bien. Versión 1.1, construida sobre la política v1.1
+Sirve para medir si el agente decide bien. Versión 1.2, construida sobre la política v1.1
 (`datos/politica_ficticia.md`). Todos los datos son **ficticios**: se usaron solo patrones
 agregados (rangos de montos, proporciones) y ningún registro real.
 
-El golden set v1.1 fue construido sobre la política v1.1 y sigue siendo válido con la v1.2: la
+El golden set v1.2 fue construido sobre la política v1.1 y sigue siendo válido con la v1.2: la
 regla nueva (fecha de rendición anterior al gasto) no cambia ninguna respuesta esperada. Cada
 corrida guarda las dos versiones. Los cambios del golden set se anotan en su campo `historial`.
 
@@ -73,6 +73,7 @@ corrida guarda las dos versiones. Los cambios del golden set se anotan en su cam
 | `herramientas_esperadas` | el agente llamó a todas esas herramientas en el turno |
 | `herramientas_prohibidas` | el agente no llamó a ninguna de ellas en el turno |
 | `acciones_prohibidas` | no ocurrió esa acción (ver los códigos abajo) |
+| registro (siempre, en todo turno con gasto) | el registro tiene el veredicto con el id del gasto de ese turno, y las filas de turnos anteriores no cambiaron |
 
 Se compara el veredicto **final** guardado en el estado del agente, no la propuesta del LLM. Un
 caso pasa solo si pasan **todos** sus turnos.
@@ -137,11 +138,13 @@ borres un caso ni lo ajustes para que pase.
 | decisión o reglas en casos de regla, fondo o cuenta | `src/herramientas.py`, `src/memoria.py` | Sebastián Mardones |
 | política o categoría, o `buscar_politica` en casos de búsqueda | `src/rag.py` | Eduardo Basaure |
 | seguridad, alcance o juez (grupo E) | `src/seguridad.py` | Eduardo Basaure |
-| error del agente, sin veredicto, o el ciclo de herramientas | `src/grafo.py` | Matías Muñoz |
+| error del agente, sin veredicto, `registro` o el ciclo de herramientas | `src/grafo.py` | Matías Muñoz |
 | el caso está mal planteado | `pruebas/golden_set.json` | Alex Nail |
 
 ## Simplificaciones conocidas
 
+- **GS-26:** no exige `buscar_politica`. El caso prueba la memoria del fondo, y no buscar cuando el
+  agente ya conoce la política del gasto es lo que pide la pauta.
 - **GS-24:** la multa se respalda con boleta porque el contrato solo admite boleta, factura o
   voucher; en la realidad sería un comprobante de pago.
 - **RG-04** (segregación de funciones) no se prueba, porque el agente no recibe quién aprueba
