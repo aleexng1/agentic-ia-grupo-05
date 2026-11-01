@@ -36,11 +36,12 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
   - [ ] plazo de rendición (RG-03: mismo mes o hasta el día 10 del mes siguiente; con visto bueno
         del Gerente General, `vb_gerente_general`, queda observado en vez de rechazado);
   - [ ] campos obligatorios (RG-10: patente en P04 y P05, con un código de la tabla de equipos en
-        P05; número de OT en P06);
+        P05; número de OT en P06; si la fecha de rendición es anterior a la fecha del gasto, los
+        datos son inconsistentes y el gasto queda observado hasta que se corrijan);
   - [ ] exclusividad de unidad de negocio;
   - [ ] devuelve la `cuenta` correcta según la tabla de la política.
   Las reglas y cuentas se **leen** de `datos/politica_ficticia.md` (no se copian a mano en el código).
-  Nota de la política v1.1: los topes de P02, P03 y P08 son **por documento** y distintos por
+  Nota de la política v1.2: los topes de P02, P03 y P08 son **por documento** y distintos por
   categoría (RG-05).
 - [ ] Cada incumplimiento dice qué `regla` falló y un `detalle` entendible.
 - [ ] **Memoria del fondo**: `fondo_inicial` entrega un fondo ficticio; `aplicar_veredicto` descuenta
@@ -54,7 +55,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 
 ## De quién dependes y quién depende de ti
 
-- **Dependes de:** Caso y calidad (la política con sus reglas). La versión vigente es la **v1.1**
+- **Dependes de:** Caso y calidad (la política con sus reglas). La versión vigente es la **v1.2**
   de `datos/politica_ficticia.md`.
 - **Dependen de ti:** Núcleo (el agente llama a `validar_gasto` y usa la memoria y el registro) y
   Caso y calidad (el golden set mide tus reglas).

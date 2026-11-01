@@ -6,7 +6,7 @@
 |---|---|
 | Empresa | Comercial Los Alerces SpA |
 | Código | POL-RG-01 |
-| Versión | 1.1 (2026-10) |
+| Versión | 1.2 (2026-11) |
 | Dueño | Gerencia de Administración y Finanzas |
 | Revisión inicial | Control de Gestión |
 
@@ -51,7 +51,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **RG-09 — Gasto mal clasificado.** Si el gasto es válido pero el colaborador eligió una política o categoría incorrecta, queda **observado** con la política, categoría y cuenta correctas sugeridas.
 
-**RG-10 — Campos obligatorios.** Si falta un campo obligatorio de la política (patente, número de OT) o su valor no es válido (por ejemplo, un código de grúa que no está en la tabla de equipos), el gasto queda **observado** hasta que se corrija.
+**RG-10 — Campos obligatorios.** Si falta un campo obligatorio de la política (patente, número de OT) o su valor no es válido (por ejemplo, un código de grúa que no está en la tabla de equipos), el gasto queda **observado** hasta que se corrija. Si la fecha de rendición es anterior a la fecha del gasto, los datos son inconsistentes y el gasto queda observado hasta que se corrijan.
 
 ---
 
@@ -313,3 +313,4 @@ Un código que no esté en esta tabla no es válido.
 |---|---|
 | 1.0 | Versión inicial. |
 | 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
+| 1.2 | RG-10 ampliada: una fecha de rendición anterior a la fecha del gasto es un dato inconsistente y deja el gasto observado. |
