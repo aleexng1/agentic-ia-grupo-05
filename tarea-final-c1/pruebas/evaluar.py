@@ -230,6 +230,9 @@ def enviar_turno(agente, turno: dict, hilo: str, fondo=None) -> str:
     texto = turno["mensaje"]
     if "gasto" in turno:
         texto += MARCA_GASTO + json.dumps(turno["gasto"], ensure_ascii=False)
+        # TODO(caso-calidad): cuando se una el PR #8, entregar aquí también el gasto original,
+        # con la función de entrada que quede definitiva (hoy conversar_con_caso):
+        #     return grafo.conversar_con_caso(agente, texto, hilo, turno["gasto"], fondo)
     if fondo is not None:
         return grafo.conversar_con_fondo(agente, texto, hilo, fondo)
     return grafo.conversar(agente, texto, hilo)
@@ -288,6 +291,23 @@ def revisar_accion(accion: str, gasto, herramientas: list, antes: list, despues:
     return None
 
 
+def revisar_registro(gasto: dict, decision, antes: list, despues: list) -> list[tuple[str, str]]:
+    """Revisa que el turno registre SU gasto y no cambie lo que ya estaba registrado."""
+    problemas = []
+    filas = {fila["id_gasto"]: fila for fila in despues}
+    fila = filas.get(gasto["id"])
+    if fila is None:
+        problemas.append((f"el veredicto de {gasto['id']}", "sin fila en el registro"))
+    elif decision and fila["decision"] != decision:
+        problemas.append((f"{gasto['id']} con decisión {decision!r}", f"registrado con {fila['decision']!r}"))
+    for previa in antes:
+        actual = filas.get(previa["id_gasto"])
+        if previa["id_gasto"] != gasto["id"] and actual != previa:
+            cambio = f"quedó con decisión {actual['decision']!r}" if actual else "desapareció del registro"
+            problemas.append((f"{previa['id_gasto']} sin cambios ({previa['decision']!r})", cambio))
+    return problemas
+
+
 def comparar_turno(esperado: dict, obtenido: dict, gasto, antes: list, despues: list) -> list[str]:
     """Compara solo los campos definidos y devuelve un motivo por cada diferencia."""
     motivos = []
@@ -331,6 +351,10 @@ def comparar_turno(esperado: dict, obtenido: dict, gasto, antes: list, despues: 
         ocurrio = revisar_accion(accion, gasto, herramientas, antes, despues)
         if ocurrio:
             anotar("acciones_prohibidas", f"que no ocurra {accion}", ocurrio)
+
+    if gasto:
+        for espera, llego in revisar_registro(gasto, obtenido["decision"], antes, despues):
+            anotar("registro", espera, llego)
     return motivos
 
 
@@ -612,6 +636,7 @@ def respuesta_perfecta(turno: dict) -> dict:
         "texto": " ".join(["Respuesta de prueba.", *frases]),
         "herramientas": list(esperado["herramientas_esperadas"]),
         "efecto": None,
+        "gasto_registrado": None,  # otro gasto para registrar, en vez del gasto del turno
     }
 
 
@@ -643,7 +668,7 @@ class AgenteFalso:
                 "categoria_sugerida": guion["categoria"] or "-",
                 "cuenta_sugerida": guion["cuenta"] or "-",
             }
-            registro.registrar_veredicto(turno["gasto"], estado["veredicto"])
+            registro.registrar_veredicto(guion["gasto_registrado"] or turno["gasto"], estado["veredicto"])
         if guion["efecto"]:
             guion["efecto"]()
         return estado
@@ -795,6 +820,9 @@ def autoprueba() -> int:
         "modificar_registro: se pidió reiniciar_registro", "GS-30", "acciones_prohibidas",
         herramientas=["reiniciar_registro"],
     )
+    debe_fallar("registro: el gasto del turno no quedó registrado", "GS-01", "registro", efecto=registro.reiniciar_registro)
+    gasto_07 = filtrar_casos(golden["casos"], "GS-07")[0]["turnos"][0]["gasto"]
+    debe_fallar("registro: quedó con otra decisión", "GS-07", "registro", efecto=aprobar(gasto_07))
 
     print("\n=== C. Lo que NO debe contar como error ===")
     debe_pasar('"Viajes Internos" vale como P02', "GS-01", politica="Viajes Internos")
@@ -835,6 +863,20 @@ def autoprueba() -> int:
     anotar(
         "el fondo se carga solo en el primer turno, con su saldo real",
         primero.get("fondo", {}).get("saldo_actual") == 50000 and "fondo" not in segundo,
+    )
+    # La decisión final calza por casualidad: solo el registro delata que se revisó el gasto anterior.
+    agente = AgenteFalso(golden, {2: {"gasto_registrado": gasto_26}})
+    caso = probar_con_agente(agente, golden, "GS-26")[0]
+    motivos = caso["turnos"][1]["motivos"]
+    anotar(
+        "el turno 2 pisa el registro del turno 1: ❌ aunque la decisión calce",
+        not caso["pasa"]
+        and caso["turnos"][0]["pasa"]
+        and len(motivos) == 2
+        and all(motivo.startswith("registro:") for motivo in motivos)
+        and "G-2602" in motivos[0]
+        and "G-2601" in motivos[1],
+        recortar(" · ".join(motivos), 150),
     )
 
     print("\n=== E. Corrida robusta ===")

@@ -942,3 +942,29 @@ En el mensaje del grupo, prioridades actualizadas:
 ````
 
 **Resultado (una línea):** Golden set v1.2: GS-26 ya no exige `buscar_politica` en sus dos turnos; era el único caso de varios turnos con esa exigencia y ninguna decisión esperada cambió.
+
+---
+
+## 14. Revisión del registro en el evaluador
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Que el evaluador detecte un turno que registra otro gasto o pisa uno anterior, y dejar `enviar_turno` listo para la función definitiva del PR #8.
+
+**Prompt completo:**
+
+````text
+Esperamos el arreglo de Matías; no unas el PR #8 todavía.
+
+Mientras tanto, en tf/caso-calidad:
+1. Agrega al evaluador la revisión de que, en cada turno con gasto, el registro tenga el
+   veredicto con el id del gasto DE ESE TURNO, y que los registros de turnos anteriores
+   no hayan cambiado. Agrega a la autoprueba el caso de GS-26 donde el turno 2 pisa el
+   registro del turno 1 (debe dar ❌ con un motivo claro).
+2. Deja enviar_turno listo para usar la función de entrada que quede definitiva en el
+   PR #8 (hoy conversar_con_caso), pero no lo cambies hasta que se una.
+3. --autoprueba, verificar.py y probar_herramientas.py deben pasar. Commit, PR y únelo.
+````
+
+**Resultado (una línea):** Cada turno con gasto revisa el registro; autoprueba 57 de 57 y la falla de `c270504` en GS-26 queda detectada con un motivo claro.
