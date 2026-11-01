@@ -142,10 +142,15 @@ FIRMAS = {
     ("seguridad", "juzgar"): ["gasto", "clasificacion", "veredicto"],
     ("grafo", "construir_agente"): [],
     ("grafo", "conversar"): ["agente", "mensaje", "hilo"],
+    ("grafo", "emitir_veredicto"): ["decision", "politica", "categoria", "cuenta", "motivo"],
 }
 
 # Estas dos son herramientas de LangChain (@tool), el LLM las puede pedir.
-HERRAMIENTAS = {("herramientas", "validar_gasto"), ("rag", "buscar_politica")}
+HERRAMIENTAS = {
+    ("herramientas", "validar_gasto"),
+    ("rag", "buscar_politica"),
+    ("grafo", "emitir_veredicto"),
+}
 
 # Campos del Gasto que pueden faltar (NotRequired en el contrato).
 CAMPOS_OPCIONALES_GASTO = {"patente", "numero_ot", "vb_gerente_general"}
@@ -305,7 +310,7 @@ def silencio():
 
 
 class LLMFalso:
-    """Primero pide la herramienta validar_gasto; cuando recibe la observación, responde."""
+    """Valida el gasto y cierra con emitir_veredicto, sin respuestas finales en texto."""
 
     def __init__(self, siempre_pide_herramienta: bool = False):
         self.siempre_pide_herramienta = siempre_pide_herramienta
@@ -334,7 +339,21 @@ class LLMFalso:
                 "type": "tool_call",
             }
             return AIMessage("", tool_calls=[pedido])
-        return AIMessage("Decisión: APROBAR. (respuesta del LLM falso de verificar.py)")
+        if mensajes[-1].name == "validar_gasto":
+            pedido = {
+                "name": "emitir_veredicto",
+                "args": {
+                    "decision": VEREDICTO_EJEMPLO["decision"],
+                    "politica": "P01",
+                    "categoria": CLASIFICACION_EJEMPLO["categoria"],
+                    "cuenta": CLASIFICACION_EJEMPLO["cuenta"],
+                    "motivo": VEREDICTO_EJEMPLO["motivo"],
+                },
+                "id": f"emitir-{self.llamadas}",
+                "type": "tool_call",
+            }
+            return AIMessage("", tool_calls=[pedido])
+        return AIMessage("El veredicto ya se emitió como herramienta.")
 
 
 @contextlib.contextmanager
