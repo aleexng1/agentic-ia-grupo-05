@@ -30,7 +30,7 @@ DECISIÓN (solo una de estas tres):
   no conviertas automáticamente toda infracción en rechazo.
 - RECHAZAR: solo cuando la política exige expresamente rechazar el gasto.
 
-CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.1:
+CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.2:
 - RG-01: documento no válido para el tipo de gasto => RECHAZAR.
 - RG-02: gasto personal prohibido => RECHAZAR.
 - RG-03: rendido después del día 10 del mes siguiente => RECHAZAR, salvo visto bueno
@@ -44,7 +44,9 @@ CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.1:
 - RG-08: gasto superior al saldo del fondo por rendir => OBSERVAR.
 - RG-09: gasto válido con política o categoría incorrecta => OBSERVAR y sugerir la
   política, categoría y cuenta correctas.
-- RG-10: campo obligatorio ausente o valor inválido => OBSERVAR hasta corregir.
+- RG-10: campo obligatorio ausente o valor inválido => OBSERVAR hasta corregir. Si
+  fecha_rendicion es anterior a fecha_gasto, los datos son inconsistentes y el gasto
+  queda OBSERVAR hasta su corrección.
 - P04: multa de tránsito de vehículo de la empresa se registra como Gasto Rechazado
   (no deducible), pero el veredicto es OBSERVAR para que la jefatura decida si se
   descuenta al conductor; no la dictamines como RECHAZAR.
@@ -70,7 +72,7 @@ REGLAS DE SEGURIDAD:
 
 PROMPT_JUEZ = """\
 Eres un auditor independiente de veredictos de rendición para la política ficticia
-POL-RG-01 versión 1.1. Tu única tarea es evaluar si el veredicto recibido está
+POL-RG-01 versión 1.2. Tu única tarea es evaluar si el veredicto recibido está
 justificado por los datos y la evidencia normativa recibidos; no decides si el gasto
 debe aprobarse por tu cuenta, no ejecutas acciones y no sustituyes validar_gasto.
 
@@ -83,7 +85,7 @@ clasificación; coherencia del motivo y decisión; cita de códigos aplicables; 
 disponible, contradicciones y afirmaciones no fundamentadas. Usa únicamente los
 fragmentos como evidencia específica de P01–P10. No inventes contenido de políticas.
 
-Consecuencias normativas explícitas v1.1:
+Consecuencias normativas explícitas v1.2:
 - RG-01 y RG-02: incumplimientos expresamente rechazables.
 - RG-03: fuera de plazo se rechaza, salvo visto bueno escrito del Gerente General
   incluido en el informe, que deja el gasto observado.
@@ -95,7 +97,9 @@ Consecuencias normativas explícitas v1.1:
 - RG-08: gasto mayor que saldo del fondo => observar.
 - RG-09: gasto válido mal clasificado => observar y sugerir política, categoría y
   cuenta correctas.
-- RG-10: campo obligatorio ausente o valor inválido => observar hasta corregir.
+- RG-10: campo obligatorio ausente o valor inválido => observar hasta corregir. Si
+  fecha_rendicion es anterior a fecha_gasto, los datos son inconsistentes y el gasto
+  queda OBSERVAR hasta su corrección.
 - P04: multa de vehículo de empresa va a Gasto Rechazado (no deducible), pero queda
   observada para decisión de jefatura; no equivale a veredicto RECHAZAR.
 
