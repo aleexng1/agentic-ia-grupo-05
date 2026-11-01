@@ -54,12 +54,14 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 Recuerda: `tipo_documento` solo puede ser `boleta`, `factura` o `voucher` (lo exige el contrato).
 Los casos de "documento no permitido" se arman con políticas que exigen un tipo específico.
 
-**Política vigente: v1.1** (`datos/politica_ficticia.md`). Lo que más cambia las decisiones:
+**Política vigente: v1.2** (`datos/politica_ficticia.md`). Lo que más cambia las decisiones:
 
 - **Plazo (RG-03):** se rinde en el mismo mes o hasta el **día 10 del mes siguiente**. Fuera de plazo
   se rechaza; con visto bueno del Gerente General (`vb_gerente_general`) queda observado.
 - **Campos obligatorios (RG-10):** **patente** en P04 y P05 (en P05, un código de la tabla de
-  equipos) y **número de OT** en P06. Si falta o no es válido, queda observado.
+  equipos) y **número de OT** en P06. Si falta o no es válido, queda observado. Si la fecha de
+  rendición es anterior a la fecha del gasto, los datos son inconsistentes y el gasto queda
+  observado hasta que se corrijan.
 - **Topes (RG-05):** son **por documento** y distintos por categoría (P02, P03 y P08). Si se
   superan, queda observado.
 - **Documentos (RG-01):** boleta o factura; voucher solo en taxi, apps de transporte y bus
