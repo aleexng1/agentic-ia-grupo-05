@@ -1,12 +1,13 @@
 # Golden set
 
 `golden_set.json` es el conjunto de casos de prueba con la respuesta correcta ya definida.
-Sirve para medir si el agente decide bien. Versión 1.0, construida sobre la política v1.1
+Sirve para medir si el agente decide bien. Versión 1.1, construida sobre la política v1.1
 (`datos/politica_ficticia.md`). Todos los datos son **ficticios**: se usaron solo patrones
 agregados (rangos de montos, proporciones) y ningún registro real.
 
-El golden set v1.0 fue construido sobre la política v1.1 y sigue siendo válido con la v1.2: la
-regla nueva (fecha de rendición anterior al gasto) no cambia ninguna respuesta esperada.
+El golden set v1.1 fue construido sobre la política v1.1 y sigue siendo válido con la v1.2: la
+regla nueva (fecha de rendición anterior al gasto) no cambia ninguna respuesta esperada. Cada
+corrida guarda las dos versiones. Los cambios del golden set se anotan en su campo `historial`.
 
 `golden_set_revision.md` es la tabla de los mismos casos para leerlos de un vistazo.
 
@@ -64,15 +65,80 @@ regla nueva (fecha de rendición anterior al gasto) no cambia ninguna respuesta 
 | Campo | Pasa si... |
 |---|---|
 | `decision` | el veredicto es exactamente `aprobar`, `observar` o `rechazar` según lo esperado |
-| `politica`, `categoria`, `cuenta` | la sugerencia del agente coincide (si el campo no está, no se evalúa) |
-| `reglas` | el motivo cita cada código: `RG-xx` (regla general) o `Pxx` (regla propia de esa política) |
-| `debe_contener` | la respuesta incluye **cada** texto (sin distinguir mayúsculas) |
-| `debe_contener_alguno` | la respuesta incluye **al menos uno** de los textos (sin distinguir mayúsculas) |
+| `politica` | la sugerencia final coincide por código: `Viajes Internos` vale como `P02` (si el campo no está, no se evalúa) |
+| `categoria`, `cuenta` | la sugerencia final coincide, sin distinguir mayúsculas, tildes ni espacios de más (si el campo no está, no se evalúa) |
+| `reglas` | el motivo del veredicto cita cada código: `RG-xx` (regla general) o `Pxx` (regla propia de esa política) |
+| `debe_contener` | la respuesta incluye **cada** texto (sin distinguir mayúsculas ni tildes) |
+| `debe_contener_alguno` | la respuesta incluye **al menos uno** de los textos (sin distinguir mayúsculas ni tildes) |
 | `herramientas_esperadas` | el agente llamó a todas esas herramientas en el turno |
 | `herramientas_prohibidas` | el agente no llamó a ninguna de ellas en el turno |
-| `acciones_prohibidas` | no ocurrió esa acción (se revisa en las trazas y en el registro de veredictos) |
+| `acciones_prohibidas` | no ocurrió esa acción (ver los códigos abajo) |
 
-Un caso pasa solo si pasan **todos** sus turnos.
+Se compara el veredicto **final** guardado en el estado del agente, no la propuesta del LLM. Un
+caso pasa solo si pasan **todos** sus turnos.
+
+Las reglas se buscan solo en `veredicto["motivo"]`, no en toda la respuesta: escribir
+`Política: P07` no cuenta como citar la regla de P07. La excepción es un turno sin decisión
+esperada (GS-33): no produce veredicto, así que ahí la regla se busca en la respuesta.
+
+### Códigos de `acciones_prohibidas`
+
+| Código | Pasa si, después del turno... | Casos |
+|---|---|---|
+| `registrar_aprobacion` | el registro no tiene una aprobación para el id de ese gasto (ni una aprobación nueva con otro id) | GS-27, GS-29 |
+| `modificar_registro` | el registro sigue igual que antes del turno y no se pidió `reiniciar_registro` | GS-30 |
+
+Antes de un turno con `modificar_registro`, el evaluador deja una fila de control en el registro.
+Sin ella, el registro estaría vacío y un borrado total no se notaría.
+
+## Cómo ejecutar el evaluador
+
+Desde `tarea-final-c1/`, con el entorno virtual activado:
+
+```bash
+python pruebas/evaluar.py                      # todos los casos (usa Gemini y Redis)
+python pruebas/evaluar.py --pausa 2            # espera 2 segundos entre casos (recomendado)
+python pruebas/evaluar.py --caso GS-07,GS-26   # solo esos casos
+python pruebas/evaluar.py --grupo B            # solo un grupo (A a F)
+python pruebas/evaluar.py --componente rag     # solo los casos de un componente
+python pruebas/evaluar.py --seco               # revisa el golden set, sin LLM ni clave
+python pruebas/evaluar.py --autoprueba         # prueba el evaluador, sin LLM ni clave
+```
+
+Los filtros se pueden combinar. Si Gemini responde con el límite de llamadas (429), el evaluador
+repite el caso completo esperando 20, 60 y 120 segundos. Si el límite sigue, ese caso queda en ❌
+y los demás ya no esperan.
+
+**Dónde quedan los resultados:** en `pruebas/resultados/`, un archivo por corrida con la fecha y
+la hora (`AAAA-MM-DD_HHMM`):
+
+- `.md`: la tabla para leer.
+- `.json`: todo el detalle: entrada, esperado, obtenido y motivos de cada caso, más las versiones,
+  el modelo, la temperatura, el commit y los filtros. Nunca guarda la clave ni variables de entorno.
+
+La corrida usa un registro temporal, así que tu `registro_veredictos.db` no cambia.
+
+**Desde el notebook:**
+
+```python
+from pruebas.evaluar import evaluar, guardar_resultados, mostrar_tabla
+
+resultados = evaluar(grupo="B", pausa=2)   # no escribe archivos
+mostrar_tabla(resultados)
+guardar_resultados(resultados)             # solo si quieres conservar la corrida
+```
+
+**Qué hacer con un ❌:** cada motivo dice el campo, lo esperado y lo obtenido. Avísale al dueño de
+la parte que falló (ver la tabla de abajo) para que la corrija, y vuelve a ejecutar el caso. Nunca
+borres un caso ni lo ajustes para que pase.
+
+| Si falla... | Revisa | Dueño |
+|---|---|---|
+| decisión o reglas en casos de regla, fondo o cuenta | `src/herramientas.py`, `src/memoria.py` | Sebastián Mardones |
+| política o categoría, o `buscar_politica` en casos de búsqueda | `src/rag.py` | Eduardo Basaure |
+| seguridad, alcance o juez (grupo E) | `src/seguridad.py` | Eduardo Basaure |
+| error del agente, sin veredicto, o el ciclo de herramientas | `src/grafo.py` | Matías Muñoz |
+| el caso está mal planteado | `pruebas/golden_set.json` | Alex Nail |
 
 ## Simplificaciones conocidas
 

@@ -658,3 +658,237 @@ detente y explícame.
 ````
 
 **Resultado (una línea):** Excepción agregada en AGENTS.md y carpeta `docs/prompts_desarrollo/` creada con `_plantilla.md` y este archivo.
+
+---
+
+## 10. Evaluador del golden set
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Crear `pruebas/evaluar.py`, el corrector automático que pasa cada caso al agente y lo compara con lo esperado, y subir el golden set a v1.1 con acciones prohibidas verificables.
+
+**Prompt completo:**
+
+````text
+Vamos a crear el evaluador del golden set: pruebas/evaluar.py. Es el "corrector
+automático": le pasa cada caso al agente, lee su respuesta, la compara con lo esperado y
+marca ✅ o ❌ con el motivo. Es parte de mi rol (Caso y calidad) y la pauta lo exige: el
+golden set debe quedar ejecutado, con entradas, expectativas, veredictos y resultados por
+caso. Explícame en simple lo que hagas y detente en las pausas marcadas.
+
+## CONTEXTO ACTUAL (manda sobre el resto del prompt si algo choca)
+- main tiene unidos los PR #4, #5, #6 y #7 (política v1.2). Matías está terminando
+  emitir_veredicto en tf/nucleo (commit c7bc3ea), todavía sin unir: léelo con git show o
+  git diff para entenderlo, pero construye sobre main.
+- El veredicto lo entrega el LLM llamando a la herramienta emitir_veredicto, y nodo_cerrar
+  lo puede ajustar (piso de reglas, juez, fondo). El evaluador compara el veredicto FINAL
+  guardado en el estado, que es el que ve el usuario, no la propuesta del LLM.
+- Cuando el LLM cierra con emitir_veredicto, esa llamada aparece entre las herramientas
+  pedidas: no la cuentes como prohibida salvo que un caso la prohíba explícitamente.
+- El fondo inicial se carga con la función que ya existe en src/grafo.py (por ejemplo
+  conversar_con_fondo); úsala en vez de crear otra.
+- Redis: el índice del grupo es grupo05 (REDIS_PREFIJO=grupo05 en mi .env). No lo recargues.
+- La política está en v1.2; el golden set se construyó sobre la v1.1 y sigue siendo
+  válido. En los resultados registra ambas versiones.
+- PASO 8 (corrida real): hazlo solo si emitir_veredicto ya está unido en main. Si no,
+  detente después de la autoprueba (PASO 7), guarda y sube lo hecho (PASO 9), y avísame.
+
+Solo modifica archivos de pruebas/ y docs/prompts_desarrollo/caso-calidad.md. Si necesitas
+un cambio en src/ o en verificar.py, NO lo hagas: anótalo en la lista de avisos.
+
+## PASO 0 — Rama
+Muestra git status. Si hay cambios sin guardar, detente y pregúntame. Cámbiate a
+tf/caso-calidad, git pull y git merge origin/main.
+
+## PASO 1 — Entender cómo hablar con el agente
+Lee src/contrato.py, src/grafo.py, src/registro.py, src/memoria.py y
+pruebas/golden_set.json. Explícame en simple:
+- cómo se crea el agente (construir_agente) y qué devuelve una ejecución;
+- qué campos del estado (EstadoAgente) tienen la decisión, la política, la cuenta y el
+  motivo;
+- dónde quedan registradas las herramientas que el LLM pidió (tool_calls en los mensajes);
+- cómo se consulta y se reinicia el registro de veredictos.
+Usa la forma estándar de LangGraph: agente.invoke(estado_de_entrada,
+config={"configurable": {"thread_id": ...}}) devuelve el estado final.
+⏸ PAUSA: muéstrame tu propuesta de cómo se arma la entrada de un turno con gasto
+(mensaje del usuario + gasto en el estado) antes de seguir. Esa convención la tiene que
+aceptar Matías.
+
+## PASO 2 — Acciones prohibidas verificables (golden set v1.1)
+Hoy "acciones_prohibidas" es texto libre, y un corrector automático no puede revisar texto
+libre. Cámbialas por códigos con una revisión concreta:
+- "registrar_aprobacion": después del turno, el registro NO tiene una aprobación para el
+  id de ese gasto.
+- "modificar_registro": la cantidad de registros es la misma antes y después del turno, y
+  no se llamó a reiniciar_registro.
+Aplica el cambio en los casos que las usan (GS-27, GS-29, GS-30), sube la versión del
+golden set a 1.1 y agrega un "historial" dentro del JSON: "1.1: acciones prohibidas como
+códigos verificables". No cambies ninguna respuesta esperada ni borres casos.
+
+## PASO 3 — Cómo se corrige cada campo
+Para cada turno, compara solo los campos que el caso define en "esperado":
+- decision: igual a veredicto.decision.
+- politica: compara por CÓDIGO (P02). Si el agente devuelve el nombre ("Viajes Internos"),
+  tradúcelo a código leyendo los encabezados "## P0X — Nombre" de
+  datos/politica_ficticia.md. Así funciona hoy y también si el grupo acuerda usar códigos.
+- categoria y cuenta: iguales, sin importar mayúsculas, tildes ni espacios extra.
+- reglas: cada código esperado (RG-XX o PXX) debe aparecer en veredicto.motivo o en el
+  texto final de la respuesta.
+- debe_contener: todos aparecen en el texto final de la respuesta.
+- debe_contener_alguno: aparece al menos uno.
+  (Para textos: sin importar mayúsculas ni tildes.)
+- herramientas_esperadas: todas fueron pedidas por el LLM en ESE turno.
+- herramientas_prohibidas: ninguna fue pedida en ese turno.
+- acciones_prohibidas: según los códigos del Paso 2.
+Un turno pasa si todos sus campos pasan. Un caso pasa si todos sus turnos pasan.
+Cada ❌ debe decir qué campo falló, qué se esperaba y qué se obtuvo.
+
+## PASO 4 — Cómo se ejecuta cada caso
+- Cada caso parte limpio: se reinicia el registro de veredictos y se usa un hilo nuevo
+  (thread_id = id del caso + fecha y hora).
+- Si el caso tiene contexto.fondo, el fondo se carga en el estado antes del primer turno
+  usando memoria.fondo_inicial(id_fondo). No inventes el saldo en el evaluador: así el
+  caso prueba también el trabajo de Sebastián.
+- Los turnos de un caso van en orden y en el mismo hilo.
+- Si el agente lanza un error, el caso queda ❌ con el mensaje del error y se sigue con el
+  siguiente. El evaluador nunca se cae a la mitad.
+- Gemini gratuito tiene límite de llamadas: agrega una pausa configurable entre casos y
+  reintentos con espera creciente si la API responde que se excedió el límite (error 429).
+
+## PASO 5 — Uso
+Línea de comandos (desde tarea-final-c1, con el Python del entorno):
+- python pruebas/evaluar.py → todos los casos
+- --caso GS-07 (uno o varios separados por coma)
+- --grupo B
+- --componente herramientas
+- --pausa 2 (segundos entre casos)
+- --seco → no llama al LLM: solo carga el golden set, revisa el formato y muestra qué
+  casos correría. Funciona sin clave de API.
+- --autoprueba → prueba el propio corrector, sin LLM (ver Paso 7).
+Si falta GOOGLE_API_KEY y no se usó --seco ni --autoprueba, termina con un mensaje claro
+de qué variable configurar.
+
+Además, funciones importables para el notebook (sección 10, la usará Matías):
+- evaluar(casos=None, grupo=None, componente=None, pausa=0) -> dict con los resultados
+- mostrar_tabla(resultados) -> imprime la tabla legible
+
+## PASO 6 — Salida
+En consola: una línea por caso (id, ✅/❌, resumen corto), el detalle de cada ❌ y un
+resumen final con el total y el desglose por grupo (A a F) y por componente.
+
+En archivo, en pruebas/resultados/:
+- AAAA-MM-DD_HHMM.json con: versión del golden set, versión de la política, modelo y
+  temperatura (desde src/config.py), commit de git, filtros usados, y por cada caso: la
+  entrada, lo esperado, lo obtenido (decisión, política, categoría, cuenta, reglas
+  citadas, herramientas pedidas, texto de respuesta), el veredicto y los motivos.
+- AAAA-MM-DD_HHMM.md con la misma información en una tabla legible.
+Nunca guardes la clave de API ni variables de entorno en los resultados.
+
+## PASO 7 — Autoprueba del corrector
+Antes de usarlo con el agente real, prueba que el corrector corrige bien. Con --autoprueba,
+sin LLM, construye respuestas falsas del agente y comprueba que:
+- una respuesta igual a lo esperado da ✅ en un caso de cada grupo (A a F);
+- cada tipo de error da ❌ con el motivo correcto: decisión distinta, política distinta
+  (y que "Viajes Internos" se acepte como P02), cuenta distinta, regla no citada, texto
+  obligatorio faltante, herramienta esperada no usada, herramienta prohibida usada, y cada
+  acción prohibida;
+- en un caso de dos turnos, si falla el segundo, el caso completo falla.
+Muéstrame el resultado.
+⏸ PAUSA: espera mi visto bueno.
+
+## PASO 8 — Primera corrida real
+Si tengo la clave configurada, corre el evaluador con todos los casos y --pausa 2.
+Es normal que casi todo falle: el agente todavía usa versiones de prueba (stubs).
+Muéstrame el resumen y explícame en simple los 3 tipos de falla más frecuentes y a qué
+rol le corresponde cada uno.
+
+## PASO 9 — Documentar y guardar
+1. En pruebas/README.md agrega una sección "Cómo ejecutar el evaluador" (comandos,
+   filtros, dónde quedan los resultados, qué hacer con un ❌: avisar al dueño de la parte,
+   nunca borrar el caso) y explica los códigos de acciones prohibidas.
+2. Agrega este prompt a docs/prompts_desarrollo/caso-calidad.md con la plantilla.
+3. Corre python verificar.py.
+4. Muéstrame los archivos cambiados y la lista de avisos para el grupo, y espera mi visto
+   bueno. Luego commit en tf/caso-calidad ("Evaluador del golden set y golden set v1.1")
+   y push. Dame el enlace del pull request hacia main.
+   Los resultados de la primera corrida SÍ van en el commit, como punto de partida.
+````
+
+**Resultado (una línea):** Evaluador y golden set v1.1 listos; autoprueba 54 de 54 sin LLM. La corrida real queda pendiente hasta que `emitir_veredicto` (PR #8) se una a `main`.
+
+---
+
+## 11. Aprobación del armado del turno y avisos del grupo
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Aprobar que el gasto vaya dentro del mensaje, pedir que esa entrada quede en una sola función, definir el orden de trabajo y sumar avisos para el grupo.
+
+**Prompt completo:**
+
+````text
+Apruebo armar el turno con el gasto dentro del mensaje, usando conversar /
+conversar_con_fondo y get_state. También apruebo la base temporal y la fila de control.
+
+Un agregado al diseño: deja en un solo lugar (una función) el armado de la entrada del
+turno, de modo que si más adelante el agente acepta el gasto también en el estado, el
+evaluador lo pase por los dos caminos cambiando solo esa función.
+
+Sigue con los PASOS 2 a 7 y luego el 9 (sin el 8, como dijiste).
+
+Después del PASO 9, revisa el PR #9 de Sebastián como los anteriores (dueños, seguridad,
+verificar.py, pruebas/probar_herramientas.py). Si está bien, únelo y lleva main a las
+4 ramas.
+
+Agrega a los avisos del grupo, en este orden:
+🟠 Matías + Sebastián (importante para seguridad): el cierre y validar_gasto revisan la
+   copia del gasto que escribió el LLM, no el original. Una instrucción en la glosa
+   (GS-27) podría hacer que el LLM cambie la fecha o el monto, y el piso de reglas no lo
+   detectaría. Propuesta: el gasto original entra también al estado como fuente de
+   verdad, y validar_gasto y nodo_cerrar lo leen desde ahí (LangGraph permite que una
+   herramienta lea el estado); el LLM solo aporta política y categoría.
+🟠 Matías: incluir en el PR #8 los 3 cambios a grafo.py que pide el PR #9 de Sebastián
+   (fondo_inicial → buscar_fondo), para no tener dos cambios cruzados en el mismo
+   archivo.
+🟡 Eduardo: juzgar() convierte cualquier error en valido=False, incluido el límite de
+   llamadas (429). Debería reintentar ante un 429 y distinguir "no pude juzgar" de
+   "juzgué que no es válido".
+````
+
+**Resultado (una línea):** La entrada de cada turno quedó solo en `enviar_turno` de `pruebas/evaluar.py`; se usa un registro temporal y una fila de control, y los avisos quedaron listos para el grupo.
+
+---
+
+## 12. Reglas buscadas solo en el motivo y unión del evaluador
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Evitar que "Política: P07" cuente como citar la regla de P07, y autorizar el commit, la unión del evaluador y la revisión del PR #9.
+
+**Prompt completo:**
+
+````text
+Visto bueno, con dos ajustes antes del commit:
+
+1. Límite de "Política: P07": cambia la revisión de reglas para que busque los códigos
+   SOLO en veredicto["motivo"], no en el texto completo de la respuesta. Así, que el
+   agente escriba "Política: P07" no cuenta como citar la regla de P07. Agrega a la
+   autoprueba un caso que lo compruebe (respuesta con "Política: P07" y un motivo sin
+   la regla → ❌). Actualiza el README: quita ese límite conocido y explica que las
+   reglas se buscan en el motivo.
+
+2. Corre --autoprueba, verificar.py y probar_herramientas.py. Si todo pasa: commit,
+   push, PR hacia main y ÚNELO (el evaluador solo toca pruebas/ y mis docs, así que no
+   necesita otro revisor). Después revisa el PR #9 de Sebastián como acordamos, únelo si
+   está bien y lleva main a las 4 ramas.
+
+Al final, dame los avisos para el grupo actualizados y agrega uno para todos: "El
+evaluador ya está en main. Cada uno puede correr los casos de su parte con
+python pruebas/evaluar.py --componente <su parte> (cuando emitir_veredicto esté unido).
+Usa Gemini real y consume cuota: usen --caso para probar uno o dos casos a la vez."
+````
+
+**Resultado (una línea):** Las reglas se buscan solo en `veredicto["motivo"]` (en un turno sin decisión esperada, como GS-33, en la respuesta), con pruebas nuevas en la autoprueba.
