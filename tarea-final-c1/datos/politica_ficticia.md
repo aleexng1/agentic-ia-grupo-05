@@ -259,7 +259,7 @@ Un código que no esté en esta tabla no es válido.
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura.
 **Campos obligatorios.** Ninguno adicional.
-**Topes (por documento).** Coffee break: $30.000. Cumpleaños: $50.000. Festividades: $110.000.
+**Topes (por documento).** Coffee break: $30.000. Capacitaciones: $35.000. Cumpleaños: $50.000. Festividades: $110.000.
 
 | Grupo | Categoría | Cuenta |
 |---|---|---|
@@ -319,4 +319,4 @@ Un código que no esté en esta tabla no es válido.
 | 1.0 | Versión inicial. |
 | 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
 | 1.2 | RG-10 ampliada: una fecha de rendición anterior a la fecha del gasto es un dato inconsistente y deja el gasto observado. |
-| 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08. |
+| 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08 y se agrega tope por documento para Capacitaciones. |
