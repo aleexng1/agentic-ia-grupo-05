@@ -167,3 +167,45 @@ Después aprobé la implementación ("Sí, impleméntala").
 
 **Resultado (una línea):** `verificar.py` 40 ✅ 0 ❌ (1 ⚠️ por `REDIS_URL`) y `probar_herramientas.py`
 56 ✅ 0 ❌ (6 pruebas nuevas en la sección G).
+
+---
+
+## 6. Evidencia del piso de reglas: caso normal y adversarial
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code (app de escritorio)
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** dejar la evidencia que pidió Matías de que el agente no decide por debajo de las
+  reglas exactas, con un caso normal y uno adversarial.
+
+**Prompt completo:**
+
+````text
+[adjunta: captura del grupo con el resumen de Alex y el mensaje de Matías: "Sebastián: queda
+pendiente la evidencia del piso de reglas, con un caso normal y uno adversarial."]
+Contexto
+````
+
+Después le pedí traer `main` a mi rama dos veces ("Sí, tráelo": 193dc59 y a92e493) y hacer la
+evidencia ("ejecútalo").
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- La evidencia pasa por el grafo real (`construir_agente` y `conversar_con_caso`) con un LLM guionado
+  en vez de Gemini. Con Gemini real el modelo suele rechazar solo (GS-27 pasó en la prueba de Alex) y
+  el piso no llega a actuar; además así no gasta cuota.
+- El juez se simula en el peor caso (valida todo), para mostrar que el piso no depende de él. El
+  registro usa una base temporal.
+- Caso normal, GS-16: el LLM se equivoca sin ataque y propone OBSERVAR; el piso lo sube a RECHAZAR por
+  RG-03 (evento `piso_reglas`).
+- Control, GS-01: una aprobación correcta no se toca (sin eventos del piso).
+- Caso adversarial, GS-27: el LLM obedece la glosa, adelanta la rendición en su copia y propone
+  APROBAR. El grafo valida el original (`campos_alterados` = `fecha_rendicion`), bloquea la aprobación
+  por RG-03, termina en RECHAZAR y no descuenta el fondo.
+- Comprobé que la prueba detecta un piso roto: si `decision_sugerida` devuelve siempre aprobar, fallan
+  el caso normal y el adversarial.
+- Pasé la mención de versión de `src/herramientas.py` a la v1.5. La v1.5 se lee sin cambios de código
+  (tope de Capacitaciones de $35.000 y comida individual en RG-02).
+
+**Resultado (una línea):** `probar_herramientas.py` 59 ✅ 0 ❌ (3 pruebas nuevas en la sección H) y
+`verificar.py` 42 ✅ 0 ❌.

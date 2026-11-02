@@ -3,7 +3,7 @@
 Dueño: rol Herramientas y estado.
 
 Idea central: las reglas NO están escritas a mano en este archivo. Se leen de
-datos/politica_ficticia.md (versión vigente 1.2): las reglas generales RG-01 a RG-10
+datos/politica_ficticia.md (versión vigente 1.5): las reglas generales RG-01 a RG-10
 con su efecto (rechaza u observa), y de cada política P01 a P10 sus unidades
 permitidas, documentos, campos obligatorios, topes por documento, tabla de cuentas,
 equipos vigentes y regla especial. Si Caso y calidad cambia la política, la

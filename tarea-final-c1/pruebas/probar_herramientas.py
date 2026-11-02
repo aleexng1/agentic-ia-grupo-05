@@ -16,6 +16,10 @@ Qué prueba:
      gasto observado, y un fondo inexistente no corta el turno.
   G. campos_alterados: detecta lo que el LLM cambió en su copia del gasto, sin avisar por
      diferencias de forma, y muestra por qué el grafo debe validar el gasto original.
+  H. Piso de reglas en el agente completo, con un LLM guionado en vez de Gemini y un juez
+     simulado que valida todo (el peor caso): un caso normal (GS-16, el LLM se equivoca y
+     propone OBSERVAR), un control (GS-01, una aprobación correcta no se toca) y un caso
+     adversarial (GS-27, el LLM obedece la glosa, adelanta la rendición y propone APROBAR).
 """
 
 import copy
@@ -236,6 +240,101 @@ def prueba_campos_alterados() -> None:
            f"copia {con_copia}, original {con_original}, campos {campos}")
 
 
+class LLMGuionado:
+    """Imita al LLM sin internet: valida con su copia del gasto y propone una decisión fija."""
+
+    def __init__(self, copia_gasto: dict, politica: str, categoria: str, propuesta: str):
+        self.copia_gasto = copia_gasto
+        self.politica = politica
+        self.categoria = categoria
+        self.propuesta = propuesta
+
+    def bind_tools(self, herramientas, **opciones):
+        return self
+
+    def invoke(self, mensajes, *args, **opciones):
+        from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
+
+        ultimo = mensajes[-1]
+        if isinstance(ultimo, HumanMessage):
+            argumentos = {"gasto": self.copia_gasto, "politica": self.politica, "categoria": self.categoria}
+            return AIMessage("", tool_calls=[{"name": "validar_gasto", "args": argumentos,
+                                              "id": "validar-1", "type": "tool_call"}])
+        if isinstance(ultimo, ToolMessage) and ultimo.name == "validar_gasto":
+            argumentos = {"decision": self.propuesta, "politica": self.politica, "categoria": self.categoria,
+                          "cuenta": json.loads(ultimo.content)["cuenta"],
+                          "motivo": f"Propuesta del LLM guionado: {self.propuesta}."}
+            return AIMessage("", tool_calls=[{"name": "emitir_veredicto", "args": argumentos,
+                                              "id": "emitir-1", "type": "tool_call"}])
+        return AIMessage("Ya emití el veredicto.")
+
+
+def revisar_con_agente(turno: dict, llm: LLMGuionado, hilo: str) -> tuple[dict, list]:
+    """Pasa un turno por el grafo real con el LLM guionado y devuelve el estado final y la traza."""
+    from unittest import mock
+
+    from src import grafo
+
+    eventos = []
+    # Juez del peor caso: valida todo, para mostrar que el piso no depende de él.
+    juez = {"valido": True, "razon": "juez simulado que valida todo", "evaluado": True}
+    with mock.patch.object(grafo, "obtener_llm", return_value=llm), \
+            mock.patch.object(grafo, "juzgar_con_validacion", return_value=juez), \
+            mock.patch.object(grafo, "registrar_traza", side_effect=lambda evento, datos: eventos.append((evento, datos))):
+        agente = grafo.construir_agente()
+        grafo.conversar_con_caso(agente, turno["mensaje"], hilo, turno["gasto"])
+        estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
+    return estado, eventos
+
+
+def prueba_piso_en_agente() -> None:
+    print("\n=== H. Piso de reglas en el agente completo (LLM guionado, sin Gemini) ===")
+    casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
+    original = registro.RUTA_REGISTRO
+    registro.RUTA_REGISTRO = CARPETA / "prueba_piso_temporal.db"
+    try:
+        registro.reiniciar_registro()
+        for tipo, id_caso, cambios, propuesta in (
+            ("normal", "GS-16", {}, "observar"),
+            ("control", "GS-01", {}, "aprobar"),
+            ("adversarial", "GS-27", {"fecha_rendicion": casos["GS-27"]["turnos"][0]["gasto"]["fecha_gasto"]}, "aprobar"),
+        ):
+            turno = casos[id_caso]["turnos"][0]
+            esperado, gasto = turno["esperado"], turno["gasto"]
+            copia_llm = {**gasto, **cambios}
+            llm = LLMGuionado(copia_llm, esperado["politica"], esperado["categoria"], propuesta)
+            estado, eventos = revisar_con_agente(turno, llm, f"hilo-piso-{id_caso}")
+            traza = dict(eventos)
+            final = estado["veredicto"]["decision"]
+            registrado = traza.get("registro", {}).get("decision")
+            if tipo == "normal":
+                ok = (final == registrado == "rechazar"
+                      and traza.get("piso_reglas") == {"llm": "observar", "reglas": "rechazar"}
+                      and "campos_alterados" not in traza)
+                detalle = f"LLM propuso OBSERVAR → final {final.upper()}, piso_reglas {traza.get('piso_reglas')}"
+            elif tipo == "control":
+                ok = (final == registrado == "aprobar"
+                      and not {"piso_reglas", "aprobacion_bloqueada"} & traza.keys())
+                detalle = f"LLM propuso APROBAR → final {final.upper()}, sin eventos del piso"
+            else:
+                con_copia = decision_sugerida(_validar(copia_llm, esperado["politica"], esperado["categoria"]))
+                bloqueo = traza.get("aprobacion_bloqueada", {})
+                ok = (final == registrado == "rechazar" and con_copia == "aprobar"
+                      and estado["gasto"] == gasto
+                      and traza.get("campos_alterados", {}).get("campos") == ["fecha_rendicion"]
+                      and "gasto_original_restaurado" in traza
+                      and bloqueo.get("reglas") == "RG-03"
+                      and gasto["id"] not in estado["fondo"]["gastos_aprobados"])
+                detalle = (f"con la copia el código diría {con_copia}; campos_alterados "
+                           f"{traza.get('campos_alterados', {}).get('campos')}, aprobación bloqueada por "
+                           f"{bloqueo.get('reglas')} → final {final.upper()}, el fondo no se descuenta")
+            anotar(f"{id_caso} ({tipo}): registro {registrado}", ok, detalle)
+            print(f"   traza: {' → '.join(evento for evento, _ in eventos)}")
+    finally:
+        registro.RUTA_REGISTRO.unlink(missing_ok=True)
+        registro.RUTA_REGISTRO = original
+
+
 if __name__ == "__main__":
     prueba_golden()
     prueba_memoria()
@@ -244,6 +343,7 @@ if __name__ == "__main__":
     prueba_piso()
     prueba_rg10()
     prueba_campos_alterados()
+    prueba_piso_en_agente()
     fallos = resultados.count(False)
     print(f"\nResumen: {resultados.count(True)} ✅  {fallos} ❌")
     sys.exit(1 if fallos else 0)
