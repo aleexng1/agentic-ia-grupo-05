@@ -74,7 +74,7 @@ Luego abre `agente.ipynb` y ejecútalo de arriba abajo (kernel: el `.venv` de es
 | Modelo de lenguaje | `gemini-3.5-flash-lite` (modelo del curso, clase-05) |
 | Temperatura | 0 |
 | Modelo de embeddings | `models/gemini-embedding-001` (clase-05) |
-| Máximo de pasos ReAct | 6 (`MAX_PASOS` en `src/contrato.py`) |
+| Máximo de pasos ReAct | 10 (`MAX_PASOS` en `src/contrato.py`) |
 | Python | 3.12 |
 | Librerías | versiones fijas en `requirements.txt` (langgraph 1.2.16, langchain 1.4.6, langchain-google-genai 4.4.2, langchain-redis 0.2.6, redis 8.1.0, redisvl 0.28.0) |
 | Almacén vectorial | Redis del curso — _TODO: confirmar con la coordinación qué instancia vale_ |

@@ -37,7 +37,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 - [ ] El estado del grafo guarda `gasto`, `clasificacion`, `validacion` y `veredicto` (tipos de
       `src/contrato.py`), para que el notebook los pueda mostrar.
 - [ ] **Condición de parada explícita**: para cuando el LLM responde sin pedir herramientas o al
-      llegar a `MAX_PASOS` (6). Se ve en las trazas.
+      llegar a `MAX_PASOS` (10). Se ve en las trazas.
 - [ ] **Trazas legibles** con `registrar_traza`: cada paso muestra qué pensó/pidió el LLM y qué
       observó.
 - [ ] **Segundo turno**: una pregunta en el mismo hilo que solo se puede responder con el historial.
