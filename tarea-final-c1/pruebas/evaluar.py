@@ -288,6 +288,15 @@ def fragmentos_del_turno(mensajes: list) -> list[dict]:
     return fragmentos
 
 
+def errores_del_turno(mensajes: list) -> list[dict]:
+    """Errores que recibió el LLM de sus herramientas en este turno, por ejemplo un veredicto rechazado."""
+    return [
+        {"herramienta": mensaje.name, "mensaje": recortar(ocultar_secretos(str(mensaje.content)), 300)}
+        for mensaje in mensajes_del_turno(mensajes)
+        if isinstance(mensaje, ToolMessage) and mensaje.status == "error"
+    ]
+
+
 def leer_obtenido(estado: dict, texto: str, veredicto_previo: dict | None, esperado: dict) -> dict:
     """Junta lo que produjo el turno. El veredicto de un turno anterior no cuenta como de este."""
     herramientas = herramientas_del_turno(estado.get("messages", []))
@@ -308,6 +317,7 @@ def leer_obtenido(estado: dict, texto: str, veredicto_previo: dict | None, esper
         "reglas_citadas": reglas_citadas(fuente_reglas),
         "herramientas": herramientas,
         "fragmentos": fragmentos_del_turno(estado.get("messages", [])),
+        "errores_herramientas": errores_del_turno(estado.get("messages", [])),
         "texto": texto,
     }
 
@@ -695,6 +705,21 @@ def texto_markdown(resultados: dict) -> str:
             "|---|---:|---|---|---|---:|",
             *filas,
         ]
+    errores = [
+        f"| {caso['id']} | {turno['numero']} | {celda(error['herramienta'])} | {celda(error['mensaje'])} |"
+        for caso in resultados["casos"]
+        for turno in caso["turnos"]
+        for error in turno["obtenido"]["errores_herramientas"]
+    ]
+    if errores:
+        lineas += [
+            "",
+            "## Errores de herramientas que recibió el LLM",
+            "",
+            "| Caso | Turno | Herramienta | Mensaje |",
+            "|---|---:|---|---|",
+            *errores,
+        ]
     return "\n".join(lineas) + "\n"
 
 
@@ -745,6 +770,7 @@ def respuesta_perfecta(turno: dict) -> dict:
         "texto": " ".join(["Respuesta de prueba.", *frases]),
         "herramientas": list(esperado["herramientas_esperadas"]),
         "fragmentos": [],
+        "errores_herramienta": [],  # (herramienta, mensaje de error) que recibe el LLM
         "efecto": None,
         "gasto_registrado": None,  # otro gasto para registrar, en vez del gasto del turno
     }
@@ -794,6 +820,8 @@ class AgenteFalso:
             mensajes.append(AIMessage("", tool_calls=[pedido]))
             contenido = json.dumps(guion["fragmentos"]) if nombre == "buscar_politica" else "{}"
             mensajes.append(ToolMessage(contenido, tool_call_id=f"llamada-{numero}", name=nombre))
+        for nombre, texto in guion["errores_herramienta"]:
+            mensajes.append(ToolMessage(texto, tool_call_id=f"error-{nombre}", name=nombre, status="error"))
         return [*mensajes, AIMessage(guion["texto"])]
 
 
@@ -838,6 +866,22 @@ class LLMDeGuion:
     def _pedir(nombre: str, argumentos: dict) -> AIMessage:
         pedido = {"name": nombre, "args": argumentos, "id": f"llamada-{nombre}", "type": "tool_call"}
         return AIMessage("", tool_calls=[pedido])
+
+
+class LLMQueSeCorrige(LLMDeGuion):
+    """Manda un veredicto con una política que no existe y lo corrige al recibir el error."""
+
+    def __init__(self, golden: dict):
+        super().__init__(golden)
+        self.por_equivocarse = True
+
+    def invoke(self, mensajes, *args, **opciones):
+        respuesta = super().invoke(mensajes, *args, **opciones)
+        for pedido in respuesta.tool_calls:
+            if pedido["name"] == "emitir_veredicto" and self.por_equivocarse:
+                self.por_equivocarse = False
+                pedido["args"]["politica"] = "P99"
+        return respuesta
 
 
 @tool("buscar_politica")
@@ -1055,9 +1099,9 @@ def autoprueba() -> int:
         for herramienta in grafo.HERRAMIENTAS
     ]
 
-    def con_grafo_real(dictamen: dict, *ids: str) -> list[dict]:
+    def con_grafo_real(dictamen: dict, *ids: str, llm=None) -> list[dict]:
         """Corre casos en el grafo real con un juez falso."""
-        llm = LLMDeGuion(golden)
+        llm = llm or LLMDeGuion(golden)
         with mock.patch.object(grafo, "obtener_llm", lambda: llm), mock.patch.object(
             grafo, "HERRAMIENTAS", herramientas
         ), mock.patch.object(grafo, "juzgar_con_validacion", lambda *_: dictamen):
@@ -1134,6 +1178,38 @@ def autoprueba() -> int:
     anotar("el .md muestra los fragmentos", "| GS-07 | 1 |" in texto and "Vehículos Propios | politica.md | -0.1235 |" in texto)
     casos = probar_con_agente(AgenteFalso(golden), golden, "GS-01")
     anotar("un turno sin fragmentos no agrega la sección al .md", "Fragmentos que devolvió" not in texto_markdown({**corrida, "casos": casos}))
+
+    print("\n=== J. Errores de herramientas que recibió el LLM ===")
+    mensajes = [
+        HumanMessage("turno anterior"),
+        ToolMessage("Error viejo.", tool_call_id="e0", name="validar_gasto", status="error"),
+        HumanMessage("turno actual"),
+        ToolMessage("{}", tool_call_id="e1", name="validar_gasto"),
+        ToolMessage("Veredicto inválido; corrige los campos.", tool_call_id="e2", name="emitir_veredicto", status="error"),
+    ]
+    anotar(
+        "guarda solo los errores de este turno",
+        errores_del_turno(mensajes) == [{"herramienta": "emitir_veredicto", "mensaje": "Veredicto inválido; corrige los campos."}],
+    )
+    largo = [ToolMessage("x" * 1000, tool_call_id="e3", name="emitir_veredicto", status="error")]
+    anotar("recorta un mensaje muy largo", len(errores_del_turno(largo)[0]["mensaje"]) == 300)
+    with mock.patch.dict(os.environ, {"GOOGLE_API_KEY": "clave-falsa-123"}):
+        secreto = [ToolMessage("falló con clave-falsa-123", tool_call_id="e4", name="buscar_politica", status="error")]
+        anotar("oculta la clave si aparece en un error", "clave-falsa" not in errores_del_turno(secreto)[0]["mensaje"])
+    caso = con_grafo_real(juez_conforme, "GS-01", llm=LLMQueSeCorrige(golden))[0]
+    errores = caso["turnos"][0]["obtenido"]["errores_herramientas"]
+    anotar(
+        "con el grafo real, guarda por qué se rechazó un emitir_veredicto",
+        caso["pasa"] and len(errores) == 1 and errores[0]["herramienta"] == "emitir_veredicto" and "P99" in errores[0]["mensaje"],
+        recortar(errores[0]["mensaje"] if errores else "sin errores", 100),
+    )
+    rechazo = ("emitir_veredicto", "Veredicto inválido; corrige los campos: motivo vacío.")
+    with contextlib.redirect_stdout(io.StringIO()):
+        corrida = correr_casos(AgenteFalso(golden, {1: {"errores_herramienta": [rechazo]}}), golden, filtrar_casos(golden["casos"], "GS-01"), {})
+    texto = texto_markdown(corrida)
+    anotar("el .md muestra los errores", "| GS-01 | 1 | emitir_veredicto | Veredicto inválido; corrige los campos: motivo vacío. |" in texto)
+    casos = probar_con_agente(AgenteFalso(golden), golden, "GS-01")
+    anotar("un turno sin errores no agrega la sección al .md", "Errores de herramientas" not in texto_markdown({**corrida, "casos": casos}))
 
     aprobadas = sum(resultados)
     print(f"\nAutoprueba: {aprobadas} de {len(resultados)} ✅")

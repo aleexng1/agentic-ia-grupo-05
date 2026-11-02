@@ -1,14 +1,14 @@
 # Golden set
 
 `golden_set.json` es el conjunto de casos de prueba con la respuesta correcta ya definida.
-Sirve para medir si el agente decide bien. Versión 1.2, construida sobre la política v1.1
+Sirve para medir si el agente decide bien. Versión 1.3, construida sobre la política v1.5
 (`datos/politica_ficticia.md`). Todos los datos son **ficticios**: se usaron solo patrones
 agregados (rangos de montos, proporciones) y ningún registro real.
 
-El golden set v1.2 fue construido sobre la política v1.1 y sigue siendo válido con la v1.5:
-la regla nueva de la v1.2 (fecha de rendición anterior al gasto) y las aclaraciones de las v1.3,
-v1.4 y v1.5 no cambian ninguna respuesta esperada. Cada corrida guarda las dos versiones. Los cambios del
-golden set se anotan en su campo `historial`.
+El golden set nació sobre la política v1.1. Las versiones siguientes de la política no cambiaron
+ninguna respuesta esperada; GS-34, agregado en la v1.3 del golden set, depende de la aclaración de
+la política v1.5. Cada corrida guarda las dos versiones. Los cambios del golden set se anotan en su
+campo `historial`.
 
 `golden_set_revision.md` es la tabla de los mismos casos para leerlos de un vistazo.
 
@@ -55,11 +55,11 @@ golden set se anotan en su campo `historial`.
 |---|---:|---|
 | A-limpio | 6 | Gastos correctos que se aprueban |
 | B-mal-clasificado | 7 | Política mal elegida: se observa con la correcta (RG-09) |
-| C-regla | 11 | Documento, plazo, campos obligatorios, unidad, topes, gasto personal, multa |
+| C-regla | 12 | Documento, plazo, campos obligatorios, unidad, topes, gasto personal, multa |
 | D-fondo | 2 | Saldo del fondo por rendir (RG-08), incluido el saldo actualizado entre turnos |
 | E-seguridad | 4 | Instrucciones escondidas, fuera de alcance, falsa autorización, acciones prohibidas |
 | F-conversacion | 3 | Saludo, historial entre turnos y búsqueda solo cuando hace falta |
-| **Total** | **33** | |
+| **Total** | **34** | |
 
 ## Cómo se evalúa cada campo
 
@@ -114,7 +114,8 @@ y los demás ya no esperan.
 **Dónde quedan los resultados:** en `pruebas/resultados/`, un archivo por corrida con la fecha y
 la hora (`AAAA-MM-DD_HHMM`):
 
-- `.md`: la tabla para leer y los fragmentos que devolvió `buscar_politica`.
+- `.md`: la tabla para leer, los fragmentos que devolvió `buscar_politica` y los errores de
+  herramientas que recibió el LLM.
 - `.json`: todo el detalle: entrada, esperado, obtenido y motivos de cada caso, más las versiones,
   el modelo, la temperatura, el commit y los filtros. Nunca guarda la clave ni variables de entorno.
 
@@ -123,6 +124,9 @@ La corrida usa un registro temporal, así que tu `registro_veredictos.db` no cam
 **Fragmentos de cada turno:** cada turno guarda la consulta, la política o regla, la fuente y el
 puntaje de lo que devolvió `buscar_politica`, sin el texto completo. Sirve para saber si un error
 de clasificación vino del RAG, que no trajo lo correcto, o del LLM, que lo tuvo y razonó mal.
+
+**Errores de herramientas:** cada turno guarda los mensajes de error que recibió el LLM, por ejemplo
+por qué se rechazó un `emitir_veredicto`. Sirven para entender por qué un turno terminó sin veredicto.
 
 **`evolucion.md`:** el antes y después de cada mejora, con fecha, commit y causa.
 
@@ -168,6 +172,8 @@ borres un caso ni lo ajustes para que pase.
 
 - **GS-26:** no exige `buscar_politica`. El caso prueba la memoria del fondo, y no buscar cuando el
   agente ya conoce la política del gasto es lo que pide la pauta.
+- **GS-34:** depende de la aclaración de la política v1.5. Mientras el índice no se recargue, el
+  agente lee la v1.4 en el RAG, así que un ❌ en este caso no mide al agente.
 - **GS-24:** la multa se respalda con boleta porque el contrato solo admite boleta, factura o
   voucher; en la realidad sería un comprobante de pago.
 - **RG-04** (segregación de funciones) no se prueba, porque el agente no recibe quién aprueba
