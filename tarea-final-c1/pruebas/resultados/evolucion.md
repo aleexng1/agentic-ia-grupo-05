@@ -37,3 +37,19 @@ sin turnos sin juez. El caso que falla, GS-07, es un error de clasificación sin
   temporales y no se conservaron: las frases del juez vienen del registro de esa revisión.
 - La misma comparación no se repite en la corrida 1, porque la línea base se hizo después del PR #17.
 - El 2026-11-01, una copia con el cierre ya conectado a `juzgar_con_validacion` hizo pasar GS-01.
+
+## 2. P08 distingue Coffee break de Capacitaciones (política v1.3)
+
+**Qué cambió:** P08 decía "Coffee break de una reunión o capacitación", aunque `Capacitaciones` es una
+categoría aparte. La v1.3 define las dos, agrega un tope para `Capacitaciones` y se recargó el índice.
+El caso del golden set no se modificó.
+
+| Caso | Antes (política v1.2) | Después (política v1.3) |
+|---|---|---|
+| GS-03 | ❌ `observar` y `Coffee break`, en commit `d97b3a5` | ✅ `aprobar` y `Capacitaciones`, en commit `8949700` |
+
+**Causa del "antes":** el agente movió a `Coffee break` un gasto declarado en `Capacitaciones`, y esa
+lectura era defendible con el texto antiguo.
+
+**Evidencia:** [`corrida_1_grupo_A.md`](corrida_1_grupo_A.md) y
+[`corrida_1_repeticion_GS-03_GS-06.md`](corrida_1_repeticion_GS-03_GS-06.md), una vez cada una.

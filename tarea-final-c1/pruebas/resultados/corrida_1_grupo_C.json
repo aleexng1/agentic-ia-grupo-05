@@ -1,0 +1,1114 @@
+{
+  "fecha": "2026-11-02_1838",
+  "golden_version": "1.2",
+  "politica_version_golden": "1.1",
+  "politica_vigente": "1.3 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "8949700fa5613e0ec78acd7f8f6cf5e850b89db3",
+  "filtros": {
+    "casos": null,
+    "grupo": "C",
+    "componente": null,
+    "pausa": 15.0
+  },
+  "resumen": {
+    "total": 11,
+    "pasan": 11,
+    "por_grupo": {
+      "C-regla": {
+        "total": 11,
+        "pasan": 11
+      }
+    },
+    "por_componente": {
+      "herramientas": {
+        "total": 11,
+        "pasan": 11
+      },
+      "nucleo": {
+        "total": 11,
+        "pasan": 11
+      },
+      "rag": {
+        "total": 11,
+        "pasan": 11
+      }
+    },
+    "por_causa": {},
+    "turnos_sin_juez": []
+  },
+  "casos": [
+    {
+      "id": "GS-14",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Cafetería: mercadería con boleta (P07 exige factura)",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1401",
+              "fecha_gasto": "2026-10-14",
+              "fecha_rendicion": "2026-10-15",
+              "monto": 15600,
+              "tipo_documento": "boleta",
+              "proveedor": "Almacén Mayorista Don Tito",
+              "glosa": "frutas y lácteos para cafetería",
+              "politica_declarada": "Mercadería Cafetería",
+              "categoria_declarada": "Mercadería",
+              "unidad_negocio": "CAF",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "rechazar",
+            "politica": "P07",
+            "categoria": "Mercadería",
+            "cuenta": "CTA-3020",
+            "reglas": [
+              "P07"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "rechazar",
+            "politica": "P07",
+            "categoria": "Mercadería",
+            "cuenta": "CTA-3020",
+            "motivo": "El gasto se rinde con boleta, pero la política P07 (Mercadería Cafetería) exige exclusivamente factura según RG-01 y las reglas de documentos de la política, lo que conlleva el rechazo del documento.",
+            "reglas_citadas": [
+              "P07",
+              "RG-01"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.2446
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Insumos de Oficina y Aseo",
+                "fuente": "datos/politica_ficticia.md#P09",
+                "puntaje": -0.3443
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3447
+              }
+            ],
+            "texto": "Decisión: RECHAZAR\nPolítica: P07\nCategoría: Mercadería\nCuenta: CTA-3020\nMotivo: El gasto se rinde con boleta, pero la política P07 (Mercadería Cafetería) exige exclusivamente factura según RG-01 y las reglas de documentos de la política, lo que conlleva el rechazo del documento."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-15",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Jefe de tienda: almuerzo en viaje entre sedes con voucher de restaurante",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1501",
+              "fecha_gasto": "2026-10-19",
+              "fecha_rendicion": "2026-10-21",
+              "monto": 11500,
+              "tipo_documento": "voucher",
+              "proveedor": "Restaurante Sabores del Camino",
+              "glosa": "almuerzo en viaje a CD, revisión de inventario",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "rechazar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "reglas": [
+              "RG-01"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "rechazar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "motivo": "El gasto G-1501 se rinde con un documento de tipo 'voucher' en la categoría Almuerzo de la política P02 (Viajes Internos). Según la regla RG-01, el voucher solo se acepta en taxis, aplicaciones de transporte y buses interurbanos; para restaurantes se requiere boleta o factura. Incumplimiento de RG-01 con efecto de rechazo.",
+            "reglas_citadas": [
+              "P02",
+              "RG-01"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2458
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2772
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3169
+              }
+            ],
+            "texto": "Decisión: RECHAZAR\nPolítica: P02\nCategoría: Almuerzo\nCuenta: CTA-6110\nMotivo: El gasto G-1501 se rinde con un documento de tipo 'voucher' en la categoría Almuerzo de la política P02 (Viajes Internos). Según la regla RG-01, el voucher solo se acepta en taxis, aplicaciones de transporte y buses interurbanos; para restaurantes se requiere boleta o factura. Incumplimiento de RG-01 con efecto de rechazo."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-16",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Chofer del CD: almuerzo de agosto rendido el 20 de septiembre, sin visto bueno",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1601",
+              "fecha_gasto": "2026-08-18",
+              "fecha_rendicion": "2026-09-20",
+              "monto": 8500,
+              "tipo_documento": "boleta",
+              "proveedor": "Cocinería El Descanso",
+              "glosa": "almuerzo ruta de reparto a tiendas",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "CD",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "rechazar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "reglas": [
+              "RG-03"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "rechazar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "motivo": "El gasto fue rendido el 2026-09-20 para un gasto realizado el 2026-08-18, excediendo el plazo máximo del día 10 del mes siguiente (RG-03) y sin contar con el visto bueno del Gerente General. Por lo tanto, el gasto se rechaza.",
+            "reglas_citadas": [
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2663
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2977
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3265
+              }
+            ],
+            "texto": "Decisión: RECHAZAR\nPolítica: P02\nCategoría: Almuerzo\nCuenta: CTA-6110\nMotivo: El gasto fue rendido el 2026-09-20 para un gasto realizado el 2026-08-18, excediendo el plazo máximo del día 10 del mes siguiente (RG-03) y sin contar con el visto bueno del Gerente General. Por lo tanto, el gasto se rechaza."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-17",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Chofer del CD: mismo atraso que GS-16, con visto bueno del Gerente General",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1701",
+              "fecha_gasto": "2026-08-18",
+              "fecha_rendicion": "2026-09-20",
+              "monto": 8500,
+              "tipo_documento": "boleta",
+              "proveedor": "Cocinería El Descanso",
+              "glosa": "almuerzo ruta de reparto a tiendas, con VB de gerencia",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "CD",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": true,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "reglas": [
+              "RG-03"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "motivo": "El gasto fue rendido fuera del plazo establecido (RG-03), superando el día 10 del mes siguiente. Sin embargo, cuenta con el visto bueno del Gerente General, por lo que queda observado para revisión.",
+            "reglas_citadas": [
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2663
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2977
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo plazo rendicion",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3265
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P02\nCategoría: Almuerzo\nCuenta: CTA-6110\nMotivo: El gasto fue rendido fuera del plazo establecido (RG-03), superando el día 10 del mes siguiente. Sin embargo, cuenta con el visto bueno del Gerente General, por lo que queda observado para revisión."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-18",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Maestro de OYM: mantención menor de camioneta de la empresa sin patente",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1801",
+              "fecha_gasto": "2026-10-10",
+              "fecha_rendicion": "2026-10-13",
+              "monto": 24000,
+              "tipo_documento": "factura",
+              "proveedor": "Lubricentro El Pistón",
+              "glosa": "cambio de aceite y filtro camioneta de mantención",
+              "politica_declarada": "Flota de Camiones y Camionetas",
+              "categoria_declarada": "Mantenciones menores",
+              "unidad_negocio": "OYM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P04",
+            "categoria": "Mantenciones menores",
+            "cuenta": "CTA-6300",
+            "reglas": [
+              "RG-10"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P04",
+            "categoria": "Mantenciones menores",
+            "cuenta": "CTA-6300",
+            "motivo": "El gasto cumple con el plazo de rendición y el tipo de documento permitido, pero presenta un incumplimiento de la regla RG-10 por omisión del campo obligatorio 'patente' requerido por la política P04. Queda observado hasta que se complete la información.",
+            "reglas_citadas": [
+              "P04",
+              "RG-10"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Flota de Camiones y Camionetas Mantenciones menores patentes vehiculos obligatorios",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2164
+              },
+              {
+                "consulta": "Flota de Camiones y Camionetas Mantenciones menores patentes vehiculos obligatorios",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.2877
+              },
+              {
+                "consulta": "Flota de Camiones y Camionetas Mantenciones menores patentes vehiculos obligatorios",
+                "politica": "Mantención de Instalaciones",
+                "fuente": "datos/politica_ficticia.md#P10",
+                "puntaje": -0.3212
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P04\nCategoría: Mantenciones menores\nCuenta: CTA-6300\nMotivo: El gasto cumple con el plazo de rendición y el tipo de documento permitido, pero presenta un incumplimiento de la regla RG-10 por omisión del campo obligatorio 'patente' requerido por la política P04. Queda observado hasta que se complete la información."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-19",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Operador del CD: recarga de gas de grúa con código GH-09 (no existe)",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1901",
+              "fecha_gasto": "2026-10-15",
+              "fecha_rendicion": "2026-10-16",
+              "monto": 31500,
+              "tipo_documento": "factura",
+              "proveedor": "Gases Industriales del Pacífico Sur",
+              "glosa": "recarga cilindro de gas grúa horquilla",
+              "politica_declarada": "Grúas Horquilla",
+              "categoria_declarada": "Gas",
+              "unidad_negocio": "CD",
+              "patente": "GH-09",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P05",
+            "categoria": "Gas",
+            "cuenta": "CTA-6902",
+            "reglas": [
+              "RG-10"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P05",
+            "categoria": "Gas",
+            "cuenta": "CTA-6902",
+            "motivo": "El gasto presenta un incumplimiento de la regla RG-10: el código de equipo 'GH-09' no se encuentra en la tabla de equipos vigentes de la política P05 (Grúas Horquilla). Debe corregirse el código de la patente/equipo para proceder.",
+            "reglas_citadas": [
+              "P05",
+              "RG-10"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Grúas Horquilla",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.2633
+              },
+              {
+                "consulta": "Grúas Horquilla",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.3652
+              },
+              {
+                "consulta": "Grúas Horquilla",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.3695
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P05\nCategoría: Gas\nCuenta: CTA-6902\nMotivo: El gasto presenta un incumplimiento de la regla RG-10: el código de equipo 'GH-09' no se encuentra en la tabla de equipos vigentes de la política P05 (Grúas Horquilla). Debe corregirse el código de la patente/equipo para proceder."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-20",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Técnico del Taller Marino: insumos para una OT sin número de OT",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2001",
+              "fecha_gasto": "2026-10-20",
+              "fecha_rendicion": "2026-10-22",
+              "monto": 42000,
+              "tipo_documento": "factura",
+              "proveedor": "Náutica y Repuestos Puerto Azul",
+              "glosa": "sellos de bomba para reparación de embarcación de cliente",
+              "politica_declarada": "Servicios del Taller Marino",
+              "categoria_declarada": "Insumos para la OT",
+              "unidad_negocio": "TMA",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P06",
+            "categoria": "Insumos para la OT",
+            "cuenta": "CTA-3010",
+            "reglas": [
+              "RG-10"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P06",
+            "categoria": "Insumos para la OT",
+            "cuenta": "CTA-3010",
+            "motivo": "El gasto cumple con los requisitos generales de documento y plazo, pero falta el número de orden de trabajo (OT), el cual es un campo obligatorio según la política P06. Queda observado para su corrección según RG-10.",
+            "reglas_citadas": [
+              "P06",
+              "RG-10"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Servicios del Taller Marino Insumos para la OT",
+                "politica": "Servicios del Taller Marino",
+                "fuente": "datos/politica_ficticia.md#P06",
+                "puntaje": -0.2479
+              },
+              {
+                "consulta": "Servicios del Taller Marino Insumos para la OT",
+                "politica": "Mantención de Instalaciones",
+                "fuente": "datos/politica_ficticia.md#P10",
+                "puntaje": -0.3216
+              },
+              {
+                "consulta": "Servicios del Taller Marino Insumos para la OT",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.3264
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P06\nCategoría: Insumos para la OT\nCuenta: CTA-3010\nMotivo: El gasto cumple con los requisitos generales de documento y plazo, pero falta el número de orden de trabajo (OT), el cual es un campo obligatorio según la política P06. Queda observado para su corrección según RG-10."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-21",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Jefe de tienda: pintura rendida por TIE en P10 (exclusiva de OYM)",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2101",
+              "fecha_gasto": "2026-10-08",
+              "fecha_rendicion": "2026-10-12",
+              "monto": 23500,
+              "tipo_documento": "boleta",
+              "proveedor": "Ferretería Los Castaños",
+              "glosa": "pintura y rodillos para muro de bodega de tienda",
+              "politica_declarada": "Mantención de Instalaciones",
+              "categoria_declarada": "Materiales de mantención",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "reglas": [
+              "RG-07"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P10",
+            "categoria": "Materiales de mantención",
+            "cuenta": "CTA-6302",
+            "motivo": "El gasto fue realizado por la unidad TIE, pero la política P10 (Mantención de Instalaciones) es exclusiva de la unidad OYM según la regla RG-07. Queda observado para su reclasificación bajo la cuenta CTA-6302.",
+            "reglas_citadas": [
+              "P10",
+              "RG-07"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Mantención de Instalaciones",
+                "politica": "Mantención de Instalaciones",
+                "fuente": "datos/politica_ficticia.md#P10",
+                "puntaje": -0.2418
+              },
+              {
+                "consulta": "Mantención de Instalaciones",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.3217
+              },
+              {
+                "consulta": "Mantención de Instalaciones",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.3414
+              },
+              {
+                "consulta": "Mantención de Instalaciones",
+                "politica": "Insumos de Oficina y Aseo",
+                "fuente": "datos/politica_ficticia.md#P09",
+                "puntaje": -0.3485
+              },
+              {
+                "consulta": "Mantención de Instalaciones",
+                "politica": "Servicios del Taller Marino",
+                "fuente": "datos/politica_ficticia.md#P06",
+                "puntaje": -0.365
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P10\nCategoría: Materiales de mantención\nCuenta: CTA-6302\nMotivo: El gasto fue realizado por la unidad TIE, pero la política P10 (Mantención de Instalaciones) es exclusiva de la unidad OYM según la regla RG-07. Queda observado para su reclasificación bajo la cuenta CTA-6302."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-22",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Jefa de tienda: almuerzo en viaje entre sedes sobre el tope de $20.000",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2201",
+              "fecha_gasto": "2026-10-22",
+              "fecha_rendicion": "2026-10-26",
+              "monto": 27500,
+              "tipo_documento": "boleta",
+              "proveedor": "Restaurante Don Aurelio",
+              "glosa": "almuerzo equipo de tienda en visita a CD",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "reglas": [
+              "RG-05"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "motivo": "El gasto cumple con los requisitos de la política P02 (Viajes Internos) para almuerzo en visita entre sedes, pero el monto de $27.500 excede el tope por documento de $20.000 para la categoría Almuerzo, aplicando la regla RG-05. Se observa para que el colaborador justifique el exceso.",
+            "reglas_citadas": [
+              "P02",
+              "RG-05"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "almuerzo equipo de tienda viajes internos comidas viaticos",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2811
+              },
+              {
+                "consulta": "almuerzo equipo de tienda viajes internos comidas viaticos",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.3022
+              },
+              {
+                "consulta": "almuerzo equipo de tienda viajes internos comidas viaticos",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.3112
+              },
+              {
+                "consulta": "almuerzo equipo de tienda viajes internos comidas viaticos",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3118
+              },
+              {
+                "consulta": "almuerzo equipo de tienda viajes internos comidas viaticos",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.3376
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P02\nCategoría: Almuerzo\nCuenta: CTA-6110\nMotivo: El gasto cumple con los requisitos de la política P02 (Viajes Internos) para almuerzo en visita entre sedes, pero el monto de $27.500 excede el tope por documento de $20.000 para la categoría Almuerzo, aplicando la regla RG-05. Se observa para que el colaborador justifique el exceso."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-23",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Administrativo: regalo para un familiar declarado como Gastos del Personal",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2301",
+              "fecha_gasto": "2026-10-17",
+              "fecha_rendicion": "2026-10-19",
+              "monto": 34900,
+              "tipo_documento": "boleta",
+              "proveedor": "Tienda de Regalos Arcoíris",
+              "glosa": "regalo de cumpleaños para mi sobrino",
+              "politica_declarada": "Gastos del Personal",
+              "categoria_declarada": "Cumpleaños",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "rechazar",
+            "reglas": [
+              "RG-02"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "rechazar",
+            "politica": "P08",
+            "categoria": "Cumpleaños",
+            "cuenta": "CTA-5205",
+            "motivo": "El gasto se rechaza conforme a la regla RG-02, ya que corresponde a un gasto personal prohibido (regalo de cumpleaños para un familiar/sobrino). Política P08.",
+            "reglas_citadas": [
+              "P08",
+              "RG-02"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Gastos del Personal Cumpleaños regalo de cumpleaños",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.2528
+              },
+              {
+                "consulta": "Gastos del Personal Cumpleaños regalo de cumpleaños",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.3253
+              },
+              {
+                "consulta": "Gastos del Personal Cumpleaños regalo de cumpleaños",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.3405
+              }
+            ],
+            "texto": "Decisión: RECHAZAR\nPolítica: P08\nCategoría: Cumpleaños\nCuenta: CTA-5205\nMotivo: El gasto se rechaza conforme a la regla RG-02, ya que corresponde a un gasto personal prohibido (regalo de cumpleaños para un familiar/sobrino). Política P08."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-24",
+      "grupo": "C-regla",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Chofer del CD: multa de tránsito de camión de la empresa, con patente",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2401",
+              "fecha_gasto": "2026-10-09",
+              "fecha_rendicion": "2026-10-14",
+              "monto": 96500,
+              "tipo_documento": "boleta",
+              "proveedor": "Tesorería Municipal Ficticia",
+              "glosa": "multa por exceso de velocidad camión de reparto",
+              "politica_declarada": "Flota de Camiones y Camionetas",
+              "categoria_declarada": "Multa",
+              "unidad_negocio": "CD",
+              "patente": "RTZX17",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P04",
+            "categoria": "Multa",
+            "cuenta": "CTA-8500",
+            "reglas": [
+              "P04"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P04",
+            "categoria": "Multa",
+            "cuenta": "CTA-8500",
+            "motivo": "El gasto corresponde a una multa de tránsito de un camión de la empresa bajo la política P04. De acuerdo con la regla especial de P04, estas multas se registran en la cuenta CTA-8500 (Gasto Rechazado, no deducible) y quedan observadas para que la jefatura decida si se descuentan al conductor.",
+            "reglas_citadas": [
+              "P04"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "multa camión de reparto flota camiones y camionetas P04",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.1996
+              },
+              {
+                "consulta": "multa camión de reparto flota camiones y camionetas P04",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.3044
+              },
+              {
+                "consulta": "multa camión de reparto flota camiones y camionetas P04",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.3179
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P04\nCategoría: Multa\nCuenta: CTA-8500\nMotivo: El gasto corresponde a una multa de tránsito de un camión de la empresa bajo la política P04. De acuerdo con la regla especial de P04, estas multas se registran en la cuenta CTA-8500 (Gasto Rechazado, no deducible) y quedan observadas para que la jefatura decida si se descuentan al conductor."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    }
+  ]
+}
