@@ -119,7 +119,8 @@ Todo es ficticio. Los casos se construyeron con patrones agregados; ningún regi
 ## Ejecución paso a paso
 
 Comandos comprobados en Linux con Python 3.12.3, salvo los marcados como **no probado**. Los que usan
-Gemini o Redis lo indican.
+Gemini o Redis lo indican. El informe de la prueba desde cero está en
+[docs/ensayo_revisor.md](docs/ensayo_revisor.md).
 
 ### 1. Crear el entorno
 
@@ -156,7 +157,8 @@ python verificar.py                # no necesita clave
 python verificar.py --con-llm      # usa Gemini y Redis; no probado en esta revisión
 ```
 
-Sin credenciales, `verificar.py` marca ⚠️ en lo que necesita Redis o Gemini. Debe terminar sin ❌.
+Resultado esperado de `python verificar.py`: `Todo en orden`, sin ningún ❌. Sin credenciales da 42 ✅
+y un ⚠️, porque omite la búsqueda en Redis; con credenciales reales da 43 ✅.
 
 ### 4. Cargar el índice
 
@@ -169,21 +171,30 @@ el índice es compartido. Si ya está cargado con la versión vigente de la pol�
 
 ### 5. Ejecutar el notebook
 
-Abre `agente.ipynb`, elige como kernel el `.venv` de esta carpeta y ejecútalo de arriba abajo. Usa
-Gemini y Redis. **No probado completo:** las secciones 5, 6 y 9 aún están por completar.
+Usa Gemini y Redis. **No probado completo:** las secciones 5, 6 y 9 aún están por completar.
+
+- **Con VS Code:** instala las extensiones Python y Jupyter, abre `agente.ipynb`, elige como kernel el
+  `.venv` de esta carpeta y ejecuta todas las celdas. `requirements.txt` no instala Jupyter Notebook
+  ni JupyterLab.
+- **Por consola:** crea una copia con las salidas, que no se sube al repositorio:
+
+```bash
+python -m jupyter nbconvert --to notebook --execute agente.ipynb --output agente_ejecutado.ipynb
+```
 
 ### 6. Correr el evaluador
 
 ```bash
-python pruebas/evaluar.py --autoprueba           # prueba el evaluador, sin LLM ni clave
-python pruebas/evaluar.py --seco                 # revisa el golden set, sin LLM ni clave
-python pruebas/probar_herramientas.py            # prueba las herramientas, sin LLM ni clave
+python pruebas/evaluar.py --autoprueba           # sin LLM ni clave; esperado: 83 de 83 ✅
+python pruebas/evaluar.py --seco                 # sin LLM ni clave; esperado: 34 de 34 casos
+python pruebas/probar_herramientas.py            # sin LLM ni clave; esperado: 56 ✅ 0 ❌
 python pruebas/evaluar.py --caso GS-07 --pausa 15   # un caso; usa Gemini y Redis
 python pruebas/evaluar.py --grupo B --pausa 15   # un grupo (A a F); usa Gemini y Redis
 ```
 
 Una corrida completa son unas 130 llamadas a Gemini. Conviene correr grupo por grupo con `--pausa 15`,
-como se hizo en la corrida 1. Más opciones en [pruebas/README.md](pruebas/README.md).
+como se hizo en la corrida 1. Cada corrida con Gemini guarda un `.md` y un `.json` en
+`pruebas/resultados/`. Más opciones en [pruebas/README.md](pruebas/README.md).
 
 ## Pruebas y resultados
 
