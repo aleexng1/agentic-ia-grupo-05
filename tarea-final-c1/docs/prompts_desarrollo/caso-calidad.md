@@ -1398,3 +1398,63 @@ Recordatorio: la corrida final se hace cuando estén los PR de Matías y Eduardo
 ````
 
 **Resultado (una línea):** La política subió a v1.4 sin cambiar reglas, topes ni categorías; GS-10 y GS-29 tienen una sola respuesta correcta y ningún otro caso cambia. Tras recargar `grupo05`, la prueba de estabilidad dio GS-07 3 de 3, GS-29 3 de 3 y GS-10 2 de 3.
+
+---
+
+## 22. Política v1.5, GS-34 y errores de herramientas en los resultados
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Cerrar el hueco de la comida individual sin viaje, probarlo con un caso nuevo y guardar por qué se rechaza una herramienta, como el `emitir_veredicto` de GS-10.
+
+**Prompt completo:**
+
+````text
+Siguiente ronda. Explícame en simple y detente en las pausas. NO recargues grupo05 en
+esta ronda: la próxima recarga será una sola, cuando Eduardo cambie el cargador.
+
+PASO 1 — Política v1.5 (en tf/caso-calidad, trayendo main). Será la última versión
+antes de la entrega.
+- En P02 y P03, ajusta la frase de la v1.4: "Comidas sin un viaje de por medio no son
+  gastos de viaje. Si son para una reunión interna o una capacitación, van en P08; si
+  son una comida individual (por ejemplo, el almuerzo diario en la oficina), son un
+  gasto personal y se rechazan (RG-02)."
+- En RG-02, agrega como ejemplo de gasto personal: "la alimentación individual en el
+  lugar de trabajo, sin viaje ni reunión".
+- Versión 1.5 e historial. Revisa que ningún caso del golden set cambie de respuesta.
+- verificar.py, probar_herramientas.py, --autoprueba. Commit, PR y únelo.
+
+PASO 2 — Golden set v1.3
+Agrega GS-34 (grupo C-regla, origen diseñado): almuerzo individual en la oficina de la
+tienda, boleta, dentro de plazo, declarado P02/Almuerzo → rechazar, [RG-02]. Datos
+realistas y ficticios, como los demás. Historial en el JSON: "1.3: se agrega GS-34
+(alimentación individual sin viaje), por la aclaración de la política v1.5". Actualiza
+golden_set_revision.md y el README. No cambies ningún otro caso.
+
+PASO 3 — Evaluador
+Guarda en los resultados, por cada turno, los mensajes de error que recibió el LLM de
+sus herramientas (por ejemplo, por qué se rechazó un emitir_veredicto), y muéstralos en
+el .md junto a los fragmentos. Agrega su autoprueba.
+--autoprueba, verificar.py. Commit del paso 2 y 3, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+Resultados de la estabilidad (8 de 9, sin aprobaciones indebidas). Pendientes:
+🔴 Eduardo (cargador, una sola recarga con todo):
+   1. NO usar la sección "Cuándo NO usarla" para calcular el vector de búsqueda (sí
+      incluirla en el texto que recibe el LLM). Las aclaraciones negativas de la v1.4
+      hicieron que "desayuno en la oficina" trajera P02 primero.
+   2. Reglas RG-01 a RG-10 como documentos propios.
+   3. Dimensiones, métrica y algoritmo explícitos y documentados; prefijo doble.
+   Cuando esté listo, avísame y coordinamos la recarga de grupo05.
+   Además: errores de Redis, k fuera de rango o consulta vacía sin cortar el turno, y
+   reintentos del juez iguales a los del agente.
+🔴 Eduardo: PROMPT_SISTEMA y el juez deben cuestionar la política elegida contra el
+   "Cuándo NO usarla".
+🟠 Para acordar (Matías lo aplica): subir MAX_PASOS de 6 a 10. En GS-10 el agente se
+   quedó sin pasos tras un emitir_veredicto rechazado y no alcanzó a corregir.
+🔴 Matías: PR corto con el filtro por turno, notebook secciones 8 y 10, y nucleo.md.
+Política congelada en v1.5 hasta la entrega, salvo un error grave.
+````
+
+**Resultado (una línea):** La política subió a v1.5 sin cambiar la respuesta de ningún caso.
