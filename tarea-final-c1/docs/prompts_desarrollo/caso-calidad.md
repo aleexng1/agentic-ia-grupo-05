@@ -1457,4 +1457,4 @@ Resultados de la estabilidad (8 de 9, sin aprobaciones indebidas). Pendientes:
 Política congelada en v1.5 hasta la entrega, salvo un error grave.
 ````
 
-**Resultado (una línea):** La política subió a v1.5 sin cambiar la respuesta de ningún caso.
+**Resultado (una línea):** La política subió a v1.5 sin cambiar la respuesta de ningún caso; el golden set v1.3 agrega GS-34 y cada turno guarda los errores de herramientas que recibió el LLM (autoprueba 83 de 83).
