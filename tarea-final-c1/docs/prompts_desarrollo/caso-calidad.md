@@ -1313,3 +1313,36 @@ Cuando tenga 1 a 3 listos, coordinamos una recarga de grupo05 antes de la corrid
 ````
 
 **Resultado (una línea):** El PR #16 quedó unido y la política subió a v1.3: GS-03 y GS-10 tienen una sola respuesta correcta, y `verificar.py`, `probar_herramientas.py` y la autoprueba pasan.
+
+---
+
+## 20. Tope de Capacitaciones en la política v1.3
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Cerrar el hueco que dejó la v1.3: al separar Capacitaciones de Coffee break, esa categoría quedaba sin tope.
+
+**Prompt completo:**
+
+````text
+Antes de cargar, cierra el hueco de Capacitaciones dentro de la misma v1.3 (todavía no
+se ha cargado ni usado en ninguna corrida):
+1. Calcula el tope de Capacitaciones (P08) con el mismo método de los demás: percentil
+   90 del monto por documento de "Gastos del Personal / Capacitaciones" en
+   ~/datos-privados/rendiciones_reducido.csv (sin Estado_Gasto = 0), redondeado hacia
+   arriba al múltiplo de $5.000. Muéstrame el resultado y el % de gastos sobre el tope.
+2. Agrégalo a la tabla de topes de P08 y amplía la línea 1.3 del historial: "... y se
+   agrega tope por documento para Capacitaciones".
+3. Comprueba con validar_gasto que un gasto de Capacitaciones sobre el tope quede en
+   observar por RG-05, y que GS-03 ($12.800) siga aprobándose. Corre verificar.py,
+   probar_herramientas.py y --autoprueba. Commit, PR y únelo.
+
+Después, con mi visto bueno ya dado: carga grupo05 desde main, haz las comprobaciones,
+las 4 búsquedas y sigue con el PASO 4.
+
+En el mensaje del grupo agrega: Eduardo y Sebastián, actualizar las menciones de versión
+de la política en src/seguridad.py y src/herramientas.py (ahora v1.3).
+````
+
+**Resultado (una línea):** Capacitaciones queda con tope de $35.000 (156 gastos, 7,7 % sobre el tope); sobre ese monto `validar_gasto` observa por RG-05 y GS-03 sigue aprobándose.
