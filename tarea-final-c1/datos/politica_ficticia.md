@@ -6,7 +6,7 @@
 |---|---|
 | Empresa | Comercial Los Alerces SpA |
 | Código | POL-RG-01 |
-| Versión | 1.3 (2026-11) |
+| Versión | 1.4 (2026-11) |
 | Dueño | Gerencia de Administración y Finanzas |
 | Revisión inicial | Control de Gestión |
 
@@ -84,7 +84,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **Cuándo usarla.** Un jefe de tienda que viaja al Centro de Distribución, un analista que visita tiendas de otra ciudad.
 
-**Cuándo NO usarla.** Viajes a proveedores, clientes o ferias van en P03. Si el viaje es con auto propio o auto liviano arrendado, los gastos del vehículo van en P01.
+**Cuándo NO usarla.** Viajes a proveedores, clientes o ferias van en P03. Si el viaje es con auto propio o auto liviano arrendado, los gastos del vehículo van en P01. Comidas sin un viaje de por medio (por ejemplo, un desayuno o almuerzo en la propia oficina o tienda) no son gastos de viaje: van en P08.
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
@@ -115,7 +115,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **Cuándo usarla.** Visita a una fábrica proveedora, asistencia a una feria comercial, reunión con un cliente empresa.
 
-**Cuándo NO usarla.** Viajes entre sedes propias van en P02. Gastos del vehículo propio o de auto liviano arrendado van en P01. Viajes por una OT del Taller Marino van en P06.
+**Cuándo NO usarla.** Viajes entre sedes propias van en P02. Gastos del vehículo propio o de auto liviano arrendado van en P01. Viajes por una OT del Taller Marino van en P06. Comidas sin un viaje de por medio (por ejemplo, un desayuno o almuerzo en la propia oficina o tienda) no son gastos de viaje: van en P08.
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
@@ -254,7 +254,7 @@ Un código que no esté en esta tabla no es válido.
 - **Coffee break:** alimentación o café para reuniones internas.
 - **Capacitaciones:** alimentación o café durante una capacitación.
 
-**Cuándo NO usarla.** Comidas durante un viaje de trabajo van en P02 o P03 (Gastos de Estadía). Eventos para clientes van con Marketing (fuera del alcance de esta política).
+**Cuándo NO usarla.** Comidas durante un viaje de trabajo van en P02 o P03 (Gastos de Estadía). Eventos para clientes van con Marketing (fuera del alcance de esta política). Ingredientes o productos para preparar comida que se vende en la Cafetería Alerces van en P07 (solo con factura), aunque sean alimentos.
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura.
@@ -320,3 +320,4 @@ Un código que no esté en esta tabla no es válido.
 | 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
 | 1.2 | RG-10 ampliada: una fecha de rendición anterior a la fecha del gasto es un dato inconsistente y deja el gasto observado. |
 | 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08 y se agrega tope por documento para Capacitaciones. |
+| 1.4 | Se aclaran los límites entre P02/P03 y P08, y entre P08 y P07. |
