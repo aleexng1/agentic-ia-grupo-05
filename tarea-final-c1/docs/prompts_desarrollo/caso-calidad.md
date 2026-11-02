@@ -1397,4 +1397,4 @@ Resultados de la corrida 1 (31/33) y de la prueba de estabilidad. Pendientes:
 Recordatorio: la corrida final se hace cuando estén los PR de Matías y Eduardo.
 ````
 
-**Resultado (una línea):** La política subió a v1.4 sin cambiar reglas, topes ni categorías; GS-10 y GS-29 tienen una sola respuesta correcta y ningún otro caso cambia.
+**Resultado (una línea):** La política subió a v1.4 sin cambiar reglas, topes ni categorías; GS-10 y GS-29 tienen una sola respuesta correcta y ningún otro caso cambia. Tras recargar `grupo05`, la prueba de estabilidad dio GS-07 3 de 3, GS-29 3 de 3 y GS-10 2 de 3.

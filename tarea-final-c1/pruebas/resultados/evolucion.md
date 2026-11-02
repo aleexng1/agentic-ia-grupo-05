@@ -53,3 +53,7 @@ lectura era defendible con el texto antiguo.
 
 **Evidencia:** [`corrida_1_grupo_A.md`](corrida_1_grupo_A.md) y
 [`corrida_1_repeticion_GS-03_GS-06.md`](corrida_1_repeticion_GS-03_GS-06.md), una vez cada una.
+
+## 3. Límites entre P02/P03, P08 y P07 (política v1.4)
+
+En la corrida 1, con la v1.3, fallaron GS-10 y GS-29; tras la v1.4 y en 3 repeticiones (commit `b03fd4c`), GS-29 pasa 3 de 3, GS-07 pasa 3 de 3 y GS-10 pasa 2 de 3, sin ninguna aprobación indebida: su ❌ agotó los 6 pasos sin veredicto. Detalle en [`estabilidad_v1_4.md`](estabilidad_v1_4.md).
