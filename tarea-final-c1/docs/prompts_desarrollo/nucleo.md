@@ -305,20 +305,33 @@ En tf/nucleo, sustituye en src/grafo.py las llamadas a fondo_inicial por buscar_
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Atender el nuevo pendiente de Alex para Núcleo, cubrir cualquier respuesta final sin veredicto válido y mostrar la acción del registro desde el flujo real del agente.
 
-**Prompt de trabajo (resumen fiel de la solicitud):**
+**Prompt exacto de Matías:**
 
 ````text
-Actualiza mi rama con lo nuevo de main y trabaja solo los pendientes de Núcleo de Alex:
-- Si el turno trae un gasto y no hay un emitir_veredicto válido, reemplaza el mensaje final
-  completo por una respuesta segura, sin depender de frases específicas del LLM.
-- En agente.ipynb, demuestra el antes/después del registro a partir de una corrida del agente,
-  sin llamar registrar_veredicto directamente desde el notebook.
-- Haz que la sección 10 use evaluar() y mostrar_tabla() de pruebas/evaluar.py, con una
-  selección dirigida de uno o dos casos, nunca una corrida completa por defecto.
-- Actualiza este registro de prompts.
-- No cambies MAX_PASOS (src/contrato.py compartido) hasta que el equipo vote 👍/👎.
+escribió esto Alex, que tengo que decir y que podemos hacer? es necesario hacer algo de inmediatto?
+````
 
-Valida con pruebas sin cuota, no recargues Redis y reporta qué requiere Gemini/Redis.
+**Extracto literal del encargo de Alex:**
+
+````text
+🔴 Matías: en docs/prompts_desarrollo/nucleo.md, la entrada nueva dice "resumen fiel de la
+solicitud". La pauta pide adjuntar los prompts: pega el texto exacto.
+
+🔴 Matías — PR corto:
+- Filtro por turno: si el turno trae un gasto y no hubo un emitir_veredicto válido,
+  reemplazar el mensaje final completo por una respuesta segura, diga lo que diga. Hoy
+  el filtro de frases deja pasar 11 de 15 variantes ("*Decisión:* APROBAR",
+  "Apruebo este gasto"…). Esto puede costar los 0,5 de seguridad en la prueba de jailbreak
+  del revisor.
+- Notebook: la sección 8 debe mostrar el registro antes/después desde una corrida del
+  agente (no llamando directo a registrar_veredicto). La sección 10 debe usar evaluar()
+  y mostrar_tabla() de pruebas/evaluar.py.
+- Actualizar docs/prompts_desarrollo/nucleo.md.
+
+🟠 PARA ACORDAR (respondan 👍 o 👎): subir MAX_PASOS de 6 a 10 (src/contrato.py,
+compartido; lo aplica Matías).
+
+Autorización posterior de Alex: "dale nomás Matías con los 10 y el PR con el MAX_PASOS modificado".
 ````
 
 **Resultado (una línea):** Tras el acuerdo de Alex y el voto 👍 de Matías, `MAX_PASOS` quedó en 10 y su comprobación del contrato se actualizó. El filtro bloqueó 15/15 variantes sin veredicto; la sección 8 mostró el antes/después de SQLite desde el cierre del agente y la 10 llamó `evaluar()`/`mostrar_tabla()` con GS-07. Pasaron las pruebas offline; no se usó Gemini ni Redis.
