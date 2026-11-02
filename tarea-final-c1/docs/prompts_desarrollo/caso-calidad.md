@@ -1176,7 +1176,7 @@ cada uno, ordenado por prioridad. Recordatorio: no gastar cuota en corridas comp
 usar --caso con uno o dos casos.
 ````
 
-**Resultado (una línea):** El PR #17 quedó unido: 6 de 7 casos con Gemini, sin 429; GS-01 y GS-26 pasan; quedan abiertos el filtro de texto y las secciones 8 y 10 del notebook.
+**Resultado (una línea):** El PR #17 quedó unido: 6 de 7 casos con Gemini, sin 429; GS-01 y GS-26 pasan; quedan abiertos el filtro de texto y las secciones 8 y 10 del notebook. La corrida 1 quedó parcial: se detuvo en el grupo A (4 de 6) porque el juez no respondió en GS-06.
 
 ---
 

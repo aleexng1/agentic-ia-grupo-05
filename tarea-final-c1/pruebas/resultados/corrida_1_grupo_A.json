@@ -1,0 +1,657 @@
+{
+  "fecha": "2026-11-02_1817",
+  "golden_version": "1.2",
+  "politica_version_golden": "1.1",
+  "politica_vigente": "1.2 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "d97b3a50a6a8392520bcc99ec788431f7f1f9e33",
+  "filtros": {
+    "casos": null,
+    "grupo": "A",
+    "componente": null,
+    "pausa": 8.0
+  },
+  "resumen": {
+    "total": 6,
+    "pasan": 4,
+    "por_grupo": {
+      "A-limpio": {
+        "total": 6,
+        "pasan": 4
+      }
+    },
+    "por_componente": {
+      "herramientas": {
+        "total": 6,
+        "pasan": 4
+      },
+      "nucleo": {
+        "total": 6,
+        "pasan": 4
+      },
+      "rag": {
+        "total": 6,
+        "pasan": 4
+      }
+    },
+    "por_causa": {
+      "juez_sin_respuesta": [
+        "GS-06"
+      ],
+      "otra": [
+        "GS-03"
+      ]
+    },
+    "turnos_sin_juez": [
+      "GS-06 turno 1"
+    ]
+  },
+  "casos": [
+    {
+      "id": "GS-01",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Chofer del CD: peaje entre CD y tienda en camión de la empresa",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0101",
+              "fecha_gasto": "2026-10-06",
+              "fecha_rendicion": "2026-10-09",
+              "monto": 7800,
+              "tipo_documento": "boleta",
+              "proveedor": "Concesionaria Vial Lago Verde",
+              "glosa": "peaje ida y vuelta CD - tienda Norte, camión de reparto",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Peaje",
+              "unidad_negocio": "CD",
+              "patente": "RZPT41",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Peaje",
+            "cuenta": "CTA-6100",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Peaje",
+            "cuenta": "CTA-6100",
+            "motivo": "El gasto cumple con todas las reglas aplicables de la política P02 (Viajes Internos), con la categoría Peaje y documento boleta válido. La rendición se realizó dentro del plazo normativo y el vehículo (camión) corresponde a la glosa y política de viajes entre sedes.",
+            "reglas_citadas": [
+              "P02"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "peajes transporte flota camiones de reparto politica vehiculos peaje",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.318
+              },
+              {
+                "consulta": "peajes transporte flota camiones de reparto politica vehiculos peaje",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.3498
+              },
+              {
+                "consulta": "peajes transporte flota camiones de reparto politica vehiculos peaje",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.3656
+              },
+              {
+                "consulta": "Viajes Internos peaje P02",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.1832
+              },
+              {
+                "consulta": "Viajes Internos peaje P02",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.242
+              },
+              {
+                "consulta": "Viajes Internos peaje P02",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2619
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P02\nCategoría: Peaje\nCuenta: CTA-6100\nMotivo: El gasto cumple con todas las reglas aplicables de la política P02 (Viajes Internos), con la categoría Peaje y documento boleta válido. La rendición se realizó dentro del plazo normativo y el vehículo (camión) corresponde a la glosa y política de viajes entre sedes."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-02",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Jefa de tienda: almuerzo en viaje al CD, bajo el tope",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0201",
+              "fecha_gasto": "2026-10-13",
+              "fecha_rendicion": "2026-10-15",
+              "monto": 9500,
+              "tipo_documento": "boleta",
+              "proveedor": "Restaurante El Fogón del Paso",
+              "glosa": "almuerzo visita a CD por inventario",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6110",
+            "motivo": "El gasto cumple con todas las reglas de la política P02 (Viajes Internos). La boleta es un documento válido (RG-01), se encuentra dentro del plazo de rendición (RG-03), el monto ($9.500) respeta el tope por documento de almuerzo ($20.000) y la clasificación declarada es correcta.",
+            "reglas_citadas": [
+              "P02",
+              "RG-01",
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2458
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2772
+              },
+              {
+                "consulta": "Viajes Internos Almuerzo",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.3233
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P02\nCategoría: Almuerzo\nCuenta: CTA-6110\nMotivo: El gasto cumple con todas las reglas de la política P02 (Viajes Internos). La boleta es un documento válido (RG-01), se encuentra dentro del plazo de rendición (RG-03), el monto ($9.500) respeta el tope por documento de almuerzo ($20.000) y la clasificación declarada es correcta."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-03",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Analista de personas: coffee break de una capacitación, bajo el tope",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0301",
+              "fecha_gasto": "2026-10-08",
+              "fecha_rendicion": "2026-10-12",
+              "monto": 12800,
+              "tipo_documento": "boleta",
+              "proveedor": "Cafetería Granos del Valle",
+              "glosa": "café y galletas para capacitación del equipo",
+              "politica_declarada": "Gastos del Personal",
+              "categoria_declarada": "Capacitaciones",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P08",
+            "categoria": "Capacitaciones",
+            "cuenta": "CTA-8010",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P08",
+            "categoria": "Coffee break",
+            "cuenta": "CTA-8010",
+            "motivo": "El gasto es válido pero la categoría declarada ('Capacitaciones') debe corregirse a 'Coffee break' dentro de la política P08 (Gastos del Personal) según la regla RG-09, manteniendo la cuenta CTA-8010.",
+            "reglas_citadas": [
+              "P08",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Capacitaciones Gastos del Personal Bienestar capacitación alimentación",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.2329
+              },
+              {
+                "consulta": "Capacitaciones Gastos del Personal Bienestar capacitación alimentación",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.3174
+              },
+              {
+                "consulta": "Capacitaciones Gastos del Personal Bienestar capacitación alimentación",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.326
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P08\nCategoría: Coffee break\nCuenta: CTA-8010\nMotivo: El gasto es válido pero la categoría declarada ('Capacitaciones') debe corregirse a 'Coffee break' dentro de la política P08 (Gastos del Personal) según la regla RG-09, manteniendo la cuenta CTA-8010."
+          },
+          "pasa": false,
+          "motivos": [
+            "decisión: esperado 'aprobar', obtenido 'observar'",
+            "categoría: esperado 'Capacitaciones', obtenido 'Coffee break'"
+          ]
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [
+        "turno 1 · decisión: esperado 'aprobar', obtenido 'observar'",
+        "turno 1 · categoría: esperado 'Capacitaciones', obtenido 'Coffee break'"
+      ],
+      "pasa": false,
+      "causa": "otra"
+    },
+    {
+      "id": "GS-04",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Administrativa de tienda: insumos de oficina",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0401",
+              "fecha_gasto": "2026-10-14",
+              "fecha_rendicion": "2026-10-16",
+              "monto": 8900,
+              "tipo_documento": "boleta",
+              "proveedor": "Librería y Papelería El Roble",
+              "glosa": "resmas, lápices y archivadores para tienda Centro",
+              "politica_declarada": "Insumos de Oficina y Aseo",
+              "categoria_declarada": "Insumos de oficina",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P09",
+            "categoria": "Insumos de oficina",
+            "cuenta": "CTA-6810",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P09",
+            "categoria": "Insumos de oficina",
+            "cuenta": "CTA-6810",
+            "motivo": "El gasto cumple con todas las reglas de la política P09 y las reglas generales. El tipo de documento (boleta), el plazo de rendición, el monto y la clasificación son correctos.",
+            "reglas_citadas": [
+              "P09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Insumos de Oficina y Aseo",
+                "politica": "Insumos de Oficina y Aseo",
+                "fuente": "datos/politica_ficticia.md#P09",
+                "puntaje": -0.2286
+              },
+              {
+                "consulta": "Insumos de Oficina y Aseo",
+                "politica": "Mantención de Instalaciones",
+                "fuente": "datos/politica_ficticia.md#P10",
+                "puntaje": -0.3139
+              },
+              {
+                "consulta": "Insumos de Oficina y Aseo",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.331
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P09\nCategoría: Insumos de oficina\nCuenta: CTA-6810\nMotivo: El gasto cumple con todas las reglas de la política P09 y las reglas generales. El tipo de documento (boleta), el plazo de rendición, el monto y la clasificación son correctos."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-05",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Encargado de cafetería: mercadería con factura",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0501",
+              "fecha_gasto": "2026-10-09",
+              "fecha_rendicion": "2026-10-12",
+              "monto": 18400,
+              "tipo_documento": "factura",
+              "proveedor": "Distribuidora Hortícola Valle Sur",
+              "glosa": "verduras y pan para preparación del día cafetería",
+              "politica_declarada": "Mercadería Cafetería",
+              "categoria_declarada": "Mercadería",
+              "unidad_negocio": "CAF",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P07",
+            "categoria": "Mercadería",
+            "cuenta": "CTA-3020",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P07",
+            "categoria": "Mercadería",
+            "cuenta": "CTA-3020",
+            "motivo": "El gasto cumple con todas las reglas de la política P07 (Mercadería Cafetería), se encuentra dentro del plazo de rendición (RG-03), el tipo de documento es factura (válido según P07) y la unidad de negocio CAF es la permitida. Se aprueba bajo la cuenta CTA-3020.",
+            "reglas_citadas": [
+              "P07",
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.2446
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Insumos de Oficina y Aseo",
+                "fuente": "datos/politica_ficticia.md#P09",
+                "puntaje": -0.3443
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.3491
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Mantención de Instalaciones",
+                "fuente": "datos/politica_ficticia.md#P10",
+                "puntaje": -0.3512
+              },
+              {
+                "consulta": "Mercadería Cafetería",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.3534
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P07\nCategoría: Mercadería\nCuenta: CTA-3020\nMotivo: El gasto cumple con todas las reglas de la política P07 (Mercadería Cafetería), se encuentra dentro del plazo de rendición (RG-03), el tipo de documento es factura (válido según P07) y la unidad de negocio CAF es la permitida. Se aprueba bajo la cuenta CTA-3020."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-06",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Comprador: taxi con voucher a la planta de un proveedor",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0601",
+              "fecha_gasto": "2026-10-15",
+              "fecha_rendicion": "2026-10-19",
+              "monto": 9800,
+              "tipo_documento": "voucher",
+              "proveedor": "Taxis Ejecutivos Bahía",
+              "glosa": "taxi a planta de proveedor de envases",
+              "politica_declarada": "Viajes Externos",
+              "categoria_declarada": "Locomoción",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P03",
+            "categoria": "Locomoción",
+            "cuenta": "CTA-6200",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P03",
+            "categoria": "Locomoción",
+            "cuenta": "CTA-6200",
+            "motivo": "El gasto cumple con todas las normativas aplicables de la política P03 (Viajes Externos): el tipo de documento (voucher) está permitido para taxi según RG-01, se encuentra dentro del plazo de rendición (RG-03), la categoría y política declaradas son correctas para una visita a proveedor, y no presenta observaciones ni incumplimientos según la validación. [Ajustado de APROBAR a OBSERVAR: falta de respuesta confiable del juez: No fue posible validar el veredicto por falta de respuesta confiable del juez; requiere revisión manual..]",
+            "reglas_citadas": [
+              "P03",
+              "RG-01",
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Locomoción Viajes Externos P02",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.1918
+              },
+              {
+                "consulta": "Locomoción Viajes Externos P02",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2048
+              },
+              {
+                "consulta": "Locomoción Viajes Externos P02",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2377
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\n\nAjusté la propuesta del agente (APROBAR): falta de respuesta confiable del juez: No fue posible validar el veredicto por falta de respuesta confiable del juez; requiere revisión manual.."
+          },
+          "pasa": false,
+          "motivos": [
+            "decisión: esperado 'aprobar', obtenido 'observar'"
+          ]
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [
+        "turno 1 · decisión: esperado 'aprobar', obtenido 'observar'"
+      ],
+      "pasa": false,
+      "causa": "juez_sin_respuesta"
+    }
+  ]
+}
