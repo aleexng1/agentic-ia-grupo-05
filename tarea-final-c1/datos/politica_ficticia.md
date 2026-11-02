@@ -6,7 +6,7 @@
 |---|---|
 | Empresa | Comercial Los Alerces SpA |
 | Código | POL-RG-01 |
-| Versión | 1.2 (2026-11) |
+| Versión | 1.3 (2026-11) |
 | Dueño | Gerencia de Administración y Finanzas |
 | Revisión inicial | Control de Gestión |
 
@@ -247,7 +247,12 @@ Un código que no esté en esta tabla no es válido.
 
 **Descripción.** Gastos para el bienestar, la formación y la seguridad de los colaboradores.
 
-**Cuándo usarla.** Coffee break de una reunión o capacitación, celebración de cumpleaños del equipo, agua para la tienda, elementos de prevención de riesgos.
+**Cuándo usarla.** Alimentación o café para una reunión interna o una capacitación, celebración de cumpleaños del equipo, agua para la tienda, elementos de prevención de riesgos.
+
+**Categorías del grupo Coffee Break.**
+
+- **Coffee break:** alimentación o café para reuniones internas.
+- **Capacitaciones:** alimentación o café durante una capacitación.
 
 **Cuándo NO usarla.** Comidas durante un viaje de trabajo van en P02 o P03 (Gastos de Estadía). Eventos para clientes van con Marketing (fuera del alcance de esta política).
 
@@ -314,3 +319,4 @@ Un código que no esté en esta tabla no es válido.
 | 1.0 | Versión inicial. |
 | 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
 | 1.2 | RG-10 ampliada: una fecha de rendición anterior a la fecha del gasto es un dato inconsistente y deja el gasto observado. |
+| 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08. |

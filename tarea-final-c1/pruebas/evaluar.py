@@ -1047,7 +1047,7 @@ def autoprueba() -> int:
         anotar("nunca guarda la clave ni la URL de Redis", "clave-falsa" not in contenido and "secreta" not in contenido)
         datos = json.loads(ruta_json.read_text(encoding="utf-8"))
         claves = {"golden_version", "politica_version_golden", "politica_vigente", "modelo", "temperatura", "commit", "filtros"}
-        anotar("guarda versiones, modelo, commit y filtros", claves <= set(datos) and datos["politica_vigente"].startswith("1.2"))
+        anotar("guarda versiones, modelo, commit y filtros", claves <= set(datos) and datos["politica_vigente"] == leer_politica()["version"])
 
     print("\n=== G. Con el grafo real y un LLM falso ===")
     herramientas = [
