@@ -78,6 +78,16 @@ VEREDICTO_CONTROL = {
     "cuenta_sugerida": "-",
 }
 
+# Causas de un ❌. El grafo deja escrito en el motivo cuando el juez bloquea una aprobación, y la
+# razón del juez dice si ni siquiera pudo responder (falla técnica, por ejemplo un 429 escondido).
+MARCA_JUEZ = "el juez no validó la aprobación"
+MARCA_JUEZ_SIN_RESPUESTA = "falta de respuesta confiable del juez"
+CAUSAS = {
+    "juez": "Juez: bloqueó una aprobación correcta",
+    "juez_sin_respuesta": "Juez sin respuesta (falla técnica)",
+    "otra": "Otra causa",
+}
+
 _CODIGO_REGLA = re.compile(r"(?<![A-Za-z0-9-])(?:RG-\d{2}|P\d{2})(?![A-Za-z0-9])", re.IGNORECASE)
 _LIMITE_LLAMADAS = re.compile(
     r"\b429\b|resource.?exhausted|too.?many.?requests|rate.?limit|quota", re.IGNORECASE
@@ -223,16 +233,14 @@ def filtrar_casos(casos: list[dict], ids=None, grupo=None, componente=None) -> l
 def enviar_turno(agente, turno: dict, hilo: str, fondo=None) -> str:
     """Manda un turno al agente y devuelve su respuesta en texto.
 
-    Es el ÚNICO lugar que arma la entrada de un turno. Hoy el gasto va dentro del mensaje, porque
-    el LLM solo lee los mensajes. Si el agente acepta el gasto también en el estado, basta con
-    cambiar esta función para pasarlo por los dos caminos.
+    Es el ÚNICO lugar que arma la entrada de un turno. El gasto va por dos caminos: dentro del
+    mensaje, porque el LLM solo lee los mensajes, y como gasto original del turno, que es el que
+    el grafo valida y registra. El hilo y el fondo se conservan entre los turnos del caso.
     """
     texto = turno["mensaje"]
     if "gasto" in turno:
         texto += MARCA_GASTO + json.dumps(turno["gasto"], ensure_ascii=False)
-        # TODO(caso-calidad): cuando se una el PR #8, entregar aquí también el gasto original,
-        # con la función de entrada que quede definitiva (hoy conversar_con_caso):
-        #     return grafo.conversar_con_caso(agente, texto, hilo, turno["gasto"], fondo)
+        return grafo.conversar_con_caso(agente, texto, hilo, turno["gasto"], fondo)
     if fondo is not None:
         return grafo.conversar_con_fondo(agente, texto, hilo, fondo)
     return grafo.conversar(agente, texto, hilo)
@@ -395,6 +403,25 @@ def correr_turnos(agente, caso: dict, turnos: list) -> None:
         })
 
 
+def causa_del_fallo(resultado: dict) -> str:
+    """Clasifica un caso ❌ según su PRIMER turno fallido; lo que venga después es consecuencia.
+
+    Es del juez solo si se esperaba aprobar, el juez bloqueó la aprobación y lo único malo de ese
+    turno es la decisión. Si además falló otra cosa, el juez no explica todo el ❌.
+    """
+    fallido = next((turno for turno in resultado["turnos"] if not turno["pasa"]), None)
+    if fallido is None:
+        return "otra"  # todos los turnos pasaron: el ❌ viene de un error del agente
+    motivo = fallido["obtenido"]["motivo"]
+    if (
+        fallido["esperado"].get("decision") != "aprobar"
+        or MARCA_JUEZ not in motivo
+        or not all(texto.startswith("decisión:") for texto in fallido["motivos"])
+    ):
+        return "otra"
+    return "juez_sin_respuesta" if MARCA_JUEZ_SIN_RESPUESTA in motivo else "juez"
+
+
 def cerrar_caso(resultado: dict) -> dict:
     """Decide si el caso pasa: todos sus turnos pasan y el agente no falló."""
     motivos = [f"turno {t['numero']} · {motivo}" for t in resultado["turnos"] for motivo in t["motivos"]]
@@ -402,6 +429,7 @@ def cerrar_caso(resultado: dict) -> dict:
         motivos.append(f"turno {len(resultado['turnos']) + 1} · error del agente: {resultado['error']}")
     resultado["motivos"] = motivos
     resultado["pasa"] = not motivos
+    resultado["causa"] = None if resultado["pasa"] else causa_del_fallo(resultado)
     return resultado
 
 
@@ -457,7 +485,7 @@ def commit_actual() -> str:
 
 
 def resumir(casos: list[dict]) -> dict:
-    """Cuenta los casos que pasan: en total, por grupo y por componente."""
+    """Cuenta los casos que pasan (en total, por grupo y por componente) y agrupa los ❌ por causa."""
 
     def contar(lista: list[dict]) -> dict:
         return {"total": len(lista), "pasan": sum(caso["pasa"] for caso in lista)}
@@ -472,6 +500,11 @@ def resumir(casos: list[dict]) -> dict:
         },
         "por_componente": {
             nombre: contar([caso for caso in casos if nombre in caso["componentes"]]) for nombre in componentes
+        },
+        "por_causa": {
+            causa: [caso["id"] for caso in casos if caso["causa"] == causa]
+            for causa in CAUSAS
+            if any(caso["causa"] == causa for caso in casos)
         },
     }
 
@@ -551,6 +584,10 @@ def mostrar_tabla(resultados: dict) -> None:
     print("Por componente:")
     for nombre, cuenta in resumen["por_componente"].items():
         print(f"   {nombre:<20} {porcentaje(cuenta)}")
+    if resumen["por_causa"]:
+        print("Por causa de los ❌:")
+    for causa, casos in resumen["por_causa"].items():
+        print(f"   {CAUSAS[causa]}: {len(casos)} ({', '.join(casos)})")
 
 
 def texto_markdown(resultados: dict) -> str:
@@ -576,6 +613,10 @@ def texto_markdown(resultados: dict) -> str:
     ]
     for cuentas in (resumen["por_grupo"], resumen["por_componente"]):
         lineas += [f"| {nombre} | {porcentaje(cuenta)} |" for nombre, cuenta in cuentas.items()]
+    if resumen["por_causa"]:
+        lineas += ["", "| Causa de los ❌ | Casos | Cuáles |", "|---|---:|---|"]
+    for causa, casos in resumen["por_causa"].items():
+        lineas.append(f"| {CAUSAS[causa]} | {len(casos)} | {', '.join(casos)} |")
     lineas += ["", "| Caso | Grupo | Resultado | Resumen |", "|---|---|---|---|"]
     for caso in resultados["casos"]:
         marca = "✅" if caso["pasa"] else "❌"
@@ -860,6 +901,7 @@ def autoprueba() -> int:
     gasto_26 = filtrar_casos(golden["casos"], "GS-26")[0]["turnos"][0]["gasto"]
     enviado = json.loads(primero["messages"][0].text.partition(MARCA_GASTO)[2])
     anotar("el gasto viaja completo dentro del mensaje", enviado == gasto_26)
+    anotar("el gasto también llega como gasto original del turno", primero.get("gasto") == gasto_26)
     anotar(
         "el fondo se carga solo en el primer turno, con su saldo real",
         primero.get("fondo", {}).get("saldo_actual") == 50000 and "fondo" not in segundo,
@@ -942,13 +984,50 @@ def autoprueba() -> int:
         buscar_politica_sin_redis if herramienta.name == "buscar_politica" else herramienta
         for herramienta in grafo.HERRAMIENTAS
     ]
-    llm = LLMDeGuion(golden)
-    with mock.patch.object(grafo, "obtener_llm", lambda: llm), mock.patch.object(
-        grafo, "HERRAMIENTAS", herramientas
-    ), mock.patch.object(grafo, "juzgar", lambda *_: {"valido": True, "razon": "ok"}):
-        casos = probar_con_agente(grafo.construir_agente(), golden, "GS-01", "GS-07", "GS-26", "GS-27")
-    for caso in casos:
+
+    def con_grafo_real(valido: bool, razon: str, *ids: str) -> list[dict]:
+        """Corre casos en el grafo real con un juez falso, sea cual sea el juez que use el cierre."""
+        llm = LLMDeGuion(golden)
+        dictamen = {"valido": valido, "razon": razon, "evaluado": True}
+        with mock.patch.object(grafo, "obtener_llm", lambda: llm), mock.patch.object(
+            grafo, "HERRAMIENTAS", herramientas
+        ), mock.patch.object(grafo, "juzgar", lambda *_: dictamen, create=True), mock.patch.object(
+            grafo, "juzgar_con_validacion", lambda *_: dictamen, create=True
+        ):
+            return probar_con_agente(grafo.construir_agente(), golden, *ids)
+
+    for caso in con_grafo_real(True, "ok", "GS-01", "GS-07", "GS-26", "GS-27"):
         anotar(f"{caso['id']} lee el veredicto final del estado real", caso["pasa"], "; ".join(caso["motivos"]))
+
+    print("\n=== H. Causa de cada ❌ ===")
+    bloqueo = f"Todo en regla. [Ajustado de APROBAR a OBSERVAR: {MARCA_JUEZ}: faltó la validación.]"
+    sin_respuesta = f"Todo en regla. [Ajustado de APROBAR a OBSERVAR: {MARCA_JUEZ}: por {MARCA_JUEZ_SIN_RESPUESTA}.]"
+    anotar("un caso que pasa no tiene causa", correr("GS-01")["causa"] is None)
+    anotar("el juez bloquea una aprobación correcta", correr("GS-01", decision="observar", motivo=bloqueo)["causa"] == "juez")
+    anotar(
+        "el juez sin respuesta queda aparte",
+        correr("GS-01", decision="observar", motivo=sin_respuesta)["causa"] == "juez_sin_respuesta",
+    )
+    anotar("un observar sin el juez es otra causa", correr("GS-01", decision="observar")["causa"] == "otra")
+    anotar(
+        "si además falla otra cosa, no es solo del juez",
+        correr("GS-01", decision="observar", motivo=bloqueo, cuenta="CTA-9999")["causa"] == "otra",
+    )
+    anotar(
+        "un bloqueo del juez donde no se esperaba aprobar no le cuenta al juez",
+        correr("GS-07", motivo=f"Sin citar nada. [{MARCA_JUEZ}.]")["causa"] == "otra",
+    )
+    agente = AgenteFalso(golden, {1: {"decision": "observar", "motivo": bloqueo}, 2: {"decision": "aprobar", "motivo": "Hay saldo."}})
+    caso = probar_con_agente(agente, golden, "GS-26")[0]
+    anotar("el turno 2 que falla como consecuencia del juez le cuenta al juez", caso["causa"] == "juez", recortar(caso["motivos"][-1], 90))
+    caso = probar_con_agente(AgenteFalso(golden, errores=[ValueError("se cayó")]), golden, "GS-01")[0]
+    anotar("un error del agente es otra causa", caso["causa"] == "otra")
+    with contextlib.redirect_stdout(io.StringIO()):
+        corrida = correr_casos(AgenteFalso(golden, {1: {"decision": "observar", "motivo": bloqueo}}), golden, filtrar_casos(golden["casos"], "GS-01"), {})
+    anotar("el resumen agrupa los ❌ por causa", corrida["resumen"]["por_causa"] == {"juez": ["GS-01"]})
+    anotar("el .md muestra la causa", CAUSAS["juez"] in texto_markdown(corrida))
+    caso = con_grafo_real(False, "no se incluyó la salida de validar_gasto", "GS-01")[0]
+    anotar("con el grafo real, el bloqueo del juez se reconoce", caso["causa"] == "juez", recortar(caso["motivos"][0], 90))
 
     aprobadas = sum(resultados)
     print(f"\nAutoprueba: {aprobadas} de {len(resultados)} ✅")

@@ -968,3 +968,137 @@ Mientras tanto, en tf/caso-calidad:
 ````
 
 **Resultado (una línea):** Cada turno con gasto revisa el registro; autoprueba 57 de 57 y la falla de `c270504` en GS-26 queda detectada con un motivo claro.
+
+---
+
+## 15. Revisión y unión de los PR #8, #12 y #14
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar y unir el trabajo de Matías, Sebastián y Eduardo, y fijar los pasos hasta la corrida 1 y el mensaje al grupo.
+
+**Prompt completo:**
+
+````text
+Hay tres PR para revisar y unir, en este orden: #8 (Matías, ya actualizado a 0298d18),
+#12 (Sebastián) y #14 (Eduardo). Explícame en simple y detente en las pausas.
+
+PASO 1 — PR #8
+Revisión habitual (dueños, seguridad, verificar.py, probar_herramientas.py,
+--autoprueba). Además:
+- Con el LLM falso: GS-26 debe registrar G-2601 como aprobar y G-2602 como observar, sin
+  pisar el primero. Y el intento de alterar la fecha debe seguir rechazándose.
+- ¿Queda alguna forma de conversar con un gasto que NO use el gasto original? Si existe,
+  dime dónde se usa (notebook incluido).
+- Con Gemini real: python pruebas/evaluar.py --caso GS-26,GS-27 --pausa 3, adaptando
+  temporalmente enviar_turno a conversar_con_caso solo para esta prueba.
+Si todo está bien, únelo (gh pr merge 8 --merge) y corre verificar.py en main.
+Si algo falla, detente y explícame.
+
+PASO 2 — PR #12 (Sebastián)
+Revisión habitual. Prueba campos_alterados con los casos que describe (fecha alterada,
+7800.0 vs 7800, campo omitido). Si está bien, únelo y corre verificar.py en main.
+
+PASO 3 — PR #14 (Eduardo)
+Revisión habitual. Además:
+- juzgar_con_validacion recibe el gasto original y el resultado de validar_gasto, y
+  devuelve valido, razon y evaluado. Prueba sin LLM que evaluado=False sale cuando falla
+  la llamada (incluido un 429 simulado).
+- ¿juzgar() llama a la nueva función o quedan dos jueces con lógica distinta?
+- PROMPT_SISTEMA: que pida cerrar con emitir_veredicto y use códigos Pxx.
+- ¿Cambió algo del RAG (cargador, reglas como documentos propios, métrica y algoritmo
+  explícitos, prefijo doble)? Si cambió el cargador, NO recargues grupo05: dímelo y lo
+  coordino.
+- Con Gemini real: --caso GS-01,GS-07,GS-16 --pausa 3. Nota: el nodo de cierre todavía
+  usa el juez antiguo, así que GS-01 puede seguir fallando por el juez; dime si es por
+  eso.
+Si está bien, únelo y corre verificar.py en main.
+⏸ PAUSA: muéstrame el resumen de los tres PR antes de seguir.
+
+PASO 4 — Mi evaluador
+En tf/caso-calidad (trae main):
+1. Cambia enviar_turno para usar conversar_con_caso con el gasto original, manteniendo
+   el mismo hilo y el fondo entre turnos del caso.
+2. Si la revisión del registro por turno (id del gasto del turno, sin pisar los
+   anteriores) no quedó hecha antes, agrégala con su autoprueba.
+3. --autoprueba, verificar.py y probar_herramientas.py deben pasar. Commit, PR y únelo.
+4. Lleva main a las 4 ramas.
+
+PASO 5 — Antes de la corrida 1
+⏸ PAUSA: recuérdame la estimación de llamadas y pregúntame el límite diario de AI Studio.
+Con mi visto bueno, corre la línea base completa (o por grupos, si la cuota es baja),
+guárdala como "corrida 1, línea base" y muéstrame el resumen por grupo, por componente y
+por causa de falla.
+
+PASO 6 — Mensaje para el grupo
+Lo que se unió y la siguiente prioridad:
+🔴 Matías: en nodo_cerrar, usar juzgar_con_validacion(gasto_original, clasificacion,
+   validacion, veredicto); tratar evaluado=False como fallo técnico (sin aprobar), y
+   agregar campos_alterados a la traza. Un solo PR.
+🟠 Eduardo: pendientes del RAG que no hayan entrado en el #14 (reglas como documentos
+   propios, métrica/algoritmo/dimensiones explícitos, prefijo doble, documentación en el
+   README). Si requieren recargar grupo05, coordinarlo conmigo.
+Incluye los resultados de la corrida 1 si ya se hizo.
+````
+
+**Respuesta a la pausa del PR #8:**
+
+````text
+Une el #8 y sigue con verificar.py en main, el PASO 2 y el PASO 3 hasta su pausa.
+
+En el mensaje del PASO 6, el pendiente de Matías queda como un solo PR con todo lo del
+cierre, en este orden:
+🔴 Matías (un solo PR para nodo_cerrar, antes de la entrega):
+   1. Si el LLM escribe "Decisión: APROBAR" como texto, sin emitir_veredicto, el usuario
+      no debe leer una aprobación: corregirlo a una respuesta segura, como hacía main
+      antes. Puede costar los 0,5 de seguridad básica en la prueba de jailbreak del
+      revisor.
+   2. Un emitir_veredicto inválido (política o categoría inexistente, motivo vacío,
+      decisión inválida) no debe cortar el turno: devolverle el error al LLM como
+      observación para que corrija, con un máximo de intentos.
+   3. Usar juzgar_con_validacion(gasto_original, clasificacion, validacion, veredicto)
+      y tratar evaluado=False como fallo técnico, sin aprobar.
+   4. Agregar campos_alterados a la traza.
+
+Y agrega para todos: "Hasta que actualice el evaluador (lo hago enseguida), no usen
+--componente: ningún gasto obtendría veredicto."
+````
+
+**Resultado (una línea):** Se unieron los PR #8, #12 y #14; `verificar.py` pasó después de cada unión. GS-01 y GS-26 fallan con Gemini porque el cierre aún usa el juez antiguo, y GS-01 pasa en una copia conectada a `juzgar_con_validacion`.
+
+---
+
+## 16. Evaluador con el gasto original y causa de cada ❌
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Pasar el evaluador a `conversar_con_caso` y separar los ❌ causados por el juez, para mostrar en la corrida 2 lo que arregla el PR de Matías.
+
+**Prompt completo:**
+
+````text
+Visto bueno para el PASO 4: cambia enviar_turno a conversar_con_caso, verifica que
+--autoprueba dé 57 de 57, commit, PR, únelo y lleva main a las 4 ramas.
+
+Sobre la corrida 1: quiero hacerla ANTES del PR de Matías. Las fallas que cause el juez
+antiguo son fallas reales del agente actual, y mostrar que se corrigen en la corrida 2
+es la evidencia de mejora que pide la pauta. En el resumen de la corrida 1, separa en
+una categoría propia los ❌ causados por el juez (por ejemplo, cuando la razón del juez
+dice que no recibió la validación), para que se vea claramente qué arregla el PR de
+Matías.
+
+Sigue hasta la pausa del PASO 5 y ahí te doy el límite de cuota.
+
+Agrega al mensaje del grupo:
+🟡 Eduardo: en tu registro de prompts, las dos entradas nuevas dicen "Prompt completo:
+   No disponible" y "Fecha: Pendiente de confirmar". La pauta pide adjuntar los prompts
+   de desarrollo, así que conviene completarlas mientras te acuerdas.
+🟠 Eduardo: siguen abiertos los pendientes del RAG (reglas como documentos propios,
+   métrica/algoritmo/dimensiones explícitos, prefijo doble y documentación en el README).
+   Son los requisitos del bono RAG (+1,0). Si hay que recargar grupo05, coordinarlo
+   conmigo, idealmente después de la corrida 1 y antes de la corrida final.
+````
+
+**Resultado (una línea):** `enviar_turno` usa `conversar_con_caso` (autoprueba 57 de 57); el evaluador agrupa los ❌ por causa con la misma regla para todas las corridas (autoprueba 69 de 69).
