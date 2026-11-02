@@ -5,9 +5,10 @@ Sirve para medir si el agente decide bien. Versión 1.2, construida sobre la pol
 (`datos/politica_ficticia.md`). Todos los datos son **ficticios**: se usaron solo patrones
 agregados (rangos de montos, proporciones) y ningún registro real.
 
-El golden set v1.2 fue construido sobre la política v1.1 y sigue siendo válido con la v1.2: la
-regla nueva (fecha de rendición anterior al gasto) no cambia ninguna respuesta esperada. Cada
-corrida guarda las dos versiones. Los cambios del golden set se anotan en su campo `historial`.
+El golden set v1.2 fue construido sobre la política v1.1 y sigue siendo válido con la v1.3:
+la regla nueva de la v1.2 (fecha de rendición anterior al gasto) y la aclaración de P08 de la v1.3
+no cambian ninguna respuesta esperada. Cada corrida guarda las dos versiones. Los cambios del
+golden set se anotan en su campo `historial`.
 
 `golden_set_revision.md` es la tabla de los mismos casos para leerlos de un vistazo.
 

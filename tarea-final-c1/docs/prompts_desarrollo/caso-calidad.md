@@ -1225,3 +1225,91 @@ RAG o el razonamiento del LLM.
 ````
 
 **Resultado (una línea):** El evaluador reconoce al juez sin respuesta, cuenta los turnos sin juez y guarda los fragmentos de cada turno (autoprueba 77 de 77); `evolucion.md` conserva el antes y después del juez.
+
+---
+
+## 19. PR #16, política v1.3, recarga de grupo05 y corrida 1
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el PR #16, resolver la ambigüedad de P08 en la política en vez de cambiar GS-03, recargar el índice una vez y terminar la corrida 1.
+
+**Prompt completo:**
+
+````text
+Decisiones y siguientes pasos. Explícame en simple y detente en las pausas.
+
+PASO 1 — PR #16 (Eduardo)
+Revisión habitual (dueños, seguridad, verificar.py, probar_herramientas.py,
+--autoprueba). Dime cuáles de sus pendientes resuelve, uno por uno:
+- registro de prompts completo (sin "No disponible" ni "Pendiente de confirmar");
+- reglas generales RG-01 a RG-10 como documentos propios en el índice;
+- dimensiones, métrica y algoritmo fijados en el código y documentados en el README
+  junto con el nombre del índice y los campos;
+- prefijo doble (grupo05:grupo05:);
+- manejo de errores de Redis sin que se caiga el turno;
+- reintentos del juez ante 429 iguales a los del agente.
+Si cambió el cargador, NO recargues todavía. Dime si conviene unirlo.
+⏸ PAUSA: espera mi decisión.
+
+PASO 2 — Política v1.3 (en tf/caso-calidad, trayendo main)
+GS-03 no se cambia: la ambigüedad está en la política. En datos/politica_ficticia.md,
+P08, aclara las dos categorías del grupo Coffee Break:
+- Coffee break: alimentación o café para reuniones internas.
+- Capacitaciones: alimentación o café durante una capacitación.
+Corrige también la frase "Coffee break de una reunión o capacitación" de la descripción
+de P08 para que sea coherente. Versión 1.3 e historial ("1.3: se aclara la diferencia
+entre Coffee break y Capacitaciones en P08"). Revisa que GS-03 y GS-10 tengan una sola
+respuesta correcta con este texto. Corre verificar.py y probar_herramientas.py.
+Commit, PR y únelo.
+
+PASO 3 — Recargar grupo05 (una sola vez)
+Antes de cargar, explícame qué borra o crea el cargador actual (con o sin el #16), y
+que solo afecte grupo05. ⏸ PAUSA: espera mi visto bueno.
+Carga con python -m scripts.cargar_indice desde main. Comprueba: cantidad de documentos,
+que tengan la v1.3, nada del historial, y repite las 4 búsquedas de prueba (plazo, peaje
+con auto propio, desayuno de reunión, pintura). Si el #16 agregó las reglas como
+documentos propios, la del plazo debería traer RG-03 en primer lugar.
+
+PASO 4 — Continuar la corrida 1
+Con --pausa 15:
+1. Repite GS-03 y GS-06 (GS-06 falló por el juez sin respuesta, no por el agente).
+2. Corre los grupos B, C, D, E y F, uno por uno, con la misma regla de detenerse si hay
+   fallas técnicas por 429.
+Guarda todo como "corrida 1, línea base", indicando que el grupo A corrió antes de la
+política v1.3 y de la recarga del índice, y que GS-03 y GS-06 se repitieron después.
+Muéstrame el resumen por grupo, por componente y por categoría de falla, la lista de ❌
+con causa y rol, y para cada ❌ con gasto, qué fragmentos trajo el RAG.
+Commit en tf/caso-calidad, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 5 — Mensaje para el grupo
+Resultados y pendientes por prioridad. Incluye para Eduardo, si el #16 no lo resolvió:
+el juez reintenta menos que el agente y por eso falla primero ante el límite de llamadas
+(GS-06); que use los mismos reintentos. Recordatorio: no gastar cuota en corridas
+completas.
+````
+
+**Respuesta a la pausa del PR #16:**
+
+````text
+Une el #16. Sigue con el PASO 2, el PASO 3 (con su pausa antes de cargar) y el PASO 4.
+
+En el mensaje del grupo, para Eduardo, como prioridad 🔴 con plazo (propón que esté
+listo antes de la corrida final):
+Pendientes del RAG que sostienen el bono de +1,0:
+1. Reglas RG-01 a RG-10 como documentos propios en el índice.
+2. Dimensiones, métrica y algoritmo fijados en el código y documentados en el README,
+   con el nombre del índice y los campos; quitar el TODO del almacén vectorial.
+3. Corregir el prefijo doble (grupo05:grupo05:).
+4. Que una falla de Redis, un k fuera de rango (por ejemplo 50) o una consulta vacía no
+   corten el turno: devolver el error al LLM como observación, igual que
+   emitir_veredicto.
+5. El juez con los mismos reintentos que el agente ante 429 (hoy 2 contra 6; por eso
+   falló GS-06).
+6. Completar en su registro de prompts las fechas de las entradas 1 a 6 y el modelo
+   de las 8.
+Cuando tenga 1 a 3 listos, coordinamos una recarga de grupo05 antes de la corrida final.
+````
+
+**Resultado (una línea):** El PR #16 quedó unido y la política subió a v1.3: GS-03 y GS-10 tienen una sola respuesta correcta, y `verificar.py`, `probar_herramientas.py` y la autoprueba pasan.
