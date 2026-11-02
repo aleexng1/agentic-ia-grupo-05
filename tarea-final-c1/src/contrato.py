@@ -14,7 +14,7 @@ from langgraph.graph.message import add_messages
 # ---------------------------------------------------------------------------
 
 # Máximo de vueltas del ciclo ReAct (LLM → herramienta → LLM ...) por turno.
-MAX_PASOS = 6
+MAX_PASOS = 10
 
 # Las únicas tres decisiones que el agente puede tomar sobre un gasto.
 DECISIONES = ("aprobar", "observar", "rechazar")

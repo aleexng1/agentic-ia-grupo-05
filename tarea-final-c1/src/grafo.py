@@ -310,15 +310,24 @@ def construir_agente():
         pasos = estado.get("pasos", 0) + 1
         respuesta = llm.invoke([SystemMessage(PROMPT_SISTEMA), *estado["messages"]])
         texto_respuesta = respuesta.text or ""
-        if not respuesta.tool_calls and re.search(
-            r"\bdecisi[oó]n\s*:\s*aprobar\b", texto_respuesta, re.IGNORECASE
-        ):
+        sin_veredicto_del_turno = not _emitio_veredicto_valido_en_turno(estado["messages"])
+        respuesta_final_insegura = (
+            not respuesta.tool_calls
+            and (
+                (estado.get("gasto") and sin_veredicto_del_turno)
+                or re.search(r"\bdecisi[oó]n\s*:\s*aprobar\b", texto_respuesta, re.IGNORECASE)
+            )
+        )
+        if respuesta_final_insegura:
             registrar_traza(
-                "aprobacion_texto_bloqueada",
-                {"motivo": "el LLM no emitió un veredicto estructurado"},
+                "respuesta_sin_veredicto_bloqueada",
+                {
+                    "gasto": (estado.get("gasto") or {}).get("id"),
+                    "motivo": "el turno no contiene un emitir_veredicto válido",
+                },
             )
             respuesta = AIMessage(
-                "No puedo decidir un gasto sin emitir un veredicto estructurado."
+                "No puedo cerrar esta revisión: no se emitió un veredicto estructurado válido para el gasto."
             )
         registrar_traza(
             "llm",

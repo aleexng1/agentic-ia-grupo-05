@@ -403,7 +403,7 @@ def bloque_2_contrato() -> None:
 
     def constantes():
         contrato = modulos["contrato"]
-        exigir(contrato.MAX_PASOS == 6, f"MAX_PASOS debe ser 6, es {contrato.MAX_PASOS}")
+        exigir(contrato.MAX_PASOS == 10, f"MAX_PASOS debe ser 10, es {contrato.MAX_PASOS}")
         exigir(
             tuple(contrato.DECISIONES) == ("aprobar", "observar", "rechazar"),
             f"DECISIONES debe ser ('aprobar', 'observar', 'rechazar'), es {contrato.DECISIONES}",
