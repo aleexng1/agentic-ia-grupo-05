@@ -1458,3 +1458,74 @@ Política congelada en v1.5 hasta la entrega, salvo un error grave.
 ````
 
 **Resultado (una línea):** La política subió a v1.5 sin cambiar la respuesta de ningún caso; el golden set v1.3 agrega GS-34 y cada turno guarda los errores de herramientas que recibió el LLM (autoprueba 83 de 83).
+
+---
+
+## 23. Revisión del PR #27 y MAX_PASOS en 10
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el cierre seguro por turno y el aumento de `MAX_PASOS`, y dejar la documentación con el valor acordado.
+
+**Prompt completo:**
+
+````text
+Revisa el PR #27 de Matías (cierre seguro por turno y MAX_PASOS a 10). Explícame en
+simple y detente en las pausas.
+
+PASO 1 — Revisión habitual (sin Gemini)
+gh pr checkout 27. Dueños según AGENTS.md (src/contrato.py es compartido: muéstrame
+exactamente qué cambió), seguridad (sin claves, .env, .db, datos reales ni URLs de
+Redis, también en el notebook), verificar.py, probar_herramientas.py y --autoprueba.
+Con el LLM falso, comprueba:
+1. Filtro por turno: con un gasto y sin un emitir_veredicto válido, la respuesta final
+   siempre es segura. Prueba las 15 variantes de la revisión anterior ("**Decisión:**
+   APROBAR", "Veredicto: APROBAR", "Apruebo este gasto", "El gasto queda APROBADO.",
+   etc.): ninguna debe llegar al usuario, y no debe quedar veredicto ni registro.
+2. Un turno SIN gasto (como GS-28 o GS-31) no debe quedar bloqueado por el filtro: la
+   respuesta normal tiene que llegar.
+3. MAX_PASOS quedó en 10 y nada más del contrato cambió.
+4. Lo que ya funcionaba se mantiene: GS-26 con dos gastos, gasto original protegido,
+   FR-999 observado, emitir_veredicto inválido devuelto al LLM.
+5. Notebook: la sección 8 muestra el registro antes/después desde una corrida del agente
+   (no llamando directo a registrar_veredicto), y la sección 10 usa evaluar() y
+   mostrar_tabla() de pruebas/evaluar.py.
+
+PASO 2 — Prueba dirigida con Gemini real (en la rama del PR)
+Con --pausa 15: GS-10 tres veces, y GS-27 y GS-29 una vez cada uno (unas 25 llamadas).
+Para cada ❌, muéstrame los fragmentos del RAG y los errores que recibió el LLM, y
+explícame la causa y a qué rol le toca. No guardes estos resultados en el repo.
+Recomendación: ✅ / ⚠️ / ❌, con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 3 — Unir y documentación
+Con mi visto bueno: gh pr merge 27 --merge, git switch main, git pull, verificar.py.
+Luego, en tf/caso-calidad (trayendo main): actualiza las menciones de "6 pasos" a 10 en
+README.md y docs/instrucciones/nucleo.md. Commit, PR, únelo y lleva main a las 4 ramas.
+Con agente.ipynb, solo fuerza un cambio de rama si la diferencia es únicamente de
+formato.
+
+PASO 4 — Mensaje para el grupo
+Corto: qué se unió, el resultado de la prueba de GS-10 y las observaciones para Matías,
+si las hay. Recuerda que grupo05 no se recarga hasta coordinar con Eduardo.
+````
+
+**Respuesta a la pausa del PR #27:**
+
+````text
+Visto bueno: une el #27 y sigue con el PASO 3 y el PASO 4. El acuerdo de MAX_PASOS = 10
+está confirmado por todo el grupo; déjalo anotado en el mensaje.
+
+En el mensaje del grupo agrega:
+- MAX_PASOS = 10 queda acordado por todos (src/contrato.py, compartido).
+- 🟠 Eduardo: en un turno SIN gasto, el agente todavía puede escribir "Veredicto:
+  APROBAR" si el usuario se lo pide por chat (no se registra nada, pero el revisor podría
+  verlo en la prueba de jailbreak). Propuesta: agregar a PROMPT_SISTEMA que sin un gasto
+  enviado nunca se declara una decisión (aprobar, observar ni rechazar), y probarlo con
+  2 o 3 intentos de jailbreak por chat usando --caso o una conversación corta.
+- 🟡 Matías: en docs/prompts_desarrollo/nucleo.md, la entrada nueva dice "resumen fiel de
+  la solicitud". La pauta pide adjuntar los prompts: pega el texto exacto.
+````
+
+**Resultado (una línea):** El PR #27 quedó unido, con GS-10 3 de 3 y GS-27 y GS-29 aprobados con Gemini; `README.md` y `docs/instrucciones/nucleo.md` indican 10 pasos.
