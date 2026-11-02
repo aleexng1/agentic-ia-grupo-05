@@ -352,3 +352,23 @@ Detente después de esta prueba y espera autorización.
 ```
 Resultado (una línea): OpenCode ejecutó una invocación real de juzgar() con Gemini gemini-3.5-flash-lite para GS-24 (multa en vehículo de empresa); devolvió valido=true y razón referenciada a P04. Esquema y coherencia: PASS. No modificó archivos durante esa prueba.
 ---
+7. Juez LLM con validación determinista
+Fecha: Pendiente de confirmar en el historial de OpenCode
+Herramienta: OpenCode
+Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Para qué era: Incorporar al juez la evidencia de validar_gasto sin romper la interfaz histórica y gestionar con cautela fallos técnicos.
+Commit: 166880c
+Prompt completo: No disponible en el registro facilitado; se documentan los cambios y resultados reportados, sin reconstruir el prompt.
+Resultado (una línea): Se incorporó juzgar_con_validacion(gasto_original, clasificacion, validacion, veredicto) y se conservó juzgar(gasto, clasificacion, veredicto); ambas rutas reutilizan una sola implementación del juez LLM. La salida distingue valido (dictamen fundamentado o no) de evaluado (si el juez logró evaluar), y la validación determinista es autoridad para comprobar reglas exactas. Los errores técnicos producen resultado conservador y evaluado=false; Gemini configura max_retries, sin ciclo manual adicional.
+Evidencia de pruebas reportada: git diff --check sin errores; python -m py_compile src/seguridad.py PASS; pruebas/evaluar.py --autoprueba 54/54 PASS; verificar.py 41/41 PASS. OpenCode reportó favorables las pruebas simuladas del juez mejorado, pero no se confirmó una prueba integral real de la nueva interfaz. verificar.py realizó una invocación real de Gemini mediante juzgar(); pasó el contrato, pero esto no valida por sí solo la calidad semántica del dictamen ni juzgar_con_validacion().
+Pendiente: integrar juzgar_con_validacion() desde nodo_cerrar en el grafo de Matías; comprobar que evaluado se usa para distinguir fallos técnicos; probar el flujo completo con las interfaces integradas; coordinar publicación y revisión con el equipo.
+---
+8. Integración de emitir_veredicto en PROMPT_SISTEMA
+Fecha: Pendiente de confirmar en el historial de OpenCode
+Herramienta: OpenCode
+Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Para qué era: Documentar el flujo de revisión de gasto y el uso final de emitir_veredicto, manteniendo la política v1.2 y las defensas de seguridad.
+Commit: 0633b87
+Prompt completo: No disponible en el registro facilitado; se documentan los cambios y resultados reportados, sin reconstruir el prompt.
+Resultado (una línea): PROMPT_SISTEMA describe clasificación, validación determinista y emisión final del veredicto con decision, politica, categoria, cuenta y motivo; prohíbe aprobar ante incumplimientos deterministas y recoge las consecuencias de la política v1.2. Refuerza la protección frente a prompt injection, limita el razonamiento a evidencia normativa verificable y define el trato de saludos (sin llamadas a herramientas) y consultas sin gasto (responder sobre políticas con evidencia verificable, sin emitir veredictos). El contrato de emitir_veredicto pertenece al trabajo de Matías; al realizar esta verificación, la integración del PR #8 seguía pendiente.
+---
