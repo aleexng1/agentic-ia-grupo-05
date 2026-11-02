@@ -55,7 +55,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 
 ## De quién dependes y quién depende de ti
 
-- **Dependes de:** Caso y calidad (la política con sus reglas). La versión vigente es la **v1.3**
+- **Dependes de:** Caso y calidad (la política con sus reglas). La versión vigente es la **v1.4**
   de `datos/politica_ficticia.md`.
 - **Dependen de ti:** Núcleo (el agente llama a `validar_gasto` y usa la memoria y el registro) y
   Caso y calidad (el golden set mide tus reglas).

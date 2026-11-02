@@ -54,7 +54,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
 Recuerda: `tipo_documento` solo puede ser `boleta`, `factura` o `voucher` (lo exige el contrato).
 Los casos de "documento no permitido" se arman con políticas que exigen un tipo específico.
 
-**Política vigente: v1.3** (`datos/politica_ficticia.md`). Lo que más cambia las decisiones:
+**Política vigente: v1.4** (`datos/politica_ficticia.md`). Lo que más cambia las decisiones:
 
 - **Plazo (RG-03):** se rinde en el mismo mes o hasta el **día 10 del mes siguiente**. Fuera de plazo
   se rechaza; con visto bueno del Gerente General (`vb_gerente_general`) queda observado.

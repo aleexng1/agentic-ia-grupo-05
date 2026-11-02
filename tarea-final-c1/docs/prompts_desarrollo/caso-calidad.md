@@ -1346,3 +1346,55 @@ de la política en src/seguridad.py y src/herramientas.py (ahora v1.3).
 ````
 
 **Resultado (una línea):** Capacitaciones queda con tope de $35.000 (156 gastos, 7,7 % sobre el tope); sobre ese monto `validar_gasto` observa por RG-05 y GS-03 sigue aprobándose.
+
+---
+
+## 21. Política v1.4 y prueba de estabilidad
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Aclarar en la política los límites que confundieron al LLM en GS-10 y GS-29, y medir con varias repeticiones si esos casos quedan estables.
+
+**Prompt completo:**
+
+````text
+Siguiente paso: política v1.4 y prueba de estabilidad. Explícame en simple y detente
+en las pausas.
+
+PASO 1 — Política v1.4 (en tf/caso-calidad, trayendo main)
+Dos aclaraciones en "Cuándo NO usarla", sin cambiar reglas ni topes:
+- P02 (y P03 con la misma idea): "Comidas sin un viaje de por medio (por ejemplo, un
+  desayuno o almuerzo en la propia oficina o tienda) no son gastos de viaje: van en P08."
+- P08: "Ingredientes o productos para preparar comida que se vende en la Cafetería
+  Alerces van en P07 (solo con factura), aunque sean alimentos."
+Versión 1.4 e historial ("1.4: se aclaran los límites entre P02/P03 y P08, y entre P08
+y P07"). Revisa que GS-10 y GS-29 tengan una sola respuesta correcta y que ningún otro
+caso cambie. verificar.py, probar_herramientas.py, --autoprueba. Commit, PR y únelo.
+
+PASO 2 — Recargar grupo05
+Mismo procedimiento de antes (solo grupo05, comprobar documentos y la v1.4). Repite la
+búsqueda del desayuno de reunión y una nueva: "pan y queso para sándwiches de la
+cafetería" (debe traer P07 primero).
+
+PASO 3 — Prueba de estabilidad
+Con --pausa 15, corre 3 veces cada uno: GS-07, GS-10 y GS-29 (unas 30 llamadas).
+Muéstrame cuántas de las 3 pasa cada caso, y para cada ❌ los fragmentos del RAG.
+Guárdalo en pruebas/resultados/ como "estabilidad tras política v1.4" y agrega una línea
+a evolucion.md. Commit, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+Resultados de la corrida 1 (31/33) y de la prueba de estabilidad. Pendientes:
+🔴 Eduardo: que PROMPT_SISTEMA y el juez cuestionen la política elegida o declarada
+   contra el "Cuándo NO usarla" de la política. En GS-29 el LLM reclasificó a P08 y con
+   eso esquivó la regla de solo factura de P07; en GS-10 aceptó P02 sin que hubiera un
+   viaje, y el juez no lo frenó. Más los pendientes del RAG ya enviados (reglas como
+   documentos propios, configuración explícita, prefijo doble, errores sin cortar el
+   turno, reintentos del juez).
+🔴 Matías: PR corto con el filtro por turno (si hay gasto y no hubo emitir_veredicto
+   válido, respuesta segura completa), notebook secciones 8 y 10, y nucleo.md.
+🟡 Eduardo y Sebastián: menciones de versión de la política en sus archivos (ahora v1.4).
+Recordatorio: la corrida final se hace cuando estén los PR de Matías y Eduardo.
+````
+
+**Resultado (una línea):** La política subió a v1.4 sin cambiar reglas, topes ni categorías; GS-10 y GS-29 tienen una sola respuesta correcta y ningún otro caso cambia.
