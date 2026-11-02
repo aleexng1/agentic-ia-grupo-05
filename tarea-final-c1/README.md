@@ -187,7 +187,7 @@ python -m jupyter nbconvert --to notebook --execute agente.ipynb --output agente
 ```bash
 python pruebas/evaluar.py --autoprueba           # sin LLM ni clave; esperado: 83 de 83 ✅
 python pruebas/evaluar.py --seco                 # sin LLM ni clave; esperado: 34 de 34 casos
-python pruebas/probar_herramientas.py            # sin LLM ni clave; esperado: 56 ✅ 0 ❌
+python pruebas/probar_herramientas.py            # sin LLM ni clave; esperado: 59 ✅ 0 ❌
 python pruebas/evaluar.py --caso GS-07 --pausa 15   # un caso; usa Gemini y Redis
 python pruebas/evaluar.py --grupo B --pausa 15   # un grupo (A a F); usa Gemini y Redis
 ```

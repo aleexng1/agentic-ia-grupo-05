@@ -1774,3 +1774,96 @@ En docs/evidencias_pauta.md agrega al final una "Lista de cierre antes de entreg
 ````
 
 **Resultado (una línea):** El caso, la matriz, el README y el ensayo de revisor quedaron listos: el proyecto se instala y sus pruebas sin LLM pasan desde cero.
+
+---
+
+## 25. Revisión de los PR #29 y #30, y arreglos chicos
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el prompt exacto de Matías y la evidencia del piso de reglas de Sebastián, contrastarlos con la matriz y dejar al grupo una sola lista de pendientes.
+
+**Prompt completo:**
+
+````text
+Revisa los PR #29 y #30, en ese orden. Explícame en simple y detente en la pausa.
+
+PASO 1 — Revisión de cada PR
+gh pr checkout <número>. Para cada uno:
+1. Autor, qué cambia y dueños según AGENTS.md (si toca archivos compartidos o de otro rol,
+   muéstrame qué).
+2. Seguridad: sin claves, .env, .db, datos reales ni URLs de Redis, y sin salidas en el
+   notebook.
+3. verificar.py, probar_herramientas.py y --autoprueba.
+4. Contrasta con los pendientes de docs/evidencias_pauta.md: dime, punto por punto, qué
+   pendiente resuelve completo, cuál resuelve en parte (y qué le falta) y cuál no toca.
+   En especial revisa:
+   - Eduardo: "Cuándo NO usarla" fuera del vector; dimensiones, métrica y algoritmo
+     fijados en el código; errores de Redis, k fuera de rango o consulta vacía sin cortar
+     el turno; juez con los mismos reintentos que el agente; prompt que no declare
+     decisiones sin un gasto y que cuestione la política contra el "Cuándo NO usarla";
+     reglas como documentos propios; registro de prompts.
+   - Seba: evidencia del piso de reglas (caso benigno y adversarial) y si la deja lista
+     para una sección del notebook.
+   - Matías: secciones 5, 6, 8 (reinicio seguro) y 9 del notebook; trazas visibles.
+5. Si un PR cambia el cargador del índice, NO recargues grupo05: dímelo.
+6. Si el PR cambia el comportamiento del agente (prompt, juez, RAG), haz una prueba
+   dirigida con Gemini real y --pausa 15, solo con los casos relevantes (máximo 5),
+   sin guardar resultados en el repo.
+Recomendación por PR: ✅ / ⚠️ / ❌, con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 2 — Unir y dejar todo al día
+Con mi visto bueno: une los aprobados uno a uno (gh pr merge --merge), verificar.py en
+main después de cada uno, y lleva main a las 4 ramas.
+
+PASO 3 — Arreglos chicos (en tf/caso-calidad, trayendo main)
+- docs/instrucciones/caso-calidad.md: cambia "20 a 30 casos" por los 34 actuales y
+  aclara que la pauta no fija cantidad.
+- .gitignore: agrega agente_ejecutado.ipynb.
+- Actualiza docs/evidencias_pauta.md con lo que resolvieron los PR unidos.
+Commit, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+UN solo mensaje que reemplace al anterior, con:
+- Qué se unió hoy: caso y criterio, matriz de evidencias, README nuevo, ensayo de
+  revisor, y los PR #29 y #30 si se unieron.
+- Que lean docs/evidencias_pauta.md: es la lista de lo que falta para cada criterio.
+- Los pendientes por persona según la matriz actualizada, ordenados por prioridad.
+- Los avisos del ensayo: dependencias indirectas con otra versión (propuesta para
+  acordar: agregar un archivo con todas las versiones exactas, por ejemplo
+  requirements-lock.txt generado con pip freeze), y la nota de .env.example sobre la
+  URL de Redis.
+- Que traigan main antes de seguir y que grupo05 no se recarga sin coordinar.
+````
+
+**Respuesta a la pausa:**
+
+````text
+Une el #29 y el #30 y sigue con los PASOS 2, 3 y 4. En el PASO 3 agrega tus dos arreglos
+(el 59 del README y el caso adversarial GS-27 en la matriz).
+
+En el mensaje del grupo, además de lo que ya pedí:
+- Agradece a Seba por la sección H (comprobaste que detecta el guardrail roto) y a Matías
+  por el prompt exacto; pídele a Matías confirmar si las entradas 6 a 11 son textos
+  exactos o resúmenes.
+- Incluye la cuenta de bonos: memoria (+1,0) demostrado; acción, golden set y guardrail
+  (+1,5) casi listos; con eso llegamos a +2,5 y para el 7,0 falta uno más: RAG (+1,0) o
+  juez (+0,5). Por eso los pendientes de Eduardo son la prioridad del grupo.
+- Propuesta para repartir carga, en tono de apoyo (que Eduardo decida):
+  · Eduardo se queda con el cargador (Cuándo NO usarla fuera del vector, configuración
+    explícita, reglas como documentos propios), PROMPT_SISTEMA (no declarar decisiones
+    sin gasto, cuestionar la política contra el Cuándo NO usarla) y su registro de
+    prompts.
+  · Seba, si Eduardo está de acuerdo: que errores de Redis, k fuera de rango o consulta
+    vacía no corten el turno, y que el juez tenga los mismos reintentos que el agente.
+  · Seba + Matías: la sección del guardrail en el notebook, usando
+    prueba_piso_en_agente() completa (no revisar_con_agente por separado) y un caso
+    benigno real con Gemini.
+  · Matías: secciones 5, 6 y 9, reinicio seguro en la 8 y trazas visibles.
+- Pídele a Eduardo que responda en el chat cuándo puede tener el cargador, para
+  coordinar la recarga única de grupo05 y la corrida final.
+````
+
+**Resultado (una línea):** Los PR #29 y #30 quedaron unidos, sin cambiar el agente; la matriz quedó en 4 ✅, 4 🟡 y 4 🔴, y los pendientes de Eduardo son la prioridad del grupo.
