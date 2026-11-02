@@ -1109,22 +1109,22 @@ Agrega al mensaje del grupo:
 
 - **Fecha:** 2026-11-01 y 2026-11-02
 - **Herramienta:** Claude Code
-- **Modelo:** Claude Opus 5.5 ()
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
 - **Para qué era:** Avisar al grupo que la corrida 1 se movía, y revisar el PR único de Núcleo antes de medir la línea base.
 
 **Prompt completo (cuota agotada):**
 
-text
+````text
 Se acabó mi cuota diaria de Gemini: no corras la línea base hoy. La haremos mañana.
 Salta al PASO 6 y dame el mensaje para el grupo, con el reemplazo que propusiste
 ("El evaluador ya funciona; traigan los cambios de su rama antes de seguir") y
 agregando: "La corrida 1 (línea base) la hago mañana. Por favor, no gasten cuota en
 corridas completas del golden set: usen --caso con uno o dos casos a la vez."
-
+````
 
 **Prompt completo (revisión y línea base):**
 
-text
+````text
 Matías abrió el PR único de Núcleo (commit 7e3c5c1). Búscalo con gh pr list. Revísalo,
 únelo si está bien y luego corremos la línea base del golden set. Tengo cuota de Gemini
 hoy, pero no conozco los límites exactos: usa siempre --pausa 8 para no chocar con el
@@ -1174,7 +1174,7 @@ PASO 5 — Mensaje para el grupo
 Resultados de la prueba dirigida y de la corrida 1, qué casos fallan y a quién le toca
 cada uno, ordenado por prioridad. Recordatorio: no gastar cuota en corridas completas;
 usar --caso con uno o dos casos.
-
+````
 
 **Resultado (una línea):** El PR #17 quedó unido: 6 de 7 casos con Gemini, sin 429; GS-01 y GS-26 pasan; quedan abiertos el filtro de texto y las secciones 8 y 10 del notebook.
 
@@ -1184,12 +1184,12 @@ usar --caso con uno o dos casos.
 
 - **Fecha:** 2026-11-02
 - **Herramienta:** Claude Code
-- **Modelo:** Claude Opus 5.5 ()
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
 - **Para qué era:** Dejar el evaluador listo para la corrida 1: reconocer al juez sin respuesta, guardar la evidencia del RAG y conservar el antes y después del juez.
 
 **Prompt completo:**
 
-text
+````text
 Decisiones:
 1. Une el #17 (PASO 3).
 2. Visto bueno para tu PR del evaluador, entre los PASOS 3 y 4, sin llamadas a Gemini:
@@ -1222,6 +1222,6 @@ entrega):
 Y para Eduardo: GS-07 clasificó P03 en vez de P01 con "auto propio" en la glosa
 (intermitente: ayer pasó). Con los fragmentos guardados en la corrida 1 veremos si es el
 RAG o el razonamiento del LLM.
+````
 
-
-**Resultado (una línea):** El evaluador reconoce al juez sin respuesta, cuenta los turnos sin juez y guarda los fragmentos de cada turno (autoprueba 77 de 77);  conserva el antes y después del juez.
+**Resultado (una línea):** El evaluador reconoce al juez sin respuesta, cuenta los turnos sin juez y guarda los fragmentos de cada turno (autoprueba 77 de 77); `evolucion.md` conserva el antes y después del juez.
