@@ -223,16 +223,14 @@ def filtrar_casos(casos: list[dict], ids=None, grupo=None, componente=None) -> l
 def enviar_turno(agente, turno: dict, hilo: str, fondo=None) -> str:
     """Manda un turno al agente y devuelve su respuesta en texto.
 
-    Es el ÚNICO lugar que arma la entrada de un turno. Hoy el gasto va dentro del mensaje, porque
-    el LLM solo lee los mensajes. Si el agente acepta el gasto también en el estado, basta con
-    cambiar esta función para pasarlo por los dos caminos.
+    Es el ÚNICO lugar que arma la entrada de un turno. El gasto va por dos caminos: dentro del
+    mensaje, porque el LLM solo lee los mensajes, y como gasto original del turno, que es el que
+    el grafo valida y registra. El hilo y el fondo se conservan entre los turnos del caso.
     """
     texto = turno["mensaje"]
     if "gasto" in turno:
         texto += MARCA_GASTO + json.dumps(turno["gasto"], ensure_ascii=False)
-        # TODO(caso-calidad): cuando se una el PR #8, entregar aquí también el gasto original,
-        # con la función de entrada que quede definitiva (hoy conversar_con_caso):
-        #     return grafo.conversar_con_caso(agente, texto, hilo, turno["gasto"], fondo)
+        return grafo.conversar_con_caso(agente, texto, hilo, turno["gasto"], fondo)
     if fondo is not None:
         return grafo.conversar_con_fondo(agente, texto, hilo, fondo)
     return grafo.conversar(agente, texto, hilo)
