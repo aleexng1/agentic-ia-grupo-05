@@ -258,6 +258,46 @@ Mantén las firmas existentes y no edites módulos ajenos. La salida estructurad
 
 ---
 
+## 10. Cerrar con la herramienta estructurada `emitir_veredicto`
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Eliminar la dependencia del texto libre de Gemini para guardar y cerrar el veredicto.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, usa emitir_veredicto(decision, politica, categoria, cuenta, motivo) como la única vía estructurada para cerrar un gasto.
+- Mantén el contrato Veredicto existente: decision, motivo, politica_sugerida, categoria_sugerida y cuenta_sugerida; normaliza la política a Pxx.
+- Conserva en el estado el Gasto original recibido por el caso; antes de ejecutar validar_gasto, reemplaza cualquier copia alterada en los argumentos de la herramienta por ese original.
+- Tras validar_gasto, el LLM debe llamar emitir_veredicto; captura su ToolMessage y enrútalo directamente a nodo_cerrar, sin interpretar la decisión desde texto.
+- nodo_cerrar debe conservar el piso de reglas, el candado, el juez, el fondo y SQLite; no registres un turno sin validación exitosa.
+- El LLM falso de verificar.py también debe cerrar mediante emitir_veredicto.
+No cambies src/contrato.py ni PROMPT_SISTEMA; coordina con Eduardo la instrucción del prompt y con él/Alex la entrada de validación al juez. Conserva modelo y temperatura. Ejecuta verificar.py sin servicios y reporta por separado las pruebas reales pendientes.
+````
+
+**Resultado (una línea):** `emitir_veredicto` se integró en el grafo y el LLM falso ya lo llama; una prueba confirmó que validar_gasto y SQLite usan el gasto original pese a cambios propuestos por el LLM; `verificar.py` pasa con 41 ✅ y 0 ❌ en modo aislado. La llamada real de Gemini queda pendiente de que Eduardo actualice PROMPT_SISTEMA; el juez aún requiere recibir también la validación.
+
+---
+
+## 11. Manejar fondos inexistentes sin detener el turno
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Integrar el nuevo `buscar_fondo` de Sebastián para que un `id_fondo` inexistente se observe por RG-10 y se registre sin tumbar el grafo.
+
+**Prompt de trabajo:**
+
+````text
+En tf/nucleo, sustituye en src/grafo.py las llamadas a fondo_inicial por buscar_fondo en la carga del fondo tras validar_gasto y en nodo_cerrar. Trata un resultado None como fondo inexistente: validar_gasto debe aportar RG-10, aplicar_veredicto no debe aprobar ni descontar, y el registro debe guardar OBSERVAR sin lanzar excepción. No modifiques src/memoria.py ni otros archivos de Sebastián. Verifica con un caso de fondo inexistente y ejecutar verificar.py.
+````
+
+**Resultado (una línea):** El grafo ahora usa `buscar_fondo`; FR-999 termina observado por RG-10, conserva fondo `None` y queda registrado sin error. `verificar.py` pasó con 41 ✅ y 0 ❌ en modo aislado.
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` incorpora el nodo de cierre. La salida estructurada y la prueba con Gemini/RAG real siguen pendientes de coordinación con Eduardo. Nunca se registrará el contenido de `.env` ni una clave.
+Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` cierra con `emitir_veredicto` y protege el gasto original. Sigue pendiente coordinar con Eduardo el prompt real y que el juez reciba `validacion`. Nunca se registrará el contenido de `.env` ni una clave.
