@@ -113,11 +113,17 @@ y los demás ya no esperan.
 **Dónde quedan los resultados:** en `pruebas/resultados/`, un archivo por corrida con la fecha y
 la hora (`AAAA-MM-DD_HHMM`):
 
-- `.md`: la tabla para leer.
+- `.md`: la tabla para leer y los fragmentos que devolvió `buscar_politica`.
 - `.json`: todo el detalle: entrada, esperado, obtenido y motivos de cada caso, más las versiones,
   el modelo, la temperatura, el commit y los filtros. Nunca guarda la clave ni variables de entorno.
 
 La corrida usa un registro temporal, así que tu `registro_veredictos.db` no cambia.
+
+**Fragmentos de cada turno:** cada turno guarda la consulta, la política o regla, la fuente y el
+puntaje de lo que devolvió `buscar_politica`, sin el texto completo. Sirve para saber si un error
+de clasificación vino del RAG, que no trajo lo correcto, o del LLM, que lo tuvo y razonó mal.
+
+**`evolucion.md`:** el antes y después de cada mejora, con fecha, commit y causa.
 
 **Desde el notebook:**
 
@@ -138,6 +144,10 @@ turno 1, no se descuenta el saldo y el turno 2 también falla.
 | Juez: bloqueó una aprobación correcta | se esperaba aprobar, el juez la bloqueó y la decisión es lo único malo de ese turno |
 | Juez sin respuesta (falla técnica) | lo mismo, pero el juez no alcanzó a evaluar, por ejemplo por un 429 |
 | Otra causa | todo lo demás |
+
+**Turnos sin juez (falla técnica):** el resumen lista todos los turnos en que el juez no alcanzó a
+evaluar, también los que pasaron. Un turno que esperaba rechazar puede pasar sin juez, pero sigue
+siendo señal de un 429: si este número no es 0, conviene detener la corrida.
 
 La causa se mide igual en todas las corridas, así que se pueden comparar entre sí.
 
