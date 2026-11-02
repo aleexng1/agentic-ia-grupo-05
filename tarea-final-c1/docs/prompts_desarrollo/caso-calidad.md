@@ -1312,7 +1312,7 @@ Pendientes del RAG que sostienen el bono de +1,0:
 Cuando tenga 1 a 3 listos, coordinamos una recarga de grupo05 antes de la corrida final.
 ````
 
-**Resultado (una línea):** El PR #16 quedó unido y la política subió a v1.3: GS-03 y GS-10 tienen una sola respuesta correcta, y `verificar.py`, `probar_herramientas.py` y la autoprueba pasan.
+**Resultado (una línea):** El PR #16 quedó unido y la política subió a v1.3: GS-03 y GS-10 tienen una sola respuesta correcta, y `verificar.py`, `probar_herramientas.py` y la autoprueba pasan. Se recargó `grupo05` una vez y la corrida 1 terminó completa: 31 de 33 casos, sin fallas técnicas; fallan GS-10 y GS-29.
 
 ---
 
