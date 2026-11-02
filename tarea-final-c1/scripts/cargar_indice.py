@@ -61,6 +61,47 @@ def separar_politicas(texto: str) -> list[dict]:
     return fragmentos
 
 
+def separar_reglas(texto: str) -> list[dict]:
+    """Extrae las reglas generales sin incluir otras secciones del documento."""
+    if not isinstance(texto, str) or not texto.strip():
+        raise ValueError("El texto de la política debe ser una cadena no vacía.")
+
+    encabezado = re.search(r"(?m)^## Reglas generales\s*$", texto)
+    if encabezado is None:
+        raise ValueError("No se encontró la sección de reglas generales.")
+    siguiente_seccion = re.search(r"(?m)^## ", texto[encabezado.end():])
+    fin_seccion = (
+        encabezado.end() + siguiente_seccion.start()
+        if siguiente_seccion
+        else len(texto)
+    )
+    seccion = texto[encabezado.end():fin_seccion]
+    coincidencias = list(re.finditer(r"(?m)^\*\*(RG-\d{2}) — [^\r\n*]+\*\*(.*)$", seccion))
+    esperados = [f"RG-{numero:02d}" for numero in range(1, 11)]
+    codigos = [coincidencia.group(1) for coincidencia in coincidencias]
+    if codigos != esperados:
+        raise ValueError("La sección general debe contener RG-01 a RG-10 exactamente una vez y en orden.")
+
+    reglas = []
+    for indice, coincidencia in enumerate(coincidencias):
+        fin = coincidencias[indice + 1].start() if indice + 1 < len(coincidencias) else len(seccion)
+        fragmento = seccion[coincidencia.start():fin].strip()
+        # Elimina únicamente separadores markdown, no contenido normativo.
+        fragmento = re.sub(r"(?:\r?\n\s*)+---\s*$", "", fragmento).strip()
+        contenido = coincidencia.group(2) + seccion[coincidencia.end():fin]
+        contenido = re.sub(r"(?:\r?\n\s*)+---\s*$", "", contenido).strip()
+        if not contenido:
+            raise ValueError(f"La regla {coincidencia.group(1)} está vacía.")
+        reglas.append({
+            "codigo": coincidencia.group(1),
+            "texto": fragmento,
+            "fuente": f"datos/politica_ficticia.md#reglas-generales/{coincidencia.group(1)}",
+        })
+    if len({regla["codigo"] for regla in reglas}) != len(reglas):
+        raise ValueError("La sección general contiene códigos de regla duplicados.")
+    return reglas
+
+
 def _configuracion() -> tuple[str, str, str]:
     """Valida configuración sin incluir sus valores en errores o trazas."""
     valores = tuple(os.getenv(nombre, "").strip() for nombre in (
