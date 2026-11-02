@@ -353,22 +353,226 @@ Detente después de esta prueba y espera autorización.
 Resultado (una línea): OpenCode ejecutó una invocación real de juzgar() con Gemini gemini-3.5-flash-lite para GS-24 (multa en vehículo de empresa); devolvió valido=true y razón referenciada a P04. Esquema y coherencia: PASS. No modificó archivos durante esa prueba.
 ---
 7. Juez LLM con validación determinista
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha: 2026-11-01 (fecha verificada del commit 166880c; no se atribuye una hora)
 Herramienta: OpenCode
 Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
 Para qué era: Incorporar al juez la evidencia de validar_gasto sin romper la interfaz histórica y gestionar con cautela fallos técnicos.
 Commit: 166880c
-Prompt completo: No disponible en el registro facilitado; se documentan los cambios y resultados reportados, sin reconstruir el prompt.
+Prompt completo (BLOQUE 1, extraído del archivo de referencia de transcripciones; son mensajes del usuario, no resultados de OpenCode):
+```text
+Actúa como especialista senior en Python, LangChain, Gemini, Pydantic y seguridad de agentes.
+
+**Proyecto:** tarea-final-c1
+**Rama:** tf/conocimiento-seguridad
+**Archivo autorizado:** src/seguridad.py
+
+## Objetivo
+
+Preparar la integración de `juzgar_con_validacion(gasto, clasificacion, validacion, veredicto)` con el grafo de Matías, reutilizando una única implementación interna del juez LLM.
+
+## Instrucciones
+
+Antes de modificar, revisa AGENTS.md, src/contrato.py, src/seguridad.py y el código disponible de src/grafo.py.
+
+1. Implementa `juzgar_con_validacion` utilizando los tipos Gasto, Clasificacion, Validacion y Veredicto existentes.
+
+2. El juez debe recibir como evidencia el gasto original que le entregue el grafo, la clasificación, la validación determinista y el veredicto. No reconstruyas ni modifiques el gasto recibido.
+
+3. Conserva `juzgar(gasto, clasificacion, veredicto)` con su firma y respuesta pública actuales. Ambas interfaces deben reutilizar una única implementación interna, sin realizar dos evaluaciones por cada llamada.
+
+4. Ajusta PROMPT_JUEZ para considerar explícitamente el resultado de validar_gasto, sin sustituir las reglas deterministas ni aceptar instrucciones provenientes de la glosa u otros datos no confiables.
+
+5. Diferencia internamente un veredicto efectivamente evaluado de una evaluación no realizada por error técnico. Propón cómo exponer este estado a Matías sin modificar src/contrato.py ni romper la respuesta de juzgar().
+
+6. Examina el manejo de HTTP 429 y los reintentos que ya ofrece la biblioteca instalada. Implementa solamente una política limitada y verificable, evitando reintentos duplicados o ilimitados.
+
+7. Ante errores técnicos o evidencia insuficiente, nunca considerar el veredicto aprobado por defecto. No exponer credenciales ni detalles sensibles del proveedor.
+
+## Restricciones
+
+- Modificar exclusivamente src/seguridad.py.
+- No modificar src/grafo.py, src/contrato.py ni verificar.py.
+- No cambiar PROMPT_SISTEMA para exigir emitir_veredicto en esta fase.
+- No modificar archivos de otros integrantes.
+- No llamar a Gemini ni Redis.
+- No ejecutar commit, merge ni push.
+- No crear un segundo juez independiente.
+
+## Verificación
+
+- Comprobar sintaxis Python.
+- Verificar compatibilidad de juzgar().
+- Probar mediante mocks los casos: evaluación válida, inválida, error 429, error no recuperable y validación con incumplimientos.
+- Ejecutar git diff --check.
+- Mostrar el diff, el resultado de las pruebas y la propuesta exacta de interfaz que deberá consumir Matías.
+
+Detente al terminar, sin realizar otras modificaciones.
+```
+
+Corrección posterior del control de reintentos (BLOQUE 2, mensaje final de corrección extraído de otra exportación; la solicitud anterior de inspección no figura íntegra en el archivo fuente):
+```text
+Actúa como ingeniero senior en Python, LangChain, Gemini SDK y pruebas de software seguro.
+
+## Contexto
+
+Proyecto: tarea-final-c1
+Rama: tf/conocimiento-seguridad
+Archivo autorizado: src/seguridad.py
+
+Se confirmó en el entorno local:
+
+- langchain-google-genai==4.4.2
+- google-genai==2.22.0
+- ChatGoogleGenerativeAI utiliza max_retries y no retries.
+
+La ejecución anterior se detuvo correctamente y no realizó cambios.
+
+## Objetivo
+
+Corregir el manejo de reintentos del juez LLM, simplificando la implementación y evitando solicitudes duplicadas al proveedor.
+
+## Instrucciones
+
+1. Inspecciona nuevamente el código fuente instalado para comprobar cómo ChatGoogleGenerativeAI transmite max_retries al SDK en llamadas síncronas invoke() mediante with_structured_output().
+
+2. Comprueba específicamente si max_retries=2 genera HttpRetryOptions(attempts=2), donde los dos intentos incluyen la solicitud inicial.
+
+3. Si se confirma, utiliza exclusivamente el mecanismo de reintentos del SDK para el juez y elimina el bucle manual de reintentos y time.sleep(0.5).
+
+4. Configura el límite únicamente sobre la instancia LLM utilizada por el juez, sin modificar src/config.py ni el comportamiento del LLM principal.
+
+5. No utilices model_copy como garantía de reconstrucción del cliente. Verifica si el valor se consulta al preparar cada solicitud y configura el objeto de forma compatible con la versión instalada.
+
+6. Conserva juzgar() con su firma y respuesta histórica. Conserva juzgar_con_validacion() y su campo evaluado.
+
+7. Si el proveedor agota los intentos, devuelve valido=False y evaluado=False, sin revelar credenciales ni detalles internos.
+
+8. No intentes determinar únicamente a partir del código HTTP 429 si se agotó la cuota diaria. Mantén el comportamiento conservador.
+
+9. Si el SDK reintenta también otros errores transitorios, documenta cuáles y confirma que no supera el presupuesto total de solicitudes.
+
+## Pruebas obligatorias
+
+Usa mocks y simulaciones locales, sin realizar llamadas externas.
+
+- Primera solicitud exitosa: un intento.
+- Primer 429 y luego éxito: como máximo dos intentos efectivos.
+- Dos errores 429 consecutivos: máximo dos intentos y resultado evaluado=False.
+- Error no recuperable: sin reintentos.
+- Respuesta del juez que invalida el veredicto: evaluado=True y valido=False.
+- Compatibilidad de juzgar().
+- Integridad del gasto original y de la validación entregada al juez.
+
+No basta con contar llamadas a juez.invoke(): instrumenta o simula también el nivel del SDK donde se producen los intentos HTTP.
+
+## Restricciones
+
+- Modificar exclusivamente src/seguridad.py.
+- No tocar src/grafo.py, src/config.py ni src/contrato.py.
+- No modificar PROMPT_SISTEMA.
+- No ejecutar Gemini ni Redis.
+- No leer ni imprimir credenciales.
+- No realizar commit, merge ni push.
+- No agregar dependencias.
+
+## Validación final
+
+- Sintaxis Python.
+- git diff --check.
+- Mostrar los resultados PASS/FAIL.
+- Mostrar cambios realizados.
+- Explicar cómo se comprobó el límite efectivo de solicitudes.
+
+Si no puedes verificar la configuración o la ejecución sin red, presenta la evidencia y las limitaciones, pero no supongas que las pruebas pasaron.
+
+Detente al finalizar.
+```
+La corrección establece que se eliminó el ciclo manual y se utilizó exclusivamente el límite `max_retries` del SDK, sujeto a confirmar en esa sesión la semántica de intentos efectiva.
 Resultado (una línea): Se incorporó juzgar_con_validacion(gasto_original, clasificacion, validacion, veredicto) y se conservó juzgar(gasto, clasificacion, veredicto); ambas rutas reutilizan una sola implementación del juez LLM. La salida distingue valido (dictamen fundamentado o no) de evaluado (si el juez logró evaluar), y la validación determinista es autoridad para comprobar reglas exactas. Los errores técnicos producen resultado conservador y evaluado=false; Gemini configura max_retries, sin ciclo manual adicional.
 Evidencia de pruebas reportada: git diff --check sin errores; python -m py_compile src/seguridad.py PASS; pruebas/evaluar.py --autoprueba 54/54 PASS; verificar.py 41/41 PASS. OpenCode reportó favorables las pruebas simuladas del juez mejorado, pero no se confirmó una prueba integral real de la nueva interfaz. verificar.py realizó una invocación real de Gemini mediante juzgar(); pasó el contrato, pero esto no valida por sí solo la calidad semántica del dictamen ni juzgar_con_validacion().
 Pendiente: integrar juzgar_con_validacion() desde nodo_cerrar en el grafo de Matías; comprobar que evaluado se usa para distinguir fallos técnicos; probar el flujo completo con las interfaces integradas; coordinar publicación y revisión con el equipo.
 ---
 8. Integración de emitir_veredicto en PROMPT_SISTEMA
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha: 2026-11-01 (fecha verificada del commit 0633b87; no se atribuye una hora)
 Herramienta: OpenCode
 Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
 Para qué era: Documentar el flujo de revisión de gasto y el uso final de emitir_veredicto, manteniendo la política v1.2 y las defensas de seguridad.
 Commit: 0633b87
-Prompt completo: No disponible en el registro facilitado; se documentan los cambios y resultados reportados, sin reconstruir el prompt.
+Prompt completo (BLOQUE 3, extraído de una transcripción y limpiado de artefactos de interfaz):
+```text
+Actúa como especialista senior en Python, LangChain, LangGraph, Gemini y seguridad de agentes.
+
+## CONTEXTO
+
+Proyecto: tarea-final-c1
+Rama: tf/conocimiento-seguridad
+Archivo autorizado: src/seguridad.py
+
+La mejora del juez LLM ya fue guardada en el commit 166880c.
+
+Matías implementó `emitir_veredicto` en el PR #8, todavía pendiente de integración en main.
+
+## OBJETIVO
+
+Actualizar exclusivamente el texto de PROMPT_SISTEMA para que Gemini utilice `emitir_veredicto` como herramienta final de revisión de gastos, después de `validar_gasto`.
+
+## INSTRUCCIONES
+Antes de modificar, inspecciona:
+
+- AGENTS.md
+- src/contrato.py
+- src/seguridad.py
+- src/grafo.py
+- datos/politica_ficticia.md
+
+Consulta el contrato de `emitir_veredicto` del PR #8 si está disponible, sin modificar archivos de Matías.
+
+Realiza únicamente estos cambios en PROMPT_SISTEMA:
+
+1. Explicar el flujo: identificar y clasificar el gasto, buscar la política cuando sea necesario, ejecutar validar_gasto y utilizar emitir_veredicto como herramienta final.
+
+2. Exigir que emitir_veredicto reciba:
+   - decision: aprobar, observar o rechazar, en minúsculas.
+   - politica: código Pxx.
+   - categoria: categoría válida de la política.
+   - cuenta: cuenta respaldada por validar_gasto.
+   - motivo: explicación basada en evidencia con códigos normativos aplicables.
+
+3. No permitir emitir_veredicto si no existe una validación confiable del gasto en el turno actual.
+
+4. No modificar, reconstruir ni sustituir el gasto original recibido del usuario. El grafo conserva la autoridad sobre ese dato.
+
+5. No permitir aprobar cuando validar_gasto indique incumplimientos. Respetar la consecuencia normativa de cada regla y no convertir automáticamente OBSERVAR en RECHAZAR.
+
+6. Mantener la política v1.2, incluyendo RG-10, RG-08, RG-02 y el tratamiento especial de multas P04.
+
+7. Conservar el comportamiento de consultas fuera de alcance, saludos y preguntas que no requieren búsqueda RAG ni veredicto.
+
+8. Preservar las defensas contra prompt injection, especialmente instrucciones maliciosas contenidas en glosas y documentos recuperados.
+
+9. Evitar inventar resultados de herramientas o simular llamadas. Si faltan datos o falla la validación, no emitir aprobación.
+
+## RESTRICCIONES
+
+- Modificar únicamente el contenido de PROMPT_SISTEMA en src/seguridad.py.
+- No modificar PROMPT_JUEZ.
+- No modificar juzgar(), juzgar_con_validacion() ni el control de reintentos.
+- No modificar src/grafo.py, src/contrato.py, src/herramientas.py o verificar.py.
+- No modificar Redis ni el archivo .env.
+- No ejecutar llamadas reales a Gemini.
+- No hacer commit, merge ni push.
+
+## VALIDACIÓN
+
+- Verificar sintaxis Python.
+- Ejecutar git diff --check.
+- Revisar que el prompt no contradiga la política v1.2.
+- Confirmar que el contrato de emitir_veredicto esté correctamente descrito.
+- Mostrar el diff de PROMPT_SISTEMA.
+- Indicar las limitaciones de integración con el PR #8 todavía abierto.
+
+Detente al finalizar y espera autorización.
+```
+Nota de fidelidad: el archivo de referencia fue extraído de transcripciones; en el bloque 3 se retiró texto superpuesto de la interfaz y se restauraron dos rutas de archivo legibles por contexto. Por ello, este bloque no se presenta como transcripción byte a byte del export original.
 Resultado (una línea): PROMPT_SISTEMA describe clasificación, validación determinista y emisión final del veredicto con decision, politica, categoria, cuenta y motivo; prohíbe aprobar ante incumplimientos deterministas y recoge las consecuencias de la política v1.2. Refuerza la protección frente a prompt injection, limita el razonamiento a evidencia normativa verificable y define el trato de saludos (sin llamadas a herramientas) y consultas sin gasto (responder sobre políticas con evidencia verificable, sin emitir veredictos). El contrato de emitir_veredicto pertenece al trabajo de Matías; al realizar esta verificación, la integración del PR #8 seguía pendiente.
 ---
