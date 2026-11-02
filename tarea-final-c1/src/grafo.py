@@ -9,9 +9,10 @@ El ciclo es:
 """
 
 import json
+import re
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
-from langchain_core.tools import tool
+from langchain_core.tools import ToolException, tool
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -20,6 +21,7 @@ from src.config import obtener_llm, registrar_traza
 from src.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
 from src.herramientas import (
     GRAVEDAD,
+    campos_alterados,
     decision_sugerida,
     efecto_de,
     resolver_categoria,
@@ -34,7 +36,7 @@ from src.memoria import (
 )
 from src.rag import buscar_politica
 from src.registro import registrar_veredicto
-from src.seguridad import PROMPT_SISTEMA, juzgar
+from src.seguridad import PROMPT_SISTEMA, juzgar_con_validacion
 
 # Herramientas que el LLM puede pedir.
 @tool
@@ -50,21 +52,33 @@ def emitir_veredicto(
     politica debe ser el código Pxx. El grafo verifica luego que la decisión no sea
     más permisiva que las reglas, el juez y el saldo del fondo.
     """
-    if decision not in DECISIONES:
-        raise ValueError(f"Decisión no permitida: {decision}.")
-    datos_politica = resolver_politica(politica)
-    categoria_exacta = resolver_categoria(datos_politica, categoria)
-    cuenta = cuenta.strip()
-    motivo = motivo.strip()
-    if not cuenta or not motivo:
-        raise ValueError("emitir_veredicto requiere cuenta y motivo no vacíos.")
-    return {
-        "decision": decision,
-        "motivo": motivo,
-        "politica_sugerida": datos_politica["codigo"],
-        "categoria_sugerida": categoria_exacta,
-        "cuenta_sugerida": cuenta,
-    }
+    try:
+        if decision not in DECISIONES:
+            raise ValueError(f"Decisión no permitida: {decision}.")
+        datos_politica = resolver_politica(politica)
+        categoria_exacta = resolver_categoria(datos_politica, categoria)
+        cuenta = cuenta.strip()
+        motivo = motivo.strip()
+        if not cuenta or not motivo:
+            raise ValueError("se requieren cuenta y motivo no vacíos.")
+        cuenta_correcta = datos_politica["categorias"][categoria_exacta]["cuenta"]
+        if cuenta != cuenta_correcta:
+            raise ValueError(
+                f"La cuenta para {datos_politica['codigo']} / {categoria_exacta} "
+                f"debe ser {cuenta_correcta}, no {cuenta}."
+            )
+        return {
+            "decision": decision,
+            "motivo": motivo,
+            "politica_sugerida": datos_politica["codigo"],
+            "categoria_sugerida": categoria_exacta,
+            "cuenta_sugerida": cuenta_correcta,
+        }
+    except (ValueError, KeyError, TypeError) as error:
+        raise ToolException(f"Veredicto inválido; corrige los campos: {error}") from error
+
+
+emitir_veredicto.handle_tool_error = True
 
 
 HERRAMIENTAS = [buscar_politica, validar_gasto, emitir_veredicto]
@@ -133,6 +147,25 @@ def _emitio_veredicto_en_turno(mensajes: list) -> bool:
     )
 
 
+def _emitio_veredicto_valido_en_turno(mensajes: list) -> bool:
+    """Solo cierra si emitir_veredicto devolvió el Veredicto completo."""
+    inicio = _inicio_turno_actual(mensajes)
+    campos = {
+        "decision",
+        "motivo",
+        "politica_sugerida",
+        "categoria_sugerida",
+        "cuenta_sugerida",
+    }
+    for mensaje in mensajes[inicio + 1 :]:
+        if not isinstance(mensaje, ToolMessage) or mensaje.name != "emitir_veredicto":
+            continue
+        resultado = _leer_resultado_herramienta(mensaje)
+        if isinstance(resultado, dict) and campos <= resultado.keys():
+            return True
+    return False
+
+
 def _estado_con_gasto_original(estado: EstadoAgente) -> tuple[EstadoAgente, AIMessage | None]:
     """Sustituye los argumentos del LLM por el gasto original recibido en el estado."""
     gasto_original = estado.get("gasto")
@@ -147,6 +180,12 @@ def _estado_con_gasto_original(estado: EstadoAgente) -> tuple[EstadoAgente, AIMe
         llamada = dict(llamada)
         argumentos = llamada.get("args", {})
         if llamada.get("name") == "validar_gasto" and isinstance(argumentos, dict):
+            campos = campos_alterados(gasto_original, argumentos.get("gasto"))
+            if campos:
+                registrar_traza(
+                    "campos_alterados",
+                    {"gasto": gasto_original.get("id"), "campos": campos},
+                )
             if argumentos.get("gasto") != gasto_original:
                 llamada["args"] = {**argumentos, "gasto": gasto_original}
                 cambio = True
@@ -270,6 +309,17 @@ def construir_agente():
         _trazar_observaciones(estado["messages"])
         pasos = estado.get("pasos", 0) + 1
         respuesta = llm.invoke([SystemMessage(PROMPT_SISTEMA), *estado["messages"]])
+        texto_respuesta = respuesta.text or ""
+        if not respuesta.tool_calls and re.search(
+            r"\bdecisi[oó]n\s*:\s*aprobar\b", texto_respuesta, re.IGNORECASE
+        ):
+            registrar_traza(
+                "aprobacion_texto_bloqueada",
+                {"motivo": "el LLM no emitió un veredicto estructurado"},
+            )
+            respuesta = AIMessage(
+                "No puedo decidir un gasto sin emitir un veredicto estructurado."
+            )
         registrar_traza(
             "llm",
             {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
@@ -393,9 +443,13 @@ def construir_agente():
             )
             ajustes.append(f"las reglas exactas exigen {piso.upper()} ({reglas})")
 
-        juicio = juzgar(gasto, clasificacion, veredicto)
+        juicio = juzgar_con_validacion(gasto, clasificacion, validacion, veredicto)
         registrar_traza("juez", juicio)
-        if not juicio["valido"] and veredicto["decision"] == "aprobar":
+        if not juicio.get("evaluado", False):
+            if veredicto["decision"] == "aprobar":
+                veredicto["decision"] = "observar"
+            ajustes.append(f"falta de respuesta confiable del juez: {juicio['razon']}")
+        elif not juicio["valido"] and veredicto["decision"] == "aprobar":
             veredicto["decision"] = "observar"
             ajustes.append(f"el juez no validó la aprobación: {juicio['razon']}")
 
@@ -471,7 +525,9 @@ def construir_agente():
         return "herramientas"
 
     def elegir_despues_herramientas(estado: EstadoAgente) -> str:
-        if _emitio_veredicto_en_turno(estado["messages"]):
+        if not estado.get("gasto") and _emitio_veredicto_en_turno(estado["messages"]):
+            return "cerrar"
+        if _emitio_veredicto_valido_en_turno(estado["messages"]):
             return "cerrar"
         return "llm"
 
