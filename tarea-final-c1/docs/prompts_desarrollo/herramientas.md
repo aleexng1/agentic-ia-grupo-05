@@ -130,3 +130,40 @@ Después le pedí al asistente que hiciera el pull y los cambios ("Sí, hazlos")
 **Resultado (una línea):** `verificar.py` 40 ✅ 0 ❌ (1 ⚠️ porque a mi `.env` le falta `REDIS_URL`),
 `probar_herramientas.py` 50 ✅ 0 ❌, y con el cambio de Matías probado en una copia, GS-01 con `FR-999`
 termina en OBSERVAR y queda registrado.
+
+---
+
+## 5. Campos que el LLM cambió en su copia del gasto
+
+- **Fecha:** 2026-11-01
+- **Herramienta:** Claude Code (app de escritorio), con el MCP de GitKraken para leer el PR #8
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** entregarle a Matías la función que pidió para el gasto original: decir qué campos
+  cambió el LLM en su copia del gasto.
+
+**Prompt completo:**
+
+````text
+[adjunta: captura del mensaje de Matías que pide la interfaz de la función que detecta qué campos
+cambió el LLM en su copia del gasto]
+````
+
+Después aprobé la implementación ("Sí, impleméntala").
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- `campos_alterados(gasto_original, gasto_llm) -> list[str]` en `src/herramientas.py`: función pura,
+  no es herramienta del LLM y no cambia `src/contrato.py`. Devuelve los campos cambiados, agregados o
+  quitados, ordenados, y `[]` si la copia es igual.
+- No avisa por diferencias de forma: ausente, `None`, `""` y `False` cuentan como vacío; los números se
+  comparan por valor (`7800`, `7800.0` y `"7800"`), porque Gemini suele mandar enteros como decimales;
+  los textos, sin espacios a los lados.
+- La protección la hace el Núcleo, que valida siempre el gasto original (PR #8); esta función explica
+  qué cambió, para la traza y como evidencia del caso adversarial del piso (GS-16 con la rendición
+  adelantada: la copia pasaría y el original se rechaza por RG-03).
+- Al revisar el PR #8 encontré que en GS-26 el turno 2 validaba el gasto del turno 1, porque el gasto
+  original queda guardado en el hilo. Se lo paso como propuesta: a Matías, dejar `"gasto": None` en la
+  entrada de cada turno, y a Alex, usar `conversar_con_caso` en el evaluador.
+
+**Resultado (una línea):** `verificar.py` 40 ✅ 0 ❌ (1 ⚠️ por `REDIS_URL`) y `probar_herramientas.py`
+56 ✅ 0 ❌ (6 pruebas nuevas en la sección G).

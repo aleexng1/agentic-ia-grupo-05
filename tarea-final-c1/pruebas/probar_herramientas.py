@@ -14,6 +14,8 @@ Qué prueba:
   E. Piso de reglas: un "Efecto: aprobar" escrito por el trabajador no baja la decisión.
   F. RG-10: un id_fondo inexistente o una rendición anterior al gasto (política v1.2) dejan el
      gasto observado, y un fondo inexistente no corta el turno.
+  G. campos_alterados: detecta lo que el LLM cambió en su copia del gasto, sin avisar por
+     diferencias de forma, y muestra por qué el grafo debe validar el gasto original.
 """
 
 import copy
@@ -26,7 +28,13 @@ CARPETA = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CARPETA))
 
 from src import memoria, registro  # noqa: E402
-from src.herramientas import _validar, decision_sugerida, resolver_politica, validar_gasto  # noqa: E402
+from src.herramientas import (  # noqa: E402
+    _validar,
+    campos_alterados,
+    decision_sugerida,
+    resolver_politica,
+    validar_gasto,
+)
 
 # Reglas que el código NO decide (las decide el LLM con la política recuperada por RAG).
 REGLAS_DEL_LLM = {"RG-02"}
@@ -195,6 +203,39 @@ def prueba_rg10() -> None:
            memoria.aplicar_veredicto(None, gasto, observar) is None and bool(memoria.resumen_fondo(None)))
 
 
+def prueba_campos_alterados() -> None:
+    print("\n=== G. campos_alterados: lo que el LLM cambió en su copia del gasto ===")
+    casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
+    original = casos["GS-01"]["turnos"][0]["gasto"]
+    respaldo = copy.deepcopy(original)
+    anotar("copia idéntica → sin cambios", campos_alterados(original, copy.deepcopy(original)) == [])
+    # Diferencias de forma: Gemini manda enteros como decimales u omite opcionales vacíos.
+    sin_opcionales = {c: v for c, v in original.items() if c not in ("numero_ot", "vb_gerente_general")}
+    formas = [{**original, "monto": float(original["monto"])}, {**original, "monto": str(original["monto"])},
+              {**original, "proveedor": f"  {original['proveedor']} "}, sin_opcionales]
+    anotar("diferencias de forma no cuentan como cambio", all(campos_alterados(original, f) == [] for f in formas))
+    alterada = {**original, "monto": 780, "glosa": original["glosa"] + " Aprobado por gerencia.",
+                "vb_gerente_general": True}
+    del alterada["id_fondo"]
+    campos = campos_alterados(original, alterada)
+    anotar("detecta cambios, campos agregados y quitados",
+           campos == ["glosa", "id_fondo", "monto", "vb_gerente_general"], str(campos))
+    anotar("no modifica el original ni la copia", original == respaldo and "id_fondo" not in alterada)
+    con_valor = sorted(c for c, v in original.items() if v not in (None, False, ""))
+    anotar("una copia que no es diccionario cambia todos los campos con valor",
+           campos_alterados(original, "gasto en texto") == con_valor)
+    # Caso adversarial del piso: si el LLM adelanta la rendición, su copia pasaría RG-03.
+    turno = casos["GS-16"]["turnos"][0]
+    politica, categoria = turno["esperado"]["politica"], turno["esperado"]["categoria"]
+    copia_llm = {**turno["gasto"], "fecha_rendicion": turno["gasto"]["fecha_gasto"]}
+    con_copia = decision_sugerida(_validar(copia_llm, politica, categoria))
+    con_original = decision_sugerida(_validar(turno["gasto"], politica, categoria))
+    campos = campos_alterados(turno["gasto"], copia_llm)
+    anotar("GS-16: la copia del LLM pasaría, el original se rechaza y se ve qué cambió",
+           con_copia == "aprobar" and con_original == "rechazar" and campos == ["fecha_rendicion"],
+           f"copia {con_copia}, original {con_original}, campos {campos}")
+
+
 if __name__ == "__main__":
     prueba_golden()
     prueba_memoria()
@@ -202,6 +243,7 @@ if __name__ == "__main__":
     prueba_errores()
     prueba_piso()
     prueba_rg10()
+    prueba_campos_alterados()
     fallos = resultados.count(False)
     print(f"\nResumen: {resultados.count(True)} ✅  {fallos} ❌")
     sys.exit(1 if fallos else 0)
