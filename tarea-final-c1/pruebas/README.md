@@ -129,6 +129,18 @@ mostrar_tabla(resultados)
 guardar_resultados(resultados)             # solo si quieres conservar la corrida
 ```
 
+**Causa de cada ❌:** el resumen separa los ❌ según su primer turno fallido, para ver qué arregla
+cada cambio. El resto de ese caso se entiende como consecuencia: en GS-26, si el juez bloquea el
+turno 1, no se descuenta el saldo y el turno 2 también falla.
+
+| Causa | Cuándo |
+|---|---|
+| Juez: bloqueó una aprobación correcta | se esperaba aprobar, el juez la bloqueó y la decisión es lo único malo de ese turno |
+| Juez sin respuesta (falla técnica) | lo mismo, pero el juez no alcanzó a evaluar, por ejemplo por un 429 |
+| Otra causa | todo lo demás |
+
+La causa se mide igual en todas las corridas, así que se pueden comparar entre sí.
+
 **Qué hacer con un ❌:** cada motivo dice el campo, lo esperado y lo obtenido. Avísale al dueño de
 la parte que falló (ver la tabla de abajo) para que la corrija, y vuelve a ejecutar el caso. Nunca
 borres un caso ni lo ajustes para que pase.
