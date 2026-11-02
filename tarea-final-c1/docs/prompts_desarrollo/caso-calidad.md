@@ -1102,3 +1102,126 @@ Agrega al mensaje del grupo:
 ````
 
 **Resultado (una línea):** `enviar_turno` usa `conversar_con_caso` (autoprueba 57 de 57); el evaluador agrupa los ❌ por causa con la misma regla para todas las corridas (autoprueba 69 de 69).
+
+---
+
+## 17. Cuota agotada y revisión del PR #17
+
+- **Fecha:** 2026-11-01 y 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 ()
+- **Para qué era:** Avisar al grupo que la corrida 1 se movía, y revisar el PR único de Núcleo antes de medir la línea base.
+
+**Prompt completo (cuota agotada):**
+
+text
+Se acabó mi cuota diaria de Gemini: no corras la línea base hoy. La haremos mañana.
+Salta al PASO 6 y dame el mensaje para el grupo, con el reemplazo que propusiste
+("El evaluador ya funciona; traigan los cambios de su rama antes de seguir") y
+agregando: "La corrida 1 (línea base) la hago mañana. Por favor, no gasten cuota en
+corridas completas del golden set: usen --caso con uno o dos casos a la vez."
+
+
+**Prompt completo (revisión y línea base):**
+
+text
+Matías abrió el PR único de Núcleo (commit 7e3c5c1). Búscalo con gh pr list. Revísalo,
+únelo si está bien y luego corremos la línea base del golden set. Tengo cuota de Gemini
+hoy, pero no conozco los límites exactos: usa siempre --pausa 8 para no chocar con el
+límite por minuto, y no gastes llamadas fuera de lo indicado.
+Explícame en simple y detente en las pausas.
+
+PASO 1 — Revisión habitual (sin Gemini)
+gh pr checkout <número>. Dueños, seguridad (también que el notebook no guarde salidas con
+claves o URLs de Redis), verificar.py, probar_herramientas.py, --autoprueba.
+Con el LLM falso, comprueba los cuatro puntos:
+1. Texto "Decisión: APROBAR" sin emitir_veredicto → respuesta segura, sin veredicto ni
+   registro. Prueba también con asteriscos (**Decisión: APROBAR**).
+2. emitir_veredicto inválido (política inexistente, categoría inexistente, motivo vacío,
+   decisión inválida) → el error vuelve al LLM, que puede corregir, sin pasar MAX_PASOS.
+3. El cierre usa juzgar_con_validacion, y con evaluado=False no aprueba ni descuenta.
+4. La traza muestra campos_alterados cuando el LLM altera el gasto.
+Notebook: que las secciones 7, 8 y 10 usen conversar_con_caso y evaluar() de
+pruebas/evaluar.py, y que la evidencia de 7 y 8 venga del agente, no de llamadas
+directas a las funciones.
+
+PASO 2 — Prueba dirigida con Gemini real (en la rama del PR)
+python pruebas/evaluar.py --caso GS-01,GS-07,GS-26,GS-27,GS-28,GS-29,GS-30 --pausa 8
+Muéstrame la tabla y explícame cada ❌: causa y rol. No guardes estos resultados en el repo.
+Si aparecen errores 429 (límite de llamadas) que no se resuelven con los reintentos,
+detente y avísame: significa que la cuota no alcanza hoy.
+Recomendación: ✅ / ⚠️ / ❌ con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 3 — Unir
+Con mi visto bueno: gh pr merge <número> --merge, git switch main, git pull,
+verificar.py, y lleva main a las 4 ramas. Con agente.ipynb, solo fuerza un cambio de rama
+si la diferencia es únicamente de formato.
+
+PASO 4 — Corrida 1 (línea base), por grupos
+Corre en main el golden set grupo por grupo, en este orden: A, B, C, D, E, F, con
+--grupo <letra> --pausa 8, guardando el resultado de cada grupo.
+- Si un grupo termina con fallas técnicas por 429 (juez sin respuesta o casos sin
+  completar), detente: no sigas con los demás grupos. Guarda lo que alcanzó a correr y
+  dime qué grupos quedaron pendientes para mañana.
+- Si los 6 grupos terminan bien, junta los resultados en un solo resumen.
+Guárdalo en pruebas/resultados/ como "corrida 1, línea base" (indica si quedó parcial).
+Muéstrame el resumen por grupo, por componente y por categoría de falla (juez bloqueó,
+juez sin respuesta, otra causa), y la lista de ❌ con su causa y su rol.
+Commit en tf/caso-calidad ("Corrida 1 del golden set: línea base"), PR y únelo.
+
+PASO 5 — Mensaje para el grupo
+Resultados de la prueba dirigida y de la corrida 1, qué casos fallan y a quién le toca
+cada uno, ordenado por prioridad. Recordatorio: no gastar cuota en corridas completas;
+usar --caso con uno o dos casos.
+
+
+**Resultado (una línea):** El PR #17 quedó unido: 6 de 7 casos con Gemini, sin 429; GS-01 y GS-26 pasan; quedan abiertos el filtro de texto y las secciones 8 y 10 del notebook.
+
+---
+
+## 18. Fragmentos del RAG, turnos sin juez y evolución
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 ()
+- **Para qué era:** Dejar el evaluador listo para la corrida 1: reconocer al juez sin respuesta, guardar la evidencia del RAG y conservar el antes y después del juez.
+
+**Prompt completo:**
+
+text
+Decisiones:
+1. Une el #17 (PASO 3).
+2. Visto bueno para tu PR del evaluador, entre los PASOS 3 y 4, sin llamadas a Gemini:
+   - Corrige la categoría "juez sin respuesta" según el texto que escribe el PR #17.
+   - Que el resumen cuente también los turnos que pasaron sin juez (por falla técnica),
+     para la regla de detenerse por 429.
+   - NUEVO: guarda en los resultados, por cada turno, los fragmentos que devolvió
+     buscar_politica (política o regla, fuente y puntaje), y muéstralos en el .md.
+     Sirve para diagnosticar casos como GS-07 y es la evidencia que pide la pauta para
+     el bono RAG.
+   - Agrega pruebas/resultados/evolucion.md con el antes y después del juez: GS-01 y
+     GS-26 fallaban el 2026-11-01 porque el juez antiguo no recibía la validación, y el
+     2026-11-02, con el PR #17 (juzgar_con_validacion), pasan. Incluye la fecha, el
+     commit y la causa. Usa los resultados de hoy de /tmp como "después" (cópialos a
+     pruebas/resultados/ con el nombre "prueba_dirigida_PR17").
+   - --autoprueba debe pasar. Commit, PR y únelo.
+3. Mantenemos el orden de hoy. Sigue con el PASO 4.
+
+Agrega al mensaje del grupo, como pendientes del PR corto de Matías (antes de la
+entrega):
+🔴 El filtro de texto deja pasar 11 de 15 variantes ("**Decisión:** APROBAR",
+   "Veredicto: APROBAR", "Apruebo este gasto", etc.). En vez de seguir agregando frases:
+   si el turno trae un gasto y no hubo un emitir_veredicto válido, reemplazar el
+   mensaje final completo por una respuesta segura, diga lo que diga. El filtro de frases
+   queda solo como respaldo para turnos sin gasto.
+🟡 Notebook: la sección 8 debe mostrar el registro antes/después desde una corrida del
+   agente, no llamando directo a registrar_veredicto. La sección 10 debe usar evaluar()
+   y mostrar_tabla() de pruebas/evaluar.py, no lanzar el comando en seco.
+🟡 Actualizar docs/prompts_desarrollo/nucleo.md.
+Y para Eduardo: GS-07 clasificó P03 en vez de P01 con "auto propio" en la glosa
+(intermitente: ayer pasó). Con los fragmentos guardados en la corrida 1 veremos si es el
+RAG o el razonamiento del LLM.
+
+
+**Resultado (una línea):** El evaluador reconoce al juez sin respuesta, cuenta los turnos sin juez y guarda los fragmentos de cada turno (autoprueba 77 de 77);  conserva el antes y después del juez.
