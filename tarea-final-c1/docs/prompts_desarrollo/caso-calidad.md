@@ -1911,4 +1911,4 @@ PASO 2 — Mis tareas (en tf/caso-calidad, trayendo main). No unas otros PR.
    las 4 ramas.
 ````
 
-**Resultado (una línea):** La sección I del PR #33 recibe el gasto en el mensaje y pasó con Gemini real: GS-01 aprobado, juez válido y sin intervención del piso.
+**Resultado (una línea):** La sección I del PR #33 recibe el gasto en el mensaje y pasó con Gemini real: GS-01 aprobado, juez válido y sin intervención del piso. El evaluador cuenta una falla del RAG como falla técnica (autoprueba 88 de 88), y la política v1.6 aclara P04 sin cambiar ninguna decisión.

@@ -45,7 +45,7 @@ CARPETA = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CARPETA))
 
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage  # noqa: E402
-from langchain_core.tools import tool  # noqa: E402
+from langchain_core.tools import ToolException, tool  # noqa: E402
 
 from src import grafo, memoria, registro  # noqa: E402
 from src.config import MODELO_DEL_CURSO, TEMPERATURA  # noqa: E402
@@ -85,10 +85,14 @@ MARCA_JUEZ_SIN_RESPUESTA = "falta de respuesta confiable del juez"
 CAUSAS = {
     "juez": "Juez: bloqueó una aprobación correcta",
     "juez_sin_respuesta": "Juez sin respuesta (falla técnica)",
+    "rag_sin_respuesta": "RAG sin respuesta (falla técnica)",
     "otra": "Otra causa",
 }
 
 _CODIGO_REGLA = re.compile(r"(?<![A-Za-z0-9-])(?:RG-\d{2}|P\d{2})(?![A-Za-z0-9])", re.IGNORECASE)
+# Errores de buscar_politica que vienen del servicio (Redis, embeddings, cuota o índice), no del pedido
+# del LLM: un k fuera de rango o una consulta vacía los corrige el propio LLM y no cuentan.
+_FALLA_RAG = re.compile(r"falló la búsqueda|incompatible|texto_completo|redis", re.IGNORECASE)
 _LIMITE_LLAMADAS = re.compile(
     r"\b429\b|resource.?exhausted|too.?many.?requests|rate.?limit|quota", re.IGNORECASE
 )
@@ -288,6 +292,14 @@ def fragmentos_del_turno(mensajes: list) -> list[dict]:
     return fragmentos
 
 
+def es_falla_del_rag(error: dict) -> bool:
+    """Error de buscar_politica que viene del servicio, no del pedido del LLM."""
+    mensaje = error["mensaje"]
+    if error["herramienta"] != "buscar_politica" or mensaje.startswith("Error invoking tool"):
+        return False
+    return bool(_FALLA_RAG.search(mensaje) or _LIMITE_LLAMADAS.search(mensaje))
+
+
 def errores_del_turno(mensajes: list) -> list[dict]:
     """Errores que recibió el LLM de sus herramientas en este turno, por ejemplo un veredicto rechazado."""
     return [
@@ -404,6 +416,11 @@ def comparar_turno(esperado: dict, obtenido: dict, gasto, antes: list, despues: 
     if gasto:
         for espera, llego in revisar_registro(gasto, obtenido["decision"], antes, despues):
             anotar("registro", espera, llego)
+
+    # Sin la política, una decisión correcta es suerte: el turno no cuenta como aprobado.
+    fallas = [error for error in obtenido["errores_herramientas"] if es_falla_del_rag(error)]
+    if fallas:
+        anotar("rag", "una búsqueda sin falla técnica", repr(recortar(fallas[0]["mensaje"], 100)))
     return motivos
 
 
@@ -449,8 +466,11 @@ def causa_del_fallo(resultado: dict) -> str:
 
     Es del juez solo si se esperaba aprobar, el juez bloqueó la aprobación o no pudo responder, y
     lo único malo de ese turno es la decisión. Si además falló otra cosa, el juez no explica todo
-    el ❌.
+    el ❌. Una falla técnica del RAG en cualquier turno pesa más que todo lo demás: sin la política,
+    el resto del caso no es confiable.
     """
+    if any(texto.startswith("rag:") for turno in resultado["turnos"] for texto in turno["motivos"]):
+        return "rag_sin_respuesta"
     fallido = next((turno for turno in resultado["turnos"] if not turno["pasa"]), None)
     if fallido is None:
         return "otra"  # todos los turnos pasaron: el ❌ viene de un error del agente
@@ -558,6 +578,12 @@ def resumir(casos: list[dict]) -> dict:
             for turno in caso["turnos"]
             if MARCA_JUEZ_SIN_RESPUESTA in turno["obtenido"]["motivo"]
         ],
+        "turnos_sin_rag": [
+            f"{caso['id']} turno {turno['numero']}"
+            for caso in casos
+            for turno in caso["turnos"]
+            if any(es_falla_del_rag(error) for error in turno["obtenido"]["errores_herramientas"])
+        ],
     }
 
 
@@ -640,12 +666,12 @@ def mostrar_tabla(resultados: dict) -> None:
         print("Por causa de los ❌:")
     for causa, casos in resumen["por_causa"].items():
         print(f"   {CAUSAS[causa]}: {len(casos)} ({', '.join(casos)})")
-    print(f"Turnos sin juez (falla técnica): {texto_sin_juez(resumen)}")
+    print(f"Turnos sin juez (falla técnica): {texto_turnos(resumen['turnos_sin_juez'])}")
+    print(f"Turnos sin RAG (falla técnica): {texto_turnos(resumen['turnos_sin_rag'])}")
 
 
-def texto_sin_juez(resumen: dict) -> str:
-    """Convierte la lista de turnos sin juez en "2 (GS-01 turno 1, GS-27 turno 1)"."""
-    turnos = resumen["turnos_sin_juez"]
+def texto_turnos(turnos: list[str]) -> str:
+    """Convierte una lista de turnos en "2 (GS-01 turno 1, GS-27 turno 1)"."""
     return f"{len(turnos)} ({', '.join(turnos)})" if turnos else "0"
 
 
@@ -660,7 +686,8 @@ def texto_markdown(resultados: dict) -> str:
         f"# Golden set: corrida {resultados['fecha']}",
         "",
         f"- **Resultado:** {porcentaje(resumen)}",
-        f"- **Turnos sin juez (falla técnica):** {texto_sin_juez(resumen)}",
+        f"- **Turnos sin juez (falla técnica):** {texto_turnos(resumen['turnos_sin_juez'])}",
+        f"- **Turnos sin RAG (falla técnica):** {texto_turnos(resumen['turnos_sin_rag'])}",
         f"- **Golden set:** v{resultados['golden_version']} (construido sobre la política "
         f"v{resultados['politica_version_golden']})",
         f"- **Política vigente:** {resultados['politica_vigente']}",
@@ -890,6 +917,17 @@ def buscar_politica_sin_redis(consulta: str, k: int = 3) -> list:
     return []
 
 
+@tool("buscar_politica")
+def buscar_politica_caida(consulta: str, k: int = 3) -> list:
+    """Búsqueda falsa que falla como Redis caído y le devuelve el error al LLM, sin cortar el turno."""
+    raise ToolException(
+        "Falló la búsqueda de políticas (ConnectionError). Comprueba Redis, memoria disponible y cuotas de embeddings."
+    )
+
+
+buscar_politica_caida.handle_tool_error = True
+
+
 def error_escondido_como_rag() -> Exception:
     """Arma un error igual a los de rag.py: el 429 original queda oculto bajo otro mensaje."""
     try:
@@ -1099,11 +1137,12 @@ def autoprueba() -> int:
         for herramienta in grafo.HERRAMIENTAS
     ]
 
-    def con_grafo_real(dictamen: dict, *ids: str, llm=None) -> list[dict]:
+    def con_grafo_real(dictamen: dict, *ids: str, llm=None, buscar=None) -> list[dict]:
         """Corre casos en el grafo real con un juez falso."""
         llm = llm or LLMDeGuion(golden)
+        lista = [buscar if buscar and h.name == "buscar_politica" else h for h in herramientas]
         with mock.patch.object(grafo, "obtener_llm", lambda: llm), mock.patch.object(
-            grafo, "HERRAMIENTAS", herramientas
+            grafo, "HERRAMIENTAS", lista
         ), mock.patch.object(grafo, "juzgar_con_validacion", lambda *_: dictamen):
             return probar_con_agente(grafo.construir_agente(), golden, *ids)
 
@@ -1210,6 +1249,46 @@ def autoprueba() -> int:
     anotar("el .md muestra los errores", "| GS-01 | 1 | emitir_veredicto | Veredicto inválido; corrige los campos: motivo vacío. |" in texto)
     casos = probar_con_agente(AgenteFalso(golden), golden, "GS-01")
     anotar("un turno sin errores no agrega la sección al .md", "Errores de herramientas" not in texto_markdown({**corrida, "casos": casos}))
+
+    print("\n=== K. Falla técnica del RAG ===")
+    caida = "Falló la búsqueda de políticas (ClientError). Comprueba Redis, memoria disponible y cuotas de embeddings."
+    anotar(
+        "distingue la falla del servicio del pedido del LLM",
+        es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": caida})
+        and es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": "429 RESOURCE_EXHAUSTED"})
+        and es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": "El documento recuperado tiene metadatos incompatibles."})
+        and not es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": "k debe ser un entero entre 1 y 10."})
+        and not es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": "La consulta no puede estar vacía."})
+        and not es_falla_del_rag({"herramienta": "buscar_politica", "mensaje": "Error invoking tool 'buscar_politica' with kwargs {'k': 'x'}"})
+        and not es_falla_del_rag({"herramienta": "emitir_veredicto", "mensaje": caida}),
+    )
+    caso = correr("GS-01", errores_herramienta=[("buscar_politica", caida)])
+    anotar(
+        "un turno con el RAG caído queda ❌ aunque la decisión calce",
+        not caso["pasa"] and caso["causa"] == "rag_sin_respuesta" and any("· rag:" in m for m in caso["motivos"]),
+        recortar(caso["motivos"][0] if caso["motivos"] else "pasó", 100),
+    )
+    anotar(
+        "un k fuera de rango no es falla técnica",
+        correr("GS-01", errores_herramienta=[("buscar_politica", "k debe ser un entero entre 1 y 10.")])["pasa"],
+    )
+    with contextlib.redirect_stdout(io.StringIO()):
+        corrida = correr_casos(
+            AgenteFalso(golden, {1: {"errores_herramienta": [("buscar_politica", caida)]}}),
+            golden, filtrar_casos(golden["casos"], "GS-01"), {},
+        )
+    anotar(
+        "el resumen y el .md cuentan los turnos sin RAG",
+        corrida["resumen"]["turnos_sin_rag"] == ["GS-01 turno 1"]
+        and corrida["resumen"]["por_causa"] == {"rag_sin_respuesta": ["GS-01"]}
+        and "sin RAG (falla técnica):** 1 (GS-01 turno 1)" in texto_markdown(corrida),
+    )
+    caso = con_grafo_real(juez_conforme, "GS-01", buscar=buscar_politica_caida)[0]
+    anotar(
+        "con el grafo real, una búsqueda que devuelve el error al LLM no deja el caso aprobado",
+        not caso["pasa"] and caso["causa"] == "rag_sin_respuesta" and caso["turnos"][0]["obtenido"]["decision"] == "aprobar",
+        recortar(caso["motivos"][-1], 100),
+    )
 
     aprobadas = sum(resultados)
     print(f"\nAutoprueba: {aprobadas} de {len(resultados)} ✅")
