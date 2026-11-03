@@ -95,5 +95,5 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
     return fragmentos
 
 
-# LangChain serializa ToolException como ToolMessage con status="error".
-buscar_politica.handle_tool_error = True
+# ToolException se propaga en llamadas directas; ToolNode debe capturarla.
+buscar_politica.handle_tool_error = False

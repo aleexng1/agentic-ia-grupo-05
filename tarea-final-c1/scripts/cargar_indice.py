@@ -9,6 +9,7 @@ from pathlib import Path
 
 CARPETA_PROYECTO = Path(__file__).resolve().parents[1]
 RUTA_POLITICA = CARPETA_PROYECTO / "datos" / "politica_ficticia.md"
+INDICE_DESTINO = "grupo05_v15"
 PATRON_POLITICA = re.compile(r"(?m)^## (P\d{2}) — (.+?)\s*$")
 
 
@@ -162,29 +163,52 @@ def _preparar_documentos(texto: str) -> list[dict]:
 
 
 def main() -> None:
-    """Previsualiza el índice offline o mantiene bloqueada la carga real."""
+    """Plan offline o carga explicita y restringida al indice nuevo."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    parser = argparse.ArgumentParser(description="Previsualiza el índice sin servicios externos.")
-    parser.add_argument("--plan", action="store_true", help="valida documentos y muestra claves previstas")
-    argumentos = parser.parse_args()
-    if not argumentos.plan:
-        raise RuntimeError(
-            "Carga bloqueada: compatibilidad Redis pendiente. Completa y autoriza "
-            "scripts/MIGRACION_INDICE_REDIS_PENDIENTE.md antes de habilitar escrituras."
-        )
+
+    parser = argparse.ArgumentParser(description="Plan de indice y carga expresamente autorizada")
+    modos = parser.add_mutually_exclusive_group(required=True)
+    modos.add_argument("--plan", action="store_true", help="Sin servicios ni escrituras")
+    modos.add_argument("--cargar", action="store_true", help="Carga real reservada al responsable autorizado")
+    parser.add_argument("--confirmar-indice", help="Confirmacion exacta del indice de destino")
+    args = parser.parse_args()
+
     texto = RUTA_POLITICA.read_text(encoding="utf-8")
+    version = re.search(r"(?m)^\|\s*Versión\s*\|\s*([^|]+?)\s*\|", texto)
+    if not version or not version.group(1).startswith("1.6"):
+        parser.error("Se requiere politica v1.6 antes de preparar el indice")
     try:
         documentos = _preparar_documentos(texto)
         _validar_plan(documentos)
     except ValueError as error:
         parser.error(str(error))
-    print(f"Plan offline: {len(documentos)} documentos; prefijo de prueba grupo05")
-    print("Claves previstas (grupo05:<código>; predicción, no verificada en Redis):")
-    for documento in documentos:
-        print(f"- {documento['codigo']}: grupo05:{documento['codigo']}")
-    print("ADVERTENCIA: las claves antiguas documentadas no han sido verificadas en Redis.")
-    print("No se crearon clientes, embeddings ni se escribieron datos.")
+
+    if args.plan:
+        if args.confirmar_indice is not None:
+            parser.error("--plan no acepta --confirmar-indice")
+        print(f"PASS: politica {version.group(1)}; {len(documentos)} documentos preparados")
+        print(f"Indice nuevo previsto: {INDICE_DESTINO}")
+        print("Codigos: " + ", ".join(doc["codigo"] for doc in documentos))
+        print("Claves fisicas pendientes de verificar por el operador autorizado")
+        print("SIN Redis, SIN Gemini, SIN escrituras")
+        return
+
+    if args.confirmar_indice != INDICE_DESTINO:
+        parser.error("Carga bloqueada: exige --confirmar-indice grupo05_v15")
+
+    # La lectura de .env solo ocurre en modo carga; no se muestran valores.
+    from dotenv import load_dotenv
+    load_dotenv(CARPETA_PROYECTO / ".env")
+    try:
+        redis_url, prefijo, modelo = _configuracion()
+    except RuntimeError:
+        parser.error("Carga bloqueada: falta configuracion Redis o embeddings")
+    if prefijo != INDICE_DESTINO:
+        parser.error("Carga bloqueada: REDIS_PREFIJO debe ser grupo05_v15")
+
+    # SOLO Alex, tras inventario y autorizacion expresa, debe ejecutar esta rama.
+    _cargar_documentos(documentos, redis_url, prefijo, modelo)
 
 
 def _validar_plan(documentos: list[dict]) -> None:
@@ -217,6 +241,8 @@ def _cargar_documentos(
     documentos_fuente: list[dict], redis_url: str, prefijo: str, modelo: str
 ) -> None:
     """Construye documentos con metadatos e IDs estables y los carga en Redis."""
+    if prefijo != INDICE_DESTINO:
+        raise ValueError("Carga bloqueada: indice diferente de grupo05_v15")
     # Redis añade key_prefix; IDs desnudos evitan prefijos duplicados.
     ids = [trozo["codigo"] for trozo in documentos_fuente]
     try:

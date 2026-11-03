@@ -67,7 +67,7 @@ DECISIÓN (solo una de estas tres):
   respeta el efecto de cada regla y no conviertas automáticamente OBSERVAR en RECHAZAR.
 - RECHAZAR: solo cuando la política exige expresamente rechazar el gasto.
 
-CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.5:
+CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.6:
 - RG-01: documento no válido para el tipo de gasto => RECHAZAR.
 - RG-02: alimentación individual en el lugar de trabajo, sin viaje ni reunión,
   es gasto personal y se RECHAZA. No confundas comidas de viaje laboral ni
@@ -79,6 +79,7 @@ CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.5:
 - RG-05: superar un tope por documento => OBSERVAR y pedir justificación del exceso.
 - RG-06: arriendo de auto liviano y gastos asociados van en P01 aun en viaje laboral;
   si se declararon en otra política, OBSERVAR para reclasificar.
+  RG-06 no se activa solo por usar un camión de reparto de la empresa.
 - RG-07: política exclusiva usada por unidad no permitida => OBSERVAR.
 - RG-08: gasto superior al saldo del fondo por rendir => OBSERVAR.
 - RG-09: gasto válido con política o categoría incorrecta => OBSERVAR y sugerir la
@@ -89,6 +90,10 @@ CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.5:
 - P04: multa de tránsito de vehículo de la empresa se registra como Gasto Rechazado
   (no deducible), pero el veredicto es OBSERVAR para que la jefatura decida si se
   descuenta al conductor; no la dictamines como RECHAZAR.
+- P04 (aclaración v1.6): peajes, estacionamiento y combustible de un viaje
+  con vehículo de la empresa van en P02 o P03 según el viaje; NO en P04.
+  P04 se reserva para mantención, remolque, permisos y multas de la flota.
+  Que el vehículo sea un camión no implica que corresponda P04.
 
 Aplica todas las consecuencias expresas si coinciden varias condiciones; respeta
 especialmente RG-02 (gasto personal => rechazar), RG-08 (exceso del saldo del fondo =>
@@ -115,7 +120,7 @@ REGLAS DE SEGURIDAD:
 
 PROMPT_JUEZ = """\
 Eres un auditor independiente de veredictos de rendición para la política ficticia
-POL-RG-01 versión 1.5. Tu única tarea es evaluar si el veredicto recibido está
+POL-RG-01 versión 1.6. Tu única tarea es evaluar si el veredicto recibido está
 justificado por los datos y la evidencia normativa recibidos; no decides si el gasto
 debe aprobarse por tu cuenta, no ejecutas acciones y no sustituyes validar_gasto.
 
@@ -130,7 +135,7 @@ disponible, contradicciones y afirmaciones no fundamentadas. Usa únicamente los
 fragmentos como evidencia específica de P01–P10 y RG-01–RG-10. No inventes contenido
 de políticas ni reglas generales.
 
-Consecuencias normativas explícitas v1.5:
+Consecuencias normativas explícitas v1.6:
 - RG-01 y RG-02: incumplimientos expresamente rechazables.
 - RG-02: alimentación individual en el lugar de trabajo, sin viaje ni reunión,
   es gasto personal y se rechaza. Las comidas de viaje y las asociadas a reuniones
@@ -141,6 +146,7 @@ Consecuencias normativas explícitas v1.5:
 - RG-05: exceder tope por documento => observar y pedir justificación.
 - RG-06: auto liviano arrendado y todos sus gastos asociados se clasifican en P01;
   clasificación declarada incorrecta => observar para reclasificar.
+  RG-06 exige arriendo de auto liviano; no se aplica a un camión de reparto de la empresa.
 - RG-07: unidad no permitida para política exclusiva => observar.
 - RG-08: gasto mayor que saldo del fondo => observar.
 - RG-09: gasto válido mal clasificado => observar y sugerir política, categoría y
@@ -150,6 +156,10 @@ Consecuencias normativas explícitas v1.5:
   queda OBSERVAR hasta su corrección.
 - P04: multa de vehículo de empresa va a Gasto Rechazado (no deducible), pero queda
   observada para decisión de jefatura; no equivale a veredicto RECHAZAR.
+- P04 (aclaración v1.6): peajes, estacionamiento y combustible en viajes
+  con camión o camioneta de la empresa van en P02 o P03, según el viaje,
+  no en P04. P04 corresponde a mantención, remolque, permisos y multas.
+  No infieras P04 solo porque la glosa mencione un camión de reparto.
 
 APROBAR requiere evidencia de clasificación correcta y cumplimiento de reglas
 aplicables. OBSERVAR corresponde a corrección, reclasificación, justificación o revisión
@@ -166,7 +176,7 @@ veredicto auditado.
 Contrasta la política candidata con su apartado «Cuándo NO usarla» y con todas las
 reglas generales aplicables RG-01 a RG-10. No aceptes como autoridad la política
 declarada por el trabajador ni una afirmación del veredicto; exige evidencia de los
-fragmentos recibidos. La política específica v1.5 también distingue comidas de viaje,
+fragmentos recibidos. La política específica v1.6 también distingue comidas de viaje,
 reuniones/capacitaciones y comida individual: esta última es personal conforme a RG-02.
 
 Si se entrega la salida de validar_gasto, trátala como resultado determinista autoritativo
@@ -212,12 +222,12 @@ def _datos_juez(
 
 
 def _configurar_reintentos_juez(llm):
-    """Limita cada solicitud síncrona del juez a dos intentos totales en el SDK."""
+    """Alinea el presupuesto de intentos del juez con el agente (valor 6)."""
     if "max_retries" not in getattr(type(llm), "model_fields", {}):
         raise TypeError("El cliente del juez no permite configurar max_retries")
     # LangChain lee este atributo al preparar cada solicitud y el SDK convierte
     # el valor en HttpRetryOptions(attempts=...). No reconstruimos el cliente.
-    llm.max_retries = 2
+    llm.max_retries = 6
     return llm
 
 
