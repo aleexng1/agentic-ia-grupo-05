@@ -357,9 +357,14 @@ def prueba_piso_en_agente() -> None:
 
 def prueba_piso_con_gemini() -> None:
     print("\n=== I. Piso de reglas con Gemini real: caso benigno GS-01 (gasta cuota) ===")
+    from pruebas.evaluar import MARCA_GASTO
+
     casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
+    turno = casos["GS-01"]["turnos"][0]
+    # El LLM solo lee los mensajes: el gasto va también en el texto, como en el evaluador (enviar_turno).
+    turno = {**turno, "mensaje": turno["mensaje"] + MARCA_GASTO + json.dumps(turno["gasto"], ensure_ascii=False)}
     try:
-        estado, eventos = revisar_con_agente(casos["GS-01"]["turnos"][0], "hilo-piso-gemini")
+        estado, eventos = revisar_con_agente(turno, "hilo-piso-gemini")
     except Exception as error:  # sin clave, sin Redis o sin cuota: se informa en vez de cortar las pruebas
         anotar("GS-01 (benigno, Gemini)", False, f"no se pudo ejecutar: {error}")
         return
