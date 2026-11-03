@@ -1912,3 +1912,23 @@ PASO 2 — Mis tareas (en tf/caso-calidad, trayendo main). No unas otros PR.
 ````
 
 **Resultado (una línea):** La sección I del PR #33 recibe el gasto en el mensaje y pasó con Gemini real: GS-01 aprobado, juez válido y sin intervención del piso. El evaluador cuenta una falla del RAG como falla técnica (autoprueba 88 de 88), y la política v1.6 aclara P04 sin cambiar ninguna decisión.
+
+---
+
+## 27. Remolque en la frase de P04 (política v1.6)
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Que la aclaración de P04 no contradiga su propia tabla, que incluye el servicio de remolque.
+
+**Prompt completo:**
+
+````text
+Corrige la frase de P04 en la v1.6 (todavía no se carga, así que sigue siendo v1.6):
+"P04 es solo para mantención, remolque, permisos y multas de la flota." Comprueba que
+quede coherente con la tabla de P04 y que ningún caso cambie. verificar.py,
+--autoprueba, probar_herramientas.py. Commit, PR, únelo y lleva main a las 4 ramas.
+````
+
+**Resultado (una línea):** La frase de P04 nombra las cuatro clases de categorías de su tabla; ningún caso ni decisión de `validar_gasto` cambia.
