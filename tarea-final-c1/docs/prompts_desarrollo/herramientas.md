@@ -209,3 +209,42 @@ evidencia ("ejecútalo").
 
 **Resultado (una línea):** `probar_herramientas.py` 59 ✅ 0 ❌ (3 pruebas nuevas en la sección H) y
 `verificar.py` 42 ✅ 0 ❌.
+
+---
+
+## 7. Piso de reglas para el notebook: base temporal y caso benigno con Gemini
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code (app de escritorio)
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** dejar lista mi parte de la sección del notebook para el piso de reglas que pide
+  la matriz de evidencias, y que Matías solo tenga que pegar las celdas.
+
+**Prompt completo:**
+
+````text
+[adjunta: captura del mensaje de Alex con lo unido en main y lo que falta. Para Seba + Matías:
+"Nueva sección del notebook para el guardrail "piso de reglas": usar prueba_piso_en_agente()
+completa (no revisar_con_agente por separado, porque escribiría en el registro local), explicar por
+qué el caso adversarial es simulado (Gemini no se equivoca a pedido) y agregar un caso benigno real
+con Gemini."]
+Contexto
+````
+
+Después aprobé el plan del asistente ("Sí, hazlo").
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- `revisar_con_agente` registra siempre en una base temporal (`tempfile`, como el notebook en las
+  secciones 7 y 8). Así ya se puede llamar sola sin tocar el registro local.
+- Nueva sección I, `prueba_piso_con_gemini()`: GS-01 con Gemini y el juez reales. Pasa si Gemini
+  propone APROBAR, el final es APROBAR y el piso no interviene. Solo corre con `--con-llm`, porque
+  gasta cuota; si falta la clave o Redis, queda ❌ con el error en vez de cortar las pruebas.
+- Probé la lógica de la sección I sin cuota, cambiando Gemini por un guion: si aprueba pasa, si
+  observa falla, y sin clave falla con el mensaje.
+- El notebook es de Matías: le paso como propuesta el texto y las dos celdas.
+- Encontré que `verificar.py` deja una fila G-VERIF en el registro local cada vez que corre. No lo
+  cambié porque es compartido.
+
+**Resultado (una línea):** `probar_herramientas.py` 59 ✅ 0 ❌ y `verificar.py` 42 ✅ 0 ❌; la sección I
+con Gemini real no se pudo ejecutar porque mi `.env` no tiene `GOOGLE_API_KEY` ni `REDIS_URL`.

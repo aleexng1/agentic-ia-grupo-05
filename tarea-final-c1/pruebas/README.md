@@ -148,11 +148,16 @@ turno 1, no se descuenta el saldo y el turno 2 también falla.
 |---|---|
 | Juez: bloqueó una aprobación correcta | se esperaba aprobar, el juez la bloqueó y la decisión es lo único malo de ese turno |
 | Juez sin respuesta (falla técnica) | lo mismo, pero el juez no alcanzó a evaluar, por ejemplo por un 429 |
+| RAG sin respuesta (falla técnica) | algún turno no pudo buscar en la política por Redis, cuota o un índice incompatible; pesa más que las otras causas |
 | Otra causa | todo lo demás |
 
 **Turnos sin juez (falla técnica):** el resumen lista todos los turnos en que el juez no alcanzó a
 evaluar, también los que pasaron. Un turno que esperaba rechazar puede pasar sin juez, pero sigue
 siendo señal de un 429: si este número no es 0, conviene detener la corrida.
+
+**Turnos sin RAG (falla técnica):** lo mismo para `buscar_politica`. Un turno cuya búsqueda falló por
+el servicio queda en ❌ aunque la decisión calce, porque el agente decidió sin la política. Un `k`
+fuera de rango o una consulta vacía no cuentan: son errores del pedido, y el LLM los corrige.
 
 La causa se mide igual en todas las corridas, así que se pueden comparar entre sí.
 

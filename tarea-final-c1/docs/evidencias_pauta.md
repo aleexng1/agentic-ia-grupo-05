@@ -60,6 +60,8 @@ del grupo A, salvo los repetidos, corrieron antes de la política v1.3.
 
 - [ ] Actualizar en el README los límites conocidos que ya se hayan resuelto.
 - [ ] Actualizar esta matriz con la evidencia de la corrida final.
-- [ ] Confirmar que el índice `grupo05` tiene la política v1.5.
+- [ ] Confirmar que el índice tiene la política v1.6.
 - [ ] Ejecutar el notebook completo de arriba abajo, desde cero.
 - [ ] Revisar que los prompts de desarrollo de los 4 estén completos.
+- [ ] Entregar `agente.ipynb` limpio y `agente_ejecutado.ipynb` con salidas, revisado para que no
+  tenga secretos (sacarlo del `.gitignore` al final).

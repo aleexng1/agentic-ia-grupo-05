@@ -36,7 +36,7 @@ contra la política.
 
 ## Alcance
 
-- Revisa gastos de a uno contra la política POL-RG-01 v1.5 (10 políticas, reglas RG-01 a RG-10).
+- Revisa gastos de a uno contra la política POL-RG-01 v1.6 (10 políticas, reglas RG-01 a RG-10).
 - Puede buscar en la política (RAG), validar reglas exactas, emitir un veredicto y registrarlo en una
   base de prueba.
 - No paga, no borra registros y solo actualiza la fila del gasto que revisa. No aprueba sin validar y
