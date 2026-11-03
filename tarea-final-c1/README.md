@@ -111,7 +111,7 @@ Todo es ficticio. Los casos se construyeron con patrones agregados; ningún regi
 
 | Archivo | Versión | Contenido |
 |---|---|---|
-| `datos/politica_ficticia.md` | 1.5 | Política POL-RG-01: 10 políticas y reglas RG-01 a RG-10 |
+| `datos/politica_ficticia.md` | 1.6 | Política POL-RG-01: 10 políticas y reglas RG-01 a RG-10 |
 | `datos/fondos_ficticios.json` | 1.0 | Fondos por rendir FR-001, FR-020 y FR-050 |
 | `datos/rendiciones_prueba.csv` | — | 5 gastos de ejemplo |
 | `pruebas/golden_set.json` | 1.3 | 34 casos con su respuesta correcta |
@@ -198,7 +198,12 @@ como se hizo en la corrida 1. Cada corrida con Gemini guarda un `.md` y un `.jso
 
 ## Pruebas y resultados
 
-Los resultados están en [pruebas/resultados/](pruebas/resultados/):
+[pruebas/resultados/](pruebas/resultados/) contiene las trazas de ejecución del evaluador: por cada caso
+y turno, la entrada, la respuesta, las herramientas que pidió el agente, los fragmentos del RAG, los
+errores de herramientas y el veredicto final, en el `.json`, con un resumen en el `.md`. No incluye las
+trazas internas del grafo (`registrar_traza`), que el evaluador apaga.
+
+Resultados guardados:
 
 - [`corrida_1_linea_base.md`](pruebas/resultados/corrida_1_linea_base.md): línea base, 31 de 33 casos.
   GS-34 se agregó después y aún no tiene resultados.
@@ -226,7 +231,7 @@ Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.m
 ### Límites conocidos
 
 - **Índice:** `grupo05` sigue con la política v1.4 hasta la próxima recarga. La política local está en
-  v1.5.
+  v1.6.
 - **Turnos sin gasto:** si alguien pide una aprobación por chat, el agente aún puede escribir una
   decisión. No se registra nada.
 - **Errores del RAG:** una falla de Redis, un `k` fuera de rango o una consulta vacía cortan el turno.
