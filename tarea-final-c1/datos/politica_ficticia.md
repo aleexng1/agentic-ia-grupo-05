@@ -6,7 +6,7 @@
 |---|---|
 | Empresa | Comercial Los Alerces SpA |
 | Código | POL-RG-01 |
-| Versión | 1.2 (2026-11) |
+| Versión | 1.5 (2026-11) |
 | Dueño | Gerencia de Administración y Finanzas |
 | Revisión inicial | Control de Gestión |
 
@@ -35,7 +35,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **RG-01 — Documentos válidos.** Solo se aceptan **boleta** o **factura**. Se acepta **voucher** únicamente en taxi, aplicaciones de transporte (tipo Uber) y bus interurbano. Un voucher de cualquier otro tipo de comercio no es válido. En algunos sistemas el voucher aparece como tipo de documento **"Otros"**; se trata igual que un voucher. Un gasto con un documento no válido (según esta regla o según los documentos que exige cada política) se **rechaza**.
 
-**RG-02 — Solo gastos laborales.** Se prohíbe rendir gastos personales: compras para uso propio, alcohol, regalos personales, multas de tránsito de vehículos personales o de arriendo, propinas sobre el 10%. Un gasto personal se **rechaza**.
+**RG-02 — Solo gastos laborales.** Se prohíbe rendir gastos personales: compras para uso propio, alcohol, regalos personales, multas de tránsito de vehículos personales o de arriendo, propinas sobre el 10%, la alimentación individual en el lugar de trabajo, sin viaje ni reunión. Un gasto personal se **rechaza**.
 
 **RG-03 — Plazo de rendición.** El gasto se rinde en el mismo mes en que se hizo o, como máximo, hasta el **día 10 del mes siguiente**. Fuera de ese plazo el gasto se **rechaza**, salvo que el informe incluya el visto bueno escrito del Gerente General; en ese caso queda **observado** para revisión.
 
@@ -84,7 +84,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **Cuándo usarla.** Un jefe de tienda que viaja al Centro de Distribución, un analista que visita tiendas de otra ciudad.
 
-**Cuándo NO usarla.** Viajes a proveedores, clientes o ferias van en P03. Si el viaje es con auto propio o auto liviano arrendado, los gastos del vehículo van en P01.
+**Cuándo NO usarla.** Viajes a proveedores, clientes o ferias van en P03. Si el viaje es con auto propio o auto liviano arrendado, los gastos del vehículo van en P01. Comidas sin un viaje de por medio no son gastos de viaje. Si son para una reunión interna o una capacitación, van en P08; si son una comida individual (por ejemplo, el almuerzo diario en la oficina), son un gasto personal y se rechazan (RG-02).
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
@@ -115,7 +115,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **Cuándo usarla.** Visita a una fábrica proveedora, asistencia a una feria comercial, reunión con un cliente empresa.
 
-**Cuándo NO usarla.** Viajes entre sedes propias van en P02. Gastos del vehículo propio o de auto liviano arrendado van en P01. Viajes por una OT del Taller Marino van en P06.
+**Cuándo NO usarla.** Viajes entre sedes propias van en P02. Gastos del vehículo propio o de auto liviano arrendado van en P01. Viajes por una OT del Taller Marino van en P06. Comidas sin un viaje de por medio no son gastos de viaje. Si son para una reunión interna o una capacitación, van en P08; si son una comida individual (por ejemplo, el almuerzo diario en la oficina), son un gasto personal y se rechazan (RG-02).
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura (voucher solo según RG-01).
@@ -247,14 +247,19 @@ Un código que no esté en esta tabla no es válido.
 
 **Descripción.** Gastos para el bienestar, la formación y la seguridad de los colaboradores.
 
-**Cuándo usarla.** Coffee break de una reunión o capacitación, celebración de cumpleaños del equipo, agua para la tienda, elementos de prevención de riesgos.
+**Cuándo usarla.** Alimentación o café para una reunión interna o una capacitación, celebración de cumpleaños del equipo, agua para la tienda, elementos de prevención de riesgos.
 
-**Cuándo NO usarla.** Comidas durante un viaje de trabajo van en P02 o P03 (Gastos de Estadía). Eventos para clientes van con Marketing (fuera del alcance de esta política).
+**Categorías del grupo Coffee Break.**
+
+- **Coffee break:** alimentación o café para reuniones internas.
+- **Capacitaciones:** alimentación o café durante una capacitación.
+
+**Cuándo NO usarla.** Comidas durante un viaje de trabajo van en P02 o P03 (Gastos de Estadía). Eventos para clientes van con Marketing (fuera del alcance de esta política). Ingredientes o productos para preparar comida que se vende en la Cafetería Alerces van en P07 (solo con factura), aunque sean alimentos.
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura.
 **Campos obligatorios.** Ninguno adicional.
-**Topes (por documento).** Coffee break: $30.000. Cumpleaños: $50.000. Festividades: $110.000.
+**Topes (por documento).** Coffee break: $30.000. Capacitaciones: $35.000. Cumpleaños: $50.000. Festividades: $110.000.
 
 | Grupo | Categoría | Cuenta |
 |---|---|---|
@@ -314,3 +319,6 @@ Un código que no esté en esta tabla no es válido.
 | 1.0 | Versión inicial. |
 | 1.1 | Topes por documento calibrados con patrones agregados y regla RG-10. Decisión de rechazo explícita en RG-01 y RG-02. |
 | 1.2 | RG-10 ampliada: una fecha de rendición anterior a la fecha del gasto es un dato inconsistente y deja el gasto observado. |
+| 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08 y se agrega tope por documento para Capacitaciones. |
+| 1.4 | Se aclaran los límites entre P02/P03 y P08, y entre P08 y P07. |
+| 1.5 | Se aclara qué pasa con las comidas sin viaje: para una reunión interna o una capacitación van en P08, y la comida individual es un gasto personal (RG-02). |

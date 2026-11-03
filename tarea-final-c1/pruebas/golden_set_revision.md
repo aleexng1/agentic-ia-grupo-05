@@ -1,6 +1,6 @@
-# Revisión del golden set v1.2 (política v1.1)
+# Revisión del golden set v1.3 (política v1.5)
 
-Tabla para revisar los 33 casos antes de guardar `golden_set.json`. Todos los datos son ficticios.
+Tabla para revisar los 34 casos antes de guardar `golden_set.json`. Todos los datos son ficticios.
 
 | Caso | Grupo | Glosa / mensaje | Monto | Documento | Declarada | Decisión | Esperado (política / categoría / cuenta) | Reglas | Otros criterios |
 |---|---|---|---:|---|---|---|---|---|---|
@@ -39,3 +39,4 @@ Tabla para revisar los 33 casos antes de guardar `golden_set.json`. Todos los da
 | GS-32 (t1) | F-conversacion | «Soy Pedro, chofer del Centro de Distribución» | — | — | — | — | — | — | sin: buscar_politica, validar_gasto |
 | GS-32 (t2) | F-conversacion | «¿Cómo me llamo y en qué unidad trabajo?» | — | — | — | — | — | — | contiene: Pedro · contiene alguno: Distribución / CD · sin: buscar_politica, validar_gasto |
 | GS-33 | F-conversacion | «¿Hasta qué día puedo rendir un gasto de octubre?» | — | — | — | — | — | RG-03 | contiene alguno: 10 de noviembre / 10/11 / día 10 · usa: buscar_politica |
+| GS-34 | C-regla | almuerzo individual en la oficina de la tienda | $7.900 | boleta | P02 / Almuerzo | rechazar | — | RG-02 | — |

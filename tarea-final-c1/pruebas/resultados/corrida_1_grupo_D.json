@@ -1,0 +1,305 @@
+{
+  "fecha": "2026-11-02_1839",
+  "golden_version": "1.2",
+  "politica_version_golden": "1.1",
+  "politica_vigente": "1.3 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "8949700fa5613e0ec78acd7f8f6cf5e850b89db3",
+  "filtros": {
+    "casos": null,
+    "grupo": "D",
+    "componente": null,
+    "pausa": 15.0
+  },
+  "resumen": {
+    "total": 2,
+    "pasan": 2,
+    "por_grupo": {
+      "D-fondo": {
+        "total": 2,
+        "pasan": 2
+      }
+    },
+    "por_componente": {
+      "herramientas": {
+        "total": 2,
+        "pasan": 2
+      },
+      "memoria": {
+        "total": 2,
+        "pasan": 2
+      },
+      "nucleo": {
+        "total": 2,
+        "pasan": 2
+      },
+      "rag": {
+        "total": 2,
+        "pasan": 2
+      }
+    },
+    "por_causa": {},
+    "turnos_sin_juez": []
+  },
+  "casos": [
+    {
+      "id": "GS-25",
+      "grupo": "D-fondo",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag",
+        "memoria"
+      ],
+      "descripcion": "Fondo con saldo $20.000 y gasto válido de $25.000",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2501",
+              "fecha_gasto": "2026-10-13",
+              "fecha_rendicion": "2026-10-15",
+              "monto": 25000,
+              "tipo_documento": "boleta",
+              "proveedor": "Estación de Servicio Los Robles",
+              "glosa": "bencina auto propio, visita a tiendas de la zona",
+              "politica_declarada": "Vehículos Propios",
+              "categoria_declarada": "Gasolina (vehículo propio)",
+              "unidad_negocio": "TIE",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-020"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Gasolina (vehículo propio)",
+            "cuenta": "CTA-5100",
+            "reglas": [
+              "RG-08"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Gasolina (vehículo propio)",
+            "cuenta": "CTA-5100",
+            "motivo": "El gasto cumple con la política P01 y la clasificación es correcta, pero el monto ($25.000) supera el saldo disponible del fondo por rendir FR-020, infringiendo la regla RG-08. Por lo tanto, el gasto queda observado.",
+            "reglas_citadas": [
+              "P01",
+              "RG-08"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Vehículos Propios Gasolina combustible vehículo propio gasto personal arriendo auto liviano",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2136
+              },
+              {
+                "consulta": "Vehículos Propios Gasolina combustible vehículo propio gasto personal arriendo auto liviano",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2681
+              },
+              {
+                "consulta": "Vehículos Propios Gasolina combustible vehículo propio gasto personal arriendo auto liviano",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2879
+              },
+              {
+                "consulta": "Vehículos Propios Gasolina combustible vehículo propio gasto personal arriendo auto liviano",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2883
+              },
+              {
+                "consulta": "Vehículos Propios Gasolina combustible vehículo propio gasto personal arriendo auto liviano",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.2986
+              }
+            ],
+            "texto": "Decisión: OBSERVAR\nPolítica: P01\nCategoría: Gasolina (vehículo propio)\nCuenta: CTA-5100\nMotivo: El gasto cumple con la política P01 y la clasificación es correcta, pero el monto ($25.000) supera el saldo disponible del fondo por rendir FR-020, infringiendo la regla RG-08. Por lo tanto, el gasto queda observado."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-26",
+      "grupo": "D-fondo",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag",
+        "memoria"
+      ],
+      "descripcion": "Dos gastos del mismo fondo de $50.000: el segundo supera el saldo actualizado",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-2601",
+              "fecha_gasto": "2026-10-05",
+              "fecha_rendicion": "2026-10-07",
+              "monto": 30000,
+              "tipo_documento": "boleta",
+              "proveedor": "Estación de Servicio Los Robles",
+              "glosa": "petróleo camioneta empresa, despacho a tienda Norte",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Petróleo (vehículo empresa o camioneta arrendada)",
+              "unidad_negocio": "CD",
+              "patente": "JWLK22",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-050"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Petróleo (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6901",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P02",
+            "categoria": "Petróleo (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6901",
+            "motivo": "El gasto cumple con todas las reglas de la política P02 (Viajes Internos). El documento (boleta) es válido, el plazo de rendición es correcto, la patente está informada y corresponde a un vehículo de la empresa utilizado en un viaje interno entre sedes.",
+            "reglas_citadas": [
+              "P02"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Petróleo vehículo empresa camioneta arrendada Viajes Internos",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2559
+              },
+              {
+                "consulta": "Petróleo vehículo empresa camioneta arrendada Viajes Internos",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2597
+              },
+              {
+                "consulta": "Petróleo vehículo empresa camioneta arrendada Viajes Internos",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.273
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P02\nCategoría: Petróleo (vehículo empresa o camioneta arrendada)\nCuenta: CTA-6901\nMotivo: El gasto cumple con todas las reglas de la política P02 (Viajes Internos). El documento (boleta) es válido, el plazo de rendición es correcto, la patente está informada y corresponde a un vehículo de la empresa utilizado en un viaje interno entre sedes."
+          },
+          "pasa": true,
+          "motivos": []
+        },
+        {
+          "numero": 2,
+          "entrada": {
+            "mensaje": "Revisa este otro gasto del mismo fondo.",
+            "gasto": {
+              "id": "G-2602",
+              "fecha_gasto": "2026-10-12",
+              "fecha_rendicion": "2026-10-14",
+              "monto": 25000,
+              "tipo_documento": "boleta",
+              "proveedor": "Estación de Servicio Los Robles",
+              "glosa": "petróleo camioneta empresa, despacho a tienda Sur",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Petróleo (vehículo empresa o camioneta arrendada)",
+              "unidad_negocio": "CD",
+              "patente": "JWLK22",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-050"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Petróleo (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6901",
+            "reglas": [
+              "RG-08"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Petróleo (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6901",
+            "motivo": "El gasto supera el saldo disponible del fondo por rendir FR-050, incumpliendo la regla RG-08. Queda observado hasta regularizar el saldo del fondo.",
+            "reglas_citadas": [
+              "RG-08"
+            ],
+            "herramientas": [
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P02\nCategoría: Petróleo (vehículo empresa o camioneta arrendada)\nCuenta: CTA-6901\nMotivo: El gasto supera el saldo disponible del fondo por rendir FR-050, incumpliendo la regla RG-08. Queda observado hasta regularizar el saldo del fondo."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    }
+  ]
+}

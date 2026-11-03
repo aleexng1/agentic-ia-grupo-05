@@ -1102,3 +1102,430 @@ Agrega al mensaje del grupo:
 ````
 
 **Resultado (una línea):** `enviar_turno` usa `conversar_con_caso` (autoprueba 57 de 57); el evaluador agrupa los ❌ por causa con la misma regla para todas las corridas (autoprueba 69 de 69).
+
+---
+
+## 17. Cuota agotada y revisión del PR #17
+
+- **Fecha:** 2026-11-01 y 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Avisar al grupo que la corrida 1 se movía, y revisar el PR único de Núcleo antes de medir la línea base.
+
+**Prompt completo (cuota agotada):**
+
+````text
+Se acabó mi cuota diaria de Gemini: no corras la línea base hoy. La haremos mañana.
+Salta al PASO 6 y dame el mensaje para el grupo, con el reemplazo que propusiste
+("El evaluador ya funciona; traigan los cambios de su rama antes de seguir") y
+agregando: "La corrida 1 (línea base) la hago mañana. Por favor, no gasten cuota en
+corridas completas del golden set: usen --caso con uno o dos casos a la vez."
+````
+
+**Prompt completo (revisión y línea base):**
+
+````text
+Matías abrió el PR único de Núcleo (commit 7e3c5c1). Búscalo con gh pr list. Revísalo,
+únelo si está bien y luego corremos la línea base del golden set. Tengo cuota de Gemini
+hoy, pero no conozco los límites exactos: usa siempre --pausa 8 para no chocar con el
+límite por minuto, y no gastes llamadas fuera de lo indicado.
+Explícame en simple y detente en las pausas.
+
+PASO 1 — Revisión habitual (sin Gemini)
+gh pr checkout <número>. Dueños, seguridad (también que el notebook no guarde salidas con
+claves o URLs de Redis), verificar.py, probar_herramientas.py, --autoprueba.
+Con el LLM falso, comprueba los cuatro puntos:
+1. Texto "Decisión: APROBAR" sin emitir_veredicto → respuesta segura, sin veredicto ni
+   registro. Prueba también con asteriscos (**Decisión: APROBAR**).
+2. emitir_veredicto inválido (política inexistente, categoría inexistente, motivo vacío,
+   decisión inválida) → el error vuelve al LLM, que puede corregir, sin pasar MAX_PASOS.
+3. El cierre usa juzgar_con_validacion, y con evaluado=False no aprueba ni descuenta.
+4. La traza muestra campos_alterados cuando el LLM altera el gasto.
+Notebook: que las secciones 7, 8 y 10 usen conversar_con_caso y evaluar() de
+pruebas/evaluar.py, y que la evidencia de 7 y 8 venga del agente, no de llamadas
+directas a las funciones.
+
+PASO 2 — Prueba dirigida con Gemini real (en la rama del PR)
+python pruebas/evaluar.py --caso GS-01,GS-07,GS-26,GS-27,GS-28,GS-29,GS-30 --pausa 8
+Muéstrame la tabla y explícame cada ❌: causa y rol. No guardes estos resultados en el repo.
+Si aparecen errores 429 (límite de llamadas) que no se resuelven con los reintentos,
+detente y avísame: significa que la cuota no alcanza hoy.
+Recomendación: ✅ / ⚠️ / ❌ con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 3 — Unir
+Con mi visto bueno: gh pr merge <número> --merge, git switch main, git pull,
+verificar.py, y lleva main a las 4 ramas. Con agente.ipynb, solo fuerza un cambio de rama
+si la diferencia es únicamente de formato.
+
+PASO 4 — Corrida 1 (línea base), por grupos
+Corre en main el golden set grupo por grupo, en este orden: A, B, C, D, E, F, con
+--grupo <letra> --pausa 8, guardando el resultado de cada grupo.
+- Si un grupo termina con fallas técnicas por 429 (juez sin respuesta o casos sin
+  completar), detente: no sigas con los demás grupos. Guarda lo que alcanzó a correr y
+  dime qué grupos quedaron pendientes para mañana.
+- Si los 6 grupos terminan bien, junta los resultados en un solo resumen.
+Guárdalo en pruebas/resultados/ como "corrida 1, línea base" (indica si quedó parcial).
+Muéstrame el resumen por grupo, por componente y por categoría de falla (juez bloqueó,
+juez sin respuesta, otra causa), y la lista de ❌ con su causa y su rol.
+Commit en tf/caso-calidad ("Corrida 1 del golden set: línea base"), PR y únelo.
+
+PASO 5 — Mensaje para el grupo
+Resultados de la prueba dirigida y de la corrida 1, qué casos fallan y a quién le toca
+cada uno, ordenado por prioridad. Recordatorio: no gastar cuota en corridas completas;
+usar --caso con uno o dos casos.
+````
+
+**Resultado (una línea):** El PR #17 quedó unido: 6 de 7 casos con Gemini, sin 429; GS-01 y GS-26 pasan; quedan abiertos el filtro de texto y las secciones 8 y 10 del notebook. La corrida 1 quedó parcial: se detuvo en el grupo A (4 de 6) porque el juez no respondió en GS-06.
+
+---
+
+## 18. Fragmentos del RAG, turnos sin juez y evolución
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Dejar el evaluador listo para la corrida 1: reconocer al juez sin respuesta, guardar la evidencia del RAG y conservar el antes y después del juez.
+
+**Prompt completo:**
+
+````text
+Decisiones:
+1. Une el #17 (PASO 3).
+2. Visto bueno para tu PR del evaluador, entre los PASOS 3 y 4, sin llamadas a Gemini:
+   - Corrige la categoría "juez sin respuesta" según el texto que escribe el PR #17.
+   - Que el resumen cuente también los turnos que pasaron sin juez (por falla técnica),
+     para la regla de detenerse por 429.
+   - NUEVO: guarda en los resultados, por cada turno, los fragmentos que devolvió
+     buscar_politica (política o regla, fuente y puntaje), y muéstralos en el .md.
+     Sirve para diagnosticar casos como GS-07 y es la evidencia que pide la pauta para
+     el bono RAG.
+   - Agrega pruebas/resultados/evolucion.md con el antes y después del juez: GS-01 y
+     GS-26 fallaban el 2026-11-01 porque el juez antiguo no recibía la validación, y el
+     2026-11-02, con el PR #17 (juzgar_con_validacion), pasan. Incluye la fecha, el
+     commit y la causa. Usa los resultados de hoy de /tmp como "después" (cópialos a
+     pruebas/resultados/ con el nombre "prueba_dirigida_PR17").
+   - --autoprueba debe pasar. Commit, PR y únelo.
+3. Mantenemos el orden de hoy. Sigue con el PASO 4.
+
+Agrega al mensaje del grupo, como pendientes del PR corto de Matías (antes de la
+entrega):
+🔴 El filtro de texto deja pasar 11 de 15 variantes ("**Decisión:** APROBAR",
+   "Veredicto: APROBAR", "Apruebo este gasto", etc.). En vez de seguir agregando frases:
+   si el turno trae un gasto y no hubo un emitir_veredicto válido, reemplazar el
+   mensaje final completo por una respuesta segura, diga lo que diga. El filtro de frases
+   queda solo como respaldo para turnos sin gasto.
+🟡 Notebook: la sección 8 debe mostrar el registro antes/después desde una corrida del
+   agente, no llamando directo a registrar_veredicto. La sección 10 debe usar evaluar()
+   y mostrar_tabla() de pruebas/evaluar.py, no lanzar el comando en seco.
+🟡 Actualizar docs/prompts_desarrollo/nucleo.md.
+Y para Eduardo: GS-07 clasificó P03 en vez de P01 con "auto propio" en la glosa
+(intermitente: ayer pasó). Con los fragmentos guardados en la corrida 1 veremos si es el
+RAG o el razonamiento del LLM.
+````
+
+**Resultado (una línea):** El evaluador reconoce al juez sin respuesta, cuenta los turnos sin juez y guarda los fragmentos de cada turno (autoprueba 77 de 77); `evolucion.md` conserva el antes y después del juez.
+
+---
+
+## 19. PR #16, política v1.3, recarga de grupo05 y corrida 1
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el PR #16, resolver la ambigüedad de P08 en la política en vez de cambiar GS-03, recargar el índice una vez y terminar la corrida 1.
+
+**Prompt completo:**
+
+````text
+Decisiones y siguientes pasos. Explícame en simple y detente en las pausas.
+
+PASO 1 — PR #16 (Eduardo)
+Revisión habitual (dueños, seguridad, verificar.py, probar_herramientas.py,
+--autoprueba). Dime cuáles de sus pendientes resuelve, uno por uno:
+- registro de prompts completo (sin "No disponible" ni "Pendiente de confirmar");
+- reglas generales RG-01 a RG-10 como documentos propios en el índice;
+- dimensiones, métrica y algoritmo fijados en el código y documentados en el README
+  junto con el nombre del índice y los campos;
+- prefijo doble (grupo05:grupo05:);
+- manejo de errores de Redis sin que se caiga el turno;
+- reintentos del juez ante 429 iguales a los del agente.
+Si cambió el cargador, NO recargues todavía. Dime si conviene unirlo.
+⏸ PAUSA: espera mi decisión.
+
+PASO 2 — Política v1.3 (en tf/caso-calidad, trayendo main)
+GS-03 no se cambia: la ambigüedad está en la política. En datos/politica_ficticia.md,
+P08, aclara las dos categorías del grupo Coffee Break:
+- Coffee break: alimentación o café para reuniones internas.
+- Capacitaciones: alimentación o café durante una capacitación.
+Corrige también la frase "Coffee break de una reunión o capacitación" de la descripción
+de P08 para que sea coherente. Versión 1.3 e historial ("1.3: se aclara la diferencia
+entre Coffee break y Capacitaciones en P08"). Revisa que GS-03 y GS-10 tengan una sola
+respuesta correcta con este texto. Corre verificar.py y probar_herramientas.py.
+Commit, PR y únelo.
+
+PASO 3 — Recargar grupo05 (una sola vez)
+Antes de cargar, explícame qué borra o crea el cargador actual (con o sin el #16), y
+que solo afecte grupo05. ⏸ PAUSA: espera mi visto bueno.
+Carga con python -m scripts.cargar_indice desde main. Comprueba: cantidad de documentos,
+que tengan la v1.3, nada del historial, y repite las 4 búsquedas de prueba (plazo, peaje
+con auto propio, desayuno de reunión, pintura). Si el #16 agregó las reglas como
+documentos propios, la del plazo debería traer RG-03 en primer lugar.
+
+PASO 4 — Continuar la corrida 1
+Con --pausa 15:
+1. Repite GS-03 y GS-06 (GS-06 falló por el juez sin respuesta, no por el agente).
+2. Corre los grupos B, C, D, E y F, uno por uno, con la misma regla de detenerse si hay
+   fallas técnicas por 429.
+Guarda todo como "corrida 1, línea base", indicando que el grupo A corrió antes de la
+política v1.3 y de la recarga del índice, y que GS-03 y GS-06 se repitieron después.
+Muéstrame el resumen por grupo, por componente y por categoría de falla, la lista de ❌
+con causa y rol, y para cada ❌ con gasto, qué fragmentos trajo el RAG.
+Commit en tf/caso-calidad, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 5 — Mensaje para el grupo
+Resultados y pendientes por prioridad. Incluye para Eduardo, si el #16 no lo resolvió:
+el juez reintenta menos que el agente y por eso falla primero ante el límite de llamadas
+(GS-06); que use los mismos reintentos. Recordatorio: no gastar cuota en corridas
+completas.
+````
+
+**Respuesta a la pausa del PR #16:**
+
+````text
+Une el #16. Sigue con el PASO 2, el PASO 3 (con su pausa antes de cargar) y el PASO 4.
+
+En el mensaje del grupo, para Eduardo, como prioridad 🔴 con plazo (propón que esté
+listo antes de la corrida final):
+Pendientes del RAG que sostienen el bono de +1,0:
+1. Reglas RG-01 a RG-10 como documentos propios en el índice.
+2. Dimensiones, métrica y algoritmo fijados en el código y documentados en el README,
+   con el nombre del índice y los campos; quitar el TODO del almacén vectorial.
+3. Corregir el prefijo doble (grupo05:grupo05:).
+4. Que una falla de Redis, un k fuera de rango (por ejemplo 50) o una consulta vacía no
+   corten el turno: devolver el error al LLM como observación, igual que
+   emitir_veredicto.
+5. El juez con los mismos reintentos que el agente ante 429 (hoy 2 contra 6; por eso
+   falló GS-06).
+6. Completar en su registro de prompts las fechas de las entradas 1 a 6 y el modelo
+   de las 8.
+Cuando tenga 1 a 3 listos, coordinamos una recarga de grupo05 antes de la corrida final.
+````
+
+**Resultado (una línea):** El PR #16 quedó unido y la política subió a v1.3: GS-03 y GS-10 tienen una sola respuesta correcta, y `verificar.py`, `probar_herramientas.py` y la autoprueba pasan. Se recargó `grupo05` una vez y la corrida 1 terminó completa: 31 de 33 casos, sin fallas técnicas; fallan GS-10 y GS-29.
+
+---
+
+## 20. Tope de Capacitaciones en la política v1.3
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Cerrar el hueco que dejó la v1.3: al separar Capacitaciones de Coffee break, esa categoría quedaba sin tope.
+
+**Prompt completo:**
+
+````text
+Antes de cargar, cierra el hueco de Capacitaciones dentro de la misma v1.3 (todavía no
+se ha cargado ni usado en ninguna corrida):
+1. Calcula el tope de Capacitaciones (P08) con el mismo método de los demás: percentil
+   90 del monto por documento de "Gastos del Personal / Capacitaciones" en
+   ~/datos-privados/rendiciones_reducido.csv (sin Estado_Gasto = 0), redondeado hacia
+   arriba al múltiplo de $5.000. Muéstrame el resultado y el % de gastos sobre el tope.
+2. Agrégalo a la tabla de topes de P08 y amplía la línea 1.3 del historial: "... y se
+   agrega tope por documento para Capacitaciones".
+3. Comprueba con validar_gasto que un gasto de Capacitaciones sobre el tope quede en
+   observar por RG-05, y que GS-03 ($12.800) siga aprobándose. Corre verificar.py,
+   probar_herramientas.py y --autoprueba. Commit, PR y únelo.
+
+Después, con mi visto bueno ya dado: carga grupo05 desde main, haz las comprobaciones,
+las 4 búsquedas y sigue con el PASO 4.
+
+En el mensaje del grupo agrega: Eduardo y Sebastián, actualizar las menciones de versión
+de la política en src/seguridad.py y src/herramientas.py (ahora v1.3).
+````
+
+**Resultado (una línea):** Capacitaciones queda con tope de $35.000 (156 gastos, 7,7 % sobre el tope); sobre ese monto `validar_gasto` observa por RG-05 y GS-03 sigue aprobándose.
+
+---
+
+## 21. Política v1.4 y prueba de estabilidad
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Aclarar en la política los límites que confundieron al LLM en GS-10 y GS-29, y medir con varias repeticiones si esos casos quedan estables.
+
+**Prompt completo:**
+
+````text
+Siguiente paso: política v1.4 y prueba de estabilidad. Explícame en simple y detente
+en las pausas.
+
+PASO 1 — Política v1.4 (en tf/caso-calidad, trayendo main)
+Dos aclaraciones en "Cuándo NO usarla", sin cambiar reglas ni topes:
+- P02 (y P03 con la misma idea): "Comidas sin un viaje de por medio (por ejemplo, un
+  desayuno o almuerzo en la propia oficina o tienda) no son gastos de viaje: van en P08."
+- P08: "Ingredientes o productos para preparar comida que se vende en la Cafetería
+  Alerces van en P07 (solo con factura), aunque sean alimentos."
+Versión 1.4 e historial ("1.4: se aclaran los límites entre P02/P03 y P08, y entre P08
+y P07"). Revisa que GS-10 y GS-29 tengan una sola respuesta correcta y que ningún otro
+caso cambie. verificar.py, probar_herramientas.py, --autoprueba. Commit, PR y únelo.
+
+PASO 2 — Recargar grupo05
+Mismo procedimiento de antes (solo grupo05, comprobar documentos y la v1.4). Repite la
+búsqueda del desayuno de reunión y una nueva: "pan y queso para sándwiches de la
+cafetería" (debe traer P07 primero).
+
+PASO 3 — Prueba de estabilidad
+Con --pausa 15, corre 3 veces cada uno: GS-07, GS-10 y GS-29 (unas 30 llamadas).
+Muéstrame cuántas de las 3 pasa cada caso, y para cada ❌ los fragmentos del RAG.
+Guárdalo en pruebas/resultados/ como "estabilidad tras política v1.4" y agrega una línea
+a evolucion.md. Commit, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+Resultados de la corrida 1 (31/33) y de la prueba de estabilidad. Pendientes:
+🔴 Eduardo: que PROMPT_SISTEMA y el juez cuestionen la política elegida o declarada
+   contra el "Cuándo NO usarla" de la política. En GS-29 el LLM reclasificó a P08 y con
+   eso esquivó la regla de solo factura de P07; en GS-10 aceptó P02 sin que hubiera un
+   viaje, y el juez no lo frenó. Más los pendientes del RAG ya enviados (reglas como
+   documentos propios, configuración explícita, prefijo doble, errores sin cortar el
+   turno, reintentos del juez).
+🔴 Matías: PR corto con el filtro por turno (si hay gasto y no hubo emitir_veredicto
+   válido, respuesta segura completa), notebook secciones 8 y 10, y nucleo.md.
+🟡 Eduardo y Sebastián: menciones de versión de la política en sus archivos (ahora v1.4).
+Recordatorio: la corrida final se hace cuando estén los PR de Matías y Eduardo.
+````
+
+**Resultado (una línea):** La política subió a v1.4 sin cambiar reglas, topes ni categorías; GS-10 y GS-29 tienen una sola respuesta correcta y ningún otro caso cambia. Tras recargar `grupo05`, la prueba de estabilidad dio GS-07 3 de 3, GS-29 3 de 3 y GS-10 2 de 3.
+
+---
+
+## 22. Política v1.5, GS-34 y errores de herramientas en los resultados
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Cerrar el hueco de la comida individual sin viaje, probarlo con un caso nuevo y guardar por qué se rechaza una herramienta, como el `emitir_veredicto` de GS-10.
+
+**Prompt completo:**
+
+````text
+Siguiente ronda. Explícame en simple y detente en las pausas. NO recargues grupo05 en
+esta ronda: la próxima recarga será una sola, cuando Eduardo cambie el cargador.
+
+PASO 1 — Política v1.5 (en tf/caso-calidad, trayendo main). Será la última versión
+antes de la entrega.
+- En P02 y P03, ajusta la frase de la v1.4: "Comidas sin un viaje de por medio no son
+  gastos de viaje. Si son para una reunión interna o una capacitación, van en P08; si
+  son una comida individual (por ejemplo, el almuerzo diario en la oficina), son un
+  gasto personal y se rechazan (RG-02)."
+- En RG-02, agrega como ejemplo de gasto personal: "la alimentación individual en el
+  lugar de trabajo, sin viaje ni reunión".
+- Versión 1.5 e historial. Revisa que ningún caso del golden set cambie de respuesta.
+- verificar.py, probar_herramientas.py, --autoprueba. Commit, PR y únelo.
+
+PASO 2 — Golden set v1.3
+Agrega GS-34 (grupo C-regla, origen diseñado): almuerzo individual en la oficina de la
+tienda, boleta, dentro de plazo, declarado P02/Almuerzo → rechazar, [RG-02]. Datos
+realistas y ficticios, como los demás. Historial en el JSON: "1.3: se agrega GS-34
+(alimentación individual sin viaje), por la aclaración de la política v1.5". Actualiza
+golden_set_revision.md y el README. No cambies ningún otro caso.
+
+PASO 3 — Evaluador
+Guarda en los resultados, por cada turno, los mensajes de error que recibió el LLM de
+sus herramientas (por ejemplo, por qué se rechazó un emitir_veredicto), y muéstralos en
+el .md junto a los fragmentos. Agrega su autoprueba.
+--autoprueba, verificar.py. Commit del paso 2 y 3, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+Resultados de la estabilidad (8 de 9, sin aprobaciones indebidas). Pendientes:
+🔴 Eduardo (cargador, una sola recarga con todo):
+   1. NO usar la sección "Cuándo NO usarla" para calcular el vector de búsqueda (sí
+      incluirla en el texto que recibe el LLM). Las aclaraciones negativas de la v1.4
+      hicieron que "desayuno en la oficina" trajera P02 primero.
+   2. Reglas RG-01 a RG-10 como documentos propios.
+   3. Dimensiones, métrica y algoritmo explícitos y documentados; prefijo doble.
+   Cuando esté listo, avísame y coordinamos la recarga de grupo05.
+   Además: errores de Redis, k fuera de rango o consulta vacía sin cortar el turno, y
+   reintentos del juez iguales a los del agente.
+🔴 Eduardo: PROMPT_SISTEMA y el juez deben cuestionar la política elegida contra el
+   "Cuándo NO usarla".
+🟠 Para acordar (Matías lo aplica): subir MAX_PASOS de 6 a 10. En GS-10 el agente se
+   quedó sin pasos tras un emitir_veredicto rechazado y no alcanzó a corregir.
+🔴 Matías: PR corto con el filtro por turno, notebook secciones 8 y 10, y nucleo.md.
+Política congelada en v1.5 hasta la entrega, salvo un error grave.
+````
+
+**Resultado (una línea):** La política subió a v1.5 sin cambiar la respuesta de ningún caso; el golden set v1.3 agrega GS-34 y cada turno guarda los errores de herramientas que recibió el LLM (autoprueba 83 de 83).
+
+---
+
+## 23. Revisión del PR #27 y MAX_PASOS en 10
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el cierre seguro por turno y el aumento de `MAX_PASOS`, y dejar la documentación con el valor acordado.
+
+**Prompt completo:**
+
+````text
+Revisa el PR #27 de Matías (cierre seguro por turno y MAX_PASOS a 10). Explícame en
+simple y detente en las pausas.
+
+PASO 1 — Revisión habitual (sin Gemini)
+gh pr checkout 27. Dueños según AGENTS.md (src/contrato.py es compartido: muéstrame
+exactamente qué cambió), seguridad (sin claves, .env, .db, datos reales ni URLs de
+Redis, también en el notebook), verificar.py, probar_herramientas.py y --autoprueba.
+Con el LLM falso, comprueba:
+1. Filtro por turno: con un gasto y sin un emitir_veredicto válido, la respuesta final
+   siempre es segura. Prueba las 15 variantes de la revisión anterior ("**Decisión:**
+   APROBAR", "Veredicto: APROBAR", "Apruebo este gasto", "El gasto queda APROBADO.",
+   etc.): ninguna debe llegar al usuario, y no debe quedar veredicto ni registro.
+2. Un turno SIN gasto (como GS-28 o GS-31) no debe quedar bloqueado por el filtro: la
+   respuesta normal tiene que llegar.
+3. MAX_PASOS quedó en 10 y nada más del contrato cambió.
+4. Lo que ya funcionaba se mantiene: GS-26 con dos gastos, gasto original protegido,
+   FR-999 observado, emitir_veredicto inválido devuelto al LLM.
+5. Notebook: la sección 8 muestra el registro antes/después desde una corrida del agente
+   (no llamando directo a registrar_veredicto), y la sección 10 usa evaluar() y
+   mostrar_tabla() de pruebas/evaluar.py.
+
+PASO 2 — Prueba dirigida con Gemini real (en la rama del PR)
+Con --pausa 15: GS-10 tres veces, y GS-27 y GS-29 una vez cada uno (unas 25 llamadas).
+Para cada ❌, muéstrame los fragmentos del RAG y los errores que recibió el LLM, y
+explícame la causa y a qué rol le toca. No guardes estos resultados en el repo.
+Recomendación: ✅ / ⚠️ / ❌, con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 3 — Unir y documentación
+Con mi visto bueno: gh pr merge 27 --merge, git switch main, git pull, verificar.py.
+Luego, en tf/caso-calidad (trayendo main): actualiza las menciones de "6 pasos" a 10 en
+README.md y docs/instrucciones/nucleo.md. Commit, PR, únelo y lleva main a las 4 ramas.
+Con agente.ipynb, solo fuerza un cambio de rama si la diferencia es únicamente de
+formato.
+
+PASO 4 — Mensaje para el grupo
+Corto: qué se unió, el resultado de la prueba de GS-10 y las observaciones para Matías,
+si las hay. Recuerda que grupo05 no se recarga hasta coordinar con Eduardo.
+````
+
+**Respuesta a la pausa del PR #27:**
+
+````text
+Visto bueno: une el #27 y sigue con el PASO 3 y el PASO 4. El acuerdo de MAX_PASOS = 10
+está confirmado por todo el grupo; déjalo anotado en el mensaje.
+
+En el mensaje del grupo agrega:
+- MAX_PASOS = 10 queda acordado por todos (src/contrato.py, compartido).
+- 🟠 Eduardo: en un turno SIN gasto, el agente todavía puede escribir "Veredicto:
+  APROBAR" si el usuario se lo pide por chat (no se registra nada, pero el revisor podría
+  verlo en la prueba de jailbreak). Propuesta: agregar a PROMPT_SISTEMA que sin un gasto
+  enviado nunca se declara una decisión (aprobar, observar ni rechazar), y probarlo con
+  2 o 3 intentos de jailbreak por chat usando --caso o una conversación corta.
+- 🟡 Matías: en docs/prompts_desarrollo/nucleo.md, la entrada nueva dice "resumen fiel de
+  la solicitud". La pauta pide adjuntar los prompts: pega el texto exacto.
+````
+
+**Resultado (una línea):** El PR #27 quedó unido, con GS-10 3 de 3 y GS-27 y GS-29 aprobados con Gemini; `README.md` y `docs/instrucciones/nucleo.md` indican 10 pasos.

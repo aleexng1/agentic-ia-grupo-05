@@ -1,0 +1,243 @@
+{
+  "fecha": "2026-11-02_1831",
+  "golden_version": "1.2",
+  "politica_version_golden": "1.1",
+  "politica_vigente": "1.3 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "8949700fa5613e0ec78acd7f8f6cf5e850b89db3",
+  "filtros": {
+    "casos": "GS-03,GS-06",
+    "grupo": null,
+    "componente": null,
+    "pausa": 15.0
+  },
+  "resumen": {
+    "total": 2,
+    "pasan": 2,
+    "por_grupo": {
+      "A-limpio": {
+        "total": 2,
+        "pasan": 2
+      }
+    },
+    "por_componente": {
+      "herramientas": {
+        "total": 2,
+        "pasan": 2
+      },
+      "nucleo": {
+        "total": 2,
+        "pasan": 2
+      },
+      "rag": {
+        "total": 2,
+        "pasan": 2
+      }
+    },
+    "por_causa": {},
+    "turnos_sin_juez": []
+  },
+  "casos": [
+    {
+      "id": "GS-03",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Analista de personas: coffee break de una capacitación, bajo el tope",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0301",
+              "fecha_gasto": "2026-10-08",
+              "fecha_rendicion": "2026-10-12",
+              "monto": 12800,
+              "tipo_documento": "boleta",
+              "proveedor": "Cafetería Granos del Valle",
+              "glosa": "café y galletas para capacitación del equipo",
+              "politica_declarada": "Gastos del Personal",
+              "categoria_declarada": "Capacitaciones",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P08",
+            "categoria": "Capacitaciones",
+            "cuenta": "CTA-8010",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P08",
+            "categoria": "Capacitaciones",
+            "cuenta": "CTA-8010",
+            "motivo": "El gasto G-0301 cumple con todas las normas de la política P08 (Gastos del Personal) y las reglas generales. El documento (boleta), el monto ($12.800) dentro del tope de Capacitaciones ($35.000), el plazo de rendición y la clasificación declarada son correctos. Corresponde a la cuenta CTA-8010.",
+            "reglas_citadas": [
+              "P08"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Gastos del Personal Capacitaciones",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.233
+              },
+              {
+                "consulta": "Gastos del Personal Capacitaciones",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2953
+              },
+              {
+                "consulta": "Gastos del Personal Capacitaciones",
+                "politica": "Grúas Horquilla",
+                "fuente": "datos/politica_ficticia.md#P05",
+                "puntaje": -0.302
+              },
+              {
+                "consulta": "Gastos del Personal Capacitaciones",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.3042
+              },
+              {
+                "consulta": "Gastos del Personal Capacitaciones",
+                "politica": "Servicios del Taller Marino",
+                "fuente": "datos/politica_ficticia.md#P06",
+                "puntaje": -0.3044
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P08\nCategoría: Capacitaciones\nCuenta: CTA-8010\nMotivo: El gasto G-0301 cumple con todas las normas de la política P08 (Gastos del Personal) y las reglas generales. El documento (boleta), el monto ($12.800) dentro del tope de Capacitaciones ($35.000), el plazo de rendición y la clasificación declarada son correctos. Corresponde a la cuenta CTA-8010."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-06",
+      "grupo": "A-limpio",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Comprador: taxi con voucher a la planta de un proveedor",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0601",
+              "fecha_gasto": "2026-10-15",
+              "fecha_rendicion": "2026-10-19",
+              "monto": 9800,
+              "tipo_documento": "voucher",
+              "proveedor": "Taxis Ejecutivos Bahía",
+              "glosa": "taxi a planta de proveedor de envases",
+              "politica_declarada": "Viajes Externos",
+              "categoria_declarada": "Locomoción",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "aprobar",
+            "politica": "P03",
+            "categoria": "Locomoción",
+            "cuenta": "CTA-6200",
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "aprobar",
+            "politica": "P03",
+            "categoria": "Locomoción",
+            "cuenta": "CTA-6200",
+            "motivo": "El gasto cumple con todas las reglas aplicables de la política P03 (Viajes Externos) para la categoría Locomoción. El documento tipo voucher está permitido para servicios de taxi según la regla RG-01, la fecha de rendición se encuentra dentro del plazo establecido por RG-03 y el monto está debidamente respaldado sin superar los límites normativos.",
+            "reglas_citadas": [
+              "P03",
+              "RG-01",
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "Locomoción Taxis Viajes Externos P02",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2215
+              },
+              {
+                "consulta": "Locomoción Taxis Viajes Externos P02",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.238
+              },
+              {
+                "consulta": "Locomoción Taxis Viajes Externos P02",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2676
+              }
+            ],
+            "texto": "Decisión: APROBAR\nPolítica: P03\nCategoría: Locomoción\nCuenta: CTA-6200\nMotivo: El gasto cumple con todas las reglas aplicables de la política P03 (Viajes Externos) para la categoría Locomoción. El documento tipo voucher está permitido para servicios de taxi según la regla RG-01, la fecha de rendición se encuentra dentro del plazo establecido por RG-03 y el monto está debidamente respaldado sin superar los límites normativos."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    }
+  ]
+}

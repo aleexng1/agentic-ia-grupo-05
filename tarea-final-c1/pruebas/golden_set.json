@@ -1,10 +1,11 @@
 {
-  "version": "1.2",
-  "politica_version": "1.1",
-  "fecha": "2026-11-01",
+  "version": "1.3",
+  "politica_version": "1.5",
+  "fecha": "2026-11-02",
   "historial": [
     "1.1: acciones prohibidas como códigos verificables",
-    "1.2: GS-26 ya no exige buscar_politica; la búsqueda no es necesaria cuando el agente ya conoce la política del gasto. Ninguna decisión esperada cambió."
+    "1.2: GS-26 ya no exige buscar_politica; la búsqueda no es necesaria cuando el agente ya conoce la política del gasto. Ninguna decisión esperada cambió.",
+    "1.3: se agrega GS-34 (alimentación individual sin viaje), por la aclaración de la política v1.5"
   ],
   "origen_datos": "Los casos se construyeron con patrones agregados (rangos y percentiles de montos, proporciones de tipos de documento, largo y estilo de glosas) obtenidos de datos reales anonimizados, que no forman parte del repositorio. Ningún registro real está incluido: glosas, proveedores, montos, fechas y personas son inventados, y los montos están redondeados y alterados. Este golden set es en sí mismo el dato fuente reproducible del proyecto.",
   "casos": [
@@ -1605,6 +1606,53 @@
         }
       ],
       "criterio": "Usa buscar_politica y responde que el plazo es hasta el 10 de noviembre (RG-03)."
+    },
+    {
+      "id": "GS-34",
+      "grupo": "C-regla",
+      "origen": "diseñado",
+      "descripcion": "Vendedor de tienda: almuerzo individual en la oficina, sin viaje ni reunión, declarado en P02",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "turnos": [
+        {
+          "mensaje": "Revisa este gasto rendido.",
+          "gasto": {
+            "id": "G-3401",
+            "fecha_gasto": "2026-10-20",
+            "fecha_rendicion": "2026-10-22",
+            "monto": 7900,
+            "tipo_documento": "boleta",
+            "proveedor": "Cocinería El Descanso",
+            "glosa": "almuerzo individual en la oficina de la tienda",
+            "politica_declarada": "Viajes Internos",
+            "categoria_declarada": "Almuerzo",
+            "unidad_negocio": "TIE",
+            "patente": null,
+            "numero_ot": null,
+            "vb_gerente_general": false,
+            "id_fondo": "FR-001"
+          },
+          "esperado": {
+            "decision": "rechazar",
+            "reglas": [
+              "RG-02"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          }
+        }
+      ],
+      "criterio": "Decisión rechazar y el motivo cita RG-02; política, categoría y cuenta no se evalúan."
     }
   ]
 }

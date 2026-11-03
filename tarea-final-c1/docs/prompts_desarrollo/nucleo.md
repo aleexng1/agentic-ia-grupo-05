@@ -298,6 +298,33 @@ En tf/nucleo, sustituye en src/grafo.py las llamadas a fondo_inicial por buscar_
 
 ---
 
+## 12. Filtro seguro por turno y evidencia en el notebook
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Atender el nuevo pendiente de Alex para Núcleo, cubrir cualquier respuesta final sin veredicto válido y mostrar la acción del registro desde el flujo real del agente.
+
+**Prompt de trabajo (resumen fiel de la solicitud):**
+
+````text
+Actualiza mi rama con lo nuevo de main y trabaja solo los pendientes de Núcleo de Alex:
+- Si el turno trae un gasto y no hay un emitir_veredicto válido, reemplaza el mensaje final
+  completo por una respuesta segura, sin depender de frases específicas del LLM.
+- En agente.ipynb, demuestra el antes/después del registro a partir de una corrida del agente,
+  sin llamar registrar_veredicto directamente desde el notebook.
+- Haz que la sección 10 use evaluar() y mostrar_tabla() de pruebas/evaluar.py, con una
+  selección dirigida de uno o dos casos, nunca una corrida completa por defecto.
+- Actualiza este registro de prompts.
+- No cambies MAX_PASOS (src/contrato.py compartido) hasta que el equipo vote 👍/👎.
+
+Valida con pruebas sin cuota, no recargues Redis y reporta qué requiere Gemini/Redis.
+````
+
+**Resultado (una línea):** Tras el acuerdo de Alex y el voto 👍 de Matías, `MAX_PASOS` quedó en 10 y su comprobación del contrato se actualizó. El filtro bloqueó 15/15 variantes sin veredicto; la sección 8 mostró el antes/después de SQLite desde el cierre del agente y la 10 llamó `evaluar()`/`mostrar_tabla()` con GS-07. Pasaron las pruebas offline; no se usó Gemini ni Redis.
+
+---
+
 ## Estado de prompts de implementación
 
-Se completaron las demostraciones de configuración, historial, fondos y registro en `agente.ipynb`; `src/grafo.py` cierra con `emitir_veredicto` y protege el gasto original. Sigue pendiente coordinar con Eduardo el prompt real y que el juez reciba `validacion`. Nunca se registrará el contenido de `.env` ni una clave.
+`src/grafo.py` cierra con `emitir_veredicto`, pasa la validación al juez, protege el gasto original y bloquea respuestas finales sin veredicto válido en turnos con gasto. Las secciones 7, 8 y 10 de `agente.ipynb` usan el grafo, SQLite temporal y el evaluador con casos dirigidos. `MAX_PASOS` quedó en 10 con acuerdo del equipo. Sigue pendiente validar con Gemini/Redis. Nunca se registra el contenido de `.env` ni una clave.
