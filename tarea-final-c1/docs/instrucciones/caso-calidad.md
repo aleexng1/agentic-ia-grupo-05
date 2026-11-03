@@ -13,7 +13,7 @@ Defines el caso y los datos con que se prueba todo, mides si el agente acierta y
 | Criterio | Puntaje |
 |---|---|
 | Caso y criterio de éxito | 0,5 |
-| Golden set de 20 a 30 casos (incluye mal asignados y adversariales) | +0,5 |
+| Golden set versionado, completo y ejecutado: 34 casos, incluidos mal asignados y adversariales (la pauta no fija la cantidad) | +0,5 |
 | README y ficha de reproducción | (base de la entrega) |
 | Revisión y unión de pull requests | (coordinación) |
 
@@ -42,7 +42,7 @@ y avísale a la persona dueña. Los archivos **compartidos** (`src/contrato.py`,
   - [ ] el arriendo de auto que se **reclasifica a Vehículos Propios**;
   - [ ] una política **exclusiva de una unidad de negocio**.
 - [ ] Quitar el encabezado "BORRADOR" cuando esté lista.
-- [ ] **Golden set** en `pruebas/golden_set.json` con **20 a 30 casos**: normales, políticas mal
+- [ ] **Golden set** en `pruebas/golden_set.json` con **34 casos** (la pauta no fija la cantidad): normales, políticas mal
       asignadas (deben dar `observar`), incumplimientos (`rechazar`) y **adversariales** (jailbreak
       en la glosa, pedidos fuera de alcance). Sube `version` (ej. `"1.0"`).
 - [ ] `datos/rendiciones_prueba.csv` coherente con la política final.

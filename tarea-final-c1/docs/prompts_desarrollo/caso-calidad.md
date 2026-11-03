@@ -1529,3 +1529,341 @@ En el mensaje del grupo agrega:
 ````
 
 **Resultado (una línea):** El PR #27 quedó unido, con GS-10 3 de 3 y GS-27 y GS-29 aprobados con Gemini; `README.md` y `docs/instrucciones/nucleo.md` indican 10 pasos.
+
+---
+
+## 24. Caso, matriz de evidencias, README y ensayo de revisor
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Avanzar lo que depende solo de Caso y calidad: el criterio de éxito, la matriz de la pauta, un README reproducible y una prueba desde cero, sin usar Gemini ni Redis.
+
+**Prompt completo:**
+
+````text
+Vamos a avanzar mis pendientes de Caso y calidad, que no dependen de mis compañeros.
+No uses Gemini ni Redis en esta sesión (salvo lectura de la configuración). Explícame
+en simple y detente en las pausas.
+
+Trabaja en tf/caso-calidad (git status; si hay cambios sin guardar, detente y
+pregúntame; luego git pull y git merge origin/main).
+
+## PASO 1 — Caso y criterio de éxito (0,5 de la base)
+Crea docs/caso_y_criterio.md con este texto (puedes corregir redacción y formato, no el
+contenido), y agrega al README una sección "Caso y criterio de éxito" con un resumen de
+10 a 15 líneas que enlace a ese archivo.
+
+---
+# Caso y criterio de éxito
+
+## Problema
+En la rendición de gastos, el colaborador debe elegir la política y la categoría de cada
+gasto. Es común que elija mal, porque una misma categoría (peaje, combustible, almuerzo)
+existe en varias políticas. No es un detalle de forma: cada política tiene un tratamiento
+contable distinto que debe definirse desde el origen.
+- Costo o gasto: un peaje para una orden de trabajo del taller es costo de venta
+  recuperable (se cobra al cliente); uno de un viaje entre sedes es gasto operacional.
+- Naturaleza del pago: con auto propio, el gasto se paga como bono de traslado al
+  colaborador.
+- Efecto tributario: el respaldo y el uso determinan si el IVA puede usarse como crédito
+  fiscal y si el gasto es aceptado o rechazado tributariamente (por ejemplo, las multas).
+- Control de gestión: cada cuenta alimenta presupuestos y centros de costo distintos.
+Clasificar mal genera cuentas equivocadas, reportes distorsionados y reprocesos. En una
+empresa grande pueden llegar cientos de rendiciones al mes, y revisarlas una por una
+consume buena parte del tiempo de los analistas de Control de Gestión.
+
+## Usuario
+- Principal: analista de Control de Gestión de "Comercial Los Alerces SpA" (empresa
+  ficticia), que hace la primera revisión normativa de las rendiciones.
+- Secundario: el colaborador que rinde, que recibe la observación y corrige.
+
+## Entrada
+Un gasto rendido: fecha del gasto y de la rendición, monto, tipo de documento, glosa,
+política y categoría declaradas, unidad de negocio, fondo y campos obligatorios
+(patente, número de OT). También acepta preguntas sobre la política.
+La política declarada por el usuario se usa como contexto: junto con la glosa, revela qué
+creía el colaborador que era el gasto. El agente la trata como una pista, no como la
+respuesta, y la verifica contra la política.
+
+## Alcance
+- Revisa gastos de a uno contra la política POL-RG-01 v1.5 (10 políticas, reglas
+  RG-01 a RG-10).
+- Puede buscar en la política (RAG), validar reglas exactas, emitir un veredicto y
+  registrarlo en una base de prueba.
+- No paga, no modifica ni borra registros, no aprueba sin validar y no responde temas
+  ajenos a las rendiciones.
+
+## Salida esperada
+Una decisión (aprobar, observar o rechazar), con la política, categoría y cuenta
+correctas, los códigos de las reglas aplicadas y el motivo. Si corresponde, el saldo del
+fondo actualizado y el registro del veredicto. El agente no reemplaza al analista: aprueba
+lo claro, con un criterio siempre igual, y le deja los casos observados.
+
+## Comprobación observable
+- Ejemplo: un peaje pagado con auto propio y declarado como Viaje Interno (P02) debe
+  quedar observado, reclasificado a P01 / Peajes / CTA-5100, citando RG-09.
+- Criterio general: el golden set (pruebas/golden_set.json, 34 casos) define para cada
+  caso la decisión, la política, la cuenta, las reglas y las herramientas esperadas.
+  El evaluador (pruebas/evaluar.py) los corre con Gemini real, y la corrida final debe
+  pasar todos.
+
+## Por qué un LLM
+Elegir la política correcta requiere interpretar una glosa escrita libremente ("visita
+a proveedor con mi auto") y contrastarla con las descripciones y excepciones de la
+política. Una regla fija no distingue, por ejemplo, un peaje con auto propio de uno con
+vehículo de la empresa.
+
+## Por qué herramientas
+Las reglas exactas (plazos, topes, tipos de documento, campos obligatorios, saldo del
+fondo) deben aplicarse siempre igual y ser auditables: se calculan con código
+(validar_gasto), no las decide el LLM. La política se consulta con RAG para que el
+agente cite la fuente.
+
+## Por qué un agente
+La revisión no es un solo paso: buscar la política, validar, interpretar el resultado,
+corregir si una herramienta rechaza el veredicto, y decidir. El ciclo ReAct permite
+repetir hasta tener una decisión válida o detenerse de forma segura.
+---
+
+Comprueba que los datos citados sean correctos en el repo (versión de la política,
+cantidad de casos, la cuenta y regla del ejemplo). Si algo no coincide, avísame.
+⏸ PAUSA: muéstrame el resultado.
+
+## PASO 2 — Sección 1 del notebook
+El notebook es de Matías, pero solo cambiarás la celda de texto de la sección 1.
+Reemplázala por un resumen del caso (máximo 25 líneas) con un enlace a
+docs/caso_y_criterio.md. No toques ninguna otra celda. Comprueba con git diff que el
+único cambio es esa celda.
+
+## PASO 3 — Matriz de evidencias de la pauta
+Crea docs/evidencias_pauta.md. La pauta pide declarar los bonos y dónde se ejecutan.
+Una tabla con, para cada criterio de la base y cada bono declarado:
+criterio | puntos | mecanismo (en simple) | dónde se ejecuta (sección del notebook,
+archivo y función) | casos del golden set que lo prueban (normal y adversarial cuando
+aplique) | archivo de resultados con la evidencia | estado (✅ demostrado / 🟡 falta
+evidencia / 🔴 pendiente) y qué falta.
+Base: caso y criterio, LLM y trazabilidad, ReAct, historial, seguridad básica.
+Bonos declarados: memoria avanzada (fondo), RAG (Redis grupo05), acción avanzada
+(registro SQLite), golden set, juez LLM, guardrail "piso de reglas" (incluye la detección
+de campos alterados por el LLM).
+Agrega una sección "Bonos no declarados": workflow adicional y MCP, con una línea de por
+qué no se usaron.
+Usa como fuentes el código, el notebook y pruebas/resultados/. No inventes evidencia: si
+algo no está demostrado todavía, márcalo así.
+Agrega al README una sección "Bonos declarados" con la lista y un enlace a la matriz.
+⏸ PAUSA: muéstramela.
+
+## PASO 4 — README y ficha de reproducción
+Revisa y completa el README para que un revisor pueda ejecutar todo desde cero. Conserva
+lo que ya escribieron mis compañeros (por ejemplo, la ficha del RAG) y ordénalo.
+Debe tener, en este orden:
+1. Qué es el proyecto (3 líneas) y enlaces a caso y criterio y a la matriz de evidencias.
+2. Ficha de reproducción:
+   - Modelo: proveedor, identificador exacto (léelo de src/config.py), parámetros, y la
+     nota de que este modelo ignora la temperatura.
+   - Modelo de embeddings y configuración del índice: nombre (grupo05 / REDIS_PREFIJO),
+     campos, dimensiones, métrica y algoritmo. Si hoy salen de valores por defecto,
+     escríbelos y márcalos "a fijar en el código (Eduardo)".
+   - Python: versión exacta del .venv.
+   - Dependencias: requirements.txt e instalación (Linux y Windows).
+   - Variables de entorno: nombre y función de cada una, sin valores, y cómo obtener
+     gratis las credenciales (clave de Gemini en AI Studio; Redis con búsqueda vectorial,
+     indicando que se usa el del curso).
+   - Datos: origen, versión y archivos (política v1.5, fondos, golden set v1.3), y que
+     todo es ficticio.
+3. Ejecución paso a paso: crear el entorno, configurar .env, verificar.py, cargar el
+   índice (python -m scripts.cargar_indice), ejecutar el notebook de arriba abajo, y
+   correr el evaluador (autoprueba y corrida).
+4. Pruebas y resultados: dónde están las corridas y la evolución.
+5. Seguridad y límites conocidos (incluye las simplificaciones de pruebas/README.md).
+6. Equipo y roles, y dónde están los prompts de desarrollo.
+No inventes comandos: cada comando que pongas, compruébalo (sin Gemini) o márcalo
+"no probado".
+⏸ PAUSA: muéstrame el README.
+
+## PASO 5 — Ensayo de revisor parcial (sin Gemini)
+Clona el repo desde GitHub en una carpeta temporal nueva, fuera del repo actual.
+Siguiendo SOLO el README, al pie de la letra: crea el entorno, instala, crea un .env con
+valores de prueba (sin claves reales), corre verificar.py y pruebas/evaluar.py
+--autoprueba y --seco. Anota cada paso que falle, confunda o no esté escrito.
+Guarda el informe en docs/ensayo_revisor.md (fecha, commit, pasos, problemas y a quién le
+toca cada uno). Corrige en el README lo que sea tuyo; lo demás va a la lista de avisos.
+Borra la carpeta temporal al final.
+
+## PASO 6 — Guardar
+1. Agrega los prompts de esta sesión a docs/prompts_desarrollo/caso-calidad.md.
+2. verificar.py y --autoprueba deben pasar.
+3. Muéstrame los archivos cambiados. Con mi visto bueno: commit, push, PR hacia main y
+   únelo. Lleva main a las 4 ramas.
+4. Dame un mensaje corto para el grupo: qué se agregó, que Matías traiga main antes de
+   tocar el notebook (cambió la celda de la sección 1), y los avisos del ensayo de
+   revisor para cada uno.
+````
+
+**Respuesta a la pausa del PASO 1:**
+
+````text
+Aplica los cambios 1 y 2 tal como los propones. Además:
+
+3. En "Alcance" agrega: "El agente no evalúa efectos tributarios (IVA, gastos
+   rechazados), presupuestos ni centros de costo: esas consecuencias son la razón de
+   clasificar bien desde el origen, y quedan a cargo de Contabilidad y Control de
+   Gestión."
+
+4. El criterio "la corrida final debe pasar todos" se mantiene. Agrega debajo:
+   "Gemini no responde siempre igual entre corridas. Si un caso falla, se analiza la
+   causa con los fragmentos y errores guardados, se corrige el agente (nunca se borra ni
+   se relaja el caso para que pase) y se vuelve a ejecutar. La evolución y las pruebas
+   de estabilidad quedan en pruebas/resultados/."
+
+Sigue con el PASO 2 y el PASO 3, hasta la siguiente pausa.
+````
+
+**Respuesta a la pausa del PASO 3:**
+
+````text
+Respuestas:
+1. La pauta no fija cantidad de casos: pide el golden set versionado, completo y
+   ejecutado. El rango 20-30 era una meta nuestra. 34 está bien; corrige la matriz.
+2. Guardrail: la pauta dice "+0,5 c/u Guardrail avanzado o juez". Prueba exigida: caso
+   benigno y adversarial, veredicto y decisión aplicada; si hay juez LLM, además modelo,
+   prompt y veredictos. No suma si duplica el prompt basal, no aplica el veredicto o
+   repite otro control. Regla común: "Declaren los bonos que solicitan y dónde se
+   ejecutan. No hay doble crédito por el mismo mecanismo." Corrige la matriz: guardrail
+   +0,5, mecanismo distinto del juez. Para el caso adversarial es válido un LLM simulado
+   que propone aprobar con un dato alterado, siempre que la sección del notebook diga
+   que es simulado y por qué (Gemini no se equivoca a pedido).
+3. Agrega al inicio de la matriz un resumen propio (no copiado) de la escala: 1,0
+   inicial + hasta 3,0 de la base = 4,0; bonos hasta +3,0; tope 3,0 si falla el flujo
+   central; seguridad basal que se rompe pierde sus 0,5; bono fallido no suma.
+
+Sobre el commit del notebook: confirma que no quede ninguna salida guardada en él.
+
+Sigue con el PASO 4. En el mensaje final del grupo (PASO 6), incluye los pendientes de la
+matriz por persona:
+🔴 Matías (notebook): llenar las secciones 5 (seguridad: GS-27 a GS-30 y un jailbreak por
+   chat), 6 (RAG: decisión de buscar y de no buscar, configuración del índice y
+   fragmentos usados) y 9 (juez: modelo, prompt, un veredicto benigno y uno adversarial,
+   y la decisión aplicada), con Eduardo aportando el contenido de 6 y 9. Restaurar en la
+   sección 8 la demostración del reinicio seguro. Que las trazas de registrar_traza se
+   vean en el notebook (hoy figura como stub).
+🔴 Matías + Seba: nueva sección para el guardrail "piso de reglas": un caso benigno real
+   y uno adversarial simulado (LLM que propone aprobar con la fecha alterada), con
+   campos_alterados en la traza y la decisión corregida, explicando por qué es simulado.
+🔴 Eduardo: pendientes del RAG y del prompt ya enviados (sostienen +1,0 y +0,5).
+````
+
+**Respuesta a la pausa del PASO 4:**
+
+````text
+Sí al PASO 5, con este orden:
+1. Haz commit de lo actual en tf/caso-calidad (sin salidas en el notebook) y push de la
+   rama, SIN abrir PR ni unir todavía.
+2. Clona desde GitHub la rama tf/caso-calidad en una carpeta temporal nueva y haz el
+   ensayo siguiendo solo el README, como dice el PASO 5.
+3. Corrige en la rama lo que sea mío y vuelve a probar los pasos que fallaron.
+Después sigue con el PASO 6 (PR, unir, llevar main a las 4 ramas y mensaje del grupo).
+
+En docs/evidencias_pauta.md agrega al final una "Lista de cierre antes de entregar" con:
+- actualizar en el README los límites conocidos que ya se hayan resuelto;
+- actualizar la matriz con la evidencia de la corrida final;
+- confirmar que el índice grupo05 tiene la política v1.5;
+- ejecución completa del notebook de arriba abajo, desde cero;
+- prompts de desarrollo completos de los 4.
+````
+
+**Resultado (una línea):** El caso, la matriz, el README y el ensayo de revisor quedaron listos: el proyecto se instala y sus pruebas sin LLM pasan desde cero.
+
+---
+
+## 25. Revisión de los PR #29 y #30, y arreglos chicos
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Revisar el prompt exacto de Matías y la evidencia del piso de reglas de Sebastián, contrastarlos con la matriz y dejar al grupo una sola lista de pendientes.
+
+**Prompt completo:**
+
+````text
+Revisa los PR #29 y #30, en ese orden. Explícame en simple y detente en la pausa.
+
+PASO 1 — Revisión de cada PR
+gh pr checkout <número>. Para cada uno:
+1. Autor, qué cambia y dueños según AGENTS.md (si toca archivos compartidos o de otro rol,
+   muéstrame qué).
+2. Seguridad: sin claves, .env, .db, datos reales ni URLs de Redis, y sin salidas en el
+   notebook.
+3. verificar.py, probar_herramientas.py y --autoprueba.
+4. Contrasta con los pendientes de docs/evidencias_pauta.md: dime, punto por punto, qué
+   pendiente resuelve completo, cuál resuelve en parte (y qué le falta) y cuál no toca.
+   En especial revisa:
+   - Eduardo: "Cuándo NO usarla" fuera del vector; dimensiones, métrica y algoritmo
+     fijados en el código; errores de Redis, k fuera de rango o consulta vacía sin cortar
+     el turno; juez con los mismos reintentos que el agente; prompt que no declare
+     decisiones sin un gasto y que cuestione la política contra el "Cuándo NO usarla";
+     reglas como documentos propios; registro de prompts.
+   - Seba: evidencia del piso de reglas (caso benigno y adversarial) y si la deja lista
+     para una sección del notebook.
+   - Matías: secciones 5, 6, 8 (reinicio seguro) y 9 del notebook; trazas visibles.
+5. Si un PR cambia el cargador del índice, NO recargues grupo05: dímelo.
+6. Si el PR cambia el comportamiento del agente (prompt, juez, RAG), haz una prueba
+   dirigida con Gemini real y --pausa 15, solo con los casos relevantes (máximo 5),
+   sin guardar resultados en el repo.
+Recomendación por PR: ✅ / ⚠️ / ❌, con motivos.
+⏸ PAUSA: espera mi decisión.
+
+PASO 2 — Unir y dejar todo al día
+Con mi visto bueno: une los aprobados uno a uno (gh pr merge --merge), verificar.py en
+main después de cada uno, y lleva main a las 4 ramas.
+
+PASO 3 — Arreglos chicos (en tf/caso-calidad, trayendo main)
+- docs/instrucciones/caso-calidad.md: cambia "20 a 30 casos" por los 34 actuales y
+  aclara que la pauta no fija cantidad.
+- .gitignore: agrega agente_ejecutado.ipynb.
+- Actualiza docs/evidencias_pauta.md con lo que resolvieron los PR unidos.
+Commit, PR y únelo. Lleva main a las 4 ramas.
+
+PASO 4 — Mensaje para el grupo
+UN solo mensaje que reemplace al anterior, con:
+- Qué se unió hoy: caso y criterio, matriz de evidencias, README nuevo, ensayo de
+  revisor, y los PR #29 y #30 si se unieron.
+- Que lean docs/evidencias_pauta.md: es la lista de lo que falta para cada criterio.
+- Los pendientes por persona según la matriz actualizada, ordenados por prioridad.
+- Los avisos del ensayo: dependencias indirectas con otra versión (propuesta para
+  acordar: agregar un archivo con todas las versiones exactas, por ejemplo
+  requirements-lock.txt generado con pip freeze), y la nota de .env.example sobre la
+  URL de Redis.
+- Que traigan main antes de seguir y que grupo05 no se recarga sin coordinar.
+````
+
+**Respuesta a la pausa:**
+
+````text
+Une el #29 y el #30 y sigue con los PASOS 2, 3 y 4. En el PASO 3 agrega tus dos arreglos
+(el 59 del README y el caso adversarial GS-27 en la matriz).
+
+En el mensaje del grupo, además de lo que ya pedí:
+- Agradece a Seba por la sección H (comprobaste que detecta el guardrail roto) y a Matías
+  por el prompt exacto; pídele a Matías confirmar si las entradas 6 a 11 son textos
+  exactos o resúmenes.
+- Incluye la cuenta de bonos: memoria (+1,0) demostrado; acción, golden set y guardrail
+  (+1,5) casi listos; con eso llegamos a +2,5 y para el 7,0 falta uno más: RAG (+1,0) o
+  juez (+0,5). Por eso los pendientes de Eduardo son la prioridad del grupo.
+- Propuesta para repartir carga, en tono de apoyo (que Eduardo decida):
+  · Eduardo se queda con el cargador (Cuándo NO usarla fuera del vector, configuración
+    explícita, reglas como documentos propios), PROMPT_SISTEMA (no declarar decisiones
+    sin gasto, cuestionar la política contra el Cuándo NO usarla) y su registro de
+    prompts.
+  · Seba, si Eduardo está de acuerdo: que errores de Redis, k fuera de rango o consulta
+    vacía no corten el turno, y que el juez tenga los mismos reintentos que el agente.
+  · Seba + Matías: la sección del guardrail en el notebook, usando
+    prueba_piso_en_agente() completa (no revisar_con_agente por separado) y un caso
+    benigno real con Gemini.
+  · Matías: secciones 5, 6 y 9, reinicio seguro en la 8 y trazas visibles.
+- Pídele a Eduardo que responda en el chat cuándo puede tener el cargador, para
+  coordinar la recarga única de grupo05 y la corrida final.
+````
+
+**Resultado (una línea):** Los PR #29 y #30 quedaron unidos, sin cambiar el agente; la matriz quedó en 4 ✅, 4 🟡 y 4 🔴, y los pendientes de Eduardo son la prioridad del grupo.
