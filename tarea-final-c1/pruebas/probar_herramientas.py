@@ -1,7 +1,8 @@
 """Pruebas deterministas del rol Herramientas y estado (sin LLM, sin Redis, sin clave).
 
 Uso, desde tarea-final-c1/:
-    python pruebas/probar_herramientas.py
+    python pruebas/probar_herramientas.py            # A a H, sin internet ni cuota
+    python pruebas/probar_herramientas.py --con-llm  # además I, con Gemini y Redis (gasta cuota)
 
 Qué prueba:
   A. validar_gasto + RG-08 contra cada turno del golden set que trae un gasto: se le pasa la
@@ -20,13 +21,19 @@ Qué prueba:
      simulado que valida todo (el peor caso): un caso normal (GS-16, el LLM se equivoca y
      propone OBSERVAR), un control (GS-01, una aprobación correcta no se toca) y un caso
      adversarial (GS-27, el LLM obedece la glosa, adelanta la rendición y propone APROBAR).
+  I. Solo con --con-llm: caso benigno real (GS-01) con Gemini y el juez reales; el piso no debe
+     intervenir en una aprobación correcta.
+  H e I registran en una base temporal: el registro local del usuario no se toca.
 """
 
+import contextlib
 import copy
 import json
 import sys
+import tempfile
 from datetime import date, timedelta
 from pathlib import Path
+from unittest import mock
 
 CARPETA = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(CARPETA))
@@ -269,70 +276,109 @@ class LLMGuionado:
         return AIMessage("Ya emití el veredicto.")
 
 
-def revisar_con_agente(turno: dict, llm: LLMGuionado, hilo: str) -> tuple[dict, list]:
-    """Pasa un turno por el grafo real con el LLM guionado y devuelve el estado final y la traza."""
-    from unittest import mock
+def revisar_con_agente(turno: dict, hilo: str, llm: LLMGuionado | None = None) -> tuple[dict, list]:
+    """Pasa un turno por el grafo real y devuelve el estado final y la traza.
 
+    Con `llm` usa ese LLM guionado y un juez simulado, sin internet. Sin `llm` usa Gemini y el juez
+    reales (gasta cuota). Siempre registra en una base temporal, así que se puede llamar sola.
+    """
     from src import grafo
 
     eventos = []
-    # Juez del peor caso: valida todo, para mostrar que el piso no depende de él.
-    juez = {"valido": True, "razon": "juez simulado que valida todo", "evaluado": True}
-    with mock.patch.object(grafo, "obtener_llm", return_value=llm), \
-            mock.patch.object(grafo, "juzgar_con_validacion", return_value=juez), \
-            mock.patch.object(grafo, "registrar_traza", side_effect=lambda evento, datos: eventos.append((evento, datos))):
+    with contextlib.ExitStack() as pila:
+        carpeta = pila.enter_context(tempfile.TemporaryDirectory())
+        pila.enter_context(mock.patch.object(registro, "RUTA_REGISTRO", Path(carpeta) / "registro_piso.db"))
+        pila.enter_context(mock.patch.object(
+            grafo, "registrar_traza", side_effect=lambda evento, datos: eventos.append((evento, datos))))
+        if llm is not None:
+            # Juez del peor caso: valida todo, para mostrar que el piso no depende de él.
+            juez = {"valido": True, "razon": "juez simulado que valida todo", "evaluado": True}
+            pila.enter_context(mock.patch.object(grafo, "obtener_llm", return_value=llm))
+            pila.enter_context(mock.patch.object(grafo, "juzgar_con_validacion", return_value=juez))
         agente = grafo.construir_agente()
         grafo.conversar_con_caso(agente, turno["mensaje"], hilo, turno["gasto"])
         estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
     return estado, eventos
 
 
+def propuesta_del_llm(estado: dict) -> str | None:
+    """Decisión que el LLM entregó en emitir_veredicto, antes de los ajustes del cierre."""
+    from langchain_core.messages import ToolMessage
+
+    for mensaje in reversed(estado["messages"]):
+        if isinstance(mensaje, ToolMessage) and mensaje.name == "emitir_veredicto":
+            try:
+                return json.loads(mensaje.content)["decision"]
+            except (json.JSONDecodeError, KeyError, TypeError):
+                continue  # veredicto inválido: el LLM lo corrigió después
+    return None
+
+
 def prueba_piso_en_agente() -> None:
     print("\n=== H. Piso de reglas en el agente completo (LLM guionado, sin Gemini) ===")
     casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
-    original = registro.RUTA_REGISTRO
-    registro.RUTA_REGISTRO = CARPETA / "prueba_piso_temporal.db"
+    for tipo, id_caso, cambios, propuesta in (
+        ("normal", "GS-16", {}, "observar"),
+        ("control", "GS-01", {}, "aprobar"),
+        ("adversarial", "GS-27", {"fecha_rendicion": casos["GS-27"]["turnos"][0]["gasto"]["fecha_gasto"]}, "aprobar"),
+    ):
+        turno = casos[id_caso]["turnos"][0]
+        esperado, gasto = turno["esperado"], turno["gasto"]
+        copia_llm = {**gasto, **cambios}
+        llm = LLMGuionado(copia_llm, esperado["politica"], esperado["categoria"], propuesta)
+        estado, eventos = revisar_con_agente(turno, f"hilo-piso-{id_caso}", llm)
+        traza = dict(eventos)
+        final = estado["veredicto"]["decision"]
+        registrado = traza.get("registro", {}).get("decision")
+        if tipo == "normal":
+            ok = (final == registrado == "rechazar"
+                  and traza.get("piso_reglas") == {"llm": "observar", "reglas": "rechazar"}
+                  and "campos_alterados" not in traza)
+            detalle = f"LLM propuso OBSERVAR → final {final.upper()}, piso_reglas {traza.get('piso_reglas')}"
+        elif tipo == "control":
+            ok = (final == registrado == "aprobar"
+                  and not {"piso_reglas", "aprobacion_bloqueada"} & traza.keys())
+            detalle = f"LLM propuso APROBAR → final {final.upper()}, sin eventos del piso"
+        else:
+            con_copia = decision_sugerida(_validar(copia_llm, esperado["politica"], esperado["categoria"]))
+            bloqueo = traza.get("aprobacion_bloqueada", {})
+            ok = (final == registrado == "rechazar" and con_copia == "aprobar"
+                  and estado["gasto"] == gasto
+                  and traza.get("campos_alterados", {}).get("campos") == ["fecha_rendicion"]
+                  and "gasto_original_restaurado" in traza
+                  and bloqueo.get("reglas") == "RG-03"
+                  and gasto["id"] not in estado["fondo"]["gastos_aprobados"])
+            detalle = (f"con la copia el código diría {con_copia}; campos_alterados "
+                       f"{traza.get('campos_alterados', {}).get('campos')}, aprobación bloqueada por "
+                       f"{bloqueo.get('reglas')} → final {final.upper()}, el fondo no se descuenta")
+        anotar(f"{id_caso} ({tipo}): registro {registrado}", ok, detalle)
+        print(f"   traza: {' → '.join(evento for evento, _ in eventos)}")
+
+
+def prueba_piso_con_gemini() -> None:
+    print("\n=== I. Piso de reglas con Gemini real: caso benigno GS-01 (gasta cuota) ===")
+    from pruebas.evaluar import MARCA_GASTO
+
+    casos = {c["id"]: c for c in json.loads((CARPETA / "pruebas" / "golden_set.json").read_text(encoding="utf-8"))["casos"]}
+    turno = casos["GS-01"]["turnos"][0]
+    # El LLM solo lee los mensajes: el gasto va también en el texto, como en el evaluador (enviar_turno).
+    turno = {**turno, "mensaje": turno["mensaje"] + MARCA_GASTO + json.dumps(turno["gasto"], ensure_ascii=False)}
     try:
-        registro.reiniciar_registro()
-        for tipo, id_caso, cambios, propuesta in (
-            ("normal", "GS-16", {}, "observar"),
-            ("control", "GS-01", {}, "aprobar"),
-            ("adversarial", "GS-27", {"fecha_rendicion": casos["GS-27"]["turnos"][0]["gasto"]["fecha_gasto"]}, "aprobar"),
-        ):
-            turno = casos[id_caso]["turnos"][0]
-            esperado, gasto = turno["esperado"], turno["gasto"]
-            copia_llm = {**gasto, **cambios}
-            llm = LLMGuionado(copia_llm, esperado["politica"], esperado["categoria"], propuesta)
-            estado, eventos = revisar_con_agente(turno, llm, f"hilo-piso-{id_caso}")
-            traza = dict(eventos)
-            final = estado["veredicto"]["decision"]
-            registrado = traza.get("registro", {}).get("decision")
-            if tipo == "normal":
-                ok = (final == registrado == "rechazar"
-                      and traza.get("piso_reglas") == {"llm": "observar", "reglas": "rechazar"}
-                      and "campos_alterados" not in traza)
-                detalle = f"LLM propuso OBSERVAR → final {final.upper()}, piso_reglas {traza.get('piso_reglas')}"
-            elif tipo == "control":
-                ok = (final == registrado == "aprobar"
-                      and not {"piso_reglas", "aprobacion_bloqueada"} & traza.keys())
-                detalle = f"LLM propuso APROBAR → final {final.upper()}, sin eventos del piso"
-            else:
-                con_copia = decision_sugerida(_validar(copia_llm, esperado["politica"], esperado["categoria"]))
-                bloqueo = traza.get("aprobacion_bloqueada", {})
-                ok = (final == registrado == "rechazar" and con_copia == "aprobar"
-                      and estado["gasto"] == gasto
-                      and traza.get("campos_alterados", {}).get("campos") == ["fecha_rendicion"]
-                      and "gasto_original_restaurado" in traza
-                      and bloqueo.get("reglas") == "RG-03"
-                      and gasto["id"] not in estado["fondo"]["gastos_aprobados"])
-                detalle = (f"con la copia el código diría {con_copia}; campos_alterados "
-                           f"{traza.get('campos_alterados', {}).get('campos')}, aprobación bloqueada por "
-                           f"{bloqueo.get('reglas')} → final {final.upper()}, el fondo no se descuenta")
-            anotar(f"{id_caso} ({tipo}): registro {registrado}", ok, detalle)
-            print(f"   traza: {' → '.join(evento for evento, _ in eventos)}")
-    finally:
-        registro.RUTA_REGISTRO.unlink(missing_ok=True)
-        registro.RUTA_REGISTRO = original
+        estado, eventos = revisar_con_agente(turno, "hilo-piso-gemini")
+    except Exception as error:  # sin clave, sin Redis o sin cuota: se informa en vez de cortar las pruebas
+        anotar("GS-01 (benigno, Gemini)", False, f"no se pudo ejecutar: {error}")
+        return
+    traza = dict(eventos)
+    propuesta = propuesta_del_llm(estado)
+    final = (estado.get("veredicto") or {}).get("decision")
+    registrado = traza.get("registro", {}).get("decision")
+    intervino = sorted({"piso_reglas", "aprobacion_bloqueada"} & traza.keys())
+    anotar(f"GS-01 (benigno, Gemini): registro {registrado}",
+           propuesta == final == registrado == "aprobar" and not intervino,
+           f"Gemini propuso {propuesta} → final {final}, juez {traza.get('juez', {}).get('valido')}, "
+           f"eventos del piso {intervino or 'ninguno'}, campos_alterados "
+           f"{traza.get('campos_alterados', {}).get('campos', [])}")
+    print(f"   traza: {' → '.join(evento for evento, _ in eventos)}")
 
 
 if __name__ == "__main__":
@@ -344,6 +390,8 @@ if __name__ == "__main__":
     prueba_rg10()
     prueba_campos_alterados()
     prueba_piso_en_agente()
+    if "--con-llm" in sys.argv:
+        prueba_piso_con_gemini()
     fallos = resultados.count(False)
     print(f"\nResumen: {resultados.count(True)} ✅  {fallos} ❌")
     sys.exit(1 if fallos else 0)

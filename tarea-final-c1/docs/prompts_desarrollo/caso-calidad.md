@@ -1867,3 +1867,48 @@ En el mensaje del grupo, además de lo que ya pedí:
 ````
 
 **Resultado (una línea):** Los PR #29 y #30 quedaron unidos, sin cambiar el agente; la matriz quedó en 4 ✅, 4 🟡 y 4 🔴, y los pendientes de Eduardo son la prioridad del grupo.
+
+---
+
+## 26. Arreglo del PR #33, evaluador, política v1.6 y cierre
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Corregir la prueba benigna con Gemini del PR #33 en ausencia de Sebastián, contar los errores del RAG como falla técnica y aclarar el límite de P04 antes de la entrega.
+
+**Prompt completo:**
+
+````text
+Decisiones tomadas. Explícame en simple y detente en la pausa.
+
+PASO 1 — Arreglar y unir el PR #33 (Sebastián no puede conectarse hoy; lo hago yo)
+1. gh pr checkout 33. En prueba_piso_con_gemini(), agrega el gasto al mensaje del turno
+   de la misma forma que lo hace el evaluador (enviar_turno), sin cambiar nada más.
+2. Ejecútala UNA vez con Gemini real (REDIS_PREFIJO=grupo05) y muéstrame el resultado.
+   Si GS-01 falla por el juez (el falso negativo intermitente), muéstrame su razón y
+   detente: decidimos juntos.
+3. Corre probar_herramientas.py, verificar.py y --autoprueba.
+4. Commit en la rama del PR con el mensaje: "Agrega el gasto al mensaje en
+   prueba_piso_con_gemini (hecho por Alex en ausencia de Sebastián)". Push a la rama del
+   PR. Agrega una entrada en docs/prompts_desarrollo/caso-calidad.md.
+⏸ PAUSA: muéstrame el resultado antes de unir. Con mi visto bueno: gh pr merge 33
+--merge, git switch main, git pull, verificar.py.
+
+PASO 2 — Mis tareas (en tf/caso-calidad, trayendo main). No unas otros PR.
+1. Evaluador: que un 429 o un error del RAG cuente como falla técnica (no como caso
+   aprobado sin búsqueda), con su autoprueba.
+2. Política v1.6 (último cambio antes de entregar; NO recargues Redis): en P04, en
+   "Cuándo NO usarla", agrega: "Peajes, estacionamiento y combustible de un viaje con un
+   vehículo de la empresa van en P02 o P03, según el viaje; P04 es solo para mantención,
+   permisos y multas de la flota." Versión 1.6 e historial. Comprueba que ningún caso del
+   golden set cambie y que validar_gasto decida igual.
+3. En docs/evidencias_pauta.md, en la lista de cierre, agrega: "Entregar agente.ipynb
+   limpio y agente_ejecutado.ipynb con salidas, revisado para que no tenga secretos
+   (sacarlo del .gitignore al final)". En el README, en "Pruebas y resultados", aclara
+   que pruebas/resultados/ contiene las trazas de ejecución del evaluador.
+4. verificar.py, --autoprueba, probar_herramientas.py. Commit, PR y únelo. Lleva main a
+   las 4 ramas.
+````
+
+**Resultado (una línea):** La sección I del PR #33 recibe el gasto en el mensaje y pasó con Gemini real: GS-01 aprobado, juez válido y sin intervención del piso.
