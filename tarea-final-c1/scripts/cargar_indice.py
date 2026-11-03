@@ -1,12 +1,13 @@
 """Carga en Redis diez políticas y diez reglas, sin borrar claves ajenas."""
 
+import argparse
 import hashlib
 import os
 import re
 import sys
+from pathlib import Path
 
-from src.config import CARPETA_PROYECTO
-
+CARPETA_PROYECTO = Path(__file__).resolve().parents[1]
 RUTA_POLITICA = CARPETA_PROYECTO / "datos" / "politica_ficticia.md"
 PATRON_POLITICA = re.compile(r"(?m)^## (P\d{2}) — (.+?)\s*$")
 
@@ -161,17 +162,61 @@ def _preparar_documentos(texto: str) -> list[dict]:
 
 
 def main() -> None:
-    """Indexa veinte documentos con identificadores estables por código."""
-    raise RuntimeError(
-        "Carga bloqueada: compatibilidad Redis pendiente. Completa y autoriza "
-        "scripts/MIGRACION_INDICE_REDIS_PENDIENTE.md antes de habilitar escrituras."
-    )
+    """Previsualiza el índice offline o mantiene bloqueada la carga real."""
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    redis_url, prefijo, modelo = _configuracion()
+    parser = argparse.ArgumentParser(description="Previsualiza el índice sin servicios externos.")
+    parser.add_argument("--plan", action="store_true", help="valida documentos y muestra claves previstas")
+    argumentos = parser.parse_args()
+    if not argumentos.plan:
+        raise RuntimeError(
+            "Carga bloqueada: compatibilidad Redis pendiente. Completa y autoriza "
+            "scripts/MIGRACION_INDICE_REDIS_PENDIENTE.md antes de habilitar escrituras."
+        )
     texto = RUTA_POLITICA.read_text(encoding="utf-8")
-    documentos_fuente = _preparar_documentos(texto)
+    try:
+        documentos = _preparar_documentos(texto)
+        _validar_plan(documentos)
+    except ValueError as error:
+        parser.error(str(error))
+    print(f"Plan offline: {len(documentos)} documentos; prefijo de prueba grupo05")
+    print("Claves previstas (grupo05:<código>; predicción, no verificada en Redis):")
+    for documento in documentos:
+        print(f"- {documento['codigo']}: grupo05:{documento['codigo']}")
+    print("ADVERTENCIA: las claves antiguas documentadas no han sido verificadas en Redis.")
+    print("No se crearon clientes, embeddings ni se escribieron datos.")
 
+
+def _validar_plan(documentos: list[dict]) -> None:
+    """Comprueba códigos, campos requeridos y exclusiones de texto."""
+    esperados = {
+        *(f"P{numero:02d}" for numero in range(1, 11)),
+        *(f"RG-{numero:02d}" for numero in range(1, 11)),
+    }
+    codigos = [documento.get("codigo") for documento in documentos]
+    if len(documentos) != 20 or set(codigos) != esperados:
+        raise ValueError("Se requieren exactamente las políticas P01-P10 y reglas RG-01 a RG-10.")
+    if len(set(codigos)) != len(codigos):
+        raise ValueError("Hay códigos duplicados entre los documentos preparados.")
+    for documento in documentos:
+        codigo = documento.get("codigo", "documento")
+        for campo in ("texto_busqueda", "texto_completo", "fuente"):
+            valor = documento.get(campo)
+            if not isinstance(valor, str) or not valor.strip():
+                raise ValueError(f"Falta {campo} en {codigo}.")
+            if campo != "fuente" and "Historial de cambios" in valor:
+                raise ValueError(f"Historial de cambios aparece en {codigo}.")
+        if codigo.startswith("P"):
+            if "Cuándo NO usarla." in documento["texto_busqueda"]:
+                raise ValueError(f"Cuándo NO usarla debe excluirse de embeddings ({codigo}).")
+            if "Cuándo NO usarla." not in documento["texto_completo"]:
+                raise ValueError(f"Cuándo NO usarla debe conservarse en texto completo ({codigo}).")
+
+
+def _cargar_documentos(
+    documentos_fuente: list[dict], redis_url: str, prefijo: str, modelo: str
+) -> None:
+    """Construye documentos con metadatos e IDs estables y los carga en Redis."""
     # Redis añade key_prefix; IDs desnudos evitan prefijos duplicados.
     ids = [trozo["codigo"] for trozo in documentos_fuente]
     try:
