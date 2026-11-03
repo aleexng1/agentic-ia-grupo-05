@@ -1290,6 +1290,38 @@ def autoprueba() -> int:
         recortar(caso["motivos"][-1], 100),
     )
 
+    # El buscar_politica real deja pasar su ToolException (handle_tool_error=False):
+    # el ToolNode del grafo debe atraparla y devolvérsela al LLM, sin cortar el turno.
+    from src import rag
+
+    class LLMEspia(LLMDeGuion):
+        """El LLM de guion, pero anota las observaciones de buscar_politica que recibe."""
+
+        def __init__(self, golden: dict):
+            super().__init__(golden)
+            self.observaciones = []
+
+        def invoke(self, mensajes, *args, **opciones):
+            self.observaciones = [m for m in mensajes if isinstance(m, ToolMessage) and m.name == "buscar_politica"]
+            return super().invoke(mensajes, *args, **opciones)
+
+    def redis_caido():
+        raise ConnectionError("redis://usuario:clave-falsa@servidor:6379 no responde")
+
+    espia = LLMEspia(golden)
+    with mock.patch.object(rag, "_obtener_indice", redis_caido):
+        caso = con_grafo_real(juez_conforme, "GS-01", llm=espia, buscar=rag.buscar_politica)[0]
+    vistas = espia.observaciones
+    anotar(
+        "con el buscar_politica real caído, el error vuelve al LLM como observación y el turno sigue",
+        caso["turnos"] and caso["turnos"][0]["obtenido"]["decision"] == "aprobar"
+        and caso["causa"] == "rag_sin_respuesta"
+        and len(vistas) == 1 and vistas[0].status == "error"
+        and "Falló la búsqueda de políticas" in vistas[0].text
+        and "clave-falsa" not in vistas[0].text,
+        recortar(vistas[0].text if vistas else "; ".join(caso["motivos"]), 100),
+    )
+
     aprobadas = sum(resultados)
     print(f"\nAutoprueba: {aprobadas} de {len(resultados)} ✅")
     return 0 if all(resultados) else 1

@@ -302,7 +302,7 @@ def _trazar_observaciones(mensajes: list) -> None:
 def construir_agente():
     """Arma y devuelve el grafo compilado, con memoria de conversación por hilo."""
     llm = obtener_llm().bind_tools(HERRAMIENTAS)
-    nodo_herramientas = ToolNode(HERRAMIENTAS)
+    nodo_herramientas = ToolNode(HERRAMIENTAS, handle_tool_errors=(ToolException,))
 
     def nodo_llm(estado: EstadoAgente) -> dict:
         # Una vuelta del ciclo: el LLM lee el historial y decide (pensar → actuar).
@@ -362,7 +362,9 @@ def construir_agente():
                     **estado_para_herramientas,
                     "messages": [*estado_para_herramientas["messages"][:-1], respuesta_segura],
                 }
-                resultado = ToolNode(herramientas_permitidas).invoke(estado_seguro)
+                resultado = ToolNode(
+                    herramientas_permitidas, handle_tool_errors=(ToolException,)
+                ).invoke(estado_seguro)
                 mensajes_por_id.update({m.tool_call_id: m for m in resultado.get("messages", [])})
             for llamada in llamadas_bloqueadas:
                 mensajes_por_id[llamada["id"]] = ToolMessage(
