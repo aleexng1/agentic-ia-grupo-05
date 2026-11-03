@@ -146,7 +146,7 @@ Estas reglas aplican a todas las políticas, además de las reglas propias de ca
 
 **Cuándo usarla.** Cambio de aceite, revisión técnica, reparación de neumáticos, permiso de circulación de un vehículo de la empresa.
 
-**Cuándo NO usarla.** El combustible de un viaje va en P02 o P03. Vehículos personales van en P01. Peajes, estacionamiento y combustible de un viaje con un vehículo de la empresa van en P02 o P03, según el viaje; P04 es solo para mantención, permisos y multas de la flota.
+**Cuándo NO usarla.** El combustible de un viaje va en P02 o P03. Vehículos personales van en P01. Peajes, estacionamiento y combustible de un viaje con un vehículo de la empresa van en P02 o P03, según el viaje; P04 es solo para mantención, remolque, permisos y multas de la flota.
 
 **Unidades permitidas.** Todas.
 **Documentos.** Boleta o factura.
@@ -322,4 +322,4 @@ Un código que no esté en esta tabla no es válido.
 | 1.3 | Se aclara la diferencia entre Coffee break y Capacitaciones en P08 y se agrega tope por documento para Capacitaciones. |
 | 1.4 | Se aclaran los límites entre P02/P03 y P08, y entre P08 y P07. |
 | 1.5 | Se aclara qué pasa con las comidas sin viaje: para una reunión interna o una capacitación van en P08, y la comida individual es un gasto personal (RG-02). |
-| 1.6 | Se aclara que peajes, estacionamiento y combustible de un viaje con un vehículo de la empresa van en P02 o P03, y que P04 es solo para mantención, permisos y multas de la flota. |
+| 1.6 | Se aclara que peajes, estacionamiento y combustible de un viaje con un vehículo de la empresa van en P02 o P03, y que P04 es solo para mantención, remolque, permisos y multas de la flota. |
