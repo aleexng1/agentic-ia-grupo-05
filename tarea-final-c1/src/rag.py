@@ -3,7 +3,7 @@
 import os
 from functools import lru_cache
 
-from langchain_core.tools import tool
+from langchain_core.tools import ToolException, tool
 
 # Importar config carga el .env del proyecto en el entorno, sin imprimir valores.
 from src.config import CARPETA_PROYECTO
@@ -21,13 +21,20 @@ def _obtener_indice():
 
     try:
         from langchain_google_genai import GoogleGenerativeAIEmbeddings
-        from langchain_redis import RedisVectorStore
+        from langchain_redis import RedisConfig, RedisVectorStore
 
         embeddings = GoogleGenerativeAIEmbeddings(model=modelo, max_retries=0)
-        return RedisVectorStore(
-            embeddings=embeddings,
+        configuracion = RedisConfig(
             index_name=prefijo,
             redis_url=redis_url,
+            embedding_dimensions=3072,
+            distance_metric="COSINE",
+            indexing_algorithm="FLAT",
+            legacy_key_format=False,
+        )
+        return RedisVectorStore(
+            embeddings=embeddings,
+            config=configuracion,
         )
     except Exception as error:
         raise RuntimeError(
@@ -44,11 +51,13 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
         consulta: qué buscar en la política de gastos, en palabras simples.
         k: cuántos fragmentos devolver (entre 1 y 10).
     """
+    if not isinstance(consulta, str):
+        raise ToolException("La consulta debe ser texto no vacío.")
     consulta = consulta.strip()
     if not consulta:
-        raise ValueError("La consulta no puede estar vacía.")
+        raise ToolException("La consulta no puede estar vacía.")
     if isinstance(k, bool) or not isinstance(k, int) or not 1 <= k <= 10:
-        raise ValueError("k debe ser un entero entre 1 y 10.")
+        raise ToolException("k debe ser un entero entre 1 y 10.")
 
     try:
         resultados = _obtener_indice().similarity_search_with_score(
@@ -56,7 +65,7 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
         )
     except Exception as error:
         # No incluir el mensaje original: puede revelar la URL o detalles de credenciales.
-        raise RuntimeError(
+        raise ToolException(
             f"Falló la búsqueda de políticas ({type(error).__name__}). "
             "Comprueba Redis, memoria disponible y cuotas de embeddings."
         ) from None
@@ -67,16 +76,24 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
         texto = metadatos.get("texto_completo")
         if not isinstance(texto, str):
             # No completar con instrucciones ni texto fabricado: índice incompatible.
-            raise RuntimeError("El documento recuperado no contiene texto_completo válido.")
+            raise ToolException("El documento recuperado no contiene texto_completo válido.")
         politica = metadatos.get("politica")
         fuente = metadatos.get("fuente")
         if not isinstance(politica, str) or not isinstance(fuente, str):
-            raise RuntimeError("El documento recuperado tiene metadatos incompatibles.")
+            raise ToolException("El documento recuperado tiene metadatos incompatibles.")
+        try:
+            puntaje_seguro = -float(puntaje)
+        except (TypeError, ValueError, OverflowError):
+            raise ToolException("Redis devolvió una puntuación incompatible.") from None
         fragmentos.append({
             "politica": politica,
             "texto": texto,
             "fuente": fuente,
             # Redis devuelve distancias: su opuesto respeta mayor = más parecido.
-            "puntaje": -float(puntaje),
+            "puntaje": puntaje_seguro,
         })
     return fragmentos
+
+
+# LangChain serializa ToolException como ToolMessage con status="error".
+buscar_politica.handle_tool_error = True

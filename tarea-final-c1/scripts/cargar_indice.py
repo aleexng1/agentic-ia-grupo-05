@@ -1,4 +1,4 @@
-"""Carga en Redis un documento por política, sin borrar claves ajenas."""
+"""Carga en Redis diez políticas y diez reglas, sin borrar claves ajenas."""
 
 import hashlib
 import os
@@ -12,7 +12,7 @@ PATRON_POLITICA = re.compile(r"(?m)^## (P\d{2}) — (.+?)\s*$")
 
 
 def separar_politicas(texto: str) -> list[dict]:
-    """Devuelve P01-P10, adjuntando RG-01-RG-10 a cada fragmento."""
+    """Devuelve P01-P10; texto íntegro para LLM y sin exclusiones en embeddings."""
     encabezado_historial = re.search(r"(?m)^## Historial de cambios\s*$", texto)
     texto_indexable = texto[:encabezado_historial.start()] if encabezado_historial else texto
 
@@ -50,12 +50,17 @@ def separar_politicas(texto: str) -> list[dict]:
         politica = encabezado.group(1)
         nombre = encabezado.group(2).strip()
         texto_politica = texto_indexable[encabezado.start():fin].strip()
+        texto_busqueda = re.sub(
+            r"(?ms)^\*\*Cuándo NO usarla\.\*\*.*?(?=^\*\*|^## |\Z)",
+            "",
+            texto_politica,
+        ).strip()
         fragmentos.append({
             "politica": nombre,
             "codigo": politica,
-            # Este contenido se entrega al agente; no se usa para calcular embeddings.
+            # Las advertencias completas se conservan para que el LLM contraste.
             "texto": f"{reglas}\n\n{texto_politica}",
-            "texto_busqueda": texto_politica,
+            "texto_busqueda": texto_busqueda,
             "fuente": f"datos/politica_ficticia.md#{politica}",
         })
     return fragmentos
@@ -113,28 +118,62 @@ def _configuracion() -> tuple[str, str, str]:
 
 
 def _recursos(redis_url: str, prefijo: str, modelo: str):
-    """Crea cliente y vector store con reintentos del proveedor desactivados."""
+    """Crea cliente con el esquema vectorial explícito y reintentos apagados."""
     from langchain_google_genai import GoogleGenerativeAIEmbeddings
-    from langchain_redis import RedisVectorStore
+    from langchain_redis import RedisConfig, RedisVectorStore
 
     embeddings = GoogleGenerativeAIEmbeddings(model=modelo, max_retries=0)
-    vector_store = RedisVectorStore(
-        embeddings=embeddings,
+    configuracion = RedisConfig(
         index_name=prefijo,
         redis_url=redis_url,
+        embedding_dimensions=3072,
+        distance_metric="COSINE",
+        indexing_algorithm="FLAT",
+        legacy_key_format=False,
+    )
+    vector_store = RedisVectorStore(
+        embeddings=embeddings,
+        config=configuracion,
     )
     return embeddings, vector_store
 
 
+def _preparar_documentos(texto: str) -> list[dict]:
+    """Combina políticas y reglas manteniendo texto embebible y texto completo."""
+    politicas = separar_politicas(texto)
+    reglas = separar_reglas(texto)
+    documentos = [
+        {**politica, "texto_completo": politica["texto"]}
+        for politica in politicas
+    ]
+    documentos.extend(
+        {
+            "politica": "Reglas generales",
+            "codigo": regla["codigo"],
+            "texto": regla["texto"],
+            "texto_busqueda": regla["texto"],
+            "texto_completo": regla["texto"],
+            "fuente": regla["fuente"],
+        }
+        for regla in reglas
+    )
+    return documentos
+
+
 def main() -> None:
-    """Indexa diez documentos con identificadores estables para actualizarlos."""
+    """Indexa veinte documentos con identificadores estables por código."""
+    raise RuntimeError(
+        "Carga bloqueada: compatibilidad Redis pendiente. Completa y autoriza "
+        "scripts/MIGRACION_INDICE_REDIS_PENDIENTE.md antes de habilitar escrituras."
+    )
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
     redis_url, prefijo, modelo = _configuracion()
-    fragmentos = separar_politicas(RUTA_POLITICA.read_text(encoding="utf-8"))
+    texto = RUTA_POLITICA.read_text(encoding="utf-8")
+    documentos_fuente = _preparar_documentos(texto)
 
-    # Hash estable y ámbito de prefijo: reejecutar actualiza los mismos IDs.
-    ids = [f"{prefijo}:{trozo['codigo']}" for trozo in fragmentos]
+    # Redis añade key_prefix; IDs desnudos evitan prefijos duplicados.
+    ids = [trozo["codigo"] for trozo in documentos_fuente]
     try:
         from langchain_core.documents import Document
 
@@ -152,7 +191,7 @@ def main() -> None:
                     ).hexdigest(),
                 },
             )
-            for trozo in fragmentos
+            for trozo in documentos_fuente
         ]
         vector_store.add_documents(documents=documentos, ids=ids)
     except Exception as error:
@@ -162,7 +201,7 @@ def main() -> None:
             "Verifica conexión, memoria y cuotas del proveedor de embeddings."
         ) from None
 
-    print(f"Carga completa: {len(fragmentos)} políticas en el índice configurado.")
+    print(f"Carga completa: {len(documentos_fuente)} documentos en el índice configurado.")
 
 
 if __name__ == "__main__":
