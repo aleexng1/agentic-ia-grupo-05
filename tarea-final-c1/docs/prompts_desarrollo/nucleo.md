@@ -174,7 +174,7 @@ quiero que avancemos en todo lo que podamos ahora y cuando terminemos de hacer t
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Adaptar Núcleo a los cambios ya integrados de Herramientas y a las decisiones del equipo, sin editar módulos ajenos.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 En tf/nucleo, actualiza solo src/grafo.py para:
@@ -198,7 +198,7 @@ Conserva las firmas públicas, el contrato compartido, el modelo y la temperatur
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Aplicar en Núcleo los cambios ya integrados de Sebastián y las decisiones de Alex, dejando documentada la coordinación pendiente con Eduardo.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 En tf/nucleo, actualiza solo src/grafo.py para integrar las herramientas y memoria ya disponibles:
@@ -222,7 +222,7 @@ No cambies firmas existentes, src/contrato.py, verificar.py, PROMPT_SISTEMA, mod
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Completar las demostraciones independientes del notebook usando la memoria y el registro SQLite ya integrados por Sebastián, sin depender de Gemini, Redis ni tocar bases locales.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 En agente.ipynb completa las secciones 7 y 8 sin modificar módulos de otros roles:
@@ -242,7 +242,7 @@ Valida el notebook y ejecuta ambas celdas sin llamar a Gemini ni Redis.
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Integrar la propuesta de Sebastián sobre el nodo de cierre sin reemplazar las correcciones existentes de política por código, fragmentos por turno y estado del veredicto.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 Integra manualmente en src/grafo.py el flujo de cierre propuesto por Sebastián, conservando los cambios actuales de Núcleo:
@@ -265,7 +265,7 @@ Mantén las firmas existentes y no edites módulos ajenos. La salida estructurad
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Eliminar la dependencia del texto libre de Gemini para guardar y cerrar el veredicto.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 En tf/nucleo, usa emitir_veredicto(decision, politica, categoria, cuenta, motivo) como la única vía estructurada para cerrar un gasto.
@@ -288,13 +288,17 @@ No cambies src/contrato.py ni PROMPT_SISTEMA; coordina con Eduardo la instrucci�
 - **Modelo:** GPT-6 Luna Fast
 - **Para qué era:** Integrar el nuevo `buscar_fondo` de Sebastián para que un `id_fondo` inexistente se observe por RG-10 y se registre sin tumbar el grafo.
 
-**Prompt de trabajo:**
+**Prompt de trabajo (redacción del registro; no confirmada como literal):**
 
 ````text
 En tf/nucleo, sustituye en src/grafo.py las llamadas a fondo_inicial por buscar_fondo en la carga del fondo tras validar_gasto y en nodo_cerrar. Trata un resultado None como fondo inexistente: validar_gasto debe aportar RG-10, aplicar_veredicto no debe aprobar ni descontar, y el registro debe guardar OBSERVAR sin lanzar excepción. No modifiques src/memoria.py ni otros archivos de Sebastián. Verifica con un caso de fondo inexistente y ejecutar verificar.py.
 ````
 
 **Resultado (una línea):** El grafo ahora usa `buscar_fondo`; FR-999 termina observado por RG-10, conserva fondo `None` y queda registrado sin error. `verificar.py` pasó con 41 ✅ y 0 ❌ en modo aislado.
+
+---
+
+**Nota de literalidad:** Las entradas 6 a 11 contienen prompts de trabajo redactados en el registro; no puedo confirmar que sean transcripciones exactas de los mensajes originales. Se rotularon para no presentarlos como literales. Si la pauta exige el texto original palabra por palabra, Matías debe aportar las conversaciones originales.
 
 ---
 
@@ -334,10 +338,111 @@ compartido; lo aplica Matías).
 Autorización posterior de Alex: "dale nomás Matías con los 10 y el PR con el MAX_PASOS modificado".
 ````
 
-**Resultado (una línea):** Tras el acuerdo de Alex y el voto 👍 de Matías, `MAX_PASOS` quedó en 10 y su comprobación del contrato se actualizó. El filtro bloqueó 15/15 variantes sin veredicto; la sección 8 mostró el antes/después de SQLite desde el cierre del agente y la 10 llamó `evaluar()`/`mostrar_tabla()` con GS-07. Pasaron las pruebas offline; no se usó Gemini ni Redis.
+**Resultado (una línea):** Tras el acuerdo de Alex y el voto 👍 de Matías, `MAX_PASOS` quedó en 10 y su comprobación del contrato se actualizó. El filtro bloqueó 15/15 variantes sin veredicto; la sección 8 mostró el antes/después de SQLite desde el cierre del agente y la sección del golden llamó `evaluar()`/`mostrar_tabla()` con GS-07. Pasaron las pruebas offline; no se usó Gemini ni Redis.
+
+---
+
+## 13. Completar evidencias pendientes del notebook
+
+- **Fecha:** 2026-11-02
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Avanzar las secciones de Núcleo identificadas en la matriz de evidencias, sin ejecutar corridas reales ni tocar trabajo de Eduardo.
+
+**Extracto literal del pedido de Núcleo:**
+
+````text
+Matías (notebook):
+- Sección 5 (seguridad): GS-27 a GS-30 y un intento de jailbreak por chat.
+- Sección 6 (RAG): cuándo busca y cuándo no, configuración del índice y fragmentos
+  usados.
+- Sección 9 (juez): modelo, prompt, un veredicto benigno, uno adversarial y la decisión
+  aplicada.
+- Sección 8: restaurar la demostración del reinicio seguro del registro (se perdió al
+  pasarla a una corrida real).
+- Que las trazas de registrar_traza se vean en el notebook (hoy figura como stub).
+- ¿Puedes confirmar si las entradas 6 a 11 de nucleo.md son textos exactos o resúmenes?
+
+Seba + Matías:
+- Nueva sección del notebook para el guardrail "piso de reglas": usar
+  prueba_piso_en_agente() completa (no revisar_con_agente por separado, porque escribiría
+  en el registro local), explicar por qué el caso adversarial es simulado (Gemini no se
+  equivoca a pedido) y agregar un caso benigno real con Gemini.
+
+Eduardo:
+- Pasarle a Matías el contenido para las secciones 6 (RAG) y 9 (juez).
+````
+
+**Resultado (una línea):** Se implementaron localmente las secciones 5, 8 y 10 y se integraron las demos offline de Eduardo para 6 y 9; las celdas 6 y 9 pasaron contra el código de su rama Draft, sin Redis ni Gemini. La traza de la sección 3 y el reinicio temporal de SQLite se probaron con LLM falso; el piso completo pasa con LLM guionado. La evidencia real de RAG, el falso negativo real de GS-01 y el jailbreak por chat siguen pendientes. No se usó Gemini ni Redis.
+
+---
+
+## 14. Preparar el notebook para la evidencia final v1.6
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Integrar en el notebook las demos técnicas recibidas de Eduardo, actualizar la rama con `main`/PR #33 y dejar preparadas las pruebas reales solicitadas por Alex sin ejecutar llamadas ni tocar Redis antes de la coordinación.
+
+**Prompt exacto de Matías:**
+
+````text
+avanza en todo lo que podamos y tenga sentido
+````
+
+**Instrucciones de integración de Alex (extracto literal):**
+
+````text
+Matías — notebook: trae main antes de tocarlo (cambió la celda 1, ahora dice v1.6).
+Las secciones 5, 6 y 9 necesitan evidencia REAL:
+- 5: GS-27 a GS-30 y un jailbreak por chat con Gemini (respuesta, veredicto, registro).
+- 6: configuración del índice, una búsqueda real con sus fragmentos (GS-07) y un caso
+  que no busca (GS-31).
+- 9: modelo y PROMPT_JUEZ, un veredicto benigno (GS-01) y uno adversarial (GS-34), con
+  valido, la razón y la decisión aplicada.
+Las demos simuladas de Eduardo pueden ir al lado, rotuladas como simuladas. Con el #33
+unido, ya puedes armar la sección del guardrail con prueba_piso_con_gemini().
+
+Entrega del notebook: la pauta pide "trazas de ejecución". Como nbstripout borra las
+salidas, entregaremos agente.ipynb limpio (para que el revisor lo ejecute) y
+agente_ejecutado.ipynb con salidas, revisado para que no tenga secretos.
+````
+
+**Resultado (una línea):** La rama se actualizó a `main` 3efd17e, que contiene PR #33, PR #41, la corrida 3 y política v1.6. Se prepararon las pruebas dirigidas reales, pero para ahorrar cuota el notebook presenta primero la evidencia histórica auténtica de corrida 3 y PR #41; las nuevas corridas de RAG/seguridad están desactivadas y claramente rotuladas. Las secciones históricas 5/6/9 y la sintaxis del notebook pasan offline. `verificar.py` 42/42, `probar_herramientas.py` 59/59 y `evaluar.py --autoprueba` 89/89. No se usó Gemini ni Redis.
+
+---
+
+## 15. Dejar listas las evidencias del notebook sin repetir la corrida final
+
+- **Fecha:** 2026-11-04
+- **Herramienta:** OpenCode
+- **Modelo:** GPT-6 Luna Fast
+- **Para qué era:** Preparar el PR de Núcleo con las celdas de evidencia del notebook, reutilizando la corrida final ya publicada para no volver a gastar cuota.
+
+**Prompt exacto de Matías:**
+
+````text
+dejemos todo listo para que el lo termine
+````
+
+**Instrucciones pertinentes de Alex (extracto literal):**
+
+````text
+El revisor ejecutará el notebook desde cero y verificará la traza del LLM, la
+herramienta, el historial y la parada. La evidencia de seguridad, RAG, juez, guardrail
+y acción tiene que estar en el notebook, no solo en los archivos de resultados.
+
+Orden: secciones del notebook → ejecución completa → agente_ejecutado.ipynb → cierre
+de documentación.
+
+⚠️ La ejecución completa del notebook usa Gemini real: avísenme antes de correrla
+completa, para coordinar la cuota.
+````
+
+**Resultado (una línea):** Se añadió lectura etiquetada de la corrida 3 (34/34) y los dictámenes reales de PR #41 para GS-01/GS-29; se muestran respuestas, herramientas, fuentes RAG, `valido`, razones, decisión aplicada y jailbreak histórico. Se resumió la traza, se quitó la ruta absoluta y se hizo idempotente la demostración de reinicio. Celdas históricas 5/6/9 pasaron offline; no se repitió ninguna llamada de API. El notebook ejecutado queda pendiente de autorización de Alex.
 
 ---
 
 ## Estado de prompts de implementación
 
-`src/grafo.py` cierra con `emitir_veredicto`, pasa la validación al juez, protege el gasto original y bloquea respuestas finales sin veredicto válido en turnos con gasto. Las secciones 7, 8 y 10 de `agente.ipynb` usan el grafo, SQLite temporal y el evaluador con casos dirigidos. `MAX_PASOS` quedó en 10 con acuerdo del equipo. Sigue pendiente validar con Gemini/Redis. Nunca se registra el contenido de `.env` ni una clave.
+`src/` está congelado. La rama contiene la integración de `main` 3efd17e. El notebook y este registro están preparados localmente para el PR de Matías. Las celdas 5/6/9 consultan evidencia histórica real sin volver a llamar servicios; las pruebas nuevas en vivo y `agente_ejecutado.ipynb` quedan para la ventana de cuota que coordine Alex. `MAX_PASOS` quedó en 10. Nunca se registra el contenido de `.env` ni una clave.
