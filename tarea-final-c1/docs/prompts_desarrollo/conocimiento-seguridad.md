@@ -46,7 +46,7 @@ VALIDACIÓN:
 
 Implementa y valida esta fase localmente. Detente antes de utilizar servicios externos.
 ```
-Resultado (una línea): Se implementaron src/rag.py y scripts/cargar_indice.py; OpenCode reportó pruebas simuladas PASS. Después se indexaron diez políticas en Redis Cloud y se recuperó P01 en primer lugar en una consulta real. Commit de respaldo local: b3996a1.
+Resultado (una línea): Se implementaron src/rag.py y scripts/cargar_indice.py; OpenCode reportó pruebas simuladas PASS. Después se indexaron diez políticas en Redis Cloud y se recuperó P01 en primer lugar en una consulta real. Commit de respaldo local: b38996a (confirmado en GitHub como respaldo de `src/rag.py` y `scripts/cargar_indice.py`; no acredita la fecha exacta del prompt).
 ---
 2. Corrección del método de similitud RAG
 Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
@@ -607,3 +607,36 @@ Resultado (una línea): PROMPT_SISTEMA describe clasificación, validación dete
 - Para resolver definitivamente los campos aún pendientes se necesitan mensajes originales de OpenCode y sus metadatos de modelo, contrastados individualmente. **No inventar fechas ni modelos**, ni confundir el LLM usado para desarrollar código en OpenCode con el LLM de ejecución del agente (Gemini).
 
 **Estado de este anexo:** evidencia de implementación por commits completada; atribuciones de fecha y modelo de OpenCode expresamente **pendientes de verificación**. No se hicieron consultas a Redis ni Gemini para esta auditoría.
+---
+
+## Registros complementarios de cierre — PR #34, PR #38 y PR #41
+
+**Criterio de fidelidad:** este apartado documenta encargos, cambios, resultados y evidencias verificables. Los resúmenes se redactaron a partir de los PR y los datos de esta conversación; **no se presentan como prompts literales enviados a OpenCode**. La herramienta, modelo y fecha exacta de cada mensaje original siguen pendientes cuando no existe transcripción atribuible. No se fabrican mensajes para completar la pauta.
+
+### 9. PR #34 — RAG y seguridad para la política v1.6
+
+- **Fecha verificable de integración:** 2026-11-03 (commit del merge; no necesariamente fecha de los prompts originales).
+- **Herramienta/modelo de desarrollo de los prompts originales:** no verificados a nivel de mensaje OpenCode.
+- **Encargo documentado (síntesis, no prompt literal):** preparar el cambio de la política ficticia v1.6 usando un índice Redis nuevo `grupo05_v15` de 20 documentos, RAG con 3.072 dimensiones/COSINE/FLAT, cargador con `--plan` offline y escritura con confirmación explícita, y prompts de seguridad/juez coherentes con P02–P04 y RG-06. Evitar modificar el índice previo y mantener los contratos existentes.
+- **Cambios verificables:** `src/rag.py`, `scripts/cargar_indice.py`, `src/seguridad.py` y documentación de migración. El código quedó incorporado mediante [PR #34](https://github.com/aleexng1/agentic-ia-grupo-05/pull/34), fusionado en `main`.
+- **Resultado de fase:** implementación preparada y fusionada; la carga efectiva posterior, ejecutada por Alex, está documentada en [PR #39](https://github.com/aleexng1/agentic-ia-grupo-05/pull/39). El ajuste de `ToolNode` fue realizado en [PR #37](https://github.com/aleexng1/agentic-ia-grupo-05/pull/37).
+- **Límite de evidencia:** el texto exacto del encargo enviado a OpenCode, sus fechas por mensaje y modelo quedan sin atribuir; consultar las sesiones exportadas si la pauta exige transcripción literal.
+
+### 10. PR #38 — Auditoría de atribuciones y trazabilidad de prompts
+
+- **Fecha verificable de integración:** 2026-11-03 en horario chileno (merge de 2026-11-04T00:25:03Z).
+- **Herramienta/modelo original:** sin metadatos verificables para los nueve bloques históricos.
+- **Encargo documentado (síntesis, no prompt literal):** revisar las atribuciones no sustentadas en el registro de Conocimiento y Seguridad, conservar los ocho registros/nueve bloques, distinguir fecha de commit frente a fecha de ejecución del prompt y reportar honestamente el cotejo con sesiones de OpenCode.
+- **Resultado verificable:** [PR #38](https://github.com/aleexng1/agentic-ia-grupo-05/pull/38) fusionado; mantuvo los registros, marcó fecha/modelo no verificados y documentó la auditoría de 26 sesiones sin coincidencias literales para los nueve bloques. **0/9 no demuestra que los prompts no existieran.**
+- **Límite de evidencia:** sin transcripciones originales identificadas no es posible atribuir mensajes exactos, hora o modelo.
+
+### 11. PR #41 — Reclasificación basada en finalidad y acciones del juez
+
+- **Fechas verificables:** commit inicial de la corrección 2026-11-04T00:41:54Z; merge 2026-11-04T01:05:45Z.
+- **Encargo verificable:** Alex asignó a Eduardo corregir GS-29 **solo en `src/seguridad.py`**, exigiendo clasificación acorde con «Cuándo usarla»/«Cuándo NO usarla», evitando evadir requisitos documentales mediante reclasificación y haciendo explícitas las acciones permitidas al juez.
+- **Implementación:** en rama `tf/seguridad-gs29-final`, después revisada por Alex para eliminar párrafos específicos del caso y conservar únicamente reglas generales; [PR #41](https://github.com/aleexng1/agentic-ia-grupo-05/pull/41), commit de cierre `4e95646`.
+- **Pruebas de Eduardo:** `verificar.py` 43/43, `probar_herramientas.py` 59/59, `evaluar.py --autoprueba` 89/89 y `git diff --check` sin errores. La comparación determinista del gasto GS-29 mostró P07/Mercadería ⇒ `P07`/CTA-3020 y P08/Coffee break ⇒ `RG-09`/CTA-8010; esa comparación no bastaba por sí sola para acreditar el LLM.
+- **Validación real de Alex:** [prueba dirigida del PR #41](../../pruebas/resultados/prueba_dirigida_PR41_general.md) con GS-29 3/3, y [corrida 3 final](../../pruebas/resultados/corrida_3.md) con **34/34**, usando Gemini real e índice `grupo05_v15`.
+- **Límite:** el origen del encargo está documentado en el intercambio del equipo; no se inventa un supuesto prompt literal de OpenCode para este PR.
+
+**Estado de cierre:** los cambios y resultados de los tres PR quedan referenciados. Si la evaluación exige los *prompts originales textuales* con herramientas y modelos por mensaje, ese requisito continúa condicionado a la recuperación de evidencias primarias; las síntesis anteriores no deben usarse como sustituto.
