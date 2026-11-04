@@ -22,4 +22,4 @@ __pycache__/
 
 # Tarea final
 *.db
-agente_ejecutado.ipynb
+# agente_ejecutado.ipynb SÍ se sube: es la ejecución completa con salidas (ver .gitattributes).
