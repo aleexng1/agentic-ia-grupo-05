@@ -445,4 +445,4 @@ completa, para coordinar la cuota.
 
 ## Estado de prompts de implementación
 
-`src/` está congelado. La rama contiene la integración de `main` 3efd17e. El notebook y este registro están preparados localmente para el PR de Matías. Las celdas 5/6/9 consultan evidencia histórica real sin volver a llamar servicios; las pruebas nuevas en vivo y `agente_ejecutado.ipynb` quedan para la ventana de cuota que coordine Alex. `MAX_PASOS` quedó en 10. Nunca se registra el contenido de `.env` ni una clave.
+`src/` está congelado desde la corrida 3 (34/34). El notebook ejecuta en vivo, con Gemini y Redis, las secciones 3 a 11, incluidas la 5 (seguridad), la 6 (RAG) y la 9 (juez), que completó Alex en los PR #46, #48 y #49; la evidencia guardada de la corrida 3 queda como respaldo. `agente_ejecutado.ipynb` tiene la ejecución completa de arriba abajo (42 ✅, 0 ⚠️, 0 ❌). `MAX_PASOS` quedó en 10. Nunca se registra el contenido de `.env` ni una clave. (Actualizado por Alex el 04-11; las entradas de prompts son de Matías y no se modificaron)
