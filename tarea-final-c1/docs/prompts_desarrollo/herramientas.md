@@ -248,3 +248,37 @@ Después aprobé el plan del asistente ("Sí, hazlo").
 
 **Resultado (una línea):** `probar_herramientas.py` 59 ✅ 0 ❌ y `verificar.py` 42 ✅ 0 ❌; la sección I
 con Gemini real no se pudo ejecutar porque mi `.env` no tiene `GOOGLE_API_KEY` ni `REDIS_URL`.
+
+---
+
+## 8. Main con la política v1.6 y estado de mi parte
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** Claude Code (app de escritorio)
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** saber qué me faltaba después de que Alex unió mis PR, traer `main` a mi rama y
+  dejar mi código al día con la política v1.6.
+
+**Prompt completo:**
+
+````text
+[adjuntas: capturas del grupo con lo unido en main (PR #33, #34, #37, #38 y #41), la política v1.6,
+el índice grupo05_v15 y el análisis de GS-29]
+Revisa este contexto y dime que falta de mi parte, no ejecutes nada, solo dame un status de avance.
+````
+
+Después pregunté "¿Qué ejecuto?" y aprobé los pasos propuestos ("ejecuta").
+
+**Decisiones que tomé al responder las consultas del asistente:**
+
+- Traje `main` (f050ad7) a mi rama, sin conflictos.
+- Pasé la mención de versión de `src/herramientas.py` a la v1.6. La v1.6 solo aclara en P04 qué gastos
+  de un vehículo de la empresa van en P02/P03, así que no cambia código: las reglas se leen del archivo.
+- Alex corrigió `prueba_piso_con_gemini` mientras yo no estaba: el LLM real solo lee los mensajes, así
+  que el gasto tiene que ir también en el texto, como en el evaluador. Con el LLM guionado no hacía falta,
+  por eso mis pruebas sin cuota no lo detectaron. Con ese arreglo, la prueba pasó con Gemini.
+- GS-29 no es de mi código: `validar_gasto` aplica bien las reglas de P07 y de P08. El error es de
+  clasificación del LLM, y Eduardo lo corrigió en `src/seguridad.py` (PR #41).
+
+**Resultado (una línea):** `probar_herramientas.py` 59 ✅ 0 ❌ y `verificar.py` 42 ✅ 0 ❌ (1 ⚠️ porque no
+tengo Redis configurado).
