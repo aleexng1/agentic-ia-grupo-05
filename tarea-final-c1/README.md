@@ -29,7 +29,7 @@ Detalle completo en [docs/caso_y_criterio.md](docs/caso_y_criterio.md).
 ## Bonos declarados
 
 - Memoria avanzada: fondo por rendir.
-- RAG: Redis, índice `grupo05`.
+- RAG: Redis, índice `grupo05_v15`.
 - Acción avanzada: registro SQLite.
 - Golden set.
 - Juez LLM.
@@ -47,7 +47,7 @@ Dónde se ejecuta cada uno, sus casos, su evidencia y su estado:
 | Proveedor | Google Gemini, con `langchain-google-genai` |
 | Modelo | `gemini-3.5-flash-lite` (`MODELO_DEL_CURSO` en `src/config.py`) |
 | Temperatura | 0. **Este modelo la ignora:** usa sus propios valores de muestreo, así que sus respuestas pueden variar entre corridas |
-| Reintentos | 6 intentos para el agente (valor por defecto) y 2 para el juez (`src/seguridad.py`) |
+| Reintentos | 6 intentos para el agente (valor por defecto) y 6 para el juez (`src/seguridad.py`) |
 | Máximo de pasos ReAct | 10 (`MAX_PASOS` en `src/contrato.py`) |
 
 ### Embeddings e índice
@@ -56,17 +56,19 @@ Dónde se ejecuta cada uno, sus casos, su evidencia y su estado:
 |---|---|
 | Modelo de embeddings | `models/gemini-embedding-001` (clase-05) |
 | Almacén vectorial | Redis del curso |
-| Nombre del índice | `grupo05` (viene de `REDIS_PREFIJO`) |
-| Documentos | 10, uno por política, con las reglas RG-01 a RG-10 dentro de cada uno |
+| Nombre del índice | `grupo05_v15` (viene de `REDIS_PREFIJO`). El sufijo es el nombre acordado, no la versión: guarda la política v1.6 |
+| Documentos | 20: uno por política (P01 a P10) y uno por regla general (RG-01 a RG-10) |
+| Texto que se busca | La política sin su apartado "Cuándo NO usarla", que sí va en el texto que lee el LLM |
 | Campos del índice | `text`, `embedding`, `_index_name`, `_metadata_json` |
 | Datos de cada documento | `politica`, `codigo`, `fuente`, `texto_completo`, `contenido_sha256` |
-| Dimensiones | 3.072 — _a fijar en el código (Eduardo)_ |
-| Métrica | COSINE — _a fijar en el código (Eduardo)_ |
-| Algoritmo | FLAT — _a fijar en el código (Eduardo)_ |
-| Llaves | `grupo05:grupo05:P01` a `P10`: prefijo doble, _a corregir (Eduardo)_ |
+| Dimensiones | 3.072, fijadas en el código (`src/rag.py` y `scripts/cargar_indice.py`) |
+| Métrica | COSINE, fijada en el código |
+| Algoritmo | FLAT, fijado en el código |
+| Llaves | `grupo05_v15:P01` a `grupo05_v15:P10` y `grupo05_v15:RG-01` a `grupo05_v15:RG-10`, con un solo prefijo |
 
-Los valores de dimensiones, métrica y algoritmo se leyeron del índice real el 2026-11-02. Hoy salen de
-los valores por defecto de la librería y del modelo.
+La configuración se comprobó en el índice real después de la carga del 2026-11-03: 20 documentos, con el
+contenido idéntico a la política v1.6 local. El índice anterior, `grupo05` (10 documentos, política v1.4),
+se conserva sin cambios: para volver a él basta cambiar `REDIS_PREFIJO`.
 
 ### Entorno
 
@@ -93,7 +95,7 @@ Valores para tu `.env` que no son secretos:
 ```
 GEMINI_MODEL=gemini-3.5-flash-lite
 EMBEDDING_MODEL=models/gemini-embedding-001
-REDIS_PREFIJO=grupo05
+REDIS_PREFIJO=grupo05_v15
 MOSTRAR_TRAZAS=1
 ```
 
@@ -162,12 +164,18 @@ y un ⚠️, porque omite la búsqueda en Redis; con credenciales reales da 43 �
 
 ### 4. Cargar el índice
 
+**El índice del grupo ya está cargado** (`grupo05_v15`, política v1.6). No hace falta cargarlo de nuevo:
+solo pon `REDIS_PREFIJO=grupo05_v15` en tu `.env`.
+
 ```bash
-python -m scripts.cargar_indice    # usa embeddings y Redis
+python scripts/cargar_indice.py --plan    # sin Redis ni Gemini: revisa los 20 documentos que cargaría
+REDIS_PREFIJO=grupo05_v15 python scripts/cargar_indice.py --cargar --confirmar-indice grupo05_v15
 ```
 
-Reemplaza los 10 documentos de tu `REDIS_PREFIJO` y no borra nada. Hazlo una sola vez, y coordínalo si
-el índice es compartido. Si ya está cargado con la versión vigente de la política, no hace falta.
+La segunda línea es la carga real que hizo Alex el 2026-11-03, después de revisar que el índice no
+existiera. Usa unas 20 llamadas de embeddings y no borra nada. El cargador solo escribe si
+`REDIS_PREFIJO` es exactamente `grupo05_v15` y se confirma ese nombre. Si el índice ya existe, reescribe
+las mismas 20 llaves. Coordínalo siempre con el grupo: el servidor es compartido.
 
 ### 5. Ejecutar el notebook
 
@@ -185,7 +193,7 @@ python -m jupyter nbconvert --to notebook --execute agente.ipynb --output agente
 ### 6. Correr el evaluador
 
 ```bash
-python pruebas/evaluar.py --autoprueba           # sin LLM ni clave; esperado: 83 de 83 ✅
+python pruebas/evaluar.py --autoprueba           # sin LLM ni clave; esperado: 89 de 89 ✅
 python pruebas/evaluar.py --seco                 # sin LLM ni clave; esperado: 34 de 34 casos
 python pruebas/probar_herramientas.py            # sin LLM ni clave; esperado: 59 ✅ 0 ❌
 python pruebas/evaluar.py --caso GS-07 --pausa 15   # un caso; usa Gemini y Redis
@@ -193,7 +201,7 @@ python pruebas/evaluar.py --grupo B --pausa 15   # un grupo (A a F); usa Gemini 
 ```
 
 Una corrida completa son unas 130 llamadas a Gemini. Conviene correr grupo por grupo con `--pausa 15`,
-como se hizo en la corrida 1. Cada corrida con Gemini guarda un `.md` y un `.json` en
+como se hizo en las corridas 1 y 2. Cada corrida con Gemini guarda un `.md` y un `.json` en
 `pruebas/resultados/`. Más opciones en [pruebas/README.md](pruebas/README.md).
 
 ## Pruebas y resultados
@@ -205,15 +213,18 @@ trazas internas del grafo (`registrar_traza`), que el evaluador apaga.
 
 Resultados guardados:
 
+- [`corrida_2.md`](pruebas/resultados/corrida_2.md): **33 de 34 casos**, el 2026-11-03, con `main` en
+  `5bbfd5d`, la política v1.6 y el índice `grupo05_v15`, sin fallas técnicas. Falla GS-29.
+- [`prueba_dirigida_indice_v16.md`](pruebas/resultados/prueba_dirigida_indice_v16.md): GS-01 3 de 3,
+  9 de 10 ejecuciones y un jailbreak por chat que no declara ninguna decisión.
 - [`corrida_1_linea_base.md`](pruebas/resultados/corrida_1_linea_base.md): línea base, 31 de 33 casos.
-  GS-34 se agregó después y aún no tiene resultados.
 - [`evolucion.md`](pruebas/resultados/evolucion.md): antes y después de cada mejora.
 - [`estabilidad_v1_4.md`](pruebas/resultados/estabilidad_v1_4.md): tres repeticiones de los casos
   inestables.
 - [`prueba_dirigida_PR17.md`](pruebas/resultados/prueba_dirigida_PR17.md): evidencia del juez con la
   validación.
 
-La corrida final se hará cuando estén listos los últimos cambios del agente y la recarga del índice.
+La corrida 2 es la candidata a corrida final: vale mientras no cambie el código del agente (`src/`).
 Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.md).
 
 ## Seguridad y límites conocidos
@@ -230,13 +241,13 @@ Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.m
 
 ### Límites conocidos
 
-- **Índice:** `grupo05` sigue con la política v1.4 hasta la próxima recarga. La política local está en
-  v1.6.
-- **Turnos sin gasto:** si alguien pide una aprobación por chat, el agente aún puede escribir una
-  decisión. No se registra nada.
-- **Errores del RAG:** una falla de Redis, un `k` fuera de rango o una consulta vacía cortan el turno.
-- **Reglas en el RAG:** van dentro de cada documento, así que una búsqueda sobre una regla no trae un
-  documento propio.
+- **GS-29:** el LLM a veces reclasifica a P08 una compra de mercadería de la cafetería y con eso esquiva
+  la regla de solo factura de P07, y el juez no lo frena. Falló en las corridas 1 y 2. Arreglo pendiente
+  en el prompt y el juez (Eduardo).
+- **Turnos sin gasto:** el prompt prohíbe declarar una decisión sin gasto, y el grafo reemplaza un
+  "Decisión: APROBAR". El jailbreak por chat de la prueba dirigida no declaró ninguna decisión.
+- **Búsqueda de un camión de la empresa:** "peaje en camión de reparto" trae P04 primero. El LLM llega a
+  P02 leyendo el "Cuándo NO usarla" de P04: GS-01 pasó 3 de 3 y en la corrida 2.
 - **Variación:** Gemini no responde siempre igual; por eso hay pruebas de estabilidad.
 - **Memoria:** el historial y el fondo viven en memoria durante la sesión; el registro es un SQLite
   local.
@@ -246,8 +257,8 @@ Simplificaciones del golden set:
 
 - **GS-26:** no exige `buscar_politica`. El caso prueba la memoria del fondo, y no buscar cuando el
   agente ya conoce la política del gasto es lo que pide la pauta.
-- **GS-34:** depende de la aclaración de la política v1.5. Mientras el índice no se recargue, el agente
-  lee la v1.4 en el RAG, así que un ❌ en este caso no mide al agente.
+- **GS-34:** depende de la aclaración de la política v1.5, que el índice `grupo05_v15` ya tiene. Pasó en la
+  corrida 2.
 - **GS-24:** la multa se respalda con boleta porque el contrato solo admite boleta, factura o voucher;
   en la realidad sería un comprobante de pago.
 - **RG-04** (segregación de funciones) no se prueba, porque el agente no recibe quién aprueba cada

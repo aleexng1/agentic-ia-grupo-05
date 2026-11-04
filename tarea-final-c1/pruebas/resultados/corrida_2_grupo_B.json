@@ -1,0 +1,780 @@
+{
+  "fecha": "2026-11-03_2104",
+  "golden_version": "1.3",
+  "politica_version_golden": "1.5",
+  "politica_vigente": "1.6 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "5bbfd5d1a706b598661bdb3f23e39108dd87ea40",
+  "filtros": {
+    "casos": null,
+    "grupo": "B",
+    "componente": null,
+    "pausa": 15
+  },
+  "resumen": {
+    "total": 7,
+    "pasan": 7,
+    "por_grupo": {
+      "B-mal-clasificado": {
+        "total": 7,
+        "pasan": 7
+      }
+    },
+    "por_componente": {
+      "herramientas": {
+        "total": 7,
+        "pasan": 7
+      },
+      "nucleo": {
+        "total": 7,
+        "pasan": 7
+      },
+      "rag": {
+        "total": 7,
+        "pasan": 7
+      }
+    },
+    "por_causa": {},
+    "turnos_sin_juez": [],
+    "turnos_sin_rag": []
+  },
+  "casos": [
+    {
+      "id": "GS-07",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Ejecutivo comercial: peaje con auto propio a un proveedor, declarado en P02",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0701",
+              "fecha_gasto": "2026-10-07",
+              "fecha_rendicion": "2026-10-09",
+              "monto": 2300,
+              "tipo_documento": "boleta",
+              "proveedor": "Autopista Costera Norte",
+              "glosa": "peaje auto propio, visita a proveedor de muebles",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Peaje",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Peajes",
+            "cuenta": "CTA-5100",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Peajes",
+            "cuenta": "CTA-5100",
+            "motivo": "El gasto corresponde a una visita a un proveedor de muebles con vehículo propio, por lo que debe clasificarse en P01 Vehículos Propios bajo la categoría Peajes (cuenta CTA-5100) en lugar de Viajes Internos (RG-09).",
+            "reglas_citadas": [
+              "P01",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "peaje vehiculo propio viaje interno P02",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.1951
+              },
+              {
+                "consulta": "peaje vehiculo propio viaje interno P02",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.225
+              },
+              {
+                "consulta": "peaje vehiculo propio viaje interno P02",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2452
+              },
+              {
+                "consulta": "Viajes a proveedores P03",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.1827
+              },
+              {
+                "consulta": "Viajes a proveedores P03",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.228
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P01\nCategoría: Peajes\nCuenta: CTA-5100\nMotivo: El gasto corresponde a una visita a un proveedor de muebles con vehículo propio, por lo que debe clasificarse en P01 Vehículos Propios bajo la categoría Peajes (cuenta CTA-5100) en lugar de Viajes Internos (RG-09)."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-08",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Técnico del Taller Marino: peaje por una OT, declarado en P02",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0801",
+              "fecha_gasto": "2026-10-16",
+              "fecha_rendicion": "2026-10-19",
+              "monto": 1900,
+              "tipo_documento": "boleta",
+              "proveedor": "Concesionaria Ruta Litoral",
+              "glosa": "peaje traslado a marina para reparar motor de cliente",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Peaje",
+              "unidad_negocio": "TMA",
+              "patente": null,
+              "numero_ot": "OT-2026-1187",
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P06",
+            "categoria": "Peajes",
+            "cuenta": "CTA-3010",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P06",
+            "categoria": "Peajes",
+            "cuenta": "CTA-3010",
+            "motivo": "El gasto es válido pero fue mal clasificado bajo la política Viajes Internos (P02) cuando corresponde a la política P06 (Servicios del Taller Marino) por estar asociado a una orden de trabajo de cliente (OT-2026-1187) de la unidad TMA (RG-09).",
+            "reglas_citadas": [
+              "P02",
+              "P06",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "peaje traslado a marina viaje flota mantenimiento P02 P03 P04",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2141
+              },
+              {
+                "consulta": "peaje traslado a marina viaje flota mantenimiento P02 P03 P04",
+                "politica": "Servicios del Taller Marino",
+                "fuente": "datos/politica_ficticia.md#P06",
+                "puntaje": -0.2352
+              },
+              {
+                "consulta": "peaje traslado a marina viaje flota mantenimiento P02 P03 P04",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2483
+              },
+              {
+                "consulta": "peaje traslado a marina viaje flota mantenimiento P02 P03 P04",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2532
+              },
+              {
+                "consulta": "peaje traslado a marina viaje flota mantenimiento P02 P03 P04",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2622
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P06\nCategoría: Peajes\nCuenta: CTA-3010\nMotivo: El gasto es válido pero fue mal clasificado bajo la política Viajes Internos (P02) cuando corresponde a la política P06 (Servicios del Taller Marino) por estar asociado a una orden de trabajo de cliente (OT-2026-1187) de la unidad TMA (RG-09)."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-09",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Trade marketing: peaje en camioneta de la empresa a una feria, declarado en P02",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-0901",
+              "fecha_gasto": "2026-10-20",
+              "fecha_rendicion": "2026-10-22",
+              "monto": 3500,
+              "tipo_documento": "boleta",
+              "proveedor": "Concesionaria Vial Lago Verde",
+              "glosa": "peaje camioneta empresa, viaje a feria de retail",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Peaje",
+              "unidad_negocio": "ADM",
+              "patente": "HTSW58",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P03",
+            "categoria": "Peaje",
+            "cuenta": "CTA-6200",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P03",
+            "categoria": "Peaje",
+            "cuenta": "CTA-6200",
+            "motivo": "El gasto corresponde a un viaje a una feria de retail (fuera de la empresa), por lo que fue mal clasificado en Viajes Internos (P02). Aplica la regla RG-09: se debe reclasificar a P03 Viajes Externos, categoría Peaje, cuenta CTA-6200.",
+            "reglas_citadas": [
+              "P02",
+              "P03",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "peaje viaje de negocios vehiculo empresa política categoria cuenta",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.234
+              },
+              {
+                "consulta": "peaje viaje de negocios vehiculo empresa política categoria cuenta",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2344
+              },
+              {
+                "consulta": "peaje viaje de negocios vehiculo empresa política categoria cuenta",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2477
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P03\nCategoría: Peaje\nCuenta: CTA-6200\nMotivo: El gasto corresponde a un viaje a una feria de retail (fuera de la empresa), por lo que fue mal clasificado en Viajes Internos (P02). Aplica la regla RG-09: se debe reclasificar a P03 Viajes Externos, categoría Peaje, cuenta CTA-6200."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-10",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Jefa administrativa: desayuno de reunión interna, declarado en P02",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1001",
+              "fecha_gasto": "2026-10-21",
+              "fecha_rendicion": "2026-10-22",
+              "monto": 9600,
+              "tipo_documento": "boleta",
+              "proveedor": "Panadería La Espiga Dorada",
+              "glosa": "desayuno reunión mensual de jefaturas en oficina",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Desayuno",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P08",
+            "categoria": "Coffee break",
+            "cuenta": "CTA-8010",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P08",
+            "categoria": "Coffee break",
+            "cuenta": "CTA-8010",
+            "motivo": "El gasto es válido pero fue clasificado incorrectamente en Viajes Internos / Desayuno. Corresponde reclasificar a P08 Gastos del Personal / Coffee break (cuenta CTA-8010) según la regla RG-09, ya que se trata de alimentación para una reunión interna en oficina sin viaje de por medio.",
+            "reglas_citadas": [
+              "P08",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "alimentacion desayuno reunion jefaturas oficina",
+                "politica": "Gastos del Personal",
+                "fuente": "datos/politica_ficticia.md#P08",
+                "puntaje": -0.2885
+              },
+              {
+                "consulta": "alimentacion desayuno reunion jefaturas oficina",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.3177
+              },
+              {
+                "consulta": "alimentacion desayuno reunion jefaturas oficina",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.3215
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P08\nCategoría: Coffee break\nCuenta: CTA-8010\nMotivo: El gasto es válido pero fue clasificado incorrectamente en Viajes Internos / Desayuno. Corresponde reclasificar a P08 Gastos del Personal / Coffee break (cuenta CTA-8010) según la regla RG-09, ya que se trata de alimentación para una reunión interna en oficina sin viaje de por medio."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-11",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Product manager: almuerzo en viaje a una feria comercial, declarado en P02",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1101",
+              "fecha_gasto": "2026-10-23",
+              "fecha_rendicion": "2026-10-26",
+              "monto": 14000,
+              "tipo_documento": "boleta",
+              "proveedor": "Restaurante Mirador del Puerto",
+              "glosa": "almuerzo durante feria comercial de proveedores",
+              "politica_declarada": "Viajes Internos",
+              "categoria_declarada": "Almuerzo",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P03",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6210",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P03",
+            "categoria": "Almuerzo",
+            "cuenta": "CTA-6210",
+            "motivo": "El gasto corresponde a una feria comercial de proveedores, por lo que debe clasificarse en P03 Viajes Externos (Categoría: Almuerzo) en lugar de Viajes Internos (P02). Se aplica la regla RG-09.",
+            "reglas_citadas": [
+              "P02",
+              "P03",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "feria comercial proveedores almuerzo viajes internos P02",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.205
+              },
+              {
+                "consulta": "feria comercial proveedores almuerzo viajes internos P02",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2268
+              },
+              {
+                "consulta": "feria comercial proveedores almuerzo viajes internos P02",
+                "politica": "Mercadería Cafetería",
+                "fuente": "datos/politica_ficticia.md#P07",
+                "puntaje": -0.2773
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P03\nCategoría: Almuerzo\nCuenta: CTA-6210\nMotivo: El gasto corresponde a una feria comercial de proveedores, por lo que debe clasificarse en P03 Viajes Externos (Categoría: Almuerzo) en lugar de Viajes Internos (P02). Se aplica la regla RG-09."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-12",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Comprador: arriendo de sedán para visitar proveedores, declarado en P03",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1201",
+              "fecha_gasto": "2026-10-05",
+              "fecha_rendicion": "2026-10-09",
+              "monto": 135000,
+              "tipo_documento": "factura",
+              "proveedor": "Arriendos Rápidos del Sur Ltda.",
+              "glosa": "arriendo auto sedán 3 días, visita a proveedores",
+              "politica_declarada": "Viajes Externos",
+              "categoria_declarada": "Arriendo de camioneta o furgón",
+              "unidad_negocio": "ADM",
+              "patente": null,
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Arriendo de auto liviano",
+            "cuenta": "CTA-5100",
+            "reglas": [
+              "RG-06",
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P01",
+            "categoria": "Arriendo de auto liviano",
+            "cuenta": "CTA-5100",
+            "motivo": "El gasto corresponde a un arriendo de auto liviano (sedán) para visita a proveedores. De acuerdo con RG-06 y RG-09, debe reclasificarse desde 'Viajes Externos / Arriendo de camioneta o furgón' a la política P01 Vehículos Propios, categoría 'Arriendo de auto liviano', cuenta CTA-5100. Queda observado para su corrección.",
+            "reglas_citadas": [
+              "P01",
+              "RG-06",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "arriendo auto liviano vehiculo viajes pasajeros politica P01 P02 P03",
+                "politica": "Reglas generales",
+                "fuente": "datos/politica_ficticia.md#reglas-generales/RG-06",
+                "puntaje": -0.2042
+              },
+              {
+                "consulta": "arriendo auto liviano vehiculo viajes pasajeros politica P01 P02 P03",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2342
+              },
+              {
+                "consulta": "arriendo auto liviano vehiculo viajes pasajeros politica P01 P02 P03",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2541
+              },
+              {
+                "consulta": "arriendo auto liviano vehiculo viajes pasajeros politica P01 P02 P03",
+                "politica": "Viajes Externos",
+                "fuente": "datos/politica_ficticia.md#P03",
+                "puntaje": -0.2606
+              },
+              {
+                "consulta": "arriendo auto liviano vehiculo viajes pasajeros politica P01 P02 P03",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2716
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P01\nCategoría: Arriendo de auto liviano\nCuenta: CTA-5100\nMotivo: El gasto corresponde a un arriendo de auto liviano (sedán) para visita a proveedores. De acuerdo con RG-06 y RG-09, debe reclasificarse desde 'Viajes Externos / Arriendo de camioneta o furgón' a la política P01 Vehículos Propios, categoría 'Arriendo de auto liviano', cuenta CTA-5100. Queda observado para su corrección."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-13",
+      "grupo": "B-mal-clasificado",
+      "componentes": [
+        "nucleo",
+        "herramientas",
+        "rag"
+      ],
+      "descripcion": "Chofer del CD: gasolina de camioneta de la empresa entre sedes, declarado en P01",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Revisa este gasto rendido.",
+            "gasto": {
+              "id": "G-1301",
+              "fecha_gasto": "2026-10-12",
+              "fecha_rendicion": "2026-10-14",
+              "monto": 38000,
+              "tipo_documento": "boleta",
+              "proveedor": "Estación de Servicio Los Robles",
+              "glosa": "bencina camioneta empresa, traslado a tienda Sur",
+              "politica_declarada": "Vehículos Propios",
+              "categoria_declarada": "Gasolina (vehículo propio)",
+              "unidad_negocio": "CD",
+              "patente": "JWLK22",
+              "numero_ot": null,
+              "vb_gerente_general": false,
+              "id_fondo": "FR-001"
+            }
+          },
+          "esperado": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Gasolina (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6900",
+            "reglas": [
+              "RG-09"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": "observar",
+            "politica": "P02",
+            "categoria": "Gasolina (vehículo empresa o camioneta arrendada)",
+            "cuenta": "CTA-6900",
+            "motivo": "El gasto es válido pero fue mal clasificado en Vehículos Propios (P01) siendo una camioneta de la empresa. Corresponde reclasificar a Viajes Internos (P02), categoría Gasolina (vehículo empresa o camioneta arrendada), cuenta CTA-6900 según RG-09.",
+            "reglas_citadas": [
+              "P01",
+              "P02",
+              "RG-09"
+            ],
+            "herramientas": [
+              "buscar_politica",
+              "buscar_politica",
+              "validar_gasto",
+              "emitir_veredicto"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "vehiculos propios bencina combustible traslado tienda sur",
+                "politica": "Vehículos Propios",
+                "fuente": "datos/politica_ficticia.md#P01",
+                "puntaje": -0.2487
+              },
+              {
+                "consulta": "vehiculos propios bencina combustible traslado tienda sur",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2879
+              },
+              {
+                "consulta": "vehiculos propios bencina combustible traslado tienda sur",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.293
+              },
+              {
+                "consulta": "P02 combustible gasolina vehiculo empresa camioneta arrendada o P03",
+                "politica": "Flota de Camiones y Camionetas",
+                "fuente": "datos/politica_ficticia.md#P04",
+                "puntaje": -0.2114
+              },
+              {
+                "consulta": "P02 combustible gasolina vehiculo empresa camioneta arrendada o P03",
+                "politica": "Viajes Internos",
+                "fuente": "datos/politica_ficticia.md#P02",
+                "puntaje": -0.2206
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Decisión: OBSERVAR\nPolítica: P02\nCategoría: Gasolina (vehículo empresa o camioneta arrendada)\nCuenta: CTA-6900\nMotivo: El gasto es válido pero fue mal clasificado en Vehículos Propios (P01) siendo una camioneta de la empresa. Corresponde reclasificar a Viajes Internos (P02), categoría Gasolina (vehículo empresa o camioneta arrendada), cuenta CTA-6900 según RG-09."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    }
+  ],
+  "indice": "grupo05_v15"
+}

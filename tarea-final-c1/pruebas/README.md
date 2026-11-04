@@ -177,8 +177,8 @@ borres un caso ni lo ajustes para que pase.
 
 - **GS-26:** no exige `buscar_politica`. El caso prueba la memoria del fondo, y no buscar cuando el
   agente ya conoce la política del gasto es lo que pide la pauta.
-- **GS-34:** depende de la aclaración de la política v1.5. Mientras el índice no se recargue, el
-  agente lee la v1.4 en el RAG, así que un ❌ en este caso no mide al agente.
+- **GS-34:** depende de la aclaración de la política v1.5, que el índice `grupo05_v15` ya tiene (política
+  v1.6). Pasó en la corrida 2.
 - **GS-24:** la multa se respalda con boleta porque el contrato solo admite boleta, factura o
   voucher; en la realidad sería un comprobante de pago.
 - **RG-04** (segregación de funciones) no se prueba, porque el agente no recibe quién aprueba
