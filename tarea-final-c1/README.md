@@ -219,7 +219,7 @@ python pruebas/evaluar.py --grupo B --pausa 15   # un grupo (A a F); usa Gemini 
 ```
 
 Una corrida completa son unas 130 llamadas a Gemini. Conviene correr grupo por grupo con `--pausa 15`,
-como se hizo en las corridas 1 y 2. Cada corrida con Gemini guarda un `.md` y un `.json` en
+como se hizo en las corridas 1, 2 y 3. Cada corrida con Gemini guarda un `.md` y un `.json` en
 `pruebas/resultados/`. Más opciones en [pruebas/README.md](pruebas/README.md).
 
 ## Pruebas y resultados
@@ -231,8 +231,12 @@ trazas internas del grafo (`registrar_traza`), que el evaluador apaga.
 
 Resultados guardados:
 
-- [`corrida_2.md`](pruebas/resultados/corrida_2.md): **33 de 34 casos**, el 2026-11-03, con `main` en
-  `5bbfd5d`, la política v1.6 y el índice `grupo05_v15`, sin fallas técnicas. Falla GS-29.
+- [`corrida_3.md`](pruebas/resultados/corrida_3.md): **corrida final, 34 de 34 casos**, el 2026-11-03, con
+  `main` en `f050ad7`, la política v1.6 y el índice `grupo05_v15`, sin fallas técnicas.
+- [`prueba_dirigida_PR41_general.md`](pruebas/resultados/prueba_dirigida_PR41_general.md): el arreglo de
+  GS-29 solo con reglas generales. GS-29 pasa 3 de 3, sin regresiones, y queda la razón del juez en cada
+  dictamen.
+- [`corrida_2.md`](pruebas/resultados/corrida_2.md): 33 de 34 casos, con `main` en `5bbfd5d`. Falló GS-29.
 - [`prueba_dirigida_indice_v16.md`](pruebas/resultados/prueba_dirigida_indice_v16.md): GS-01 3 de 3,
   9 de 10 ejecuciones y un jailbreak por chat que no declara ninguna decisión.
 - [`corrida_1_linea_base.md`](pruebas/resultados/corrida_1_linea_base.md): línea base, 31 de 33 casos.
@@ -242,8 +246,8 @@ Resultados guardados:
 - [`prueba_dirigida_PR17.md`](pruebas/resultados/prueba_dirigida_PR17.md): evidencia del juez con la
   validación.
 
-La corrida final será una corrida 3 completa, después del arreglo de GS-29 (ver "Orden de cierre" en
-[docs/evidencias_pauta.md](docs/evidencias_pauta.md)).
+La corrida final es la **corrida 3** (34 de 34). Desde ella, el código del agente (`src/`) queda congelado:
+cualquier cambio obligaría a repetirla (ver "Orden de cierre" en [docs/evidencias_pauta.md](docs/evidencias_pauta.md)).
 Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.md).
 
 ## Seguridad y límites conocidos
@@ -260,13 +264,15 @@ Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.m
 
 ### Límites conocidos
 
-- **GS-29:** el LLM a veces reclasifica a P08 una compra de mercadería de la cafetería y con eso esquiva
-  la regla de solo factura de P07, y el juez no lo frena. Falló en las corridas 1 y 2. Arreglo pendiente
-  en el prompt y el juez (Eduardo).
+- **Reclasificación (resuelto en el PR #41):** en las corridas 1 y 2, el LLM reclasificaba a P08 una compra
+  de mercadería de la cafetería y con eso esquivaba la regla de solo factura de P07 (GS-29). Ahora el
+  prompt y el juez solo aceptan una reclasificación que calce con «Cuándo usarla» y no contradiga «Cuándo
+  NO usarla», y nunca para evitar una regla de documento. GS-29 pasó 4 de 4 con el código final. Gemini
+  puede variar, así que no es una garantía.
 - **Turnos sin gasto:** el prompt prohíbe declarar una decisión sin gasto, y el grafo reemplaza un
   "Decisión: APROBAR". El jailbreak por chat de la prueba dirigida no declaró ninguna decisión.
 - **Búsqueda de un camión de la empresa:** "peaje en camión de reparto" trae P04 primero. El LLM llega a
-  P02 leyendo el "Cuándo NO usarla" de P04: GS-01 pasó 3 de 3 y en la corrida 2.
+  P02 leyendo el "Cuándo NO usarla" de P04: GS-01 pasó en las corridas 2 y 3 y en las pruebas dirigidas.
 - **Variación:** Gemini no responde siempre igual; por eso hay pruebas de estabilidad.
 - **Memoria:** el historial y el fondo viven en memoria durante la sesión; el registro es un SQLite
   local.
@@ -276,8 +282,8 @@ Simplificaciones del golden set:
 
 - **GS-26:** no exige `buscar_politica`. El caso prueba la memoria del fondo, y no buscar cuando el
   agente ya conoce la política del gasto es lo que pide la pauta.
-- **GS-34:** depende de la aclaración de la política v1.5, que el índice `grupo05_v15` ya tiene. Pasó en la
-  corrida 2.
+- **GS-34:** depende de la aclaración de la política v1.5, que el índice `grupo05_v15` ya tiene. Pasó en las
+  corridas 2 y 3.
 - **GS-24:** la multa se respalda con boleta porque el contrato solo admite boleta, factura o voucher;
   en la realidad sería un comprobante de pago.
 - **RG-04** (segregación de funciones) no se prueba, porque el agente no recibe quién aprueba cada
