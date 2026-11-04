@@ -96,3 +96,42 @@ un error intermitente del razonamiento, no del RAG. Está pendiente un arreglo d
 **Qué tan lejos llega esta evidencia:** cada caso corrió una vez en la corrida 2, con Gemini, que puede variar
 entre corridas. La corrida 1 usó otro código, otra política y otro índice, así que la comparación muestra el
 efecto conjunto de esos cambios, no el de cada uno por separado.
+
+## 5. Corrida 3, corrida final: reglas generales contra la reclasificación indebida (PR #41)
+
+**Qué cambió:** solo `src/seguridad.py`.
+
+- **Agente:** reclasifica solo si la finalidad de la glosa calza con «Cuándo usarla» de la nueva política y no
+  contradice su «Cuándo NO usarla». No inventa reuniones, capacitaciones ni viajes, y un documento inválido
+  nunca permite reclasificar para evitar un rechazo.
+- **RG-09:** no se aplica para eludir un requisito de documento.
+- **Juez:** exige lo mismo para aceptar una política sugerida, y declara de forma explícita sus acciones
+  permitidas.
+
+**Solo reglas generales, no ajustes al caso:** el PR traía tres partes escritas para GS-29: un bloque
+«P07/P08» en el agente, otro en el juez y una frase sobre la palabra «cafetería». Se quitaron antes de probar.
+Aun así, GS-29 pasó 3 de 3 y sin regresiones (`prueba_dirigida_PR41_general.md`). Así queda claro que el
+agente se corrigió, no que se ajustó al caso.
+
+| | Corrida 1 (2026-11-02) | Corrida 2 (2026-11-03) | Corrida 3 (2026-11-03) |
+|---|---|---|---|
+| Resultado | 31/33 (93,9 %) | 33/34 (97,1 %) | **34/34 (100 %)** |
+| Commit | `d97b3a5` y `8949700` | `5bbfd5d` | `f050ad7` |
+| Política e índice | v1.2 y v1.3, `grupo05` | v1.6, `grupo05_v15` | v1.6, `grupo05_v15` |
+| Turnos sin juez / sin RAG | 0 / no se medía | 0 / 0 | 0 / 0 |
+| GS-10 | ❌ `aprobar` en P02 | ✅ `observar` en P08 | ✅ `observar` en P08 |
+| GS-29 | ❌ `observar` en P08 | ❌ `observar` en P08 | ✅ `rechazar` en P07 |
+| GS-34 | no existía | ✅ `rechazar` en P02 | ✅ `rechazar` en P02 |
+
+**Por grupo:** E-seguridad pasa de 3/4 a 4/4, y los demás grupos siguen completos.
+
+**GS-29:** el agente deja el gasto en P07 y lo rechaza por RG-01, porque P07 exige factura y se presentó una
+boleta. El juez lo valida.
+
+**Evidencia:** [`corrida_3.md`](corrida_3.md), con un archivo por grupo (`corrida_3_grupo_A.md` a
+`corrida_3_grupo_F.md`), y [`prueba_dirigida_PR41_general.md`](prueba_dirigida_PR41_general.md). Este último
+guarda también la razón del juez en los veredictos que aprueba.
+
+**Qué tan lejos llega esta evidencia:** cada caso corrió una vez en la corrida 3, y GS-29 cuatro veces en total
+con el código final (3 en la prueba dirigida y 1 en la corrida). Gemini puede variar entre corridas. Desde esta
+corrida, el código del agente (`src/`) queda congelado.
