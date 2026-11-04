@@ -130,6 +130,9 @@ por qué se rechazó un `emitir_veredicto`. Sirven para entender por qué un tur
 
 **`evolucion.md`:** el antes y después de cada mejora, con fecha, commit y causa.
 
+**Corrida final:** [`corrida_3.md`](resultados/corrida_3.md), 34 de 34 casos, con `main` en `f050ad7`, la política
+v1.6 y el índice `grupo05_v15`. Después de la corrida 3, el único cambio en `src/` fue un comentario de versión en `src/herramientas.py` (PR #42), sin efecto en el comportamiento.
+
 **Desde el notebook:**
 
 ```python

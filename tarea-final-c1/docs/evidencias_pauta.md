@@ -25,6 +25,7 @@ La evidencia principal es la **corrida 3, la corrida final** (`corrida_3.md`): *
 el 2026-11-03, con `main` en `f050ad7`, la política v1.6 y el índice `grupo05_v15` (20 documentos). No hubo
 fallas técnicas: 0 turnos sin juez y 0 sin RAG. Desde esta corrida, el código del agente (`src/`) queda
 congelado. La corrida 2 (33 de 34) y la corrida 1 (31 de 33) quedan como comparación en `evolucion.md`.
+Después de la corrida 3, el único cambio en `src/` fue un comentario de versión en `src/herramientas.py` (PR #42), sin efecto en el comportamiento.
 
 ## Criterios base
 
