@@ -56,6 +56,6 @@ Los pasos siguientes documentan la secuencia de control y reversión acordada; *
 
 **Alcance de esta evidencia:** no se adjunta una exportación independiente de las claves físicas ni el historial de autorizaciones por paso. Por tanto, el estado ejecutado se atribuye al registro de Alex/PR #39 y a las recuperaciones efectivas posteriores, sin afirmar que Eduardo inspeccionó directamente Redis.
 
-**Cargador — pendiente ya resuelto en código:** `scripts/cargar_indice.py` captura errores en `_cargar_documentos` y entrega `RuntimeError` con el **tipo de excepción** (`type(error).__name__`), sin incluir el texto potencialmente sensible del SDK. No requiere tocar `src/` ni repetir la corrida final.
+**Cargador — mejora pendiente, no resuelta:** `scripts/cargar_indice.py` captura errores en `_cargar_documentos` y entrega `RuntimeError` con el tipo de la excepción **externa** (`type(error).__name__`), sin el texto del SDK. En la carga del 2026-11-03 eso mostró solo `RedisVLError`: la causa interna (memoria llena en el servidor compartido) quedó oculta y hubo que deducirla con inventarios de solo lectura. Mostrar también el tipo de la causa interna (`error.__cause__` o `error.__context__`), sin URLs ni credenciales, sigue siendo una mejora opcional; no afecta la corrida final porque `scripts/` no es parte del agente.
 
 **Operación segura después del corte:** no volver a ejecutar `--cargar` por iniciativa individual, no borrar `grupo05`, no exponer URLs ni credenciales y no repetir pruebas reales con Gemini sin coordinar cuota con Alex.
