@@ -7,6 +7,15 @@ aprobar, observar o rechazar. Empresa, personas, cuentas y montos son **ficticio
 - Caso completo: [docs/caso_y_criterio.md](docs/caso_y_criterio.md)
 - Matriz de evidencias de la pauta: [docs/evidencias_pauta.md](docs/evidencias_pauta.md)
 
+**Estado final (2026-11-04):**
+
+- **Corrida final del golden set:** [corrida 3](pruebas/resultados/corrida_3.md), **34 de 34**, con Gemini
+  real, la política v1.6 y el índice `grupo05_v15`.
+- **Notebook ejecutado:** [`agente_ejecutado.ipynb`](agente_ejecutado.ipynb), ejecutado de arriba abajo
+  con las salidas guardadas. Su resumen final da **42 ✅, 0 ⚠️ y 0 ❌**.
+- **Código del agente congelado** desde la corrida 3. Después solo cambió un comentario de versión en
+  `src/herramientas.py` (PR #42).
+
 ## Caso y criterio de éxito
 
 En **Comercial Los Alerces SpA** (ficticia), cada colaborador elige la política y la categoría de
@@ -198,16 +207,30 @@ nada: la carga lo completa.
 
 ### 5. Ejecutar el notebook
 
-Usa Gemini y Redis. **No probado completo:** las secciones 5, 6 y 9 aún están por completar.
+Ejecuta el agente **en vivo**, con Gemini y Redis, en las secciones 3 a 11. Necesita el `.env` completo con
+`REDIS_PREFIJO=grupo05_v15`. Hace unas 45 a 50 llamadas al modelo y tarda unos 3 minutos. Usa siempre
+bases de registro temporales, así que tu `registro_veredictos.db` no cambia.
 
+- **Sin `.env`:** las celdas en vivo se detienen con un mensaje claro que dice qué falta.
+- **Comprobaciones:** lo que no depende de Gemini (formato, índice, registro, seguridad) da ❌ y detiene
+  la celda si falla. Lo que depende del modelo da ✅, o ⚠️ si Gemini varió, y la ejecución sigue. La última
+  celda resume todo.
 - **Con VS Code:** instala las extensiones Python y Jupyter, abre `agente.ipynb`, elige como kernel el
   `.venv` de esta carpeta y ejecuta todas las celdas. `requirements.txt` no instala Jupyter Notebook
   ni JupyterLab.
-- **Por consola:** crea una copia con las salidas, que no se sube al repositorio:
+- **Por consola**, desde esta carpeta y con el Python del `.venv`. Usa otro nombre de salida para no
+  pisar el `agente_ejecutado.ipynb` de la entrega:
 
 ```bash
-python -m jupyter nbconvert --to notebook --execute agente.ipynb --output agente_ejecutado.ipynb
+.venv/bin/python -m nbconvert --to notebook --execute agente.ipynb --output mi_ejecucion.ipynb
 ```
+
+En Windows, el Python del entorno es `.venv\Scripts\python`. `python -m jupyter nbconvert` solo funciona con
+el entorno activado, porque busca el programa en el PATH.
+
+**El notebook ya ejecutado de la entrega** es [`agente_ejecutado.ipynb`](agente_ejecutado.ipynb): se generó
+el 2026-11-04 con ese comando, desde `main` en `bcd61cc`. nbstripout no le borra las salidas, por la marca
+`keep_output` y `.gitattributes`, pero sí los números de ejecución.
 
 ### 6. Correr el evaluador
 
@@ -232,6 +255,8 @@ trazas internas del grafo (`registrar_traza`), que el evaluador apaga.
 
 Resultados guardados:
 
+- [`agente_ejecutado.ipynb`](agente_ejecutado.ipynb): el notebook ejecutado completo, con las salidas de
+  cada sección en vivo y su resumen (42 ✅, 0 ⚠️, 0 ❌).
 - [`corrida_3.md`](pruebas/resultados/corrida_3.md): **corrida final, 34 de 34 casos**, el 2026-11-03, con
   `main` en `f050ad7`, la política v1.6 y el índice `grupo05_v15`, sin fallas técnicas.
 - [`prueba_dirigida_PR41_general.md`](pruebas/resultados/prueba_dirigida_PR41_general.md): el arreglo de
@@ -262,6 +287,9 @@ Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.m
 - Si un turno con gasto no tiene un veredicto válido, la respuesta se reemplaza por una segura.
 - El LLM no tiene herramientas para registrar ni borrar: el registro lo hace el grafo al cerrar.
 - El agente se detiene al llegar a `MAX_PASOS`.
+- `verificar.py`, el evaluador y el notebook usan bases de registro temporales: no tocan el
+  `registro_veredictos.db` local. Hasta el PR #46, `verificar.py` lo vaciaba.
+- El notebook no imprime rutas personales ni secretos, y su última celda lo comprueba.
 
 ### Límites conocidos
 
@@ -275,6 +303,11 @@ Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.m
 - **Búsqueda de un camión de la empresa:** "peaje en camión de reparto" trae P04 primero. El LLM llega a
   P02 leyendo el "Cuándo NO usarla" de P04: GS-01 pasó en las corridas 2 y 3 y en las pruebas dirigidas.
 - **Variación:** Gemini no responde siempre igual; por eso hay pruebas de estabilidad.
+- **El juez también varía:** en la primera ejecución completa del notebook, el juez marcó como no
+  válido el rechazo correcto de GS-29. Como el juez solo puede frenar aprobaciones, su error no cambió
+  la decisión aplicada, que fue rechazar en P07. En la segunda ejecución, sí lo validó.
+- **Aviso repetido (cosmético):** la librería de Gemini avisa en cada llamada que el modelo ignora la
+  temperatura. El notebook lo muestra sin rutas, pero no logra mostrarlo una sola vez.
 - **Memoria:** el historial y el fondo viven en memoria durante la sesión; el registro es un SQLite
   local.
 - **Fuera de alcance:** el agente no evalúa efectos tributarios, presupuestos ni centros de costo.
