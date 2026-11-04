@@ -1,0 +1,251 @@
+{
+  "fecha": "2026-11-03_2111",
+  "golden_version": "1.3",
+  "politica_version_golden": "1.5",
+  "politica_vigente": "1.6 (2026-11)",
+  "modelo": "gemini-3.5-flash-lite",
+  "temperatura": 0,
+  "commit": "5bbfd5d1a706b598661bdb3f23e39108dd87ea40",
+  "filtros": {
+    "casos": null,
+    "grupo": "F",
+    "componente": null,
+    "pausa": 15
+  },
+  "resumen": {
+    "total": 3,
+    "pasan": 3,
+    "por_grupo": {
+      "F-conversacion": {
+        "total": 3,
+        "pasan": 3
+      }
+    },
+    "por_componente": {
+      "nucleo": {
+        "total": 3,
+        "pasan": 3
+      },
+      "rag": {
+        "total": 1,
+        "pasan": 1
+      }
+    },
+    "por_causa": {},
+    "turnos_sin_juez": [],
+    "turnos_sin_rag": []
+  },
+  "casos": [
+    {
+      "id": "GS-31",
+      "grupo": "F-conversacion",
+      "componentes": [
+        "nucleo"
+      ],
+      "descripcion": "Saludo simple",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Hola",
+            "gasto": null
+          },
+          "esperado": {
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [],
+            "herramientas_prohibidas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": null,
+            "politica": null,
+            "categoria": null,
+            "cuenta": null,
+            "motivo": "",
+            "reglas_citadas": [],
+            "herramientas": [],
+            "fragmentos": [],
+            "errores_herramientas": [],
+            "texto": "¡Hola! Soy el revisor de rendiciones de gastos de Comercial Los Alerces SpA. ¿En qué puedo ayudarte hoy con tus gastos o con la política de gastos?"
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-32",
+      "grupo": "F-conversacion",
+      "componentes": [
+        "nucleo"
+      ],
+      "descripcion": "Recordar datos del turno anterior",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "Soy Pedro, chofer del Centro de Distribución",
+            "gasto": null
+          },
+          "esperado": {
+            "reglas": [],
+            "debe_contener": [],
+            "debe_contener_alguno": [],
+            "herramientas_esperadas": [],
+            "herramientas_prohibidas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": null,
+            "politica": null,
+            "categoria": null,
+            "cuenta": null,
+            "motivo": "",
+            "reglas_citadas": [],
+            "herramientas": [],
+            "fragmentos": [],
+            "errores_herramientas": [],
+            "texto": "¡Hola, Pedro! Como revisor de rendiciones de gastos de Comercial Los Alerces SpA, estoy a tu disposición para ayudarte a revisar tus rendiciones de gastos o responder cualquier duda sobre la política de gastos de la empresa. \n\n¿En qué te puedo ayudar hoy?"
+          },
+          "pasa": true,
+          "motivos": []
+        },
+        {
+          "numero": 2,
+          "entrada": {
+            "mensaje": "¿Cómo me llamo y en qué unidad trabajo?",
+            "gasto": null
+          },
+          "esperado": {
+            "reglas": [],
+            "debe_contener": [
+              "Pedro"
+            ],
+            "debe_contener_alguno": [
+              "Distribución",
+              "CD"
+            ],
+            "herramientas_esperadas": [],
+            "herramientas_prohibidas": [
+              "buscar_politica",
+              "validar_gasto"
+            ],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": null,
+            "politica": null,
+            "categoria": null,
+            "cuenta": null,
+            "motivo": "",
+            "reglas_citadas": [],
+            "herramientas": [],
+            "fragmentos": [],
+            "errores_herramientas": [],
+            "texto": "Te llamas Pedro y trabajas en el Centro de Distribución. ¿Hay algo relacionado con tus rendiciones de gastos o la política de la empresa en lo que te pueda ayudar?"
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    },
+    {
+      "id": "GS-33",
+      "grupo": "F-conversacion",
+      "componentes": [
+        "nucleo",
+        "rag"
+      ],
+      "descripcion": "Pregunta sobre el plazo que requiere buscar en la política",
+      "intentos": 1,
+      "turnos": [
+        {
+          "numero": 1,
+          "entrada": {
+            "mensaje": "¿Hasta qué día puedo rendir un gasto de octubre?",
+            "gasto": null
+          },
+          "esperado": {
+            "reglas": [
+              "RG-03"
+            ],
+            "debe_contener": [],
+            "debe_contener_alguno": [
+              "10 de noviembre",
+              "10/11",
+              "día 10"
+            ],
+            "herramientas_esperadas": [
+              "buscar_politica"
+            ],
+            "herramientas_prohibidas": [],
+            "acciones_prohibidas": []
+          },
+          "obtenido": {
+            "decision": null,
+            "politica": null,
+            "categoria": null,
+            "cuenta": null,
+            "motivo": "",
+            "reglas_citadas": [
+              "RG-03"
+            ],
+            "herramientas": [
+              "buscar_politica"
+            ],
+            "fragmentos": [
+              {
+                "consulta": "plazo rendicion fecha mes siguiente dia 10 RG-03",
+                "politica": "Reglas generales",
+                "fuente": "datos/politica_ficticia.md#reglas-generales/RG-03",
+                "puntaje": -0.1693
+              },
+              {
+                "consulta": "plazo rendicion fecha mes siguiente dia 10 RG-03",
+                "politica": "Reglas generales",
+                "fuente": "datos/politica_ficticia.md#reglas-generales/RG-10",
+                "puntaje": -0.2577
+              },
+              {
+                "consulta": "plazo rendicion fecha mes siguiente dia 10 RG-03",
+                "politica": "Reglas generales",
+                "fuente": "datos/politica_ficticia.md#reglas-generales/RG-08",
+                "puntaje": -0.3041
+              }
+            ],
+            "errores_herramientas": [],
+            "texto": "Según la política de gastos de la compañía (regla RG-03), un gasto realizado en octubre se puede rendir dentro del mismo mes de octubre y, como plazo máximo, hasta el **día 10 del mes siguiente** (es decir, hasta el 10 de noviembre). \n\nSi se rinde después de esa fecha, el gasto se rechaza automáticamente, a menos que el informe incluya el visto bueno por escrito del Gerente General (en cuyo caso queda observado para revisión)."
+          },
+          "pasa": true,
+          "motivos": []
+        }
+      ],
+      "error": null,
+      "limite_agotado": false,
+      "motivos": [],
+      "pasa": true,
+      "causa": null
+    }
+  ],
+  "indice": "grupo05_v15"
+}
