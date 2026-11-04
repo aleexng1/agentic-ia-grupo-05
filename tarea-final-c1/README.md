@@ -162,20 +162,38 @@ python verificar.py --con-llm      # usa Gemini y Redis; no probado en esta revi
 Resultado esperado de `python verificar.py`: `Todo en orden`, sin ningún ❌. Sin credenciales da 42 ✅
 y un ⚠️, porque omite la búsqueda en Redis; con credenciales reales da 43 ✅.
 
-### 4. Cargar el índice
+### 4. Índice de la política en Redis
 
-**El índice del grupo ya está cargado** (`grupo05_v15`, política v1.6). No hace falta cargarlo de nuevo:
-solo pon `REDIS_PREFIJO=grupo05_v15` en tu `.env`.
+Pon `REDIS_PREFIJO=grupo05_v15` en tu `.env` y sigue este camino:
+
+1. **Revisa si el índice ya existe**, sin escribir nada: `python verificar.py`. Si la línea
+   `buscar_politica devuelve Fragmentos` dice ✅ con 3 fragmentos, el índice existe.
+2. **Si existe** (es el caso del Redis del curso, cargado el 2026-11-03): úsalo tal cual. No lo cargues
+   de nuevo.
+3. **Si no existe** (la línea da ❌ porque no devuelve fragmentos, por ejemplo en otro Redis): revisa el
+   plan y luego carga, con el mismo comando que se usó en el Redis del curso:
 
 ```bash
-python scripts/cargar_indice.py --plan    # sin Redis ni Gemini: revisa los 20 documentos que cargaría
+python scripts/cargar_indice.py --plan    # sin Redis ni Gemini: muestra los 20 documentos que cargaría
 REDIS_PREFIJO=grupo05_v15 python scripts/cargar_indice.py --cargar --confirmar-indice grupo05_v15
 ```
 
-La segunda línea es la carga real que hizo Alex el 2026-11-03, después de revisar que el índice no
-existiera. Usa unas 20 llamadas de embeddings y no borra nada. El cargador solo escribe si
-`REDIS_PREFIJO` es exactamente `grupo05_v15` y se confirma ese nombre. Si el índice ya existe, reescribe
-las mismas 20 llaves. Coordínalo siempre con el grupo: el servidor es compartido.
+Qué hace el cargador:
+
+- **`--plan`:** no se conecta a Redis, así que no sabe si el índice existe. Solo revisa que la política
+  local sea la v1.6 y que salgan 20 documentos: P01-P10 y RG-01-RG-10.
+- **`--cargar`:** solo escribe si `REDIS_PREFIJO` es exactamente `grupo05_v15` y se confirma ese nombre.
+  Si el índice no existe, lo crea con 3.072 dimensiones, COSINE y FLAT, y carga las 20 llaves.
+- **Si el índice ya existe:** no se niega ni lo borra. Lo deja como está, con su configuración, y
+  **reescribe las mismas 20 llaves** (`grupo05_v15:P01` … `grupo05_v15:RG-10`) con el texto local. Gasta
+  unas 20 llamadas de embeddings, y por eso, si ya existe, no hace falta cargarlo.
+- No borra nada más. Si Redis está lleno, la carga falla y puede quedar a medias: repítela cuando haya
+  espacio.
+- En Windows, o si prefieres no fijar la variable en la terminal, basta con tener
+  `REDIS_PREFIJO=grupo05_v15` en el `.env` y correr el mismo comando sin `REDIS_PREFIJO=…` al inicio.
+
+Si el índice no existe, `verificar.py` y el agente crean uno vacío con ese nombre al buscar. No pasa
+nada: la carga lo completa.
 
 ### 5. Ejecutar el notebook
 
@@ -224,7 +242,8 @@ Resultados guardados:
 - [`prueba_dirigida_PR17.md`](pruebas/resultados/prueba_dirigida_PR17.md): evidencia del juez con la
   validación.
 
-La corrida 2 es la candidata a corrida final: vale mientras no cambie el código del agente (`src/`).
+La corrida final será una corrida 3 completa, después del arreglo de GS-29 (ver "Orden de cierre" en
+[docs/evidencias_pauta.md](docs/evidencias_pauta.md)).
 Cómo se evalúa cada campo del golden set: [pruebas/README.md](pruebas/README.md).
 
 ## Seguridad y límites conocidos

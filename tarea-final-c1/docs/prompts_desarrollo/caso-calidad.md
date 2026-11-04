@@ -2182,3 +2182,52 @@ corrida 2 con 33 de 34 (falla GS-29), sin fallas técnicas.
 
 **Qué corregí a mano o con otra instrucción:** el PR #37 se creó primero con una mención `@` errónea,
 que se borró en seguida; desde entonces no se menciona a nadie con `@` en GitHub.
+
+## 29. Golden set en 🟡, camino del revisor para el índice y orden de cierre
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Ajustar la matriz a la pauta (el golden set no suma con un fallo sin resolver), dejar
+  escrito qué hace el revisor con el índice y fijar el orden de cierre.
+
+**Prompt completo:**
+
+````text
+CARPETA Y RAMAS: solo ~/Escritorio/agentic-ia-grupo-05 (comandos desde tarea-final-c1),
+ramas main y tf/caso-calidad (más las 4 de rol solo para llevarles main). Antes de cada
+cambio de rama: git status y git worktree list; si hay algo ajeno, DETENTE. No cambies
+src/, la política, el golden set ni el evaluador. No menciones a nadie con @.
+
+Contrasté el estado con la pauta. Haz esto en tf/caso-calidad (trayendo main):
+
+1. Matriz (docs/evidencias_pauta.md): el golden set pasa a 🟡. La pauta dice que "no suma
+   si quedan fallos sin resolver" y que la corrida final debe cumplir los criterios: con
+   GS-29 fallando, falta arreglarlo y hacer una corrida 3 completa. Aclara que GS-29 no
+   rompe la seguridad básica (no obedeció la falsa autorización ni aprobó nada).
+
+2. Revisa sin cambiar nada:
+   a) ¿PROMPT_JUEZ incluye instrucciones de alcance y acciones permitidas? La pauta las
+      pide "en cada llamada al LLM que pueda decidir o responder", y el juez decide.
+   b) ¿Qué pasa si un revisor sigue el README y el índice grupo05_v15 ya existe? Prueba
+      el cargador en modo --plan y lee el código: ¿se niega a cargar, sobrescribe o qué?
+   c) ¿Dónde se ven hoy, en el notebook, el modelo, la configuración, las fuentes y los
+      prompts de cada llamada al LLM, y una traza legible?
+   Muéstrame los resultados.
+
+3. README, sección de ejecución: deja escrito el camino del revisor para el índice: si
+   grupo05_v15 ya existe en el Redis del curso, usarlo tal cual; si no existe, cargarlo
+   con el comando real. Que coincida con lo que hace el cargador según el punto 2b.
+
+4. Agrega a la matriz una sección "Orden de cierre": arreglo de GS-29 → corrida 3 →
+   secciones del notebook ejecutadas con el código final → ejecución completa y
+   agente_ejecutado.ipynb → README, matriz y registros de prompts.
+
+verificar.py, --autoprueba, probar_herramientas.py. Commit, PR, únelo y lleva main a las
+4 ramas. Dame un resumen corto con los hallazgos de 2a, 2b y 2c.
+````
+
+**Resultado (una línea):** Golden set en 🟡 hasta la corrida 3; README con el camino del revisor (si
+`grupo05_v15` existe se usa, si no se carga; si se carga sobre uno existente, reescribe las 20 llaves) y
+orden de cierre en la matriz. El juez sí declara alcance; el notebook aún no muestra prompts ni guarda
+trazas.
