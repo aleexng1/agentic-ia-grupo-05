@@ -2344,3 +2344,34 @@ sin fallas técnicas. El código del agente queda congelado.
 
 **Qué corregí a mano o con otra instrucción:** el PASO 2 del primer prompt no se ejecutó con la versión
 original del PR. Lo reemplazó el PASO B, con la versión limpia.
+
+## 31. PR #42 (comentario de versión) y nota sobre la corrida final
+
+- **Fecha:** 2026-11-03
+- **Herramienta:** Claude Code
+- **Modelo:** Claude Opus 5.5 (`claude-opus-5-5`)
+- **Para qué era:** Unir el PR #42 de Sebastián, que llegó después de congelar el código, comprobando que no
+  cambia el comportamiento, y dejarlo anotado junto a la corrida final.
+
+**Prompt completo:**
+
+````text
+CARPETA Y RAMAS: solo ~/Escritorio/agentic-ia-grupo-05 (comandos desde tarea-final-c1).
+Ramas: main, la rama del PR #42, tf/caso-calidad y las 4 de rol (solo para llevarles
+main). Antes de cada cambio de rama: git status y git worktree list; si hay algo ajeno,
+DETENTE. No menciones a nadie con @.
+
+1. Revisa el PR #42: confirma con git diff que en src/herramientas.py el único cambio es
+   el comentario de versión (1.5 → 1.6), sin tocar ninguna línea de código, y que el
+   resto es su registro de prompts. verificar.py, --autoprueba, probar_herramientas.py.
+   Si hay cualquier cambio de código en src/, detente y avísame.
+2. Si está bien: únelo, git switch main, git pull, verificar.py, y lleva main a las 4
+   ramas.
+3. En tf/caso-calidad (trayendo main), en docs/evidencias_pauta.md y en
+   pruebas/README.md, junto a la corrida 3, anota: "Después de la corrida 3, el único
+   cambio en src/ fue un comentario de versión en src/herramientas.py (PR #42), sin
+   efecto en el comportamiento." Commit, PR, únelo y lleva main a las 4 ramas.
+````
+
+**Resultado (una línea):** el PR #42 solo cambia la docstring del módulo (el código, sin docstrings, es
+idéntico) y el registro de Sebastián; se unió y la nota quedó en la matriz y en `pruebas/README.md`.
