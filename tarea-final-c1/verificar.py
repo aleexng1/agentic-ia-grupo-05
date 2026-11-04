@@ -13,12 +13,14 @@ import contextlib
 import copy
 import csv
 import functools
+import hashlib
 import importlib
 import inspect
 import io
 import json
 import re
 import sys
+import tempfile
 from datetime import date
 from pathlib import Path
 from unittest import mock
@@ -65,6 +67,13 @@ def exigir(condicion: bool, mensaje: str) -> None:
 
 def titulo(texto: str) -> None:
     print(f"\n=== {texto} ===")
+
+
+def huella_archivo(ruta: Path):
+    """Resumen del contenido de un archivo (None si no existe), para saber si cambió."""
+    if not ruta.exists():
+        return None
+    return hashlib.sha256(ruta.read_bytes()).hexdigest()
 
 
 # ---------------------------------------------------------------------------
@@ -684,13 +693,31 @@ def main() -> None:
     if not all(resultados):
         print("\n❌ No se pudieron importar todos los módulos: corrige eso primero.")
         sys.exit(1)
-    bloque_2_contrato()
-    bloque_3_firmas()
-    bloque_4_llamadas()
-    bloque_5_datos()
-    bloque_6_grafo_sin_internet()
-    if CON_LLM:
-        bloque_7_con_llm()
+
+    # Las revisiones registran y reinician veredictos: se hacen en una base temporal,
+    # como en el evaluador, para no vaciar el registro_veredictos.db del usuario.
+    registro = modulos["registro"]
+    ruta_local = registro.RUTA_REGISTRO
+    huella_antes = huella_archivo(ruta_local)
+    with tempfile.TemporaryDirectory(ignore_cleanup_errors=True) as carpeta:
+        registro.RUTA_REGISTRO = Path(carpeta) / "registro_verificar.db"
+        try:
+            bloque_2_contrato()
+            bloque_3_firmas()
+            bloque_4_llamadas()
+            bloque_5_datos()
+            bloque_6_grafo_sin_internet()
+            if CON_LLM:
+                bloque_7_con_llm()
+        finally:
+            registro.RUTA_REGISTRO = ruta_local
+
+    def registro_local_intacto():
+        exigir(huella_archivo(ruta_local) == huella_antes, f"{ruta_local.name} cambió durante la verificación")
+        return f"{ruta_local.name} no cambió (las pruebas usaron una base temporal)"
+
+    titulo("Registro local")
+    punto("el registro local del usuario no cambia", registro_local_intacto)
 
     fallas = resultados.count(False)
     print(f"\nResumen: {resultados.count(True)} ✅  {fallas} ❌")
