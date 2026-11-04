@@ -3,9 +3,9 @@ Responsable: Eduardo Basaure
 > **Nota de trazabilidad:** los bloques siguientes reproducen los textos de instrucciones disponibles en esta conversación de ChatGPT. Los resultados se basan en capturas compartidas por el usuario. La coincidencia literal con los mensajes efectivamente enviados a OpenCode y las fechas individuales deben cotejarse en el historial de OpenCode. No se inventaron fechas ni credenciales.
 ---
 1. Implementación inicial del RAG con Redis
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Implementar RAG de diez políticas ficticias en Redis y validar sin conectarse a servicios externos.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -49,9 +49,9 @@ Implementa y valida esta fase localmente. Detente antes de utilizar servicios ex
 Resultado (una línea): Se implementaron src/rag.py y scripts/cargar_indice.py; OpenCode reportó pruebas simuladas PASS. Después se indexaron diez políticas en Redis Cloud y se recuperó P01 en primer lugar en una consulta real. Commit de respaldo local: b3996a1.
 ---
 2. Corrección del método de similitud RAG
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Corregir NotImplementedError asociado a cálculo de relevancia en RedisVectorStore.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -88,9 +88,9 @@ ENTREGA:
 Resultado (una línea): Se cambió el método por similarity_search_with_score; pasó las simulaciones. La prueba inicial de verificar.py falló mientras el índice Redis estaba vacío; después se cargaron diez documentos y buscar_politica.invoke recuperó tres políticas, con P01 en primer lugar.
 ---
 3. Actualización de ingesta a política v1.1
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Incorporar RG-10 y excluir el historial, manteniendo exactamente diez fragmentos.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -155,9 +155,9 @@ AL FINAL:
 Resultado (una línea): OpenCode actualizó scripts/cargar_indice.py y reportó todas las pruebas locales PASS. Después se ejecutó la ingesta real; Redis confirmó 10 documentos con RG-10 presente en los 10 y sin «Historial de cambios» en ninguno.
 ---
 4. Actualización del prompt de seguridad
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Distinguir APROBAR/OBSERVAR/RECHAZAR según política v1.1 y proteger contra prompt injection.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -211,9 +211,9 @@ Al finalizar, resume los cambios y detente. No avances al juez LLM sin mi autori
 Resultado (una línea): OpenCode actualizó solo PROMPT_SISTEMA y reportó revisión local PASS; verificar.py terminó 41 PASS / 0 FAIL. No se probó en ese momento resistencia real a ataques con Gemini.
 ---
 5. Implementación del juez LLM
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Implementar juzgar() de modo compatible con el contrato y probar errores, coherencia y entradas no confiables.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -308,9 +308,9 @@ Detente al terminar. Espera mi autorización antes de ejecutar pruebas con Gemin
 Resultado (una línea): OpenCode implementó juzgar() en src/seguridad.py y reportó 10 pruebas simuladas PASS; la prueba real posterior se completó correctamente. Commit local posterior de la actualización v1.1 y juez: ae4fad7.
 ---
 6. Prueba real del juez con Gemini (GS-24)
-Fecha: Pendiente de confirmar en el historial de OpenCode
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Ver evidencia de commits relacionados en el anexo; un commit no fecha el prompt.
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Validar una sola invocación real de juzgar() con el caso GS-24.
 Prompt completo (texto facilitado en esta conversación):
 ```text
@@ -353,9 +353,9 @@ Detente después de esta prueba y espera autorización.
 Resultado (una línea): OpenCode ejecutó una invocación real de juzgar() con Gemini gemini-3.5-flash-lite para GS-24 (multa en vehículo de empresa); devolvió valido=true y razón referenciada a P04. Esquema y coherencia: PASS. No modificó archivos durante esa prueba.
 ---
 7. Juez LLM con validación determinista
-Fecha: 2026-11-01 (fecha verificada del commit 166880c; no se atribuye una hora)
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Commit asociado: 166880c (2026-11-01, fecha Chile; no acredita la fecha del mensaje).
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Incorporar al juez la evidencia de validar_gasto sin romper la interfaz histórica y gestionar con cautela fallos técnicos.
 Commit: 166880c
 Prompt completo (BLOQUE 1, extraído del archivo de referencia de transcripciones; son mensajes del usuario, no resultados de OpenCode):
@@ -493,9 +493,9 @@ Evidencia de pruebas reportada: git diff --check sin errores; python -m py_compi
 Pendiente: integrar juzgar_con_validacion() desde nodo_cerrar en el grafo de Matías; comprobar que evaluado se usa para distinguir fallos técnicos; probar el flujo completo con las interfaces integradas; coordinar publicación y revisión con el equipo.
 ---
 8. Integración de emitir_veredicto en PROMPT_SISTEMA
-Fecha: 2026-11-01 (fecha verificada del commit 0633b87; no se atribuye una hora)
+Fecha de ejecución del prompt: NO VERIFICADA en OpenCode. Commit asociado: 0633b87 (2026-11-01, fecha Chile; no acredita la fecha del mensaje).
 Herramienta: OpenCode
-Modelo: GPT-6 Luna (mostrado en las capturas de las sesiones de trabajo; verificar por sesión)
+Modelo de OpenCode: NO VERIFICADO para este prompt. Las capturas disponibles fueron descritas como «GPT-6 Luna», pero no existe atribución corroborada por mensaje.
 Para qué era: Documentar el flujo de revisión de gasto y el uso final de emitir_veredicto, manteniendo la política v1.2 y las defensas de seguridad.
 Commit: 0633b87
 Prompt completo (BLOQUE 3, extraído de una transcripción y limpiado de artefactos de interfaz):
@@ -576,3 +576,34 @@ Detente al finalizar y espera autorización.
 Nota de fidelidad: el archivo de referencia fue extraído de transcripciones; en el bloque 3 se retiró texto superpuesto de la interfaz y se restauraron dos rutas de archivo legibles por contexto. Por ello, este bloque no se presenta como transcripción byte a byte del export original.
 Resultado (una línea): PROMPT_SISTEMA describe clasificación, validación determinista y emisión final del veredicto con decision, politica, categoria, cuenta y motivo; prohíbe aprobar ante incumplimientos deterministas y recoge las consecuencias de la política v1.2. Refuerza la protección frente a prompt injection, limita el razonamiento a evidencia normativa verificable y define el trato de saludos (sin llamadas a herramientas) y consultas sin gasto (responder sobre políticas con evidencia verificable, sin emitir veredictos). El contrato de emitir_veredicto pertenece al trabajo de Matías; al realizar esta verificación, la integración del PR #8 seguía pendiente.
 ---
+
+---
+
+## Anexo de trazabilidad verificable — 2026-11-03
+
+**Objetivo:** distinguir la fecha de ejecución de un prompt en OpenCode, el modelo del mensaje y la fecha de incorporación del código al repositorio. Estos datos no son intercambiables.
+
+### Evidencia de Git de implementaciones relacionadas
+
+| Registro | Actividad | Evidencia comprobable del código | Fecha del commit en Chile | Fecha exacta del prompt / modelo de OpenCode |
+|---|---|---|---|---|
+| 1 | Implementación inicial de RAG | [`b38996a`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/b38996a84) — `src/rag.py`, `scripts/cargar_indice.py` | 2026-10-28 | No verificados |
+| 2 | Método de búsqueda por similitud | [`b38996a`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/b38996a84) — incluye `similarity_search_with_score`; no acredita la hora del prompt correctivo | 2026-10-28 | No verificados |
+| 3 | Actualización RAG a v1.1 | [`ae4fad7`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/ae4fad73c) — extracción de RG-01 a RG-10 | 2026-10-29 | No verificados |
+| 4 | Prompt del agente v1.1 | [`ae4fad7`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/ae4fad73c) — cambios en `src/seguridad.py` | 2026-10-29 | No verificados |
+| 5 | Implementación del juez LLM | [`ae4fad7`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/ae4fad73c) — código del juez | 2026-10-29 | No verificados |
+| 6 | Prueba real GS-24 con Gemini | Resultado relatado en el registro histórico; no se identificó un commit que pruebe fecha, mensaje y modelo de esa ejecución | No verificable con Git | No verificados |
+| 7 | Juez con validación determinista y reintentos | [`166880c`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/166880c66) — `src/seguridad.py` | 2026-11-01 | No verificados |
+| 8 | Integración de `emitir_veredicto` | [`0633b87`](https://github.com/aleexng1/agentic-ia-grupo-05/commit/0633b87c7) — `PROMPT_SISTEMA` | 2026-11-01 | No verificados |
+
+### Resultado de la auditoría local de OpenCode
+
+- El 2026-11-03 se identificaron **26 sesiones** del proyecto con fechas de creación y actualización.
+- Se exportaron las 26 sesiones mediante la CLI en modo saneado; el proceso informó **0 errores de lectura**.
+- Se compararon los **nueve bloques `text`** incluidos en los ocho registros anteriores. El algoritmo buscaba coincidencia literal o dos tramos largos del prompt. **Resultado: 0/9 coincidencias**.
+- Esta ausencia de coincidencias **no demuestra que los prompts no se enviaran**: pueden existir diferencias textuales, exportaciones saneadas o sesiones no incluidas en el alcance de búsqueda. Por tanto, no corresponde asignar sesión, fecha exacta ni modelo a ninguno de esos nueve textos.
+- El CSV local `Downloads/auditoria_prompts_opencode.csv` contiene únicamente metadatos del cotejo; no se incorpora al repositorio por no ser evidencia positiva de correspondencia.
+- La denominación «GPT-6 Luna» se conserva únicamente como **referencia histórica no validada por mensaje**, no como nombre confirmado de modelo para cada prompt.
+- Para resolver definitivamente los campos aún pendientes se necesitan mensajes originales de OpenCode y sus metadatos de modelo, contrastados individualmente. **No inventar fechas ni modelos**, ni confundir el LLM usado para desarrollar código en OpenCode con el LLM de ejecución del agente (Gemini).
+
+**Estado de este anexo:** evidencia de implementación por commits completada; atribuciones de fecha y modelo de OpenCode expresamente **pendientes de verificación**. No se hicieron consultas a Redis ni Gemini para esta auditoría.
