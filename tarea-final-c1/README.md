@@ -75,7 +75,7 @@ se conserva sin cambios: para volver a él basta cambiar `REDIS_PREFIJO`.
 | Elemento | Valor |
 |---|---|
 | Python | 3.12.3 |
-| Dependencias | versiones fijas en `requirements.txt` (langgraph 1.2.16, langchain 1.4.6, langchain-google-genai 4.4.2, langchain-redis 0.2.6, redis 8.1.0, redisvl 0.28.0) |
+| Dependencias | `requirements.txt` para instalar: versiones fijas de las librerías directas (langgraph 1.2.16, langchain 1.4.6, langchain-google-genai 4.4.2, langchain-redis 0.2.6, redis 8.1.0, redisvl 0.28.0). `requirements-lock.txt`: las versiones exactas de todo el entorno usado en la corrida 3, para reproducirlo tal cual (`python -m pip install -r requirements-lock.txt`) |
 
 ### Variables de entorno
 
@@ -159,8 +159,9 @@ python verificar.py                # no necesita clave
 python verificar.py --con-llm      # usa Gemini y Redis; no probado en esta revisión
 ```
 
-Resultado esperado de `python verificar.py`: `Todo en orden`, sin ningún ❌. Sin credenciales da 42 ✅
-y un ⚠️, porque omite la búsqueda en Redis; con credenciales reales da 43 ✅.
+Resultado esperado de `python verificar.py`: `Todo en orden`, sin ningún ❌. Sin credenciales da 43 ✅
+y un ⚠️, porque omite la búsqueda en Redis; con credenciales reales da 44 ✅. Usa una base temporal: tu
+`registro_veredictos.db` no cambia, y el último punto lo comprueba.
 
 ### 4. Índice de la política en Redis
 
