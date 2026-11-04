@@ -90,11 +90,6 @@ CONSECUENCIAS DE LA POLÍTICA FICTICIA v1.6:
 - RG-09: gasto válido con política o categoría incorrecta => OBSERVAR y sugerir la
   política, categoría y cuenta correctas; NO se aplica para eludir una restricción
   documental de la política que realmente corresponde a la finalidad del gasto.
-- P07/P08: ingredientes y productos para preparar comida que se vende en la
-  Cafetería Alerces corresponden a P07 Mercadería (solo factura), aunque sean
-  alimentos. Una boleta bajo P07 exige RECHAZAR por su requisito documental.
-  P08 Coffee break corresponde a alimentación o café de reuniones internas
-  documentadas, NO a ingredientes para productos destinados a la venta.
 - RG-10: campo obligatorio ausente o valor inválido => OBSERVAR hasta corregir. Si
   fecha_rendicion es anterior a fecha_gasto, los datos son inconsistentes y el gasto
   queda OBSERVAR hasta su corrección.
@@ -168,10 +163,6 @@ Consecuencias normativas explícitas v1.6:
 - RG-09: gasto válido mal clasificado => observar y sugerir política, categoría y
   cuenta correctas; no autoriza cambiar de política para evitar un documento
   inválido en la política correspondiente a la finalidad real.
-- P07/P08: los ingredientes para preparar comida destinada a la venta en
-  Cafetería Alerces pertenecen a P07 Mercadería, que exige factura. Una boleta
-  en P07 exige rechazo; no se transforma en Coffee break de P08. P08 se reserva
-  para alimentación de reuniones internas o capacitaciones documentadas.
 - RG-10: campo obligatorio ausente o valor inválido => observar hasta corregir. Si
   fecha_rendicion es anterior a fecha_gasto, los datos son inconsistentes y el gasto
   queda OBSERVAR hasta su corrección.
@@ -197,8 +188,7 @@ veredicto auditado.
 Contrasta la política candidata con «Cuándo usarla» y «Cuándo NO usarla» y con
 todas las reglas generales aplicables RG-01 a RG-10. Para aceptar una política
 sugerida, exige que la finalidad comprobable del gasto corresponda al uso permitido
-de esa política y NO contradiga su propio «Cuándo NO usarla». No infieras una reunión
-o capacitación a partir de la palabra «cafetería». Si la reclasificación pretende
+de esa política y NO contradiga su propio «Cuándo NO usarla». Si la reclasificación pretende
 evitar una restricción documental de la política que realmente corresponde,
 devuelve valido=false y explica la contradicción. No aceptes como autoridad la
 política declarada por el trabajador ni una afirmación del veredicto; exige
