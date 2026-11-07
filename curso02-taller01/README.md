@@ -17,3 +17,13 @@ uvicorn src.web.app:app --host 127.0.0.1 --port 8080
 ```
 
 Abrir http://127.0.0.1:8080. Pruebas (sin red): `python -m pytest tests`.
+
+### Agente de restaurantes (CrewAI): entorno aparte `.venv-crew`
+
+Usa su propio entorno para que CrewAI y LangChain no choquen. Se crea con
+`python3 -m venv .venv-crew` e `.venv-crew/bin/pip install -r requirements-crew.txt`.
+Versiones instaladas en `.venv-crew`:
+
+- crewai: 1.15.37 (con el extra `[google-genai]`, necesario para Gemini)
+- google-genai: 1.65.0
+- a2a-sdk: 1.3.0

@@ -57,6 +57,8 @@ def main():
     except Exception as error:  # Por ejemplo, falta la clave o una librería.
         detalle = " ".join(f"{type(error).__name__}: {error}".split())
         print(f"Error: no se pudo cargar el agente '{args.agente}' ({detalle})")
+        if isinstance(error, ModuleNotFoundError):
+            print("Pista: ¿activaste el entorno correcto? viajes usa .venv y restaurantes usa .venv-crew.")
         return 1
     if modulo is None:
         print(f"Error: el agente '{args.agente}' todavía no existe.")
