@@ -1,0 +1,230 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mis agentes A2A</title>
+<style>
+  :root {
+    --fondo: #f6f7f9; --panel: #ffffff; --texto: #1c2430; --suave: #5b6676;
+    --borde: #dfe3e8; --acento: #2457d6; --acento-texto: #ffffff;
+    --ok: #1a7f4b; --ok-fondo: #e3f4ea; --off: #8a4b12; --off-fondo: #fbeedd;
+    --burbuja-usuario: #e5edff; --burbuja-agente: #f0f1f4; --error: #b3261e; --error-fondo: #fde8e6;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #12151a; --panel: #1b2027; --texto: #e6e9ee; --suave: #9aa4b2;
+      --borde: #2c333d; --acento: #6c97ff; --acento-texto: #0d1117;
+      --ok: #62d394; --ok-fondo: #14301f; --off: #f0b36b; --off-fondo: #3a2810;
+      --burbuja-usuario: #22304f; --burbuja-agente: #262c35; --error: #ff8a80; --error-fondo: #3d1c19;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fondo); color: var(--texto);
+         font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  header { padding: 16px; border-bottom: 1px solid var(--borde); background: var(--panel);
+           display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 1.15rem; margin: 0; }
+  main { display: grid; grid-template-columns: minmax(260px, 340px) 1fr; gap: 16px; padding: 16px;
+         max-width: 1100px; margin: 0 auto; }
+  @media (max-width: 760px) { main { grid-template-columns: 1fr; } }
+  button { font: inherit; cursor: pointer; border: 1px solid var(--borde); background: var(--panel);
+           color: var(--texto); padding: 8px 12px; border-radius: 8px; }
+  button.principal { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+  button:focus-visible, textarea:focus-visible { outline: 2px solid var(--acento); outline-offset: 2px; }
+  .tarjeta { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+             padding: 14px; margin-bottom: 12px; }
+  .tarjeta.elegida { border-color: var(--acento); box-shadow: 0 0 0 1px var(--acento); }
+  .tarjeta h2 { font-size: 1rem; margin: 0 0 4px; }
+  .tarjeta p { margin: 4px 0; color: var(--suave); font-size: .9rem; }
+  .estado { display: inline-block; font-size: .75rem; padding: 2px 8px; border-radius: 999px; }
+  .estado.ok { background: var(--ok-fondo); color: var(--ok); }
+  .estado.off { background: var(--off-fondo); color: var(--off); }
+  .skill { border-top: 1px solid var(--borde); margin-top: 8px; padding-top: 8px; font-size: .88rem; }
+  .skill strong { display: block; }
+  .ejemplo { margin-top: 4px; padding: 4px 8px; font-size: .82rem; text-align: left; }
+  .chat { background: var(--panel); border: 1px solid var(--borde); border-radius: 12px;
+          display: flex; flex-direction: column; min-height: 460px; }
+  .chat-cabecera { padding: 12px 14px; border-bottom: 1px solid var(--borde); display: flex;
+                   justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .chat-cabecera span { font-weight: 600; }
+  #mensajes { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column;
+              gap: 10px; max-height: 60vh; }
+  .burbuja { max-width: 85%; padding: 8px 12px; border-radius: 12px; white-space: pre-wrap;
+             overflow-wrap: anywhere; }
+  .burbuja.usuario { align-self: flex-end; background: var(--burbuja-usuario); }
+  .burbuja.agente { align-self: flex-start; background: var(--burbuja-agente); }
+  .burbuja.error { align-self: flex-start; background: var(--error-fondo); color: var(--error); }
+  .vacio { color: var(--suave); text-align: center; margin: auto; padding: 16px; }
+  form { display: flex; gap: 8px; padding: 12px; border-top: 1px solid var(--borde); }
+  textarea { flex: 1; font: inherit; padding: 8px 10px; border-radius: 8px; resize: vertical;
+             border: 1px solid var(--borde); background: var(--fondo); color: var(--texto); min-height: 44px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Mis agentes A2A</h1>
+  <button id="actualizar" type="button">Actualizar lista</button>
+</header>
+<main>
+  <section id="lista" aria-label="Agentes"></section>
+  <section class="chat" aria-label="Conversación">
+    <div class="chat-cabecera">
+      <span id="titulo">Elige un agente</span>
+      <button id="nueva" type="button" disabled>Nueva conversación</button>
+    </div>
+    <div id="mensajes" aria-live="polite"></div>
+    <form id="formulario">
+      <textarea id="texto" rows="2" placeholder="Escribe tu pregunta (Enter envía, Shift+Enter salto de línea)" disabled></textarea>
+      <button id="enviar" class="principal" type="submit" disabled>Enviar</button>
+    </form>
+  </section>
+</main>
+
+<script>
+"use strict";
+// Estado en memoria: se pierde al recargar la página (a propósito).
+const agentes = [];                 // fichas que devolvió el servidor
+const conversaciones = {};          // id del agente -> { contextId, mensajes: [{tipo, texto}] }
+let elegido = null;
+let enviando = false;
+
+const $ = (id) => document.getElementById(id);
+
+function crear(etiqueta, clase, texto) {
+  const el = document.createElement(etiqueta);
+  if (clase) el.className = clase;
+  if (texto !== undefined) el.textContent = texto;   // siempre texto plano, nunca HTML
+  return el;
+}
+
+function conversacion(id) {
+  if (!conversaciones[id]) conversaciones[id] = { contextId: null, mensajes: [] };
+  return conversaciones[id];
+}
+
+function dibujarLista() {
+  const lista = $("lista");
+  lista.replaceChildren();
+  for (const a of agentes) {
+    const tarjeta = crear("div", "tarjeta" + (a.id === elegido ? " elegida" : ""));
+    const titulo = crear("h2", "", a.disponible ? a.nombre : a.id);
+    tarjeta.append(titulo);
+    tarjeta.append(crear("span", "estado " + (a.disponible ? "ok" : "off"),
+                         a.disponible ? "disponible" : "no disponible"));
+    if (a.disponible) {
+      if (a.descripcion) tarjeta.append(crear("p", "", a.descripcion));
+      for (const s of a.skills) {
+        const bloque = crear("div", "skill");
+        bloque.append(crear("strong", "", s.nombre));
+        if (s.descripcion) bloque.append(crear("span", "", s.descripcion));
+        if (s.ejemplo) {
+          const ej = crear("button", "ejemplo", "Probar: " + s.ejemplo);
+          ej.type = "button";
+          ej.addEventListener("click", () => { elegir(a.id); $("texto").value = s.ejemplo; $("texto").focus(); });
+          bloque.append(ej);
+        }
+        tarjeta.append(bloque);
+      }
+      const abrir = crear("button", "principal", "Conversar");
+      abrir.type = "button";
+      abrir.style.marginTop = "10px";
+      abrir.addEventListener("click", () => elegir(a.id));
+      tarjeta.append(abrir);
+    } else if (a.motivo) {
+      tarjeta.append(crear("p", "", "Motivo: " + a.motivo + "."));
+    }
+    lista.append(tarjeta);
+  }
+}
+
+function dibujarChat() {
+  const a = agentes.find((x) => x.id === elegido);
+  const hayAgente = Boolean(a && a.disponible);
+  $("titulo").textContent = a ? (a.disponible ? a.nombre : a.id + " (no disponible)") : "Elige un agente";
+  $("nueva").disabled = !hayAgente;
+  $("texto").disabled = !hayAgente || enviando;
+  $("enviar").disabled = !hayAgente || enviando;
+  const caja = $("mensajes");
+  caja.replaceChildren();
+  const msgs = elegido ? conversacion(elegido).mensajes : [];
+  if (msgs.length === 0) {
+    caja.append(crear("div", "vacio", hayAgente ? "Escribe un mensaje para empezar." : "Elige un agente disponible de la lista."));
+  }
+  for (const m of msgs) caja.append(crear("div", "burbuja " + m.tipo, m.texto));
+  caja.scrollTop = caja.scrollHeight;
+}
+
+function elegir(id) {
+  elegido = id;
+  dibujarLista();
+  dibujarChat();
+  if ($("texto") && !$("texto").disabled) $("texto").focus();
+}
+
+async function cargarAgentes() {
+  $("actualizar").disabled = true;
+  try {
+    const r = await fetch("/api/agentes");
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    agentes.splice(0, agentes.length, ...(await r.json()));
+  } catch (e) {
+    agentes.splice(0, agentes.length);
+    $("lista").replaceChildren(crear("div", "tarjeta", "No se pudo leer la lista de agentes (" + e.message + ")."));
+    $("actualizar").disabled = false;
+    return;
+  }
+  $("actualizar").disabled = false;
+  if (elegido && !agentes.some((a) => a.id === elegido)) elegido = null;
+  dibujarLista();
+  dibujarChat();
+}
+
+async function enviar(evento) {
+  evento.preventDefault();
+  const caja = $("texto");
+  const texto = caja.value.trim();
+  if (!texto || !elegido || enviando) return;
+  const conv = conversacion(elegido);
+  const id = elegido;
+  conv.mensajes.push({ tipo: "usuario", texto });
+  conv.mensajes.push({ tipo: "agente", texto: "Pensando..." });
+  caja.value = "";
+  enviando = true;
+  dibujarChat();
+  let respuesta;
+  try {
+    const r = await fetch("/api/mensaje", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ agente: id, texto, contextId: conv.contextId }),
+    });
+    const datos = await r.json().catch(() => ({}));
+    if (datos.contextId) conv.contextId = datos.contextId;
+    if (datos.texto !== undefined) respuesta = { tipo: "agente", texto: datos.texto };
+    else respuesta = { tipo: "error", texto: datos.error || (datos.detail ? "Petición rechazada." : "Respuesta inesperada del servidor.") };
+  } catch (e) {
+    respuesta = { tipo: "error", texto: "No se pudo contactar el servidor de la página." };
+  }
+  conv.mensajes[conv.mensajes.length - 1] = respuesta;   // reemplaza "Pensando..."
+  enviando = false;
+  if (elegido === id) dibujarChat();
+  if (elegido === id) $("texto").focus();
+}
+
+$("formulario").addEventListener("submit", enviar);
+$("texto").addEventListener("keydown", (e) => {
+  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("formulario").requestSubmit(); }
+});
+$("nueva").addEventListener("click", () => {
+  if (!elegido) return;
+  conversaciones[elegido] = { contextId: null, mensajes: [] };
+  dibujarChat();
+});
+$("actualizar").addEventListener("click", cargarAgentes);
+
+cargarAgentes();
+</script>
+</body>
+</html>
