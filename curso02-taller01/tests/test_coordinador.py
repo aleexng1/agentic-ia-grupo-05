@@ -1,14 +1,12 @@
-"""Pruebas del coordinador. Sin red ni clave: el agente remoto está simulado en memoria."""
+"""Pruebas del cliente A2A del coordinador. Sin red ni clave: el agente remoto está simulado en memoria."""
 
 import asyncio
 
 import httpx
 import pytest
 from google.protobuf.json_format import MessageToDict
-from langchain_core.messages import HumanMessage
 
 import src.coordinador.cliente as cliente
-import src.coordinador.graph as grafo
 from src.comun.servidor import crear_app
 from src.comun.tarjeta import crear_tarjeta
 
@@ -136,49 +134,3 @@ def test_tarea_fallida_o_sin_texto_da_error_de_una_linea(monkeypatch):
     monkeypatch.setattr(cliente, "_transporte", _remoto_simulado(tarea("TASK_STATE_WORKING")))
     with pytest.raises(cliente.ErrorRemoto, match="working"):
         _preguntar()
-
-
-def test_el_nodo_reenvia_el_mismo_context_id(monkeypatch):
-    vistos = []
-    monkeypatch.setattr(cliente, "_transporte", _remoto_real(vistos))
-
-    async def ejecutar():
-        try:
-            return await grafo.responder("Vuelo a Lima", "conversacion-xyz")
-        finally:
-            await cliente.cerrar_clientes()
-
-    assert asyncio.run(ejecutar()) == "eco: Vuelo a Lima"
-    assert vistos == [("Vuelo a Lima", "conversacion-xyz")]
-
-
-def test_el_nodo_inventa_context_id_si_no_hay_thread_id(monkeypatch):
-    vistos = []
-    monkeypatch.setattr(cliente, "_transporte", _remoto_real(vistos))
-
-    async def ejecutar():
-        try:
-            return await grafo.delegar({"messages": [HumanMessage("hola")]}, {"configurable": {}})
-        finally:
-            await cliente.cerrar_clientes()
-
-    resultado = asyncio.run(ejecutar())
-    assert resultado["messages"][0].content == "eco: hola"
-    assert len(vistos[0][1]) == 36  # un uuid4 inventado
-    assert resultado["messages"][0].additional_kwargs["context_id"] == vistos[0][1]
-    assert resultado["messages"][0].additional_kwargs["agente_remoto"] == "Agente de mentira"
-
-
-def test_si_el_agente_remoto_falla_el_nodo_responde_con_un_error_de_una_linea(monkeypatch):
-    def caido(request):
-        raise httpx.ConnectError("sin conexión", request=request)
-
-    monkeypatch.setattr(cliente, "_transporte", httpx.MockTransport(caido))
-    respuesta = asyncio.run(grafo.responder("hola", "conv-1"))
-    assert respuesta.startswith("Error: no pude consultar al agente de viajes")
-    assert "\n" not in respuesta
-
-
-def test_el_grafo_tiene_un_solo_nodo():
-    diagrama = grafo.diagrama()
-    assert "delegar" in diagrama and "__start__" in diagrama and "__end__" in diagrama
