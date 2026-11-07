@@ -52,7 +52,12 @@ def main():
     parser.add_argument("--diagrama", action="store_true", help="imprime su estructura en Mermaid sin ejecutarlo")
     args = parser.parse_args()
 
-    modulo = cargar_modulo(args.agente)
+    try:
+        modulo = cargar_modulo(args.agente)
+    except Exception as error:  # Por ejemplo, falta la clave o una librería.
+        detalle = " ".join(f"{type(error).__name__}: {error}".split())
+        print(f"Error: no se pudo cargar el agente '{args.agente}' ({detalle})")
+        return 1
     if modulo is None:
         print(f"Error: el agente '{args.agente}' todavía no existe.")
         return 1
