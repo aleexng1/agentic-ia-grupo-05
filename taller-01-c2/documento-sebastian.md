@@ -218,8 +218,11 @@ Con el agente de Matias en el catálogo, esa pregunta debería ir a él.
 
 ## 5. Túnel de Cloudflare
 
-- Dirección pública: `https://replace-earl-univ-robinson.trycloudflare.com` (túnel del 2026-11-08; cambia al reiniciarlo).
-  El túnel del 2026-11-07 (`discussed-split-drink-derek`) se cerró antes de sacar las capturas, así que se abrió uno nuevo.
+- Dirección pública de la prueba grupal (8 de noviembre, 19:00): `https://defining-envelope-obtaining-dem.trycloudflare.com`.
+  Cambia al reiniciar el túnel.
+- Las capturas `03-tunel.png` y `03-ficha-telefono.png` se sacaron antes, con el túnel de la mañana
+  (`https://replace-earl-univ-robinson.trycloudflare.com`), que ya está cerrado. El túnel del
+  2026-11-07 (`discussed-split-drink-derek`) se cerró antes de sacar esas capturas.
 - Comando: `cloudflared tunnel --url http://127.0.0.1:8006`, con el agente corriendo en
   el 8006. La dirección se copió a `URL_PUBLICA` en el `.env` antes de levantar el agente,
   así que la ficha la publica desde el arranque.
