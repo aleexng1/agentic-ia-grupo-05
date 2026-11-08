@@ -1,0 +1,16 @@
+﻿{
+    "result":  {
+                   "message":  {
+                                   "messageId":  "dcafa804-e76d-4b78-ad08-2088459dda54",
+                                   "contextId":  "5fccd216-97f3-4ae1-b6b2-acad7477b31d",
+                                   "role":  "ROLE_AGENT",
+                                   "parts":  [
+                                                 {
+                                                     "text":  "AquÃ­ tienes la estimaciÃ³n del presupuesto simulado para tu feria tecnolÃ³gica de 80 personas con una duraciÃ³n de 4 horas (240 minutos):\n\n* **Tipo de evento:** tecnolÃ³gico\n* **Participantes:** 80 personas\n* **DuraciÃ³n:** 240 minutos\n\n### Partidas (CLP)\n* **AlimentaciÃ³n genÃ©rica:** $144.000\n* **Equipamiento:** $200.000\n* **LogÃ­stica:** $64.000\n* **Personal:** $768.000\n* **Recinto referencial:** $800.000\n\n* **Subtotal:** $1.976.000\n* **Contingencia (10%):** $197.600\n* **Total:** $2.173.600\n\n### Supuestos\n* La duraciÃ³n se calcula en 8 bloques de 30 minutos, redondeando hacia arriba.\n* La contingencia es 10 % del subtotal, redondeada hacia arriba al peso.\n* La alimentaciÃ³n es genÃ©rica y no define menÃº, dieta, proveedor ni cantidades de platos.\n\n*Nota: Todos los importes son ficticios y corresponden exclusivamente a una simulaciÃ³n. No se autorizan compras, reservas, pagos ni contrataciones. Los impuestos no estÃ¡n modelados y las consultas sobre menÃºs detallados corresponden a SebastiÃ¡n.*"
+                                                 }
+                                             ]
+                               }
+               },
+    "id":  "1",
+    "jsonrpc":  "2.0"
+}
