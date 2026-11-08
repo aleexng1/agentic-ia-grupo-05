@@ -75,14 +75,51 @@ La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png
 La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías está definida en el prompt, pero su prueba específica continúa pendiente.
 
 
-## 4. Fichas del agente y `02-ficha-antes.json`
+## 4. Fichas del agente: antes y después
 
-La ficha final local disponible es [`evidencias/eduardo/02-ficha.json`](evidencias/eduardo/02-ficha.json)
-y anuncia `http://127.0.0.1:8005`. **No existe una ficha anterior auténtica de Eduardo**
-llamada `02-ficha-antes.json` entre las evidencias disponibles. No se usa ni se copia el
-archivo homónimo de Sebastián, y no se fabrica una versión histórica. Por tanto, la
-comparación antes/después no está demostrada y queda pendiente solo si se recupera una
-captura anterior auténtica.
+Las dos fichas se guardaron levantando el agente en `http://127.0.0.1:8005` y leyendo
+`/.well-known/agent-card.json`. Las dos anuncian `http://127.0.0.1:8005`.
+
+**De dónde sale `02-ficha-antes.json`.** Es la ficha real que publicaba el agente en `main`
+el 8 de noviembre de 2026, justo antes del ajuste descrito abajo (era la misma que estaba
+guardada como `02-ficha.json`). Hasta entonces `server.py` había tenido una sola versión de
+la ficha, por eso no existía una ficha «antes». Ahora sí existe una versión anterior real.
+
+Descripción antes ([`evidencias/eduardo/02-ficha-antes.json`](evidencias/eduardo/02-ficha-antes.json)):
+
+> Estima presupuestos agregados y simulados para ferias y eventos usando únicamente tarifas
+> ficticias. No prepara menús ni cotiza catering (Sebastián), ni recomienda recintos (Alex);
+> tampoco autoriza compras, reservas, pagos o contrataciones.
+
+Descripción después ([`evidencias/eduardo/02-ficha.json`](evidencias/eduardo/02-ficha.json)):
+
+> Estima presupuestos agregados y simulados para ferias y eventos usando únicamente tarifas
+> ficticias. Incluye un costo de alimentación genérica por persona, pero no prepara menús
+> (Sebastián), ni recomienda recintos (Alex); tampoco autoriza compras, reservas, pagos o
+> contrataciones.
+
+**Por qué se cambió.** Es un ajuste hecho en la revisión del grupo, después del ensayo
+general del 8 de noviembre. En el ensayo, el supervisor mandó «¿Cuánto cuesta el catering
+para 100 personas?» a Eduardo porque es un costo, pero su prompt la rechazaba («corresponde
+a Sebastián») y Sebastián no da precios, así que nadie la respondía. Además, la ficha decía
+«no cotiza catering», aunque la herramienta sí calcula una partida de alimentación genérica.
+
+Cambios:
+
+- Ficha: ahora dice que incluye un costo de alimentación genérica por persona, pero que no
+  prepara menús.
+- Prompt: se agregó «Si preguntan cuánto cuesta la comida o el catering, es una consulta de
+  costos: pide los datos que falten, usa estimar_presupuesto y destaca la partida de
+  alimentación genérica. Solo deriva a Sebastián cuando pidan qué menú servir.» La regla
+  anterior («Si preguntan por menús, comida o catering… corresponde a Sebastián») se acotó a
+  «qué menú o qué comida servir», para que no contradiga la nueva.
+
+Resultado después del cambio:
+
+- «¿Cuánto cuesta el catering para 100 personas?»: pregunta el tipo de evento.
+- Con «feria tecnológica de 4 horas» en la misma conversación: entrega el presupuesto con
+  la alimentación genérica destacada ($180.000 CLP; total $2.497.000 CLP).
+- «¿Qué menú sirvo para 80 personas?»: «Eso corresponde a Sebastián.»
 
 La ficha pública disponible en
 [`evidencias/eduardo/03-ficha-telefono.png`](evidencias/eduardo/03-ficha-telefono.png)
@@ -112,7 +149,8 @@ muestra a `cloudflared` anunciando esa URL y la configuración de origen local e
   fecha/hora de la sesión y el origen local `127.0.0.1:8005`.
 - `03-ficha-telefono.png`: captura de la ficha en Safari móvil por 4G, convertida del JPEG
   original para cumplir la pauta. El original JPEG se conserva localmente fuera del PR.
-- `02-ficha.json`: ficha local final. No hay `02-ficha-antes.json` auténtico de Eduardo.
+- `02-ficha-antes.json` y `02-ficha.json`: ficha local antes y después del ajuste de la
+  revisión del grupo (sección 4).
 - `04-a2a-publico.json` y `respuesta-a2a.json`: respuestas guardadas; no equivalen a una
   repetición actual de A2A.
 
@@ -126,8 +164,6 @@ No se tomó la captura de `01-saltos.png` como prueba visual de todas las consul
   ambiguas en la tabla de la ronda.
 - Capturar la vista del supervisor/catálogo y completar las evidencias grupales que solicite
   el taller.
-- Si se requiere la comparación de ficha «antes/después», recuperar únicamente la versión
-  anterior auténtica de Eduardo; si no existe, dejar documentada la limitación.
 
 ## 8. Estado de Git y seguridad
 
@@ -138,6 +174,5 @@ del alcance de la revisión. El cambio funcional de `src/agente_eduardo/prompts.
 preparado en Git junto con las evidencias correspondientes.
 
 Los archivos del PR ya están preparados en Git. Entre las limitaciones y pendientes se
-mantienen la ronda grupal aún no ejecutada, la ausencia de una ficha anterior auténtica de
-Eduardo y el carácter temporal de la URL pública. No se ejecutaron commit ni push ni se creó
+mantienen la ronda grupal aún no ejecutada y el carácter temporal de la URL pública. No se ejecutaron commit ni push ni se creó
 un PR.

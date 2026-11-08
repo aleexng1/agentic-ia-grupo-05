@@ -1,0 +1,40 @@
+{
+  "name": "Agente de Eduardo",
+  "description": "Estima presupuestos agregados y simulados para ferias y eventos usando únicamente tarifas ficticias. No prepara menús ni cotiza catering (Sebastián), ni recomienda recintos (Alex); tampoco autoriza compras, reservas, pagos o contrataciones.",
+  "supportedInterfaces": [
+    {
+      "url": "http://127.0.0.1:8005",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "estimar_presupuesto",
+      "name": "Estimar presupuesto de evento",
+      "description": "Calcula partidas agregadas simuladas en CLP para un evento, según tipo, asistentes y duración.",
+      "tags": [
+        "estimar_presupuesto"
+      ],
+      "examples": [
+        "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?"
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    }
+  ]
+}
