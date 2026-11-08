@@ -26,7 +26,7 @@ Versión final (`blueprint-Alex.md`):
 | Nunca sin persona  | No reserva ni confirma un recinto, no contacta administradores y no garantiza que se cumplan los permisos o el aforo legal. |
 | Deriva a otro      | Cuando la pregunta es de costos o presupuesto, de comida o catering, o del programa y horario de actividades, lo dice en una frase y no responde. |
 | Dónde se ejecuta   | `http://127.0.0.1:8004` · `src/agente_alex/` · `python main.py alex` |
-| Dirección pública  | (se completa en el paso 6 con la URL del túnel) |
+| Dirección pública  | `https://jenny-regulated-airfare-possibilities.trycloudflare.com` (túnel de Cloudflare del 2026-11-07; cambia al reiniciarlo) |
 
 **Por qué la herramienta hace las cuentas:** los modelos de lenguaje calculan mal (a Matias
 le pasó con los minutos libres). Por eso `buscar_recintos` entrega ya calculados la
@@ -255,11 +255,51 @@ que la ficha tiene que decir con claridad qué entra y qué no:
 
 ## 5. Túnel de Cloudflare
 
-**PENDIENTE:** se hace aparte. En Linux Mint hay que instalar `cloudflared` y usar
-`scripts/tunel.sh`.
+- Dirección pública: `https://jenny-regulated-airfare-possibilities.trycloudflare.com`
+  (túnel rápido de trycloudflare del 2026-11-07, sin cuenta; cambia al reiniciarlo).
+- `evidencias/alex/03-tunel.png`: ventana de la Terminal de Mint con el túnel corriendo
+  (`pgrep` muestra `cloudflared tunnel --url http://127.0.0.1:8004`), la dirección que
+  informa `cloudflared` en `127.0.0.1:20241/quicktunnel` y la ficha pública respondiendo
+  con esa dirección. Se sacó así porque el recuadro verde de `tunel.sh` quedó tapado por
+  los registros de `cloudflared` en la terminal de VS Code.
+- `evidencias/alex/03-ficha-telefono.png`: la ficha abierta desde el teléfono, con la URL
+  pública. Se abrió con datos móviles (arriba se ve "5G"), es decir, desde fuera de la red
+  del computador.
 
-- Dirección pública: (pendiente; también va en `blueprint-Alex.md` y en `compañeros.md`).
-- `evidencias/alex/03-tunel.png`: terminal de `cloudflared` con la dirección. (pendiente)
+> **Nota sobre las tildes en el teléfono:** en la captura del teléfono las tildes se ven
+> mal ("tecnolÃ³gicas" en vez de "tecnológicas") porque el servidor responde
+> `content-type: application/json` sin declarar `charset=utf-8`, y el navegador del
+> teléfono interpreta el texto en otro formato. La ficha es correcta: los bytes que envía
+> el servidor son UTF-8 válido y dicen "tecnológicas", como se ve en `02-ficha.json` y
+> `03-ficha-publica.json`. No se cambió `src/comun/`, que es el código compartido que arma
+> la respuesta.
+- `evidencias/alex/03-ficha-publica.json`: la ficha descargada con `curl` desde la URL
+  pública. Es igual a `02-ficha.json` salvo la dirección, que ahora es la del túnel
+  (`supportedInterfaces[0].url`).
+
+Cómo se hizo en Linux Mint 22.3 (basado en Ubuntu 24.04):
+
+1. Instalación de `cloudflared` con apt, desde el repositorio oficial de Cloudflare
+   (https://pkg.cloudflare.com/), con la clave `cloudflare-main.gpg` y la línea
+   `deb [...] https://pkg.cloudflare.com/cloudflared any main`. Versión instalada: 2026.10.7.
+2. Terminal 1: `uvicorn src.agente_alex.server:app --port 8004` (sin `--reload`).
+3. Terminal 2: `bash scripts/tunel.sh 8004`. Muestra la dirección en verde. Si se pierde
+   entre los registros, `curl -s http://127.0.0.1:20241/quicktunnel` la devuelve.
+4. La dirección se copió en `URL_PUBLICA` del `.env` (sin `/` final) y se reinició la
+   terminal 1, porque el `.env` solo se lee al arrancar.
+
+Problemas encontrados:
+
+- El primer intento no mostró ninguna dirección porque el túnel no quedó corriendo. Una
+  prueba de 30 segundos confirmó que la red estaba bien (chequeos de DNS, QUIC y HTTP/2
+  en "PASS"); al volver a lanzar `tunel.sh` funcionó.
+- Tras pegar la URL en el `.env`, la ficha seguía publicando `http://127.0.0.1:8004`:
+  el agente no se había reiniciado. Después de reiniciarlo publica la dirección del túnel.
+- `scripts/tunel.sh` solo sugería `brew install cloudflared` (macOS). Alex, como
+  integrador, agregó al mensaje las instrucciones para Linux.
+
+Mientras el túnel está abierto, cualquiera con la dirección puede usar el agente y
+gastar la clave de Gemini, así que se cierra con Ctrl+C al terminar.
 
 ## 6. Catálogo y ronda de preguntas
 

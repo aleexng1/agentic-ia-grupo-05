@@ -10,4 +10,4 @@
 | Nunca sin persona  | No reserva ni confirma un recinto, no contacta administradores y no garantiza que se cumplan los permisos o el aforo legal. |
 | Deriva a otro      | Cuando la pregunta es de costos o presupuesto, de comida o catering, o del programa y horario de actividades, lo dice en una frase y no responde. |
 | Dónde se ejecuta   | `http://127.0.0.1:8004` · `src/agente_alex/` · `python main.py alex` |
-| Dirección pública  | (se completa en el paso 6 con la URL del túnel) |
+| Dirección pública  | `https://jenny-regulated-airfare-possibilities.trycloudflare.com` (túnel de Cloudflare del 2026-11-07; cambia al reiniciarlo) |
