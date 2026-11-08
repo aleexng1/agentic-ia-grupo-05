@@ -218,8 +218,11 @@ Con el agente de Matias en el catálogo, esa pregunta debería ir a él.
 
 ## 5. Túnel de Cloudflare
 
-- Dirección pública: `https://replace-earl-univ-robinson.trycloudflare.com` (túnel del 2026-11-08; cambia al reiniciarlo).
-  El túnel del 2026-11-07 (`discussed-split-drink-derek`) se cerró antes de sacar las capturas, así que se abrió uno nuevo.
+- Dirección pública de la prueba grupal (8 de noviembre, 19:00): `https://defining-envelope-obtaining-dem.trycloudflare.com`.
+  Cambia al reiniciar el túnel.
+- Las capturas `03-tunel.png` y `03-ficha-telefono.png` se sacaron antes, con el túnel de la mañana
+  (`https://replace-earl-univ-robinson.trycloudflare.com`), que ya está cerrado. El túnel del
+  2026-11-07 (`discussed-split-drink-derek`) se cerró antes de sacar esas capturas.
 - Comando: `cloudflared tunnel --url http://127.0.0.1:8006`, con el agente corriendo en
   el 8006. La dirección se copió a `URL_PUBLICA` en el `.env` antes de levantar el agente,
   así que la ficha la publica desde el arranque.
@@ -233,4 +236,23 @@ Con el agente de Matias en el catálogo, esa pregunta debería ir a él.
 
 ## 6. Catálogo y ronda de preguntas
 
-**PENDIENTE (domingo 8 de noviembre, 19:00).**
+Prueba grupal del 8 de noviembre, 19:00. El coordinador corrió en mi PC con los cuatro
+agentes en `URLS_AGENTES`: el mío local (`http://127.0.0.1:8006`) y los túneles de Matías,
+Alex y Eduardo. Mi agente salió en el túnel `https://defining-envelope-obtaining-dem.trycloudflare.com`.
+
+- Catálogo: `evidencias/sebastian/04-catalogo.png`, con la línea «Supervisor con 4 agentes».
+- Ronda: `evidencias/sebastian/05-ronda.png`, con las tres preguntas, el agente elegido y el motivo.
+
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|----------|-------------|-----------------------|---------------|
+| 1 | (de mi tema) Feria gastronómica de 5 horas desde las 11:00 para 200 personas, 20 son vegetarianas, ¿qué servimos? | Agente de Sebastian | El usuario solicita propuestas de comida y menús para una feria gastronómica. | Sí |
+| 2 | (del tema de otro) Para una feria tecnológica de 4 horas con estudiantes, ¿qué charlas o talleres hago y en qué orden? | Agente de Matias | El usuario solicita el programa de actividades y horarios para una feria. | Sí |
+| 3 | (que nadie sabe) ¿Cómo configuro el wifi de mi casa? | ninguno | La pregunta sobre cómo configurar el wifi no corresponde a ningún agente especializado en ferias y eventos. | Sí |
+
+En la pregunta 1, el agente propuso servicios a las 12:00 y 14:30, con cantidades y
+330 litros de agua, sin precios. En la 2, Matías propuso un programa de 10:00 a 13:40.
+
+**¿Qué cambiarías de tu ficha después de la ronda?** La ficha funcionó: el supervisor eligió bien
+las tres preguntas. Dejaría la frase «no arma el programa de actividades», porque es la que mandó
+la pregunta de charlas a Matías. Le agregaría que también responde la hora de los servicios de comida,
+porque en el ensayo ese tipo de pregunta se confundía con el horario de actividades.
