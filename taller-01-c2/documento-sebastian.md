@@ -116,7 +116,7 @@ graph TD;
 
 ### Saltos
 
-**PENDIENTE:** captura `evidencias/sebastian/01-saltos.png` con:
+Captura `evidencias/sebastian/01-saltos.png`, con estos dos comandos:
 
 - `python main.py sebastian "Voy a hacer una feria tecnológica de 4 horas desde las 10:00 para 150 personas, 12 son veganas. ¿Qué les sirvo?" --saltos`
   (se ve `Herramienta: armar_catering` con sus argumentos; 3 saltos).
@@ -207,19 +207,18 @@ Con el agente de Matias en el catálogo, esa pregunta debería ir a él.
 
 ## 5. Túnel de Cloudflare
 
-- Dirección pública: `https://discussed-split-drink-derek.trycloudflare.com` (2026-11-07).
+- Dirección pública: `https://replace-earl-univ-robinson.trycloudflare.com` (túnel del 2026-11-08; cambia al reiniciarlo).
+  El túnel del 2026-11-07 (`discussed-split-drink-derek`) se cerró antes de sacar las capturas, así que se abrió uno nuevo.
 - Comando: `cloudflared tunnel --url http://127.0.0.1:8006`, con el agente corriendo en
   el 8006. La dirección se copió a `URL_PUBLICA` en el `.env` antes de levantar el agente,
-  así que la ficha la publica desde el arranque y no hubo que reiniciarlo.
-- `cloudflared` conectó por QUIC al centro de datos `scl04` (Santiago); todas las
-  comprobaciones previas (DNS, UDP, TCP y API) pasaron.
-- Verificación desde fuera, por la URL pública: `/salud` responde `{"ok": true}`, la ficha
+  así que la ficha la publica desde el arranque.
+- `cloudflared` conectó por QUIC y todas las comprobaciones previas (DNS, UDP, TCP y API) pasaron.
+- Verificación desde fuera, por la URL pública: `/salud` responde `{"ok": true}` y la ficha
   (`evidencias/sebastian/02-ficha.json`, descargada por el túnel) publica la dirección https en
-  `supportedInterfaces`, y un `SendMessage` enviado por el túnel volvió con `ROLE_AGENT` y
-  la propuesta de catering.
-- **PENDIENTE (capturas de Sebastian):** `evidencias/sebastian/03-tunel.png` (la terminal de
-  `cloudflared` con la URL) y `evidencias/sebastian/03-ficha-telefono.png` (la ficha abierta desde
-  el teléfono).
+  `supportedInterfaces`. Es igual a la ficha del día anterior salvo por la URL.
+- Capturas: `evidencias/sebastian/03-tunel.png` (la terminal de `cloudflared` con el aviso de
+  túnel creado y la URL) y `evidencias/sebastian/03-ficha-telefono.png` (la ficha abierta desde
+  el teléfono, con datos móviles).
 
 ## 6. Catálogo y ronda de preguntas
 
