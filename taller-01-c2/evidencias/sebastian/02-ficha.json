@@ -3,7 +3,7 @@
   "description": "Propone la comida que se sirve a los asistentes de ferias tecnológicas, gastronómicas, culturales o infantiles de 10 a 500 personas y de 30 minutos a 8 horas: coffee break, cóctel, box lunch, almuerzo buffet, food trucks o colación infantil, con la hora de cada servicio, las cantidades y el agua calculadas, y menús vegetarianos, veganos, sin gluten y sin lactosa. No da precios ni presupuestos, no recomienda recintos ni capacidad, no arma el programa de actividades y no contrata proveedores: entrega solo propuestas.",
   "supportedInterfaces": [
     {
-      "url": "https://discussed-split-drink-derek.trycloudflare.com",
+      "url": "https://replace-earl-univ-robinson.trycloudflare.com",
       "protocolBinding": "JSONRPC",
       "protocolVersion": "1.0"
     }

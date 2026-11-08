@@ -10,4 +10,4 @@
 | Nunca sin persona  | No contrata ni confirma proveedores, no hace pedidos y no garantiza que un menú sea seguro para alergias graves: eso lo confirma una persona con el proveedor. |
 | Deriva a otro      | Cuando la pregunta es de precios o presupuesto, de recintos o capacidad, o del programa y horario de actividades, lo dice en una frase y no responde. |
 | Dónde se ejecuta   | `http://127.0.0.1:8006` · `src/agente_sebastian/` · `python main.py sebastian` |
-| Dirección pública  | `https://discussed-split-drink-derek.trycloudflare.com` (túnel de Cloudflare del 2026-11-07; cambia al reiniciarlo) |
+| Dirección pública  | `https://replace-earl-univ-robinson.trycloudflare.com` (túnel de Cloudflare del 2026-11-08; cambia al reiniciarlo) |
