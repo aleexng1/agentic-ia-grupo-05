@@ -15,7 +15,7 @@ URL_EDUARDO = os.getenv("URL_EDUARDO", "http://127.0.0.1:8005")
 
 tarjeta = crear_tarjeta(
     "Agente de Eduardo",
-    "Estima presupuestos agregados y simulados para ferias y eventos usando únicamente tarifas ficticias. No prepara menús ni cotiza catering (Sebastián), ni recomienda recintos (Alex); tampoco autoriza compras, reservas, pagos o contrataciones.",
+    "Estima presupuestos agregados y simulados para ferias y eventos usando únicamente tarifas ficticias. Incluye un costo de alimentación genérica por persona, pero no prepara menús (Sebastián), ni recomienda recintos (Alex); tampoco autoriza compras, reservas, pagos o contrataciones.",
     URL_EDUARDO,
     [
         (
