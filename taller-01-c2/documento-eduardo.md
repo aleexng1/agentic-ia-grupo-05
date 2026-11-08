@@ -45,24 +45,35 @@ re-ejecutaron durante la revisión documental:
   **$2.173.600 CLP**, en 3 saltos: `model → tools (estimar_presupuesto) → model`.
 - **Derivación de menú vegetariano:** Sebastián, 1 salto (`model`), sin herramienta.
 - **Derivación de consulta sobre recintos:** Alex, 1 salto (`model`), sin herramienta.
-- **Derivación de consulta sobre actividades y horarios:** Matías, 1 salto (`model`), sin herramienta.
+- - **Derivación de consulta sobre actividades y horarios:** Matías es el agente responsable según el prompt. Prueba de ejecución pendiente.
 
-Diagrama Mermaid comunicado como validado:
+Diagrama Mermaid generado directamente con el comando `python main.py eduardo --diagrama`:
 
 ```mermaid
-graph TD
-    __start__([__start__]) --> model
-    model -.-> __end__([__end__])
-    model -.-> tools
-    tools --> model
-    tools["tools<br/>estimar_presupuesto"]
+---
+config:
+  flowchart:
+    curve: linear
+---
+graph TD;
+        __start__([<p>__start__</p>]):::first
+        model(model)
+        tools(tools<hr/><small><em>__tools = estimar_presupuesto</em></small>)
+        __end__([<p>__end__</p>]):::last
+        __start__ --> model;
+        model -.-> __end__;
+        model -.-> tools;
+        tools -.-> model;
+        classDef default fill:#f2f0ff,line-height:1.2
+        classDef first fill-opacity:0
+        classDef last fill:#bfb6fc
 ```
 
-La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png) muestra
-la ejecución del presupuesto con sus tres saltos y el comienzo de la respuesta de derivación
-del menú vegetariano. La captura disponible no documenta por sí sola todas las consultas;
- los resultados de las tres derivaciones indicadas arriba corresponden a ejecuciones reales
- validadas por Eduardo.
+
+La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png) muestra la ejecución del presupuesto simulado de $2.173.600 CLP, con tres saltos y uso de `estimar_presupuesto`. También muestra el rechazo completo de una consulta sobre menú vegetariano, derivada a Sebastián en un salto y sin ejecutar herramientas. La evidencia no expone rutas personales ni credenciales.
+
+La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías está definida en el prompt, pero su prueba específica continúa pendiente.
+
 
 ## 4. Fichas del agente y `02-ficha-antes.json`
 
