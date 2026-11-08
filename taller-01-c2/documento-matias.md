@@ -161,19 +161,27 @@ QUIC y la ficha fue accesible desde el teléfono.
 
 ## 6. Catálogo y ronda de preguntas
 
-**PENDIENTE:** se hace en una sesión conjunta con los agentes de los compañeros.
+Prueba grupal del domingo 8 de noviembre de 2026, con los cuatro agentes en computadores
+distintos conectados por túneles de Cloudflare. Túnel de Matias en esa prueba:
+`https://plugin-telescope-termination-riverside.trycloudflare.com`.
 
-- Catálogo: `evidencias/matias/04-catalogo.png` (`Supervisor con N agentes`).
+- Catálogo: `evidencias/matias/04-catalogo.png` (`Supervisor con 4 agentes`).
 - Ronda: `evidencias/matias/05-ronda.png` y la tabla siguiente.
 
-| # | Pregunta | A quién fue | ¿Estuvo bien? |
-|---|----------|-------------|---------------|
-| 1 | (de mi propia skill) | | |
-| 2 | (de la skill de un compañero) | | |
-| 3 | (que nadie sabe) | | |
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|----------|-------------|-----------------------|---------------|
+| 1 | Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora? | Agente de Matias | El usuario solicita un programa de actividades y horarios para una feria cultural. | Sí. Armó tres actividades entre las 16:00 y las 18:00 e informó 60 minutos libres. |
+| 2 | Vamos a hacer una feria gastronómica para unas 250 personas y queremos que sea al aire libre, ¿qué lugar nos sirve? | Agente de Alex | La pregunta solicita recomendaciones de recintos para una feria, lo cual corresponde a las funciones del agente de Alex. | Sí. Recomendó dos recintos exteriores con capacidad para 300 y 500 personas. |
+| 3 | ¿Quién ganó el mundial de 1962? | ninguno | La pregunta sobre la Copa Mundial de 1962 no corresponde a las funciones de ningún agente especializado del catálogo. | Sí. Respondió que no tiene un agente para eso y listó los cuatro agentes. |
 
-Preguntas para comentar: ¿qué ficha eligió mejor el supervisor y qué decía?, ¿hubo una
-pregunta que dos agentes podrían responder y cómo se resolvió?, ¿qué cambiarían de su ficha?
+Análisis del grupo (qué ficha eligió mejor el supervisor y si hubo preguntas que dos agentes
+podían responder): lo escribe Alex en el documento de entrega.
+
+**Qué cambiaría de mi ficha.** En la ronda el supervisor eligió bien a mi agente, pero mi
+descripción usa la palabra «horario» sin precisar que es el de las actividades, y la ficha
+del agente de Sebastián también habla de «la hora de cada servicio» de comida. Precisaría
+«horario de las actividades». También agregaría un ejemplo con público de estudiantes, porque
+el único que tengo es de una feria infantil.
 
 ### Prueba previa con un solo agente (no es la ronda oficial)
 
@@ -188,3 +196,7 @@ salones y a otra sobre el mundial de 1962.
 - En la consola de Windows las tildes salen mal sin `PYTHONIOENCODING=utf-8`.
 - Los agentes de viajes y restaurantes de la clase siguen en el proyecto, pero no están en
   el catálogo del coordinador de este grupo.
+- Al conectar el coordinador con los túneles, el antivirus Avast (que revisa el HTTPS) hacía
+  fallar la verificación con `CERTIFICATE_VERIFY_FAILED`, porque firma con su propio
+  certificado. En `src/coordinador/cliente.py` se usan ahora los certificados del sistema
+  operativo en lugar de los de `certifi`.

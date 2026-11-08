@@ -1,6 +1,7 @@
 """Cliente A2A para descubrir y consultar agentes remotos."""
 
 import asyncio
+import ssl
 from uuid import uuid4
 
 import httpx
@@ -45,7 +46,13 @@ async def obtener_cliente(url: str):
             return _CLIENTES[direccion]
 
         if _CLIENTE_HTTP is None or _CLIENTE_HTTP.is_closed:
-            _CLIENTE_HTTP = httpx.AsyncClient(timeout=TIEMPO_LIMITE)
+            # Se usan los certificados del sistema operativo (no solo los de certifi):
+            # un antivirus que revisa el HTTPS (por ejemplo Avast) firma con su propio
+            # certificado, que solo está en el almacén del sistema.
+            _CLIENTE_HTTP = httpx.AsyncClient(
+                timeout=TIEMPO_LIMITE,
+                verify=ssl.create_default_context(),
+            )
 
         resolver = A2ACardResolver(
             httpx_client=_CLIENTE_HTTP,
