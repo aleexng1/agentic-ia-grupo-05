@@ -1,0 +1,40 @@
+{
+    "name": "Agente de Alex",
+    "description": "Recomienda lugares para eventos. No da precios.",
+    "supportedInterfaces": [
+        {
+            "url": "http://127.0.0.1:8004",
+            "protocolBinding": "JSONRPC",
+            "protocolVersion": "1.0"
+        }
+    ],
+    "version": "1.0.0",
+    "capabilities": {
+        "streaming": false
+    },
+    "defaultInputModes": [
+        "text/plain"
+    ],
+    "defaultOutputModes": [
+        "text/plain"
+    ],
+    "skills": [
+        {
+            "id": "buscar_recintos",
+            "name": "Buscar recintos",
+            "description": "Busca recintos según tipo de evento y personas.",
+            "tags": [
+                "buscar_recintos"
+            ],
+            "examples": [
+                "buscar_recintos tecnologico 150"
+            ],
+            "inputModes": [
+                "text/plain"
+            ],
+            "outputModes": [
+                "text/plain"
+            ]
+        }
+    ]
+}
