@@ -245,9 +245,14 @@ Alex y Eduardo. Mi agente salió en el túnel `https://defining-envelope-obtaini
 
 | # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
 |---|----------|-------------|-----------------------|---------------|
-| 1 | (de mi tema) Feria gastronómica de 5 horas desde las 11:00 para 200 personas, 20 son vegetarianas, ¿qué servimos? | Agente de Sebastian | Pide propuestas de comida y menús especiales para un evento | Sí |
-| 2 | (del tema de otro) Para una feria tecnológica de 4 horas con estudiantes, ¿qué charlas o talleres hago y en qué orden? | Agente de Matias | Pide el programa de actividades y el horario | Sí |
-| 3 | (que nadie sabe) ¿Cómo configuro el wifi de mi casa? | ninguno | No corresponde a ningún agente de ferias | Sí |
+| 1 | (de mi tema) Feria gastronómica de 5 horas desde las 11:00 para 200 personas, 20 son vegetarianas, ¿qué servimos? | Agente de Sebastian | El usuario solicita propuestas de comida y menús para una feria gastronómica. | Sí |
+| 2 | (del tema de otro) Para una feria tecnológica de 4 horas con estudiantes, ¿qué charlas o talleres hago y en qué orden? | Agente de Matias | El usuario solicita el programa de actividades y horarios para una feria. | Sí |
+| 3 | (que nadie sabe) ¿Cómo configuro el wifi de mi casa? | ninguno | La pregunta sobre cómo configurar el wifi no corresponde a ningún agente especializado en ferias y eventos. | Sí |
 
 En la pregunta 1, el agente propuso servicios a las 12:00 y 14:30, con cantidades y
 330 litros de agua, sin precios. En la 2, Matías propuso un programa de 10:00 a 13:40.
+
+**¿Qué cambiarías de tu ficha después de la ronda?** La ficha funcionó: el supervisor eligió bien
+las tres preguntas. Dejaría la frase «no arma el programa de actividades», porque es la que mandó
+la pregunta de charlas a Matías. Le agregaría que también responde la hora de los servicios de comida,
+porque en el ensayo ese tipo de pregunta se confundía con el horario de actividades.
