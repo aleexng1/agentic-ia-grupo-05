@@ -1,0 +1,8 @@
+# Archivos generados para la entrega (se vuelven a armar con los scripts de entrega/).
+entrega/*.zip
+entrega/documento-entrega.md
+entrega/documento-entrega.pdf
+entrega/documento-entrega.html
+entrega/.venv-entrega/
+# Registros del ensayo general local.
+scripts_ensayo/logs/
