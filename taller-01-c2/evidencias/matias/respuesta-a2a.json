@@ -1,0 +1,16 @@
+{
+  "result": {
+    "message": {
+      "messageId": "65cfc07c-e971-41a0-abaa-a68229bbb66f",
+      "contextId": "82638c14-df4c-4d99-8c3b-6e62ceb37596",
+      "role": "ROLE_AGENT",
+      "parts": [
+        {
+          "text": "¡Hola! Soy Matias, especialista en programas y horarios para ferias y eventos.\n\nAquí tienes una propuesta de programa para tu feria infantil de 180 minutos (3 horas) a partir de las 15:00:\n\n- **15:00 - 15:30:** Pintacuentos (30 min) - Los niños pintan una escena mientras se lee un cuento.\n- **15:30 - 16:15:** Taller de globoflexia (45 min) - Figuras con globos para niños de 4 a 10 años.\n- **16:15 - 16:55:** Show de magia (40 min) - Magia de cerca con participación de niños voluntarios.\n- **16:55 - 17:25:** Carrera de sacos (30 min) - Competencia recreativa por categorías de edad.\n\nEl programa no ocupa toda la duración pedida; quedan 35 minutos libres. \n\nRecuerda que esto es solo una propuesta y no incluye cotizaciones, reservas ni confirmación definitiva."
+        }
+      ]
+    }
+  },
+  "id": "1",
+  "jsonrpc": "2.0"
+}

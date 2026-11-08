@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f5f6f8">
+  <title>Agentes · Panel de viaje</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --tinta: #172b3a;
+      --tinta-suave: #617482;
+      --fondo: #f5f6f8;
+      --papel: #ffffff;
+      --borde: #e4e9ed;
+      --azul: #176b69;
+      --azul-oscuro: #105553;
+      --menta: #e5f4ef;
+      --verde: #25846c;
+      --sombra: 0 18px 50px rgba(30, 54, 68, .08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--fondo); color: var(--tinta); }
+    button, textarea { font: inherit; }
+    .barra-superior {
+      height: 72px; display: flex; align-items: center; justify-content: space-between;
+      padding: 0 clamp(20px, 5vw, 72px); background: rgba(255,255,255,.86);
+      border-bottom: 1px solid var(--borde);
+    }
+    .marca { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: -.03em; }
+    .marca-icono {
+      width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center;
+      color: white; background: var(--azul); font-size: 18px;
+    }
+    .marca small { display: block; color: var(--tinta-suave); font-size: 10px; font-weight: 700; letter-spacing: .12em; margin-top: 2px; }
+    .estado-global { display: flex; align-items: center; gap: 9px; color: var(--tinta-suave); font-size: 13px; }
+    .enlace-estudio { color: var(--azul); font-size: 13px; text-decoration: none; font-weight: 750; }
+    .enlace-estudio:hover { text-decoration: underline; }
+    .punto { width: 8px; height: 8px; border-radius: 50%; background: #39a67d; box-shadow: 0 0 0 4px #e7f5ef; }
+    .contenedor { width: min(1180px, calc(100% - 40px)); margin: 44px auto 60px; }
+    .encabezado { margin-bottom: 26px; }
+    .sobretitulo { color: var(--azul); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -.055em; margin: 10px 0 8px; }
+    .bajada { color: var(--tinta-suave); margin: 0; font-size: 15px; }
+    .rejilla { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 22px; align-items: start; }
+    .columna { display: grid; gap: 18px; }
+    .tarjeta { background: var(--papel); border: 1px solid var(--borde); border-radius: 20px; box-shadow: var(--sombra); }
+    .lista-agentes { padding: 20px 14px 14px; }
+    .titulo-seccion { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #80909a; font-weight: 800; margin: 0 8px 13px; }
+    .agente {
+      width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 10px;
+      border: 1px solid transparent; border-radius: 14px; text-align: left; color: inherit; background: transparent;
+    }
+    .agente.activo { background: #eff8f5; border-color: #d5ebe3; }
+    .agente.proximamente { opacity: .67; }
+    .agente-icono { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 13px; background: #edf1f4; font-size: 18px; }
+    .agente.activo .agente-icono { background: #d9eee6; }
+    .agente-texto { min-width: 0; flex: 1; }
+    .agente-nombre { display: block; font-size: 14px; font-weight: 750; }
+    .agente-detalle { display: block; color: var(--tinta-suave); font-size: 11px; margin-top: 4px; }
+    .etiqueta { color: var(--verde); font-size: 9px; letter-spacing: .09em; font-weight: 850; white-space: nowrap; }
+    .etiqueta.pendiente { color: #8a969e; }
+    .nota-datos { padding: 17px; background: #fffaf0; border-color: #f1e8d2; box-shadow: none; }
+    .nota-datos strong { font-size: 13px; }
+    .nota-datos p { margin: 7px 0 0; color: #786e58; line-height: 1.55; font-size: 12px; }
+    .chat { overflow: hidden; }
+    .chat-cabecera { display: flex; justify-content: space-between; align-items: center; padding: 19px 22px; border-bottom: 1px solid var(--borde); }
+    .chat-identidad { display: flex; align-items: center; gap: 11px; }
+    .chat-identidad .agente-icono { background: var(--menta); }
+    .chat-identidad strong { display: block; font-size: 14px; }
+    .chat-identidad span { color: var(--tinta-suave); font-size: 11px; }
+    .protocolo { font-size: 10px; color: #6b7c86; font-weight: 800; letter-spacing: .1em; border: 1px solid var(--borde); padding: 7px 9px; border-radius: 8px; }
+    .conversacion { min-height: 345px; max-height: 52vh; overflow-y: auto; padding: 24px 22px; display: flex; flex-direction: column; gap: 15px; }
+    .mensaje { max-width: min(82%, 570px); display: flex; flex-direction: column; gap: 5px; animation: aparecer .2s ease-out; }
+    @keyframes aparecer { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    .mensaje.usuario { align-self: flex-end; align-items: flex-end; }
+    .mensaje.agente { align-self: flex-start; }
+    .burbuja { padding: 12px 15px; line-height: 1.55; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 16px; }
+    .mensaje.agente .burbuja { background: #f0f4f5; border-bottom-left-radius: 5px; }
+    .mensaje.usuario .burbuja { background: var(--azul); color: white; border-bottom-right-radius: 5px; }
+    .hora { padding: 0 4px; font-size: 10px; color: #91a0a8; }
+    .sugerencias { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 22px 15px; }
+    .sugerencia { cursor: pointer; border: 1px solid #dce8e5; background: white; color: var(--azul-oscuro); border-radius: 999px; padding: 8px 11px; font-size: 11px; transition: .15s ease; }
+    .sugerencia:hover { background: var(--menta); border-color: #b8d9ce; }
+    .entrada { margin: 0 18px 18px; padding: 9px; display: flex; align-items: flex-end; gap: 10px; border: 1px solid #dce3e7; border-radius: 16px; background: #fbfcfc; }
+    .entrada:focus-within { border-color: #7bb6a2; box-shadow: 0 0 0 3px rgba(41, 132, 108, .1); }
+    textarea { resize: none; min-height: 42px; max-height: 120px; flex: 1; padding: 11px 9px; border: 0; outline: 0; color: var(--tinta); background: transparent; font-size: 14px; }
+    textarea::placeholder { color: #9aa7ae; }
+    .enviar { cursor: pointer; border: 0; border-radius: 12px; padding: 0 17px; height: 42px; color: white; background: var(--azul); font-size: 13px; font-weight: 750; transition: .15s; }
+    .enviar:hover { background: var(--azul-oscuro); }
+    .enviar:disabled { cursor: wait; opacity: .6; }
+    .pie { text-align: center; padding: 0 20px 20px; color: #95a1a8; font-size: 10px; }
+    .indicador { display: inline-flex; gap: 4px; padding: 13px 15px; background: #f0f4f5; border-radius: 15px; }
+    .indicador i { width: 5px; height: 5px; border-radius: 50%; background: #82979e; animation: latido 1s infinite alternate; }
+    .indicador i:nth-child(2) { animation-delay: .2s; } .indicador i:nth-child(3) { animation-delay: .4s; }
+    @keyframes latido { to { opacity: .3; transform: translateY(-3px); } }
+    @media (max-width: 760px) {
+      .barra-superior { height: 62px; padding: 0 18px; }
+      .contenedor { width: min(100% - 24px, 620px); margin: 28px auto 40px; }
+      .rejilla { grid-template-columns: 1fr; }
+      .lista-agentes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); padding: 12px; }
+      .titulo-seccion { grid-column: 1 / -1; margin-bottom: 5px; }
+      .agente { padding: 9px 6px; flex-direction: column; align-items: flex-start; gap: 7px; }
+      .agente-icono { width: 34px; height: 34px; }
+      .agente-nombre { font-size: 12px; }
+      .agente-detalle { font-size: 10px; }
+      .etiqueta { font-size: 8px; }
+      .nota-datos { display: none; }
+      .conversacion { min-height: 300px; max-height: 48vh; padding: 18px 14px; }
+      .chat-cabecera { padding: 15px; }
+      .sugerencias { padding: 0 14px 13px; }
+      .entrada { margin: 0 12px 13px; }
+      .estado-global { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="barra-superior">
+    <div class="marca">
+      <div class="marca-icono" aria-hidden="true">✳</div>
+      <div>AGENTES<small>CONSOLA A2A</small></div>
+    </div>
+    <div class="estado-global"><a class="enlace-estudio" href="/estudio">Guía de estudio ↗</a><span class="punto"></span><span>3 agentes implementados</span></div>
+  </header>
+
+  <main class="contenedor">
+    <section class="encabezado">
+      <div class="sobretitulo">Tu equipo de asistentes</div>
+      <h1>¿A dónde vamos?</h1>
+      <p class="bajada">Consulta a tus agentes desde un solo lugar.</p>
+    </section>
+
+    <div class="rejilla">
+      <aside class="columna" aria-label="Agentes del proyecto">
+        <section class="tarjeta lista-agentes">
+          <h2 class="titulo-seccion">Mis agentes</h2>
+          <div class="agente activo" aria-current="true">
+            <div class="agente-icono" aria-hidden="true">✈</div>
+            <div class="agente-texto"><span class="agente-nombre">Viajes</span><span class="agente-detalle">Vuelos y hoteles</span></div>
+            <span class="etiqueta">ACTIVO</span>
+          </div>
+          <div class="agente">
+            <div class="agente-icono" aria-hidden="true">⌂</div>
+            <div class="agente-texto"><span class="agente-nombre">Restaurantes</span><span class="agente-detalle">Recomendaciones · puerto 8001</span></div>
+            <span class="etiqueta">IMPLEMENTADO</span>
+          </div>
+          <div class="agente">
+            <div class="agente-icono" aria-hidden="true">✣</div>
+            <div class="agente-texto"><span class="agente-nombre">Coordinador</span><span class="agente-detalle">Delegación A2A · puerto 8002</span></div>
+            <span class="etiqueta">IMPLEMENTADO</span>
+          </div>
+        </section>
+        <section class="tarjeta nota-datos">
+          <strong>Sobre estos resultados</strong>
+          <p>Los vuelos y alojamientos son datos de demostración. No representan disponibilidad real y no permiten reservar ni pagar.</p>
+        </section>
+      </aside>
+
+      <section class="tarjeta chat" aria-label="Conversación con el agente de viajes">
+        <header class="chat-cabecera">
+          <div class="chat-identidad">
+            <div class="agente-icono" aria-hidden="true">✈</div>
+            <div><strong>Agente de viajes</strong><span><span class="punto" style="display:inline-block;width:6px;height:6px;box-shadow:none;margin-right:5px"></span>Listo para ayudarte</span></div>
+          </div>
+          <span class="protocolo">A2A · LANGGRAPH</span>
+        </header>
+
+        <div class="conversacion" id="conversacion" aria-live="polite">
+          <div class="mensaje agente">
+            <div class="burbuja">¡Hola! Puedo buscar vuelos entre SCL, LIM, BOG y EZE, además de hoteles. ¿Qué viaje tienes en mente?</div>
+            <span class="hora">Agente de viajes</span>
+          </div>
+        </div>
+
+        <div class="sugerencias" aria-label="Preguntas sugeridas">
+          <button class="sugerencia" type="button" data-pregunta="Busca un vuelo de SCL a LIM para 2026-12-10">✈ Vuelo SCL → LIM</button>
+          <button class="sugerencia" type="button" data-pregunta="Busca hoteles en Lima para 2 noches">⌂ Hoteles en Lima</button>
+          <button class="sugerencia" type="button" data-pregunta="Compara vuelos de SCL a EZE para 2026-12-10">↔ Comparar vuelos</button>
+        </div>
+
+        <form class="entrada" id="formulario">
+          <textarea id="pregunta" rows="1" placeholder="Escribe tu pregunta de viaje..." aria-label="Tu pregunta" required></textarea>
+          <button class="enviar" id="enviar" type="submit">Enviar&nbsp; ↑</button>
+        </form>
+        <div class="pie">El agente puede tardar unos segundos mientras consulta sus herramientas.</div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+    const formulario = document.getElementById("formulario");
+    const pregunta = document.getElementById("pregunta");
+    const conversacion = document.getElementById("conversacion");
+    const botonEnviar = document.getElementById("enviar");
+    const claveContexto = "contexto-agente-viajes";
+    let contextId = sessionStorage.getItem(claveContexto);
+    if (!contextId) {
+      contextId = crypto.randomUUID();
+      sessionStorage.setItem(claveContexto, contextId);
+    }
+
+    function agregarMensaje(texto, tipo, etiqueta) {
+      const contenedor = document.createElement("div");
+      contenedor.className = `mensaje ${tipo}`;
+      const burbuja = document.createElement("div");
+      burbuja.className = "burbuja";
+      burbuja.textContent = texto;
+      const pie = document.createElement("span");
+      pie.className = "hora";
+      pie.textContent = etiqueta;
+      contenedor.append(burbuja, pie);
+      conversacion.appendChild(contenedor);
+      conversacion.scrollTop = conversacion.scrollHeight;
+      return contenedor;
+    }
+
+    formulario.addEventListener("submit", async (evento) => {
+      evento.preventDefault();
+      const texto = pregunta.value.trim();
+      if (!texto || botonEnviar.disabled) return;
+
+      agregarMensaje(texto, "usuario", "Tú");
+      pregunta.value = "";
+      botonEnviar.disabled = true;
+      const espera = agregarMensaje("", "agente", "Consultando...");
+      const indicador = document.createElement("span");
+      indicador.className = "indicador";
+      indicador.innerHTML = "<i></i><i></i><i></i>";
+      espera.querySelector(".burbuja").appendChild(indicador);
+
+      const control = new AbortController();
+      const temporizador = window.setTimeout(() => control.abort(), 65000);
+      try {
+        const respuesta = await fetch("/panel/consultar", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ texto, context_id: contextId }),
+          signal: control.signal
+        });
+        const datos = await respuesta.json();
+        espera.remove();
+        if (!respuesta.ok) throw new Error(datos.detail || "No se pudo consultar al agente.");
+        if (datos.context_id) {
+          contextId = datos.context_id;
+          sessionStorage.setItem(claveContexto, contextId);
+        }
+        agregarMensaje(datos.respuesta, "agente", "Agente de viajes");
+      } catch (error) {
+        espera.remove();
+        const mensaje = error.name === "AbortError"
+          ? "La consulta tardó demasiado. Inténtalo nuevamente."
+          : (error.message || "No se pudo conectar con el agente.").replace(/[\r\n]+/g, " ");
+        agregarMensaje(mensaje, "agente", "Aviso");
+      } finally {
+        window.clearTimeout(temporizador);
+        botonEnviar.disabled = false;
+        pregunta.focus();
+      }
+    });
+
+    document.querySelectorAll(".sugerencia").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        pregunta.value = boton.dataset.pregunta;
+        formulario.requestSubmit();
+      });
+    });
+  </script>
+</body>
+</html>

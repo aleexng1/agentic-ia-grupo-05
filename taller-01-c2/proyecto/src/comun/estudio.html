@@ -1,0 +1,391 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102e38">
+  <title>Guía de estudio · Agentes A2A</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --tinta: #172e38;
+      --suave: #627880;
+      --fondo: #f4f6f3;
+      --papel: #fff;
+      --borde: #e1e8e4;
+      --verde: #176b61;
+      --verde-oscuro: #0f514d;
+      --menta: #e8f4ef;
+      --coral: #e48d69;
+      --azul-noche: #102e38;
+      --sombra: 0 18px 50px rgba(16, 46, 56, .07);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; background: var(--fondo); color: var(--tinta); }
+    button, a { font: inherit; }
+    a { color: inherit; }
+    .barra { height: 68px; padding: 0 clamp(20px, 6vw, 90px); display: flex; align-items: center; justify-content: space-between; color: #f4f8f5; background: var(--azul-noche); }
+    .marca { display: flex; gap: 11px; align-items: center; text-decoration: none; font-size: 13px; font-weight: 800; letter-spacing: .05em; }
+    .marca-icono { width: 34px; height: 34px; display: grid; place-items: center; border-radius: 11px; background: #277b70; color: white; font-size: 18px; }
+    .volver { color: #d4e4df; text-decoration: none; font-size: 13px; }
+    .volver:hover { color: white; }
+    .hero { background: var(--azul-noche); color: #f4f8f5; padding: 54px clamp(20px, 6vw, 90px) 76px; position: relative; overflow: hidden; }
+    .hero::after { content: ""; position: absolute; width: 480px; height: 480px; border: 1px solid rgba(148, 206, 183, .13); border-radius: 50%; right: -120px; top: -220px; box-shadow: 0 0 0 42px rgba(148, 206, 183, .035), 0 0 0 86px rgba(148, 206, 183, .025); pointer-events: none; }
+    .hero-contenido { width: min(1120px, 100%); margin: auto; position: relative; z-index: 1; }
+    .insignia { display: inline-flex; align-items: center; gap: 8px; color: #b7ded0; font-size: 10px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    .insignia::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: #71c9a5; }
+    h1 { max-width: 720px; font-size: clamp(38px, 6vw, 68px); letter-spacing: -.065em; line-height: 1.02; margin: 17px 0 15px; }
+    .hero p { max-width: 620px; color: #c2d2d2; font-size: 16px; line-height: 1.7; margin: 0; }
+    .hero-pie { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 27px; }
+    .hero-etiqueta { border: 1px solid rgba(220, 239, 229, .2); color: #e0eee8; background: rgba(255,255,255,.04); padding: 8px 11px; border-radius: 9px; font-size: 11px; }
+    .pagina { width: min(1120px, calc(100% - 36px)); margin: -28px auto 72px; position: relative; z-index: 2; }
+    .resumen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px; border: 1px solid var(--borde); border-radius: 17px; overflow: hidden; background: var(--borde); box-shadow: var(--sombra); }
+    .resumen-item { min-height: 94px; background: var(--papel); padding: 19px 21px; }
+    .resumen-item strong { display: block; font-size: 21px; letter-spacing: -.04em; }
+    .resumen-item span { display: block; color: var(--suave); font-size: 11px; margin-top: 4px; }
+    .seccion { margin-top: 58px; scroll-margin-top: 24px; }
+    .seccion-cabecera { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 19px; }
+    .sobre { color: var(--verde); font-size: 10px; font-weight: 850; letter-spacing: .15em; text-transform: uppercase; }
+    h2 { margin: 7px 0 0; font-size: clamp(25px, 3vw, 34px); letter-spacing: -.05em; }
+    .explicacion { color: var(--suave); line-height: 1.65; font-size: 14px; max-width: 630px; margin: 9px 0 0; }
+    .tarjeta { background: var(--papel); border: 1px solid var(--borde); border-radius: 18px; box-shadow: var(--sombra); }
+    .laboratorio { overflow: hidden; }
+    .pestanas { display: flex; gap: 7px; padding: 17px 18px; background: #fbfcfa; border-bottom: 1px solid var(--borde); }
+    .pestana { border: 1px solid transparent; border-radius: 9px; background: transparent; padding: 9px 13px; cursor: pointer; color: var(--suave); font-size: 12px; font-weight: 750; }
+    .pestana[aria-selected="true"] { color: var(--verde-oscuro); background: var(--menta); border-color: #cfe5da; }
+    .aviso-ruta { margin: 18px 20px 0; padding: 12px 14px; background: #f5f8f6; border-left: 3px solid #79b39a; color: #526a68; line-height: 1.55; font-size: 12px; }
+    .diagrama { display: flex; align-items: stretch; justify-content: center; gap: 9px; padding: 26px 20px 20px; overflow-x: auto; }
+    .nodo { min-width: 122px; max-width: 155px; min-height: 100px; display: flex; flex-direction: column; justify-content: center; padding: 13px; border: 1px solid #dce6e1; border-radius: 14px; background: white; text-align: center; }
+    .nodo small { color: var(--verde); font-size: 9px; font-weight: 850; letter-spacing: .1em; text-transform: uppercase; }
+    .nodo strong { margin-top: 7px; font-size: 13px; line-height: 1.35; }
+    .nodo span { color: var(--suave); font-size: 10px; line-height: 1.4; margin-top: 5px; }
+    .nodo.activo { border-color: #65aa91; background: #edf7f2; box-shadow: 0 0 0 3px rgba(67, 142, 112, .09); }
+    .flecha { display: flex; flex: 0 0 22px; align-items: center; justify-content: center; color: #86a098; font-size: 20px; }
+    .detalle-flujo { border-top: 1px solid var(--borde); display: grid; grid-template-columns: 260px 1fr; min-height: 220px; }
+    .lista-pasos { padding: 17px; background: #fbfcfa; border-right: 1px solid var(--borde); }
+    .lista-pasos-titulo { margin: 0 0 10px 4px; color: #83938f; font-size: 9px; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
+    .boton-paso { display: flex; gap: 10px; align-items: center; width: 100%; padding: 9px; border: 0; border-radius: 10px; background: transparent; color: var(--tinta); text-align: left; cursor: pointer; font-size: 11px; }
+    .boton-paso:hover, .boton-paso[aria-current="step"] { background: #e9f3ee; }
+    .numero-paso { display: grid; place-items: center; width: 23px; height: 23px; flex: 0 0 auto; border-radius: 8px; color: var(--verde); background: white; font-size: 10px; font-weight: 850; }
+    .detalle-paso { padding: 23px 25px; }
+    .detalle-paso h3 { font-size: 20px; letter-spacing: -.035em; margin: 0 0 9px; }
+    .detalle-paso p { max-width: 640px; color: var(--suave); font-size: 13px; line-height: 1.75; margin: 0; }
+    .archivo { display: inline-block; margin-top: 17px; padding: 7px 9px; border-radius: 7px; color: var(--verde-oscuro); background: #eff6f2; font: 11px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .ramas { display: none; gap: 8px; justify-content: center; padding: 0 20px 20px; }
+    .ramas.visible { display: flex; }
+    .rama { padding: 8px 11px; border-radius: 8px; font-size: 10px; color: #5b706c; background: #f4f7f5; }
+    .rejilla-conceptos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 13px; }
+    .concepto { min-height: 176px; padding: 18px; }
+    .concepto-icono { width: 37px; height: 37px; display: grid; place-items: center; border-radius: 12px; color: var(--verde); background: var(--menta); font-size: 17px; }
+    .concepto h3 { font-size: 15px; margin: 14px 0 7px; letter-spacing: -.02em; }
+    .concepto p { color: var(--suave); font-size: 11px; line-height: 1.7; margin: 0; }
+    .rejilla-archivos { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .archivo-card { padding: 16px; }
+    .archivo-card code { color: var(--verde-oscuro); font: 11px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .archivo-card p { color: var(--suave); font-size: 11px; line-height: 1.65; margin: 8px 0 0; }
+    .banda-verdad { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    .verdad { padding: 18px 20px; }
+    .verdad h3 { margin: 0 0 8px; font-size: 14px; }
+    .verdad p { margin: 0; color: var(--suave); font-size: 12px; line-height: 1.7; }
+    .verdad.ficticio { background: #fffaf2; border-color: #f0e7d5; }
+    .verdad.estado { background: #eef6f2; border-color: #dbeae1; }
+    .comandos { padding: 21px; }
+    .comando { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 13px; margin-top: 9px; background: #112e37; border-radius: 10px; color: #e1eeea; }
+    .comando code { overflow-x: auto; white-space: nowrap; font: 11px ui-monospace, SFMono-Regular, Consolas, monospace; }
+    .copiar { flex: 0 0 auto; padding: 6px 9px; border: 1px solid #41616a; border-radius: 7px; background: transparent; color: #d9e8e1; cursor: pointer; font-size: 10px; }
+    .copiar:hover { background: #244750; }
+    .nota-comandos { color: var(--suave); font-size: 11px; line-height: 1.65; margin: 13px 0 0; }
+    .reto { padding: 22px; }
+    .reto h3 { margin: 0 0 7px; font-size: 17px; }
+    .reto p { color: var(--suave); font-size: 12px; }
+    .opciones { display: flex; flex-wrap: wrap; gap: 8px; }
+    .opcion { padding: 9px 12px; border: 1px solid var(--borde); border-radius: 9px; background: white; color: var(--tinta); cursor: pointer; font-size: 11px; }
+    .opcion:hover { border-color: #80b49e; background: #f3faf6; }
+    .resultado-reto { min-height: 19px; margin: 12px 0 0 !important; font-weight: 700; }
+    .pie-pagina { margin-top: 45px; border-top: 1px solid var(--borde); padding: 22px 0 0; display: flex; justify-content: space-between; gap: 16px; color: #82928d; font-size: 10px; }
+    @media (max-width: 850px) { .rejilla-conceptos { grid-template-columns: repeat(2, 1fr); } .diagrama { justify-content: flex-start; } .resumen-item { padding: 16px; } }
+    @media (max-width: 640px) {
+      .barra { height: 60px; padding: 0 17px; }
+      .hero { padding: 43px 20px 62px; }
+      .pagina { width: calc(100% - 24px); }
+      .resumen { grid-template-columns: repeat(2, 1fr); }
+      .resumen-item { min-height: 80px; }
+      .seccion { margin-top: 43px; }
+      .seccion-cabecera { display: block; }
+      .detalle-flujo { grid-template-columns: 1fr; }
+      .lista-pasos { border-right: 0; border-bottom: 1px solid var(--borde); display: grid; grid-template-columns: repeat(2, 1fr); gap: 3px; }
+      .lista-pasos-titulo { grid-column: 1 / -1; }
+      .detalle-paso { padding: 20px; }
+      .rejilla-conceptos { grid-template-columns: 1fr 1fr; }
+      .concepto { min-height: 190px; padding: 14px; }
+      .rejilla-archivos { grid-template-columns: repeat(2, 1fr); }
+      .banda-verdad { grid-template-columns: 1fr; }
+      .comando { align-items: flex-start; }
+      .comando code { white-space: pre-wrap; overflow-wrap: anywhere; }
+      .pie-pagina { flex-direction: column; }
+    }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <a class="marca" href="/" aria-label="Volver al panel de agentes"><span class="marca-icono">✳</span> GUÍA DE AGENTES</a>
+    <a class="volver" href="/">← Volver al panel</a>
+  </header>
+
+  <section class="hero">
+    <div class="hero-contenido">
+      <div class="insignia">Guía interactiva · Curso de agentes</div>
+      <h1>Entiende qué pasa detrás de cada respuesta.</h1>
+      <p>Recorre una consulta desde que escribes una pregunta hasta que vuelve la respuesta. Puedes explorar el camino del panel web o el protocolo A2A.</p>
+      <div class="hero-pie">
+        <span class="hero-etiqueta">03 agentes implementados</span>
+        <span class="hero-etiqueta">LangGraph · CrewAI · A2A</span>
+        <span class="hero-etiqueta">Datos de demostración</span>
+      </div>
+    </div>
+  </section>
+
+  <main class="pagina">
+    <section class="resumen" aria-label="Resumen del proyecto">
+      <div class="resumen-item"><strong>3</strong><span>agentes planeados</span></div>
+      <div class="resumen-item"><strong>3</strong><span>agentes implementados</span></div>
+      <div class="resumen-item"><strong>1</strong><span>coordinador A2A</span></div>
+      <div class="resumen-item"><strong>45 s</strong><span>límite de espera de Gemini</span></div>
+    </section>
+
+    <section class="seccion" id="recorridos">
+      <div class="seccion-cabecera">
+        <div><div class="sobre">01 · Sigue el recorrido</div><h2>Una pregunta, paso a paso</h2>
+          <p class="explicacion">Elige por dónde entra el mensaje. Pulsa cada paso para ver qué hace y en qué archivo ocurre.</p>
+        </div>
+      </div>
+      <div class="tarjeta laboratorio">
+        <div class="pestanas" role="tablist" aria-label="Tipo de recorrido">
+          <button class="pestana" role="tab" aria-selected="true" data-recorrido="panel">Desde el panel web</button>
+          <button class="pestana" role="tab" aria-selected="false" data-recorrido="a2a">Desde otro agente A2A</button>
+        </div>
+        <div class="aviso-ruta" id="aviso-ruta"></div>
+        <div class="diagrama" id="diagrama-flujo" aria-label="Diagrama del recorrido"></div>
+        <div class="ramas" id="ramas-flujo"></div>
+        <div class="detalle-flujo">
+          <nav class="lista-pasos" id="lista-pasos" aria-label="Pasos del recorrido"></nav>
+          <article class="detalle-paso" aria-live="polite">
+            <div class="sobre" id="numero-detalle"></div>
+            <h3 id="titulo-detalle"></h3>
+            <p id="texto-detalle"></p>
+            <code class="archivo" id="archivo-detalle"></code>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="seccion-cabecera"><div><div class="sobre">02 · Ideas clave</div><h2>Cuatro piezas que colaboran</h2></div></div>
+      <div class="rejilla-conceptos">
+        <article class="tarjeta concepto"><div class="concepto-icono">◉</div><h3>Agente</h3><p>Viajes usa LangGraph; Restaurantes, CrewAI; y el Coordinador, un grafo LangGraph de un nodo que consulta Viajes por A2A.</p></article>
+        <article class="tarjeta concepto"><div class="concepto-icono">⌘</div><h3>LangGraph</h3><p>Orquesta los pasos del agente: el nodo <code>model</code> decide si responder o pedir una herramienta; el nodo <code>tools</code> la ejecuta.</p></article>
+        <article class="tarjeta concepto"><div class="concepto-icono">⚒</div><h3>Herramienta</h3><p>Una función que el modelo puede solicitar. Aquí consulta diccionarios locales; no busca en internet ni confirma disponibilidad real.</p></article>
+        <article class="tarjeta concepto"><div class="concepto-icono">↻</div><h3>Memoria</h3><p>Viajes usa <code>MemorySaver</code> con <code>context_id</code> como <code>thread_id</code>; Restaurantes guarda el historial en un diccionario por contexto. Ambos viven en RAM.</p></article>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="seccion-cabecera"><div><div class="sobre">03 · Orientación en el código</div><h2>¿Dónde vive cada cosa?</h2><p class="explicacion">Este mapa te sirve como orden de lectura cuando quieras modificar el proyecto.</p></div></div>
+      <div class="rejilla-archivos">
+        <article class="tarjeta archivo-card"><code>src/agente_viajes/tools.py</code><p>Los datos inventados y las herramientas buscar_vuelos / buscar_hoteles.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_viajes/prompts.py</code><p>Las instrucciones que definen el comportamiento y los límites del agente.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_viajes/graph.py</code><p>Gemini, create_agent, MemorySaver, responder, saltos y diagrama.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_viajes/server.py</code><p>Construye la tarjeta del agente y la aplicación FastAPI para levantarla.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_restaurantes/tools.py</code><p>Restaurantes inventados de LIM, BOG y EZE y sus dos herramientas.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_restaurantes/prompts.py</code><p>Rol, objetivo e historia del agente de restaurantes.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_restaurantes/crew.py</code><p>Gemini, Agent, Task, Crew, historial por context_id y callback de pasos.</p></article>
+        <article class="tarjeta archivo-card"><code>src/agente_restaurantes/server.py</code><p>Publica la tarjeta y conecta responder de CrewAI al servidor A2A común.</p></article>
+        <article class="tarjeta archivo-card"><code>src/coordinador/cliente.py</code><p>Descubre tarjetas A2A, reutiliza clientes JSON-RPC y espera respuestas o tareas.</p></article>
+        <article class="tarjeta archivo-card"><code>src/coordinador/graph.py</code><p>Un nodo delegar llama a Viajes por A2A; MemorySaver mantiene el contexto.</p></article>
+        <article class="tarjeta archivo-card"><code>scripts/probar_coordinador.py</code><p>Envía dos preguntas con el mismo context_id para verificar continuidad.</p></article>
+        <article class="tarjeta archivo-card"><code>src/comun/executor.py</code><p>Traduce el mensaje A2A a una llamada responder y publica el mensaje de vuelta.</p></article>
+        <article class="tarjeta archivo-card"><code>src/comun/servidor.py · panel.py</code><p>Monta las rutas A2A, salud, el panel web y su endpoint de consulta.</p></article>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="seccion-cabecera"><div><div class="sobre">04 · Límites actuales</div><h2>Qué hace y qué todavía no hace</h2></div></div>
+      <div class="banda-verdad">
+        <article class="tarjeta verdad ficticio"><h3>✳ Datos ficticios</h3><p>Los horarios, precios y hoteles vienen de ejemplos dentro del código. Son para aprender el flujo, no para comprar, reservar o planificar un viaje real.</p></article>
+        <article class="tarjeta verdad estado"><h3>↗ El coordinador sí delega</h3><p>El Coordinador consulta a Viajes por A2A y repite su respuesta. Restaurantes ya tiene servidor propio, pero el Coordinador todavía no lo consulta.</p></article>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="seccion-cabecera"><div><div class="sobre">05 · Experimenta</div><h2>Prueba y observa</h2><p class="explicacion">El modo diagrama no llama a Gemini. El modo saltos sí ejecuta el agente, por lo que requiere una clave válida en `.env`.</p></div></div>
+      <div class="tarjeta comandos">
+        <div class="comando"><code>python main.py viajes "Busca hoteles en Lima para 2 noches" --saltos</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>python main.py viajes "vuelo a Lima" --diagrama</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>python main.py restaurantes "Busca comida peruana en Lima" --saltos</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>python main.py restaurantes --diagrama</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>python main.py coordinador "¿Qué vuelos hay de SCL a LIM?" --saltos</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>python main.py coordinador --diagrama</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>.\.venv\Scripts\python.exe -m uvicorn src.agente_viajes.server:app --port 8000 --reload</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>.\.venv-crew\Scripts\python.exe -m uvicorn src.agente_restaurantes.server:app --port 8001</code><button class="copiar" type="button">Copiar</button></div>
+        <div class="comando"><code>.\.venv\Scripts\python.exe -m uvicorn src.coordinador.server:app --port 8002</code><button class="copiar" type="button">Copiar</button></div>
+        <p class="nota-comandos">Usa <code>.venv</code> para Viajes y Coordinador, y <code>.venv-crew</code> para Restaurantes antes de ejecutar <code>python main.py</code>. Configura <code>GOOGLE_API_KEY</code> en <code>.env</code> para consultas Gemini. El panel está en <code>http://127.0.0.1:8000/</code> y la guía en <code>/estudio</code>. Detén cada servidor con <code>Ctrl+C</code>.</p>
+      </div>
+    </section>
+
+    <section class="seccion">
+      <div class="seccion-cabecera"><div><div class="sobre">06 · Comprueba lo aprendido</div><h2>Mini reto</h2></div></div>
+      <div class="tarjeta reto">
+        <h3>La herramienta no encuentra una ciudad.</h3>
+        <p>¿Qué devuelve <code>buscar_hoteles("Cusco", 2)</code>?</p>
+        <div class="opciones">
+          <button class="opcion" type="button" data-correcta="false">Una excepción de red</button>
+          <button class="opcion" type="button" data-correcta="true">Una lista vacía: []</button>
+          <button class="opcion" type="button" data-correcta="false">Hoteles que Gemini inventa</button>
+        </div>
+        <p class="resultado-reto" id="resultado-reto" aria-live="polite"></p>
+      </div>
+    </section>
+
+    <footer class="pie-pagina"><span>Guía local del proyecto de agentes A2A.</span><a href="/">Volver al panel de agentes ↑</a></footer>
+  </main>
+
+  <script>
+    const recorridos = {
+      panel: {
+        aviso: "El chat del navegador llama a una ruta propia de FastAPI. Esta ruta comparte la función responder con el agente; no es una llamada A2A entre agentes.",
+        nodos: [
+          ["Entrada", "Tu pregunta", "Navegador"],
+          ["HTTP", "POST /panel/consultar", "Texto + contexto"],
+          ["Aplicación", "responder()", "async"],
+          ["LangGraph", "model", "Gemini decide"],
+          ["Herramienta", "tools", "si hace falta"],
+          ["Salida", "Respuesta", "De vuelta al chat"]
+        ],
+        ramas: ["model → respuesta directa", "model → tools → model → respuesta"],
+        pasos: [
+          ["Escribes una pregunta", "El navegador conserva un context_id en esta pestaña. Eso permite que el agente recupere el hilo de conversación entre mensajes.", "src/comun/panel.html"],
+          ["El panel envía la consulta", "Hace POST a /panel/consultar con el texto y el context_id. La petición del navegador tiene un límite de espera de 65 segundos.", "src/comun/panel.html"],
+          ["FastAPI valida y delega", "La ruta recibe el cuerpo JSON, rechaza texto vacío y llama de forma asíncrona a responder(texto, context_id). Los errores se devuelven en una línea entendible.", "src/comun/panel.py"],
+          ["LangGraph invoca el modelo", "graph.ainvoke carga el estado del hilo en MemorySaver y entrega a Gemini el historial, el prompt y las definiciones de herramientas. Gemini tiene timeout de 45 segundos.", "src/agente_viajes/graph.py"],
+          ["El modelo elige qué hacer", "Puede pedir buscar_vuelos o buscar_hoteles. LangGraph enruta la decisión al nodo tools y luego vuelve al nodo model; si no necesita datos, puede responder directamente.", "create_agent · nodos model / tools"],
+          ["La respuesta vuelve al chat", "FastAPI devuelve el texto y el mismo context_id. El navegador agrega la respuesta sin interpretar HTML recibido del modelo.", "POST /panel/consultar → navegador"]
+        ]
+      },
+      a2a: {
+        aviso: "A2A es la vía para que clientes u otros agentes compatibles hablen con este agente. El panel de esta demo usa la ruta propia /panel/consultar; ambos caminos llegan al mismo responder().",
+        nodos: [
+          ["Cliente", "Cliente A2A", "Otro agente / app"],
+          ["JSON-RPC", "POST /", "Mensaje A2A"],
+          ["SDK", "RequestHandler", "Valida y arma contexto"],
+          ["Adaptador", "Executor", "Extrae texto e ID"],
+          ["Agente", "responder()", "Framework del agente"],
+          ["JSON-RPC", "Message", "Respuesta A2A"]
+        ],
+        ramas: ["Tarjeta: GET /.well-known/agent-card.json", "Salud: GET /salud"],
+        pasos: [
+          ["Un cliente descubre el agente", "La tarjeta publica nombre, descripción, dirección, capacidades y skills. Así el cliente sabe qué ofrece este agente.", "GET /.well-known/agent-card.json · tarjeta.py"],
+          ["El cliente envía un mensaje", "Envía una petición A2A JSON-RPC por POST /. Esta ruta puede coexistir con GET /, que sirve la página del panel.", "src/comun/servidor.py"],
+          ["El SDK prepara la solicitud", "DefaultRequestHandler y InMemoryTaskStore administran la petición y su contexto usando las APIs reales del a2a-sdk 1.3.0.", "DefaultRequestHandler · a2a-sdk"],
+          ["Executor adapta el protocolo", "context.get_user_input() extrae el texto. Executor conserva context_id o crea un UUID si falta, y llama a la función compartida responder.", "src/comun/executor.py"],
+          ["El agente procesa el texto", "Executor llama al responder del agente correspondiente. Viajes y Coordinador usan LangGraph; Restaurantes usa CrewAI. El Coordinador además llama a Viajes con un cliente A2A.", "src/coordinador/graph.py · src/coordinador/cliente.py"],
+          ["Executor publica la respuesta", "Crea un Message con rol de agente, texto y el mismo context_id; lo entrega a la cola A2A para que el SDK responda al cliente.", "EventQueue → respuesta JSON-RPC"]
+        ]
+      }
+    };
+
+    const elementoDiagrama = document.getElementById("diagrama-flujo");
+    const elementoRamas = document.getElementById("ramas-flujo");
+    const elementoLista = document.getElementById("lista-pasos");
+    const pestanas = document.querySelectorAll(".pestana");
+    let recorridoActual = "panel";
+
+    function mostrarPaso(indice) {
+      const paso = recorridos[recorridoActual].pasos[indice];
+      document.getElementById("numero-detalle").textContent = `PASO ${String(indice + 1).padStart(2, "0")}`;
+      document.getElementById("titulo-detalle").textContent = paso[0];
+      document.getElementById("texto-detalle").textContent = paso[1];
+      document.getElementById("archivo-detalle").textContent = paso[2];
+      elementoLista.querySelectorAll(".boton-paso").forEach((boton, posicion) => {
+        boton.setAttribute("aria-current", posicion === indice ? "step" : "false");
+      });
+      elementoDiagrama.querySelectorAll(".nodo").forEach((nodo, posicion) => {
+        nodo.classList.toggle("activo", posicion === indice);
+      });
+    }
+
+    function mostrarRecorrido(nombre) {
+      recorridoActual = nombre;
+      const recorrido = recorridos[nombre];
+      pestanas.forEach((pestana) => pestana.setAttribute("aria-selected", String(pestana.dataset.recorrido === nombre)));
+      document.getElementById("aviso-ruta").textContent = recorrido.aviso;
+      elementoDiagrama.replaceChildren();
+      recorrido.nodos.forEach((datos, indice) => {
+        const nodo = document.createElement("div");
+        nodo.className = "nodo";
+        nodo.innerHTML = `<small>${datos[0]}</small><strong>${datos[1]}</strong><span>${datos[2]}</span>`;
+        elementoDiagrama.appendChild(nodo);
+        if (indice < recorrido.nodos.length - 1) {
+          const flecha = document.createElement("span");
+          flecha.className = "flecha";
+          flecha.textContent = "→";
+          flecha.setAttribute("aria-hidden", "true");
+          elementoDiagrama.appendChild(flecha);
+        }
+      });
+      elementoRamas.replaceChildren();
+      elementoRamas.classList.add("visible");
+      recorrido.ramas.forEach((texto) => {
+        const rama = document.createElement("span");
+        rama.className = "rama";
+        rama.textContent = texto;
+        elementoRamas.appendChild(rama);
+      });
+      elementoLista.replaceChildren();
+      const titulo = document.createElement("p");
+      titulo.className = "lista-pasos-titulo";
+      titulo.textContent = "Explora cada paso";
+      elementoLista.appendChild(titulo);
+      recorrido.pasos.forEach((paso, indice) => {
+        const boton = document.createElement("button");
+        boton.className = "boton-paso";
+        boton.type = "button";
+        boton.setAttribute("aria-current", "false");
+        boton.innerHTML = `<span class="numero-paso">${String(indice + 1).padStart(2, "0")}</span><span>${paso[0]}</span>`;
+        boton.addEventListener("click", () => mostrarPaso(indice));
+        elementoLista.appendChild(boton);
+      });
+      mostrarPaso(0);
+    }
+
+    pestanas.forEach((pestana) => pestana.addEventListener("click", () => mostrarRecorrido(pestana.dataset.recorrido)));
+    mostrarRecorrido("panel");
+
+    document.querySelectorAll(".copiar").forEach((boton) => {
+      boton.addEventListener("click", async () => {
+        const texto = boton.parentElement.querySelector("code").textContent;
+        try {
+          await navigator.clipboard.writeText(texto);
+          boton.textContent = "Copiado";
+          window.setTimeout(() => { boton.textContent = "Copiar"; }, 1200);
+        } catch {
+          boton.textContent = "Selecciona el comando";
+          window.setTimeout(() => { boton.textContent = "Copiar"; }, 1600);
+        }
+      });
+    });
+
+    document.querySelectorAll(".opcion").forEach((boton) => {
+      boton.addEventListener("click", () => {
+        const resultado = document.getElementById("resultado-reto");
+        const acierto = boton.dataset.correcta === "true";
+        resultado.textContent = acierto
+          ? "¡Correcto! La herramienta devuelve [] cuando no encuentra esa ciudad."
+          : "No: los datos desconocidos no se inventan. La herramienta devuelve [].";
+        resultado.style.color = acierto ? "#176b61" : "#a35a42";
+      });
+    });
+  </script>
+</body>
+</html>

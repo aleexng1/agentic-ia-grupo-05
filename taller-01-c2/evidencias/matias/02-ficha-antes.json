@@ -1,0 +1,40 @@
+{
+  "name": "Agente de Matias",
+  "description": "Arma programas y horarios para ferias tecnológicas, gastronómicas, culturales e infantiles, según duración y público. No cotiza lugares, comida ni costos, y no confirma el programa definitivo.",
+  "supportedInterfaces": [
+    {
+      "url": "https://node-farms-couple-arthur.trycloudflare.com",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "armar_programa",
+      "name": "Armar programa de feria",
+      "description": "Sugiere actividades y un horario para un evento según tipo, duración, público y hora de inicio.",
+      "tags": [
+        "armar_programa"
+      ],
+      "examples": [
+        "Arma un programa de 4 horas para una feria tecnológica con público familiar desde las 10:00."
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    }
+  ]
+}

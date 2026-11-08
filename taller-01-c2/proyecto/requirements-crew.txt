@@ -1,0 +1,6 @@
+crewai[google-genai]
+a2a-sdk>=1.2
+sse-starlette>=3.0
+fastapi
+uvicorn[standard]
+python-dotenv
