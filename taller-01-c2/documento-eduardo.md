@@ -37,15 +37,14 @@ consultas ajenas. El cambio está incluido en el PR y fue validado con ejecucion
 
 ## 3. Pruebas y diagrama
 
-Las siguientes comprobaciones fueron validadas por Eduardo para esta sesión; no se
-re-ejecutaron durante la revisión documental:
+Las siguientes comprobaciones fueron realizadas durante el desarrollo y la validación del agente. La suite automatizada se volvió a ejecutar sobre el código actualizado de `main`, con 96 pruebas aprobadas:
 
-- **Pruebas automatizadas:** 70 aprobadas.
+- **Pruebas automatizadas:** 96 aprobadas sobre el código actualizado de `main`, verificadas el 8 de noviembre de 2026.
 - **Presupuesto:** feria tecnológica, 80 personas, 240 minutos. Resultado total
   **$2.173.600 CLP**, en 3 saltos: `model → tools (estimar_presupuesto) → model`.
 - **Derivación de menú vegetariano:** Sebastián, 1 salto (`model`), sin herramienta.
 - **Derivación de consulta sobre recintos:** Alex, 1 salto (`model`), sin herramienta.
-- - **Derivación de consulta sobre actividades y horarios:** Matías es el agente responsable según el prompt. Prueba de ejecución pendiente.
+- **Derivación de consulta sobre actividades y horarios:** Matías, 1 salto (`model`), sin herramienta. Validada mediante ejecución real.
 
 Diagrama Mermaid generado directamente con el comando `python main.py eduardo --diagrama`:
 
@@ -72,7 +71,7 @@ graph TD;
 
 La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png) muestra la ejecución del presupuesto simulado de $2.173.600 CLP, con tres saltos y uso de `estimar_presupuesto`. También muestra el rechazo completo de una consulta sobre menú vegetariano, derivada a Sebastián en un salto y sin ejecutar herramientas. La evidencia no expone rutas personales ni credenciales.
 
-La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías está definida en el prompt, pero su prueba específica continúa pendiente.
+La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías también fue verificada mediante ejecución real: Eduardo identificó correctamente su especialidad en un salto y sin invocar herramientas.
 
 
 ## 4. Fichas del agente: antes y después
@@ -157,22 +156,65 @@ muestra a `cloudflared` anunciando esa URL y la configuración de origen local e
 No se tomó la captura de `01-saltos.png` como prueba visual de todas las consultas; los
  resultados de las tres derivaciones provienen de ejecuciones reales validadas por Eduardo.
 
-## 7. Pendientes de la prueba grupal
+## 7. Resultados de la prueba grupal A2A
 
-- Ejecutar la ronda conjunta con el coordinador y los agentes de los compañeros.
-- Registrar las preguntas, agente seleccionado, resultado y análisis de derivaciones
-  ambiguas en la tabla de la ronda.
-- Capturar la vista del supervisor/catálogo y completar las evidencias grupales que solicite
-  el taller.
+La ronda grupal se ejecutó el 8 de noviembre de 2026,
+utilizando el coordinador y las fichas de los cuatro
+agentes especializados.
+
+El coordinador mostró `Supervisor con 4 agentes`.
+
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|---|---|---|---|
+| 1 | Presupuesto de feria infantil para 60 personas y 2 horas | Agente de Eduardo | El usuario solicita la estimación de un presupuesto simulado para un evento. | Sí. Entregó un presupuesto ficticio de $927.300 CLP. |
+| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario pregunta sobre comida y menús específicos para una feria infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
+| 3 | ¿Cuál es la capital de Australia? | ninguno | La pregunta no corresponde a las funciones de ningún agente especializado del catálogo. | Sí. El coordinador no delegó la consulta. |
+
+### Resultado
+
+Las tres selecciones fueron correctas (3 de 3).
+
+Cada consulta recorrió dos nodos del coordinador.
+
+En las primeras dos consultas se utilizó el nodo
+`agente_remoto` para delegar mediante A2A.
+
+La tercera consulta utilizó `sin_agente`, al estar
+fuera de las especialidades disponibles.
+
+### Evidencias
+
+- `evidencias/eduardo/04-catalogo.png`:
+  supervisor con los cuatro agentes descubiertos.
+- `evidencias/eduardo/05-ronda.png`:
+  resultados de las tres preguntas, agente elegido
+  y motivo de selección.
 
 ## 8. Estado de Git y seguridad
 
-Se revisaron `git status --short`, `git diff --check` y los archivos de evidencia a incorporar.
-No se encontraron patrones de credenciales en los documentos y evidencias revisados. Los
-archivos JSON/fotos contienen datos de demostración y la URL temporal; mantenerlos dentro
-del alcance de la revisión. El cambio funcional de `src/agente_eduardo/prompts.py` está
-preparado en Git junto con las evidencias correspondientes.
+## 8. Estado de Git y seguridad
 
-Los archivos del PR ya están preparados en Git. Entre las limitaciones y pendientes se
-mantienen la ronda grupal aún no ejecutada y el carácter temporal de la URL pública. No se ejecutaron commit ni push ni se creó
-un PR.
+El agente de Eduardo fue integrado en el repositorio grupal
+mediante los PR #57, #58, #61, #62, #63 y #64.
+
+Las correcciones incluyen validación de datos obligatorios,
+memoria conversacional por context_id, mejoras en las
+responsabilidades del agente y evidencias individuales.
+
+Se ejecutaron 96 pruebas automatizadas, todas aprobadas,
+utilizando el código actualizado de main.
+
+Durante la prueba grupal del 8 de noviembre de 2026,
+el coordinador descubrió cuatro agentes y realizó
+correctamente las tres selecciones de la ronda de Eduardo.
+
+Las conexiones públicas utilizaron túneles temporales
+de Cloudflare. Estas direcciones pueden dejar de funcionar
+al finalizar la sesión.
+
+Las evidencias de la ronda se incorporarán mediante un
+PR de cierre independiente.
+
+No deben incluirse archivos .env, claves de Gemini,
+credenciales ni rutas personales en las evidencias
+publicadas.

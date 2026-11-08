@@ -58,9 +58,11 @@ Invoke-RestMethod https://DIRECCION-DEL-COMPAÑERO/.well-known/agent-card.json |
 
 ## Eduardo Basaure · Presupuesto y costos estimados
 
-- **Nombre del agente:** (pendiente)
-- **URL pública:** (pendiente)
-- **Ficha JSON:** (pendiente)
+## Eduardo Basaure · Presupuesto y costos estimados
+
+- **Nombre del agente:** Agente de Eduardo
+- **URL pública:** `https://legend-origin-minor-admissions.trycloudflare.com` (túnel temporal de la prueba grupal del 8 de noviembre de 2026).
+- **Ficha JSON:** `evidencias/eduardo/03-ficha-publica.json`, descargada desde el agente público durante la prueba grupal.
 
 ## Sebastian Mardones · Comida y catering
 
