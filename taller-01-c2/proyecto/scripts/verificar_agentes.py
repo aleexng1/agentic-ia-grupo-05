@@ -9,9 +9,11 @@ from dotenv import load_dotenv
 
 
 AGENTES = {
-    "viajes": ("URL_VIAJES", "http://127.0.0.1:8000"),
-    "restaurantes": ("URL_RESTAURANTES", "http://127.0.0.1:8001"),
     "coordinador": ("URL_COORDINADOR", "http://127.0.0.1:8002"),
+    "matias": ("URL_MATIAS", "http://127.0.0.1:8003"),
+    "alex": ("URL_ALEX", "http://127.0.0.1:8004"),
+    "eduardo": ("URL_EDUARDO", "http://127.0.0.1:8005"),
+    "sebastian": ("URL_SEBASTIAN", "http://127.0.0.1:8006"),
 }
 TIEMPO_LIMITE = 10.0
 
@@ -99,8 +101,10 @@ async def _verificar_agente(
 async def _ejecutar(nombres: list[str]) -> int:
     """Consulta los servicios seleccionados en paralelo."""
     load_dotenv()
+    # Si una variable está vacía (por ejemplo URL_MATIAS en el equipo de un compañero),
+    # se usa la dirección local por defecto de ese agente.
     configurados = {
-        nombre: os.getenv(variable, valor).strip().rstrip("/")
+        nombre: (os.getenv(variable) or valor).strip().rstrip("/")
         for nombre, (variable, valor) in AGENTES.items()
     }
 
@@ -123,7 +127,7 @@ def main() -> int:
     parser.add_argument(
         "--agente",
         choices=AGENTES,
-        help="Comprueba solo este agente; por defecto revisa los tres.",
+        help="Comprueba solo este agente; por defecto revisa el coordinador y los cuatro agentes (puertos 8002 a 8006).",
     )
     argumentos = parser.parse_args()
     nombres = [argumentos.agente] if argumentos.agente else list(AGENTES)
