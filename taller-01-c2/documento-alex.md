@@ -303,16 +303,33 @@ gastar la clave de Gemini, así que se cierra con Ctrl+C al terminar.
 
 ## 6. Catálogo y ronda de preguntas
 
-**PENDIENTE:** se hace en una sesión conjunta con los agentes de los compañeros.
+Prueba grupal del 8 de noviembre de 2026. Mi coordinador corrió en mi computador
+(puerto 8002) con mi agente local (`http://127.0.0.1:8004`) y los túneles de Matias,
+Eduardo y Sebastian en `URLS_AGENTES`. Las fichas descargadas ese día están en
+`evidencias/alex/fichas-companeros/` y en `compañeros.md`.
 
-- Catálogo: `evidencias/alex/04-catalogo.png` (`Supervisor con N agentes`). (pendiente)
-- Ronda: `evidencias/alex/05-ronda.png` y la tabla siguiente. (pendiente)
+**Catálogo:** [`evidencias/alex/04-catalogo.png`](evidencias/alex/04-catalogo.png). Al
+arrancar, el coordinador leyó las 4 fichas y mostró **«Supervisor con 4 agentes»**.
 
-| # | Pregunta | A quién fue | ¿Estuvo bien? |
-|---|----------|-------------|---------------|
-| 1 | (de mi propia skill) | | |
-| 2 | (de la skill de un compañero) | | |
-| 3 | (que nadie sabe) | | |
+**Ronda:** [`evidencias/alex/05-ronda.png`](evidencias/alex/05-ronda.png). Las 3 preguntas
+se hicieron con `python main.py coordinador "…" --saltos`.
+
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|----------|-------------|-----------------------|---------------|
+| 1 | Voy a hacer una feria tecnológica para 150 personas, ¿dónde la hago? | Agente de Alex | El usuario solicita una recomendación de recinto para una feria tecnológica. | Sí |
+| 2 | ¿Cuánta plata necesito más o menos para una feria gastronómica de 120 personas que dura 3 horas? | Agente de Eduardo | La pregunta solicita una estimación de presupuesto y costos para un evento. | Sí |
+| 3 | ¿Qué vuelos hay a Lima? | ninguno | La pregunta sobre vuelos a Lima no corresponde a las funciones de ningún agente disponible. | Sí |
+
+Comentarios:
+
+1. Fue a mi agente, que recomendó 3 recintos con ocupación de 83,3 %, 60 % y 50 %,
+   m² por persona y stands estimados. Esos números salen de `buscar_recintos`: al repetir
+   la pregunta con `python main.py alex "…" --saltos` se ve `Herramienta: buscar_recintos`.
+2. Pregunta escrita como alguien que no conoce el tema («cuánta plata», sin decir
+   «presupuesto»). El supervisor igual la mandó a Eduardo, que usó su herramienta y
+   devolvió las partidas con un total simulado de $2.059.200 CLP.
+3. Ningún agente sabe de vuelos. El supervisor eligió «ninguno» y el coordinador respondió
+   con la lista de agentes disponibles, sin inventar una respuesta.
 
 Preguntas para comentar: ¿qué ficha eligió mejor el supervisor y qué decía?, ¿hubo una
 pregunta que dos agentes podrían responder y cómo se resolvió?, ¿qué cambiarían de su ficha?

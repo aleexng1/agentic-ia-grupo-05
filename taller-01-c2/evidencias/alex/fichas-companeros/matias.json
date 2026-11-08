@@ -1,0 +1,40 @@
+{
+  "name": "Agente de Matias",
+  "description": "Arma el programa de actividades y el horario de ferias tecnológicas, gastronómicas, culturales o infantiles de 30 minutos a 8 horas, para público familiar, adulto o estudiantes. No responde sobre lugares ni capacidad, comida ni costos, y no reserva ni confirma el programa definitivo: entrega solo propuestas.",
+  "supportedInterfaces": [
+    {
+      "url": "https://plugin-telescope-termination-riverside.trycloudflare.com",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "armar_programa",
+      "name": "Armar programa de feria",
+      "description": "Propone las actividades que caben en el tiempo disponible, con su hora de inicio y término, según tipo de evento, público y hora de inicio.",
+      "tags": [
+        "armar_programa"
+      ],
+      "examples": [
+        "Necesito armar el programa de una feria infantil de 3 horas que parta a las 15:00."
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    }
+  ]
+}
