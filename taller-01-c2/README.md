@@ -30,6 +30,8 @@ Cada uno cambia **solo** lo suyo (cambia `NOMBRE` por el tuyo):
 `proyecto/src/coordinador/` y `proyecto/scripts/`. Estos los cambia Alex. Si
 necesitas cambiar alguno, dilo en la descripción de tu pull request.
 
+Excepción: Matías Muñoz es el dueño de proyecto/src/coordinador/ y proyecto/scripts/verificar_agentes.py.
+
 > **Nunca subas el `.env`**: lleva tu clave de Gemini. Tampoco `.venv`,
 > `__pycache__` ni `.pytest_cache`.
 
