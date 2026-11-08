@@ -9,7 +9,10 @@ if ! [[ "$puerto" =~ ^[0-9]+$ ]] || (( puerto < 1 || puerto > 65535 )); then
 fi
 
 if ! command -v cloudflared >/dev/null 2>&1; then
-  printf 'cloudflared no está instalado. Instálalo con: brew install cloudflared\n' >&2
+  printf 'cloudflared no está instalado. Instálalo así:\n' >&2
+  printf '  macOS: brew install cloudflared\n' >&2
+  printf '  Linux (Ubuntu, Debian, Linux Mint): sigue las instrucciones de apt en https://pkg.cloudflare.com/\n' >&2
+  printf '    o instala el .deb de https://github.com/cloudflare/cloudflared/releases/latest\n' >&2
   exit 1
 fi
 
