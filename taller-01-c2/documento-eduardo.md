@@ -1,0 +1,132 @@
+# Documento de entrega · Taller A2A · Grupo 5
+
+**Tema del grupo:** planificador de ferias y eventos.
+
+| Integrante | Agente |
+|------------|--------|
+| Matias Muñoz | Programa, actividades y horarios |
+| Alex Nail | Lugares y capacidad |
+| Eduardo Basaure | Presupuesto y costos estimados |
+| Sebastian Mardones | Comida y catering |
+
+> Este documento cubre el agente de **Eduardo Basaure**. La ronda de preguntas se completa
+> en la prueba grupal con el coordinador y los agentes de los compañeros.
+
+## 1. Blueprint y alcance
+
+Versión final: [`blueprint-Eduardo.md`](blueprint-Eduardo.md).
+
+El agente estima presupuestos agregados simulados en CLP para eventos tecnológicos,
+gastronómicos, culturales e infantiles, para 10–500 personas y duraciones de 30–480 minutos.
+`estimar_presupuesto` informa partidas, subtotal, contingencia del 10 % y total; usa tarifas
+ficticias y no modela impuestos. No genera cotizaciones ni autoriza compras, reservas,
+pagos o contrataciones.
+
+Derivaciones: menús, comida y catering → Sebastián; recintos y capacidad → Alex; actividades
+y horarios → Matías. Las consultas ajenas se rechazan en una frase, se deriva al agente
+correspondiente y no se ejecuta la herramienta de presupuesto.
+
+## 2. Construcción y cambios
+
+La herramienta usada para esta revisión fue **OpenCode**. No se dispone de un prompt original
+auténtico ni de una transcripción de la construcción inicial; no se inventa ninguno.
+
+El cambio funcional de `src/agente_eduardo/prompts.py` refuerza la derivación por
+especialidad, evita presentaciones espontáneas y prohíbe llamar a `estimar_presupuesto` para
+consultas ajenas. El cambio está incluido en el PR y fue validado con ejecuciones reales.
+
+## 3. Pruebas y diagrama
+
+Las siguientes comprobaciones fueron validadas por Eduardo para esta sesión; no se
+re-ejecutaron durante la revisión documental:
+
+- **Pruebas automatizadas:** 70 aprobadas.
+- **Presupuesto:** feria tecnológica, 80 personas, 240 minutos. Resultado total
+  **$2.173.600 CLP**, en 3 saltos: `model → tools (estimar_presupuesto) → model`.
+- **Derivación de menú vegetariano:** Sebastián, 1 salto (`model`), sin herramienta.
+- **Derivación de consulta sobre recintos:** Alex, 1 salto (`model`), sin herramienta.
+- **Derivación de consulta sobre actividades y horarios:** Matías, 1 salto (`model`), sin herramienta.
+
+Diagrama Mermaid comunicado como validado:
+
+```mermaid
+graph TD
+    __start__([__start__]) --> model
+    model -.-> __end__([__end__])
+    model -.-> tools
+    tools --> model
+    tools["tools<br/>estimar_presupuesto"]
+```
+
+La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png) muestra
+la ejecución del presupuesto con sus tres saltos y el comienzo de la respuesta de derivación
+del menú vegetariano. La captura disponible no documenta por sí sola todas las consultas;
+ los resultados de las tres derivaciones indicadas arriba corresponden a ejecuciones reales
+ validadas por Eduardo.
+
+## 4. Fichas del agente y `02-ficha-antes.json`
+
+La ficha final local disponible es [`evidencias/eduardo/02-ficha.json`](evidencias/eduardo/02-ficha.json)
+y anuncia `http://127.0.0.1:8005`. **No existe una ficha anterior auténtica de Eduardo**
+llamada `02-ficha-antes.json` entre las evidencias disponibles. No se usa ni se copia el
+archivo homónimo de Sebastián, y no se fabrica una versión histórica. Por tanto, la
+comparación antes/después no está demostrada y queda pendiente solo si se recupera una
+captura anterior auténtica.
+
+La ficha pública disponible en
+[`evidencias/eduardo/03-ficha-telefono.png`](evidencias/eduardo/03-ficha-telefono.png)
+se ve en un teléfono con 4G y contiene la URL pública en `supportedInterfaces[0].url`.
+El archivo original era JPEG y se convirtió a PNG para cumplir la pauta; el original se
+conserva localmente fuera del PR. Las tildes aparecen mal interpretadas por el navegador en
+la captura; no se corrige la imagen.
+
+## 5. A2A y dirección pública
+
+La respuesta guardada [`evidencias/eduardo/04-a2a-publico.json`](evidencias/eduardo/04-a2a-publico.json)
+registra el presupuesto de $2.173.600 CLP. Es una respuesta archivada y no prueba por sí
+sola que un servidor continúe activo. La respuesta está en `result.message.parts[0].text`.
+
+URL verificada en la sesión del **8 de noviembre de 2026**:
+<https://breaking-rid-bestsellers-juvenile.trycloudflare.com>.
+Es un túnel rápido de Cloudflare **temporal**: puede dejar de funcionar y la URL puede
+cambiar al reiniciar el túnel. La captura [`evidencias/eduardo/03-tunel.png`](evidencias/eduardo/03-tunel.png)
+muestra a `cloudflared` anunciando esa URL y la configuración de origen local en el puerto
+8005; la captura telefónica muestra la ficha publicada con esa URL.
+
+## 6. Evidencias disponibles y validación de archivos
+
+- `01-saltos.png`: captura de terminal; PNG válido. Se ve la ejecución de presupuesto con
+  `estimar_presupuesto` y 3 saltos; aparece también el inicio de la derivación vegetariana.
+- `03-tunel.png`: captura de la terminal de Cloudflare; PNG válido. Muestra la URL temporal,
+  fecha/hora de la sesión y el origen local `127.0.0.1:8005`.
+- `03-ficha-telefono.png`: captura de la ficha en Safari móvil por 4G, convertida del JPEG
+  original para cumplir la pauta. El original JPEG se conserva localmente fuera del PR.
+- `02-ficha.json`: ficha local final. No hay `02-ficha-antes.json` auténtico de Eduardo.
+- `04-a2a-publico.json` y `respuesta-a2a.json`: respuestas guardadas; no equivalen a una
+  repetición actual de A2A.
+
+No se tomó la captura de `01-saltos.png` como prueba visual de todas las consultas; los
+ resultados de las tres derivaciones provienen de ejecuciones reales validadas por Eduardo.
+
+## 7. Pendientes de la prueba grupal
+
+- Ejecutar la ronda conjunta con el coordinador y los agentes de los compañeros.
+- Registrar las preguntas, agente seleccionado, resultado y análisis de derivaciones
+  ambiguas en la tabla de la ronda.
+- Capturar la vista del supervisor/catálogo y completar las evidencias grupales que solicite
+  el taller.
+- Si se requiere la comparación de ficha «antes/después», recuperar únicamente la versión
+  anterior auténtica de Eduardo; si no existe, dejar documentada la limitación.
+
+## 8. Estado de Git y seguridad
+
+Se revisaron `git status --short`, `git diff --check` y los archivos de evidencia a incorporar.
+No se encontraron patrones de credenciales en los documentos y evidencias revisados. Los
+archivos JSON/fotos contienen datos de demostración y la URL temporal; mantenerlos dentro
+del alcance de la revisión. El cambio funcional de `src/agente_eduardo/prompts.py` está
+preparado en Git junto con las evidencias correspondientes.
+
+Los archivos del PR ya están preparados en Git. Entre las limitaciones y pendientes se
+mantienen la ronda grupal aún no ejecutada, la ausencia de una ficha anterior auténtica de
+Eduardo y el carácter temporal de la URL pública. No se ejecutaron commit ni push ni se creó
+un PR.
