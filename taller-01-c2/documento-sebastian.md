@@ -233,4 +233,18 @@ Con el agente de Matias en el catálogo, esa pregunta debería ir a él.
 
 ## 6. Catálogo y ronda de preguntas
 
-**PENDIENTE (domingo 8 de noviembre, 19:00).**
+Prueba grupal del 8 de noviembre, 19:00. El coordinador corrió en mi PC con los cuatro
+agentes en `URLS_AGENTES`: el mío local (`http://127.0.0.1:8006`) y los túneles de Matías,
+Alex y Eduardo. Mi agente salió en el túnel `https://defining-envelope-obtaining-dem.trycloudflare.com`.
+
+- Catálogo: `evidencias/sebastian/04-catalogo.png`, con la línea «Supervisor con 4 agentes».
+- Ronda: `evidencias/sebastian/05-ronda.png`, con las tres preguntas, el agente elegido y el motivo.
+
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|----------|-------------|-----------------------|---------------|
+| 1 | (de mi tema) Feria gastronómica de 5 horas desde las 11:00 para 200 personas, 20 son vegetarianas, ¿qué servimos? | Agente de Sebastian | Pide propuestas de comida y menús especiales para un evento | Sí |
+| 2 | (del tema de otro) Para una feria tecnológica de 4 horas con estudiantes, ¿qué charlas o talleres hago y en qué orden? | Agente de Matias | Pide el programa de actividades y el horario | Sí |
+| 3 | (que nadie sabe) ¿Cómo configuro el wifi de mi casa? | ninguno | No corresponde a ningún agente de ferias | Sí |
+
+En la pregunta 1, el agente propuso servicios a las 12:00 y 14:30, con cantidades y
+330 litros de agua, sin precios. En la 2, Matías propuso un programa de 10:00 a 13:40.
