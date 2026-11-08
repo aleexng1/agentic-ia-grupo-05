@@ -1,0 +1,16 @@
+{
+    "result": {
+        "message": {
+            "messageId": "003afee8-11d0-4280-b665-5c803edddecf",
+            "contextId": "00e0400e-e8af-4d26-8665-7f1bc3732a22",
+            "role": "ROLE_AGENT",
+            "parts": [
+                {
+                    "text": "Te recomiendo estos recintos:\n\n1. **Carpa Modular Bahía Pizarra** (Bahía Pizarra, exterior):\n   - Capacidad máxima: 300 personas\n   - Ocupación: 66,7%\n   - Superficie: 500 m² (2,5 m² por persona)\n   - Stands estimados: 22\n   - Estacionamientos: 50\n   - Accesible: sí\n\n2. **Explanada del Parque Lomas de Arrayán** (Lomas de Arrayán, exterior):\n   - Capacidad máxima: 500 personas\n   - Ocupación: 40%\n   - Superficie: 3000 m² (15 m² por persona)\n   - Stands estimados: 133\n   - Estacionamientos: 80\n   - Accesible: sí\n\nLa disponibilidad y el aforo legal los confirma una persona con el recinto."
+                }
+            ]
+        }
+    },
+    "id": "1",
+    "jsonrpc": "2.0"
+}
