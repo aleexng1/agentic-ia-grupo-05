@@ -1,0 +1,16 @@
+{
+  "result": {
+    "message": {
+      "messageId": "00fde91b-e957-462c-a0ae-6a0f4dc60419",
+      "contextId": "88b381ae-3009-422a-99ed-1dd4bef1c9cc",
+      "role": "ROLE_AGENT",
+      "parts": [
+        {
+          "text": "Propuesta de comida y catering:\n\n- **12:00 - Almuerzo infantil** (Menú sencillo en porciones para niños.)\n  - **Platos generales** (para 74 personas):\n    - Mini hamburguesa o nuggets: 82 porciones\n    - Papas al horno: 82 porciones\n    - Fruta entera: 82 unidades\n    - Postre: 82 porciones\n  - **Menú para dieta sin gluten** (para 6 personas):\n    - Pollo al horno con papas: 7 porciones\n    - Postre sin gluten: 7 porciones\n  - **Bebidas**:\n    - Jugo: 88 vasos\n\n- **Agua**: 88 litros en total.\n\n*Notas:*\n- Las cantidades incluyen un 10 % de margen y están redondeadas hacia arriba.\n- Los datos son ficticios y sin precios; esto es solo una propuesta, no incluye contratación ni reserva de proveedores.\n- Las alergias graves deben ser confirmadas directamente con el proveedor."
+        }
+      ]
+    }
+  },
+  "id": "1",
+  "jsonrpc": "2.0"
+}

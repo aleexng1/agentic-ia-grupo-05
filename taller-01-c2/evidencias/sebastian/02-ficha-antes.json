@@ -1,0 +1,40 @@
+{
+  "name": "Agente de Sebastian",
+  "description": "Propone comida y catering para ferias y eventos según el tipo de evento, la cantidad de personas y la duración. No cotiza precios ni reserva proveedores.",
+  "supportedInterfaces": [
+    {
+      "url": "http://127.0.0.1:8006",
+      "protocolBinding": "JSONRPC",
+      "protocolVersion": "1.0"
+    }
+  ],
+  "version": "1.0.0",
+  "capabilities": {
+    "streaming": false
+  },
+  "defaultInputModes": [
+    "text/plain"
+  ],
+  "defaultOutputModes": [
+    "text/plain"
+  ],
+  "skills": [
+    {
+      "id": "armar_catering",
+      "name": "Armar catering",
+      "description": "Propone servicios de comida y sus cantidades para un evento.",
+      "tags": [
+        "armar_catering"
+      ],
+      "examples": [
+        "Necesito catering para una feria tecnológica de 4 horas para 150 personas."
+      ],
+      "inputModes": [
+        "text/plain"
+      ],
+      "outputModes": [
+        "text/plain"
+      ]
+    }
+  ]
+}
