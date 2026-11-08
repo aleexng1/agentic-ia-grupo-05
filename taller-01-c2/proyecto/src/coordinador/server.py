@@ -15,14 +15,14 @@ URL_COORDINADOR = os.getenv("URL_COORDINADOR", "http://127.0.0.1:8002")
 
 tarjeta = crear_tarjeta(
     "Coordinador",
-    "Recibe preguntas y las delega al agente de viajes mediante A2A. No contiene conocimiento propio sobre vuelos ni hoteles.",
+    "Recibe preguntas sobre la organización de una feria o evento y las delega por A2A al agente que corresponde: programa y horarios (Matias), lugares y capacidad (Alex), presupuesto y costos (Eduardo) o comida y catering (Sebastian). No tiene conocimiento propio sobre esos temas ni reserva ni confirma nada.",
     URL_COORDINADOR,
     [
         (
             "delegar_consulta",
-            "Consultar al agente de viajes",
-            "Envía la pregunta al agente de viajes por A2A y repite su respuesta.",
-            "¿Qué opciones hay para viajar de SCL a LIM?",
+            "Consultar al agente del planificador de eventos",
+            "Elige el agente especializado según la pregunta (programa, lugares, presupuesto o comida), se la envía por A2A y repite su respuesta indicando cuál respondió.",
+            "Estoy organizando una feria tecnológica: ¿qué actividades puedo incluir en 4 horas?",
         ),
     ],
 )
