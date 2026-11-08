@@ -89,6 +89,17 @@ Se omite solo la clave de acceso de la dirección de la plataforma.
   salvo que te pregunten quién eres".
 - Las respuestas decían "152 vasos de Vaso de fruta picada": el plato se renombró a
   "Fruta picada".
+- Ajuste hecho en la revisión del grupo, después del ensayo general del 8 de noviembre:
+  el supervisor mandó "¿A qué hora conviene el almuerzo?" a Sebastian (su ficha dice
+  "con la hora de cada servicio"), pero el prompt la rechazaba como "horario de
+  actividades" y nadie la respondía. Los límites ahora dicen primero lo que sí es su
+  tema: cuándo servir la comida (coffee break, almuerzo, colación, cóctel), pidiendo los
+  datos que falten y usando `armar_catering`, con el ejemplo "¿a qué hora sirvo el coffee
+  break?". Después dicen lo que no es su tema: el programa de actividades (charlas,
+  talleres, shows y sus horarios). Con la regla de rechazo primero, "¿Cuándo les doy la
+  colación a los niños?" se rechazaba 2 de 6 veces. Con el orden nuevo pidió los datos
+  6 de 6, el almuerzo y el cóctel 3 de 3, y "¿Qué charlas pongo y a qué hora?" se
+  siguió rechazando 3 de 3.
 
 ### Pruebas automáticas de la herramienta
 
