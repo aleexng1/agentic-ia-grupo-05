@@ -35,7 +35,9 @@ Las direcciones públicas y las fichas están en `compañeros.md`, junto a esta 
 - `scripts/`: túnel de Cloudflare (`tunel.sh`, `tunel.ps1`) y scripts de verificación.
 
 Junto a `proyecto/` (en la raíz de la entrega) van los `blueprint-NOMBRE.md`,
-`compañeros.md`, `evidencias/NOMBRE/` y el `documento-entrega.pdf`.
+`compañeros.md`, `evidencias/NOMBRE/` y el `documento-entrega.pdf`. La pauta muestra una sola
+carpeta `evidencias/`; usamos una subcarpeta por integrante porque los cuatro tienen archivos
+con el mismo nombre (`01-saltos.png`, `02-ficha.json`, …).
 
 ## Instalación
 

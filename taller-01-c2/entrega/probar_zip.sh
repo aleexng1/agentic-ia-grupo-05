@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Prueba el zip como lo haría quien lo corrige: lo descomprime en /tmp, crea un .venv
 # nuevo, instala requirements.txt, copia el .env de Alex (no se muestra), corre pytest y
-# una pregunta con --saltos a cada uno de los 4 agentes. Al terminar borra todo.
+# una pregunta con --saltos a cada uno de los 4 agentes, y python main.py coordinador
+# --diagrama. Al terminar borra todo.
 #
 # Uso, desde taller-01-c2/:
 #   bash entrega/probar_zip.sh
@@ -66,6 +67,17 @@ preguntar matias "Necesito armar el programa de una feria infantil de 3 horas qu
 preguntar alex "Voy a hacer una feria tecnológica para 150 personas, ¿dónde la hago?"
 preguntar eduardo "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?"
 preguntar sebastian "Voy a hacer una feria tecnológica de 4 horas desde las 10:00 para 150 personas, 12 son veganas. ¿Qué les sirvo?"
+
+echo
+echo "== 6. Diagrama del coordinador =="
+echo "--- python main.py coordinador --diagrama"
+diagrama="$(.venv/bin/python main.py coordinador --diagrama 2>&1)"
+echo "$diagrama" | grep -E -- '-->|-\.->' | sed 's/^/    /'
+if echo "$diagrama" | grep -q 'supervisor -.-> agente_remoto'; then
+  echo "    ✓ diagrama con supervisor, agente_remoto y sin_agente"
+else
+  echo "    ✗ el diagrama no salió"; fallos=1
+fi
 
 echo
 if (( fallos )); then
