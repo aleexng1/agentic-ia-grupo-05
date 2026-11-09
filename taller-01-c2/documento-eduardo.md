@@ -9,8 +9,9 @@
 | Eduardo Basaure | Presupuesto y costos estimados |
 | Sebastian Mardones | Comida y catering |
 
-> Este documento cubre el agente de **Eduardo Basaure**. La ronda de preguntas se completa
-> en la prueba grupal con el coordinador y los agentes de los compañeros.
+> Este documento cubre el agente de **Eduardo Basaure** y registra
+> su construcción, validación y resultados de la ronda
+> grupal A2A del 8 de noviembre de 2026.
 
 ## 1. Blueprint y alcance
 
@@ -22,9 +23,11 @@ gastronómicos, culturales e infantiles, para 10–500 personas y duraciones de 
 ficticias y no modela impuestos. No genera cotizaciones ni autoriza compras, reservas,
 pagos o contrataciones.
 
-Derivaciones: menús, comida y catering → Sebastián; recintos y capacidad → Alex; actividades
-y horarios → Matías. Las consultas ajenas se rechazan en una frase, se deriva al agente
-correspondiente y no se ejecuta la herramienta de presupuesto.
+Derivaciones: solicitudes sobre qué menú o comida servir → Sebastián;
+recintos y capacidad → Alex; actividades y horarios → Matías.
+
+Eduardo estima costos ficticios de alimentación genérica como parte
+del presupuesto, pero no diseña menús ni cotiza proveedores reales.
 
 ## 2. Construcción y cambios
 
@@ -37,15 +40,14 @@ consultas ajenas. El cambio está incluido en el PR y fue validado con ejecucion
 
 ## 3. Pruebas y diagrama
 
-Las siguientes comprobaciones fueron validadas por Eduardo para esta sesión; no se
-re-ejecutaron durante la revisión documental:
+Las siguientes comprobaciones fueron realizadas durante el desarrollo y la validación del agente. La suite automatizada se volvió a ejecutar sobre el código actualizado de `main`, con 96 pruebas aprobadas:
 
-- **Pruebas automatizadas:** 70 aprobadas.
+- **Pruebas automatizadas:** 96 aprobadas sobre el código actualizado de `main`, verificadas el 8 de noviembre de 2026.
 - **Presupuesto:** feria tecnológica, 80 personas, 240 minutos. Resultado total
   **$2.173.600 CLP**, en 3 saltos: `model → tools (estimar_presupuesto) → model`.
 - **Derivación de menú vegetariano:** Sebastián, 1 salto (`model`), sin herramienta.
 - **Derivación de consulta sobre recintos:** Alex, 1 salto (`model`), sin herramienta.
-- - **Derivación de consulta sobre actividades y horarios:** Matías es el agente responsable según el prompt. Prueba de ejecución pendiente.
+- **Derivación de consulta sobre actividades y horarios:** Matías, 1 salto (`model`), sin herramienta. Validada mediante ejecución real.
 
 Diagrama Mermaid generado directamente con el comando `python main.py eduardo --diagrama`:
 
@@ -72,7 +74,7 @@ graph TD;
 
 La captura [`evidencias/eduardo/01-saltos.png`](evidencias/eduardo/01-saltos.png) muestra la ejecución del presupuesto simulado de $2.173.600 CLP, con tres saltos y uso de `estimar_presupuesto`. También muestra el rechazo completo de una consulta sobre menú vegetariano, derivada a Sebastián en un salto y sin ejecutar herramientas. La evidencia no expone rutas personales ni credenciales.
 
-La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías está definida en el prompt, pero su prueba específica continúa pendiente.
+La derivación a Alex fue verificada mediante una ejecución independiente. La derivación a Matías también fue verificada mediante ejecución real: Eduardo identificó correctamente su especialidad en un salto y sin invocar herramientas.
 
 
 ## 4. Fichas del agente: antes y después
@@ -157,22 +159,54 @@ muestra a `cloudflared` anunciando esa URL y la configuración de origen local e
 No se tomó la captura de `01-saltos.png` como prueba visual de todas las consultas; los
  resultados de las tres derivaciones provienen de ejecuciones reales validadas por Eduardo.
 
-## 7. Pendientes de la prueba grupal
+## 7. Resultados de la prueba grupal A2A
 
-- Ejecutar la ronda conjunta con el coordinador y los agentes de los compañeros.
-- Registrar las preguntas, agente seleccionado, resultado y análisis de derivaciones
-  ambiguas en la tabla de la ronda.
-- Capturar la vista del supervisor/catálogo y completar las evidencias grupales que solicite
-  el taller.
+La ronda grupal se ejecutó el 8 de noviembre de 2026,
+utilizando el coordinador y las fichas de los cuatro
+agentes especializados.
+
+El coordinador mostró `Supervisor con 4 agentes`.
+
+| # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
+|---|---|---|---|---|
+| 1 | Presupuesto de feria infantil para 60 personas y 2 horas | Agente de Eduardo | El usuario solicita la estimación de un presupuesto simulado para un evento. | Sí. Entregó un presupuesto ficticio de $927.300 CLP. |
+| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario solicita una propuesta de comida con menús específicos para celíacos en una feria infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
+| 3 | ¿Cuál es la capital de Australia? | ninguno | La pregunta sobre la capital de Australia no corresponde a ninguno de los agentes especializados en ferias y eventos del catálogo. | Sí. El coordinador no delegó la consulta. |
+
+### ¿Qué cambiaría de mi ficha después de la ronda?
+
+Haría más explícito que Eduardo estima costos ficticios de alimentación
+genérica, pero no propone menús ni cotiza proveedores reales; esas
+consultas corresponden a Sebastián.
+
+También destacaría los tres datos necesarios para estimar un presupuesto:
+tipo de evento, cantidad de asistentes y duración.
+
+### Resultado
+
+Las tres selecciones fueron correctas (3 de 3).
+
+Cada consulta recorrió dos nodos del coordinador.
+
+En las primeras dos consultas se utilizó el nodo
+`agente_remoto` para delegar mediante A2A.
+
+La tercera consulta utilizó `sin_agente`, al estar
+fuera de las especialidades disponibles.
+
+### Evidencias
+
+- `evidencias/eduardo/04-catalogo.png`:
+  supervisor con los cuatro agentes descubiertos.
+- `evidencias/eduardo/05-ronda.png`:
+  resultados de las tres preguntas, agente elegido
+  y motivo de selección.
+  - `evidencias/eduardo/05-ronda-2.png`:
+  captura complementaria de la tercera pregunta
+  (capital de Australia), con el comando ejecutado,
+  agente elegido `ninguno`, motivo, respuesta y dos saltos.
 
 ## 8. Estado de Git y seguridad
 
-Se revisaron `git status --short`, `git diff --check` y los archivos de evidencia a incorporar.
-No se encontraron patrones de credenciales en los documentos y evidencias revisados. Los
-archivos JSON/fotos contienen datos de demostración y la URL temporal; mantenerlos dentro
-del alcance de la revisión. El cambio funcional de `src/agente_eduardo/prompts.py` está
-preparado en Git junto con las evidencias correspondientes.
-
-Los archivos del PR ya están preparados en Git. Entre las limitaciones y pendientes se
-mantienen la ronda grupal aún no ejecutada y el carácter temporal de la URL pública. No se ejecutaron commit ni push ni se creó
-un PR.
+Las evidencias finales de la ronda se presentan en el PR #70
+para revisión e integración en `main`.
