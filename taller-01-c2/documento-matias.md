@@ -1,17 +1,3 @@
-# Documento de entrega · Taller A2A · Grupo 5
-
-**Tema del grupo:** planificador de ferias y eventos.
-
-| Integrante | Agente |
-|------------|--------|
-| Matias Muñoz | Programa, actividades y horarios |
-| Alex Nail | Lugares y capacidad |
-| Eduardo Basaure | Presupuesto y costos estimados |
-| Sebastian Mardones | Comida y catering |
-
-> Este documento cubre el agente de **Matias Muñoz**. Las secciones de cada compañero
-> y la ronda de preguntas se completan cuando existan sus agentes.
-
 ## 1. Blueprint
 
 Matias escribió el primer borrador y lo envió al grupo. Ese borrador definía la
@@ -174,8 +160,7 @@ distintos conectados por túneles de Cloudflare. Túnel de Matias en esa prueba:
 | 2 | Vamos a hacer una feria gastronómica para unas 250 personas y queremos que sea al aire libre, ¿qué lugar nos sirve? | Agente de Alex | La pregunta solicita recomendaciones de recintos para una feria, lo cual corresponde a las funciones del agente de Alex. | Sí. Recomendó dos recintos exteriores con capacidad para 300 y 500 personas. |
 | 3 | ¿Quién ganó el mundial de 1962? | ninguno | La pregunta sobre la Copa Mundial de 1962 no corresponde a las funciones de ningún agente especializado del catálogo. | Sí. Respondió que no tiene un agente para eso y listó los cuatro agentes. |
 
-Análisis del grupo (qué ficha eligió mejor el supervisor y si hubo preguntas que dos agentes
-podían responder): lo escribe Alex en el documento de entrega.
+El análisis del grupo está en la sección 6.
 
 **Qué cambiaría de mi ficha.** En la ronda el supervisor eligió bien a mi agente, pero mi
 descripción usa la palabra «horario» sin precisar que es el de las actividades, y la ficha
