@@ -9,8 +9,9 @@
 | Eduardo Basaure | Presupuesto y costos estimados |
 | Sebastian Mardones | Comida y catering |
 
-> Este documento cubre el agente de **Eduardo Basaure**. La ronda de preguntas se completa
-> en la prueba grupal con el coordinador y los agentes de los compañeros.
+> Este documento cubre el agente de **Eduardo Basaure** y registra
+> su construcción, validación y resultados de la ronda
+> grupal A2A del 8 de noviembre de 2026.
 
 ## 1. Blueprint y alcance
 
@@ -22,9 +23,11 @@ gastronómicos, culturales e infantiles, para 10–500 personas y duraciones de 
 ficticias y no modela impuestos. No genera cotizaciones ni autoriza compras, reservas,
 pagos o contrataciones.
 
-Derivaciones: menús, comida y catering → Sebastián; recintos y capacidad → Alex; actividades
-y horarios → Matías. Las consultas ajenas se rechazan en una frase, se deriva al agente
-correspondiente y no se ejecuta la herramienta de presupuesto.
+Derivaciones: solicitudes sobre qué menú o comida servir → Sebastián;
+recintos y capacidad → Alex; actividades y horarios → Matías.
+
+Eduardo estima costos ficticios de alimentación genérica como parte
+del presupuesto, pero no diseña menús ni cotiza proveedores reales.
 
 ## 2. Construcción y cambios
 
@@ -167,8 +170,17 @@ El coordinador mostró `Supervisor con 4 agentes`.
 | # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
 |---|---|---|---|---|
 | 1 | Presupuesto de feria infantil para 60 personas y 2 horas | Agente de Eduardo | El usuario solicita la estimación de un presupuesto simulado para un evento. | Sí. Entregó un presupuesto ficticio de $927.300 CLP. |
-| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario pregunta sobre comida y menús específicos para una feria infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
-| 3 | ¿Cuál es la capital de Australia? | ninguno | La pregunta no corresponde a las funciones de ningún agente especializado del catálogo. | Sí. El coordinador no delegó la consulta. |
+| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario solicita una propuesta de comida con menús específicos para celíacos en una feria infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
+| 3 | ¿Cuál es la capital de Australia? | ninguno | La pregunta sobre la capital de Australia no corresponde a ninguno de los agentes especializados en ferias y eventos del catálogo. | Sí. El coordinador no delegó la consulta. |
+
+### ¿Qué cambiaría de mi ficha después de la ronda?
+
+Haría más explícito que Eduardo estima costos ficticios de alimentación
+genérica, pero no propone menús ni cotiza proveedores reales; esas
+consultas corresponden a Sebastián.
+
+También destacaría los tres datos necesarios para estimar un presupuesto:
+tipo de evento, cantidad de asistentes y duración.
 
 ### Resultado
 
@@ -189,32 +201,12 @@ fuera de las especialidades disponibles.
 - `evidencias/eduardo/05-ronda.png`:
   resultados de las tres preguntas, agente elegido
   y motivo de selección.
+  - `evidencias/eduardo/05-ronda-2.png`:
+  captura complementaria de la tercera pregunta
+  (capital de Australia), con el comando ejecutado,
+  agente elegido `ninguno`, motivo, respuesta y dos saltos.
 
 ## 8. Estado de Git y seguridad
 
-## 8. Estado de Git y seguridad
-
-El agente de Eduardo fue integrado en el repositorio grupal
-mediante los PR #57, #58, #61, #62, #63 y #64.
-
-Las correcciones incluyen validación de datos obligatorios,
-memoria conversacional por context_id, mejoras en las
-responsabilidades del agente y evidencias individuales.
-
-Se ejecutaron 96 pruebas automatizadas, todas aprobadas,
-utilizando el código actualizado de main.
-
-Durante la prueba grupal del 8 de noviembre de 2026,
-el coordinador descubrió cuatro agentes y realizó
-correctamente las tres selecciones de la ronda de Eduardo.
-
-Las conexiones públicas utilizaron túneles temporales
-de Cloudflare. Estas direcciones pueden dejar de funcionar
-al finalizar la sesión.
-
-Las evidencias de la ronda se incorporarán mediante un
-PR de cierre independiente.
-
-No deben incluirse archivos .env, claves de Gemini,
-credenciales ni rutas personales en las evidencias
-publicadas.
+Las evidencias finales de la ronda se presentan en el PR #70
+para revisión e integración en `main`.
