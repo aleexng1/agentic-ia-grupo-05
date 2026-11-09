@@ -331,6 +331,10 @@ Comentarios:
 3. Ningún agente sabe de vuelos. El supervisor eligió «ninguno» y el coordinador respondió
    con la lista de agentes disponibles, sin inventar una respuesta.
 
+### Qué cambiaría de mi ficha después de la ronda
+
+La ficha funcionó: el supervisor me mandó las preguntas de recintos, incluida la de una feria con food trucks del ensayo, en la que el agente pidió la cantidad de personas antes de recomendar. Cambiaría dos cosas. Agregaría a la descripción que necesito tres datos (tipo de feria, cantidad de personas y si se prefiere interior o exterior), para que quien pregunta los dé de entrada. Y haría que el agente indique si un recinto permite servicio de comida (el dato ya está en mi catálogo, pero hoy no lo muestra), aclarando que qué servir es tema de Sebastián, porque esa es la frontera más cercana entre nuestros agentes.
+
 Preguntas para comentar: ¿qué ficha eligió mejor el supervisor y qué decía?, ¿hubo una
 pregunta que dos agentes podrían responder y cómo se resolvió?, ¿qué cambiarían de su ficha?
 

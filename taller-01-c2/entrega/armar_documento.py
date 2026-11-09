@@ -23,6 +23,7 @@ from pathlib import Path
 BASE = Path(__file__).resolve().parent.parent  # taller-01-c2/
 ENTREGA = BASE / "entrega"
 EVIDENCIAS = BASE / "evidencias"
+ANALISIS = ENTREGA / "analisis-ronda.md"  # respuestas del grupo a las 3 preguntas de la ronda
 SALIDA_MD = ENTREGA / "documento-entrega.md"
 SALIDA_PDF = ENTREGA / "documento-entrega.pdf"
 
@@ -39,6 +40,7 @@ _MESES = ["enero", "febrero", "marzo", "abril", "mayo", "junio", "julio", "agost
 
 _pendientes: list[str] = []
 _SALTO = '<div class="nueva-pagina"></div>\n\n'
+_INDICE = "<!-- INDICE -->"  # generar_pdf lo reemplaza por el índice con números de página
 
 
 def _pendiente(texto: str) -> str:
@@ -124,6 +126,9 @@ def armar_markdown(fecha: str) -> str:
         "</div>\n"
     )
 
+    # Índice (se arma en generar_pdf con los títulos ## del documento)
+    partes.append(_SALTO + _INDICE + "\n")
+
     # Identificación
     partes.append(_SALTO + "## Identificación\n")
     partes.append("**Grupo 5** · tema común: planificador de ferias y eventos.\n")
@@ -176,6 +181,9 @@ def armar_markdown(fecha: str) -> str:
         "- Los roles son `ROLE_USER` y `ROLE_AGENT`.\n"
         "- El texto de la respuesta viene en `result.message.parts`, no en `artifacts`.\n"
         "- `sse-starlette` se agregó a `requirements.txt`: sin ella el servidor A2A no arranca.\n\n"
+        "**Evidencias por integrante.** La pauta muestra una sola carpeta `evidencias/`; usamos "
+        "una subcarpeta por integrante (`evidencias/NOMBRE/`) porque los cuatro tienen archivos "
+        "con el mismo nombre (`01-saltos.png`, `02-ficha.json`, …).\n\n"
         "**Tildes en el celular.** En las capturas de la ficha abierta desde el teléfono las "
         "tildes se ven mal («tecnolÃ³gicas»): el servidor responde `content-type: application/json` "
         "sin declarar `charset=utf-8` y el navegador del teléfono interpreta el texto en otro "
@@ -238,13 +246,19 @@ def armar_markdown(fecha: str) -> str:
 
     # 7. Análisis
     partes.append("## 6. Análisis de la ronda\n")
-    for pregunta in (
-        "¿Qué ficha eligió mejor el supervisor y qué decía?",
-        "¿Hubo preguntas que dos agentes podían responder? ¿Cómo se resolvió?",
-        "¿Qué cambiaría cada uno de su ficha?",
-    ):
-        partes.append(f"### {pregunta}\n")
-        partes.append(_pendiente("se responde después de la ronda grupal"))
+    if ANALISIS.exists():
+        # Lo que diga «PENDIENTE: …» dentro del archivo sale como recuadro rojo.
+        analisis = re.sub(r"PENDIENTE: *(.+)", lambda m: _pendiente(m.group(1).strip()),
+                          ANALISIS.read_text(encoding="utf-8"))
+        partes.append(analisis)
+    else:
+        for pregunta in (
+            "¿Qué ficha eligió mejor el supervisor y qué decía?",
+            "¿Hubo preguntas que dos agentes podían responder? ¿Cómo se resolvió?",
+            "¿Qué cambiaría cada uno de su ficha?",
+        ):
+            partes.append(f"### {pregunta}\n")
+            partes.append(_pendiente("se responde después de la ronda grupal"))
 
     # 8. Uso de IA
     partes.append("## 7. Uso de herramientas de IA\n")
@@ -290,6 +304,13 @@ figure img { max-width: 100%; max-height: 19cm; border: 1px solid #ccc; }
 figcaption { font-size: 7.5pt; color: #555; margin-top: 3px; }
 .pendiente { border: 3px solid #c0161c; background: #fde8e8; color: #9b0d12; font-weight: bold;
              font-size: 11pt; padding: 10px 12px; margin: 10px 0; }
+.indice-titulo { font-size: 18pt; font-weight: bold; color: #12355b; border-bottom: 2px solid #12355b;
+                 padding-bottom: 3px; margin: 0 0 12px; }
+.indice ul { list-style: none; padding: 0; margin: 0; font-size: 11pt; }
+.indice li { margin: 7px 0; }
+.indice li.sub { margin-left: 1.6em; font-size: 10pt; }
+.indice a { color: #1a1a1a; text-decoration: none; }
+.indice a::after { content: leader('.') target-counter(attr(href), page); }
 .portada { text-align: center; padding-top: 5cm; }
 .portada .curso { font-size: 11pt; color: #555; }
 .portada .titulo { font-size: 30pt; margin: 0.6cm 0 0.2cm; border: none; }
@@ -298,6 +319,30 @@ figcaption { font-size: 7.5pt; color: #555; margin-top: 3px; }
 .portada .integrantes { font-size: 12pt; margin-top: 2.5cm; line-height: 1.8; }
 .portada .fecha { font-size: 11pt; margin-top: 1.5cm; color: #555; }
 """
+
+
+_entradas_indice: list[tuple[str, str]] = []
+
+
+def _anclar_titulos(cuerpo: str) -> str:
+    """Da un id a cada título principal (h2) para que el índice pueda apuntar a él."""
+    _entradas_indice.clear()
+
+    def anclar(m: re.Match) -> str:
+        ancla = f"sec-{len(_entradas_indice) + 1}"
+        _entradas_indice.append((ancla, m.group(1)))
+        return f'<h2 id="{ancla}">{m.group(1)}</h2>'
+
+    return re.sub(r"<h2>(.*?)</h2>", anclar, cuerpo)
+
+
+def _indice() -> str:
+    """Lista de títulos principales; las secciones 3.x (una por integrante) van con sangría."""
+    filas = []
+    for ancla, titulo in _entradas_indice:
+        clase = ' class="sub"' if re.match(r"3\.\d", titulo) else ""
+        filas.append(f'<li{clase}><a href="#{ancla}">{titulo}</a></li>')
+    return '<div class="indice"><p class="indice-titulo">Índice</p><ul>' + "".join(filas) + "</ul></div>"
 
 
 def generar_pdf(texto_md: str) -> bool:
@@ -310,6 +355,8 @@ def generar_pdf(texto_md: str) -> bool:
         return False
     # CommonMark con tablas: el mismo formato con que GitHub muestra los documentos.
     cuerpo = MarkdownIt("commonmark", {"html": True}).enable("table").render(texto_md)
+    cuerpo = _anclar_titulos(cuerpo)
+    cuerpo = cuerpo.replace(_INDICE, _indice())
     html = (
         '<!doctype html><html lang="es"><head><meta charset="utf-8">'
         f"<title>Taller A2A · Grupo 5</title><style>{_CSS}</style></head>"
