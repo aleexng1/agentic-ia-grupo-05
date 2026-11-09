@@ -241,7 +241,7 @@ agentes en `URLS_AGENTES`: el mío local (`http://127.0.0.1:8006`) y los túnele
 Alex y Eduardo. Mi agente salió en el túnel `https://defining-envelope-obtaining-dem.trycloudflare.com`.
 
 - Catálogo: `evidencias/sebastian/04-catalogo.png`, con la línea «Supervisor con 4 agentes».
-- Ronda: `evidencias/sebastian/05-ronda.png`, con las tres preguntas, el agente elegido y el motivo.
+- Ronda: `evidencias/sebastian/05-ronda.png`, `05-ronda-2.png` y `05-ronda-3.png`, una captura por pregunta, con el agente elegido y el motivo.
 
 | # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
 |---|----------|-------------|-----------------------|---------------|

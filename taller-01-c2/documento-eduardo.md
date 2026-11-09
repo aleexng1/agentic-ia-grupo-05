@@ -170,7 +170,7 @@ El coordinador mostró `Supervisor con 4 agentes`.
 | # | Pregunta | A quién fue | Motivo del supervisor | ¿Estuvo bien? |
 |---|---|---|---|---|
 | 1 | Presupuesto de feria infantil para 60 personas y 2 horas | Agente de Eduardo | El usuario solicita la estimación de un presupuesto simulado para un evento. | Sí. Entregó un presupuesto ficticio de $927.300 CLP. |
-| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario solicita una propuesta de comida con menús específicos para celíacos en una feria infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
+| 2 | Alimentación para 80 niños, incluidos 6 celíacos | Agente de Sebastian | El usuario solicita una propuesta de comida con opciones específicas para celíacos en un evento infantil. | Sí. Propuso alimentación general y opciones sin gluten. |
 | 3 | ¿Cuál es la capital de Australia? | ninguno | La pregunta sobre la capital de Australia no corresponde a ninguno de los agentes especializados en ferias y eventos del catálogo. | Sí. El coordinador no delegó la consulta. |
 
 ### ¿Qué cambiaría de mi ficha después de la ronda?
@@ -199,14 +199,15 @@ fuera de las especialidades disponibles.
 - `evidencias/eduardo/04-catalogo.png`:
   supervisor con los cuatro agentes descubiertos.
 - `evidencias/eduardo/05-ronda.png`:
-  resultados de las tres preguntas, agente elegido
+  resultados de las preguntas 1 y 2, agente elegido
   y motivo de selección.
-  - `evidencias/eduardo/05-ronda-2.png`:
+- `evidencias/eduardo/05-ronda-2.png`:
   captura complementaria de la tercera pregunta
   (capital de Australia), con el comando ejecutado,
   agente elegido `ninguno`, motivo, respuesta y dos saltos.
 
+Ajustes de redacción hechos en la revisión del grupo.
+
 ## 8. Estado de Git y seguridad
 
-Las evidencias finales de la ronda se presentan en el PR #70
-para revisión e integración en `main`.
+Las evidencias finales de la ronda quedaron en `evidencias/eduardo/`.
