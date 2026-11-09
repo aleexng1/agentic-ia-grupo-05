@@ -228,9 +228,13 @@ def armar_markdown(fecha: str) -> str:
         ruta_doc = _documento(carpeta)
         tabla = _tabla_ronda(ruta_doc.read_text(encoding="utf-8")) if ruta_doc.exists() else None
         partes.append(tabla + "\n" if tabla else _pendiente(f"tabla de la ronda en documento-{carpeta}.md"))
-        captura = EVIDENCIAS / carpeta / "05-ronda.png"
-        partes.append(_imagen(captura, f"05-ronda de {nombre}") if captura.exists()
-                      else _pendiente(f"evidencias/{carpeta}/05-ronda.png (prueba grupal)"))
+        # Algunos integrantes usaron una captura por pregunta (05-ronda, 05-ronda-2, ...).
+        rondas = sorted((EVIDENCIAS / carpeta).glob("05-ronda*.png"),
+                        key=lambda p: (p.stem != "05-ronda", p.name))
+        if rondas:
+            partes.extend(_imagen(p, f"{p.stem} de {nombre}") for p in rondas)
+        else:
+            partes.append(_pendiente(f"evidencias/{carpeta}/05-ronda.png (prueba grupal)"))
 
     # 7. Análisis
     partes.append("## 6. Análisis de la ronda\n")
