@@ -1,17 +1,3 @@
-# Documento de entrega · Taller A2A · Grupo 5
-
-**Tema del grupo:** planificador de ferias y eventos.
-
-| Integrante | Agente |
-|------------|--------|
-| Matias Muñoz | Programa, actividades y horarios |
-| Alex Nail | Lugares y capacidad |
-| Eduardo Basaure | Presupuesto y costos estimados |
-| Sebastian Mardones | Comida y catering |
-
-> Este documento cubre el agente de **Alex Nail**. La ronda de preguntas se completa en la
-> sesión conjunta con los agentes de los compañeros.
-
 ## 1. Blueprint
 
 Versión final (`blueprint-Alex.md`):
@@ -335,8 +321,7 @@ Comentarios:
 
 La ficha funcionó: el supervisor me mandó las preguntas de recintos, incluida la de una feria con food trucks del ensayo, en la que el agente pidió la cantidad de personas antes de recomendar. Cambiaría dos cosas. Agregaría a la descripción que necesito tres datos (tipo de feria, cantidad de personas y si se prefiere interior o exterior), para que quien pregunta los dé de entrada. Y haría que el agente indique si un recinto permite servicio de comida (el dato ya está en mi catálogo, pero hoy no lo muestra), aclarando que qué servir es tema de Sebastián, porque esa es la frontera más cercana entre nuestros agentes.
 
-Preguntas para comentar: ¿qué ficha eligió mejor el supervisor y qué decía?, ¿hubo una
-pregunta que dos agentes podrían responder y cómo se resolvió?, ¿qué cambiarían de su ficha?
+El análisis del grupo está en la sección 6.
 
 ## 7. Notas técnicas
 
