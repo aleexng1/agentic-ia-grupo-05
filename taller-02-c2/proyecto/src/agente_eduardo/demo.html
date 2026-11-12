@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#102a43">
+  <title>Agente de Eduardo — Presupuestos y Costos</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --tinta: #17324d;
+      --texto-secundario: #586b7d;
+      --fondo: #f3f6f9;
+      --superficie: #fff;
+      --borde: #dce5ec;
+      --azul: #176b87;
+      --azul-oscuro: #10546d;
+      --verde: #18745c;
+      --alerta: #7a4a08;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; color: var(--tinta); background: var(--fondo); }
+    .barra { background: #102a43; color: white; border-bottom: 4px solid #45b8a3; }
+    .barra-interior, main { width: min(100% - 32px, 900px); margin-inline: auto; }
+    .barra-interior { min-height: 76px; display: flex; align-items: center; gap: 14px; }
+    .marca { width: 42px; height: 42px; border: 1px solid #6bd0bf; border-radius: 12px; display: grid; place-items: center; color: #8be0d1; font-size: 20px; font-weight: 750; }
+    .nombre { margin: 0; font-size: 16px; letter-spacing: .01em; }
+    main { padding-block: 48px 64px; }
+    .intro { max-width: 690px; margin-bottom: 28px; }
+    .etiqueta { color: var(--verde); font-size: 12px; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 10px 0 12px; font-size: clamp(29px, 5vw, 42px); line-height: 1.12; letter-spacing: -.035em; }
+    .bajada { margin: 0; color: var(--texto-secundario); font-size: 17px; line-height: 1.6; }
+    .aviso { margin-top: 22px; padding: 13px 16px; border: 1px solid #edd6a9; border-radius: 10px; color: var(--alerta); background: #fff9eb; font-size: 14px; line-height: 1.5; }
+    .panel { overflow: hidden; border: 1px solid var(--borde); border-radius: 16px; background: var(--superficie); box-shadow: 0 12px 34px #17324d0b; }
+    .panel-cabecera { display: flex; align-items: center; gap: 12px; padding: 20px 22px; border-bottom: 1px solid var(--borde); }
+    .estado { width: 10px; height: 10px; flex: 0 0 auto; border-radius: 50%; background: var(--verde); box-shadow: 0 0 0 4px #e5f5ef; }
+    .panel-cabecera h2 { margin: 0; font-size: 16px; }
+    .panel-cabecera p { margin: 4px 0 0; color: var(--texto-secundario); font-size: 13px; }
+    .conversacion { min-height: 200px; max-height: 460px; overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 16px; }
+    .vacio { margin: auto; max-width: 410px; color: var(--texto-secundario); text-align: center; line-height: 1.6; }
+    .mensaje { max-width: min(88%, 650px); padding: 13px 16px; border-radius: 13px; line-height: 1.55; overflow-wrap: anywhere; white-space: pre-wrap; }
+    .mensaje.usuario { align-self: flex-end; color: white; background: var(--azul); border-bottom-right-radius: 4px; }
+    .mensaje.agente { align-self: flex-start; color: var(--tinta); background: #f0f4f7; border-bottom-left-radius: 4px; }
+    .mensaje.error { color: #8a3029; background: #fff0ee; }
+    .formulario { padding: 18px 22px 22px; border-top: 1px solid var(--borde); }
+    label { display: block; margin-bottom: 9px; font-size: 14px; font-weight: 700; }
+    .entrada-fila { display: flex; gap: 10px; }
+    textarea { width: 100%; min-height: 54px; max-height: 150px; resize: vertical; padding: 15px; border: 1px solid #aebdca; border-radius: 10px; color: var(--tinta); background: white; font: inherit; line-height: 1.45; }
+    textarea:focus-visible, button:focus-visible { outline: 3px solid #67c8b4; outline-offset: 2px; }
+    button { border: 0; border-radius: 10px; color: white; background: var(--azul); font: inherit; font-weight: 700; cursor: pointer; }
+    button:hover:not(:disabled) { background: var(--azul-oscuro); }
+    button:disabled { opacity: .6; cursor: wait; }
+    .enviar { min-width: 112px; padding: 0 18px; }
+    .ejemplos { margin-top: 23px; }
+    .ejemplos h2 { margin: 0 0 11px; font-size: 14px; }
+    .lista-ejemplos { display: flex; flex-wrap: wrap; gap: 9px; }
+    .ejemplo { padding: 9px 12px; border: 1px solid var(--borde); border-radius: 999px; color: var(--azul-oscuro); background: white; font-size: 13px; text-align: left; }
+    .ejemplo:hover { background: #edf7f8; }
+    .nota { margin: 18px 0 0; color: var(--texto-secundario); font-size: 12px; line-height: 1.5; }
+    @media (max-width: 560px) {
+      main { padding-top: 34px; }
+      .entrada-fila { flex-direction: column; }
+      .enviar { min-height: 48px; }
+      .conversacion { padding: 16px; }
+      .formulario { padding: 16px; }
+      .mensaje { max-width: 96%; }
+    }
+    @media (prefers-reduced-motion: no-preference) { .panel { animation: aparecer .35s ease-out both; } @keyframes aparecer { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: none; } } }
+  </style>
+</head>
+<body>
+  <header class="barra">
+    <div class="barra-interior">
+      <div class="marca" aria-hidden="true">E</div>
+      <p class="nombre">Demostración · Agente de Eduardo</p>
+    </div>
+  </header>
+  <main>
+    <section class="intro" aria-labelledby="titulo">
+      <span class="etiqueta">Planificación de eventos</span>
+      <h1 id="titulo">Agente de Eduardo — Presupuestos y Costos</h1>
+      <p class="bajada">Explora estimaciones presupuestarias simuladas para dimensionar los costos de tu evento.</p>
+      <aside class="aviso" aria-label="Aviso sobre los precios"><strong>Importante:</strong> Los precios y presupuestos son ficticios, solo para demostración, y no representan cotizaciones reales.</aside>
+    </section>
+
+    <section class="panel" aria-labelledby="titulo-conversacion">
+      <div class="panel-cabecera">
+        <span class="estado" aria-hidden="true"></span>
+        <div><h2 id="titulo-conversacion">Consulta de presupuesto</h2><p>La conversación se conserva mientras esta página permanezca abierta.</p></div>
+      </div>
+      <div id="conversacion" class="conversacion" role="log" aria-live="polite" aria-relevant="additions text" aria-label="Conversación con el agente">
+        <p id="vacio" class="vacio">Escribe una consulta o elige uno de los ejemplos para comenzar.</p>
+      </div>
+      <form id="formulario" class="formulario">
+        <label for="pregunta">¿Qué presupuesto quieres estimar?</label>
+        <div class="entrada-fila">
+          <textarea id="pregunta" name="pregunta" rows="2" maxlength="2000" placeholder="Describe el tipo de evento, asistentes y duración…" required></textarea>
+          <button id="enviar" class="enviar" type="submit">Consultar</button>
+        </div>
+        <p class="nota">No incluyas información personal, credenciales ni datos sensibles.</p>
+      </form>
+    </section>
+
+    <section class="ejemplos" aria-labelledby="titulo-ejemplos">
+      <h2 id="titulo-ejemplos">Prueba con un ejemplo</h2>
+      <div class="lista-ejemplos">
+        <button class="ejemplo" type="button">¿Cuál sería el presupuesto simulado para una feria tecnológica de 80 personas y 4 horas?</button>
+        <button class="ejemplo" type="button">Estima el costo ficticio de un evento cultural para 150 asistentes durante 6 horas.</button>
+        <button class="ejemplo" type="button">¿Qué presupuesto aproximado tendría una celebración infantil para 40 personas y 3 horas?</button>
+      </div>
+    </section>
+  </main>
+  <script>
+    (() => {
+      const formulario = document.querySelector("#formulario");
+      const entrada = document.querySelector("#pregunta");
+      const enviar = document.querySelector("#enviar");
+      const conversacion = document.querySelector("#conversacion");
+      const vacio = document.querySelector("#vacio");
+      let contextId = null;
+
+      function agregarMensaje(texto, tipo) {
+        vacio?.remove();
+        const mensaje = document.createElement("div");
+        mensaje.className = `mensaje ${tipo}`;
+        mensaje.textContent = texto;
+        conversacion.append(mensaje);
+        conversacion.scrollTop = conversacion.scrollHeight;
+        return mensaje;
+      }
+
+      document.querySelectorAll(".ejemplo").forEach((boton) => {
+        boton.addEventListener("click", () => {
+          entrada.value = boton.textContent.trim();
+          entrada.focus();
+        });
+      });
+
+      formulario.addEventListener("submit", async (evento) => {
+        evento.preventDefault();
+        const texto = entrada.value.trim();
+        if (!texto || enviar.disabled) return;
+
+        agregarMensaje(texto, "usuario");
+        entrada.value = "";
+        enviar.disabled = true;
+        enviar.textContent = "Consultando…";
+        const espera = agregarMensaje("Preparando estimación…", "agente");
+        const controlador = new AbortController();
+        const temporizador = window.setTimeout(() => controlador.abort(), 60000);
+
+        try {
+          const respuestaHttp = await fetch("/panel/consultar", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Accept": "application/json" },
+            body: JSON.stringify({ texto, context_id: contextId }),
+            signal: controlador.signal,
+            credentials: "same-origin",
+          });
+          const datos = await respuestaHttp.json();
+          if (!respuestaHttp.ok) {
+            const detalle = typeof datos.detail === "string" ? datos.detail : "No se pudo completar la consulta.";
+            throw new Error(detalle);
+          }
+          if (typeof datos.respuesta !== "string" || typeof datos.context_id !== "string") {
+            throw new Error("El servicio devolvió una respuesta con formato inesperado.");
+          }
+          contextId = datos.context_id;
+          espera.textContent = datos.respuesta;
+        } catch (error) {
+          const mensaje = error.name === "AbortError"
+            ? "La consulta tardó demasiado. Inténtalo de nuevo."
+            : error instanceof TypeError
+              ? "No se pudo comunicar con el agente. Comprueba que el servicio esté disponible e inténtalo de nuevo."
+              : (error.message || "No se pudo completar la consulta.");
+          espera.classList.add("error");
+          espera.textContent = mensaje.replace(/[\r\n]+/g, " ");
+        } finally {
+          window.clearTimeout(temporizador);
+          enviar.disabled = false;
+          enviar.textContent = "Consultar";
+          entrada.focus();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

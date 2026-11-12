@@ -1,0 +1,23 @@
+# Heroku solo necesita taller-02-c2/proyecto: lo demás no entra al despliegue.
+
+# Otras carpetas de talleres
+/taller-01
+/taller-01-c2
+/taller-02
+/taller-03
+/tarea-final-c1
+/curso02-taller01
+/curso02-taller-n8n
+/_plantilla-taller
+
+# Evidencias
+/taller-02-c2/evidencias
+
+# PDFs e imágenes
+*.pdf
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.webp
+*.svg
