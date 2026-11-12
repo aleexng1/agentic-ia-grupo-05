@@ -1,0 +1,15 @@
+# Entornos y caché de Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Variables de entorno y secretos
+.env
+
+# Dependencias
+node_modules/
+
+# Datos locales de n8n y Postgres
+.n8n/
+pgdata/
