@@ -1,6 +1,1 @@
-# Ajustar a las versiones que use la plataforma del curso.
-langgraph
-langchain-google-genai
-python-dotenv
-jupyter
-nbstripout
+-r taller-02-c2/proyecto/requirements.txt
