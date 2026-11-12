@@ -1,7 +1,11 @@
 """Descubrimiento de agentes disponibles mediante sus tarjetas A2A."""
 
 from src.comun.config import modo_interno, urls_agentes
+from src.comun.registro import obtener_registro
 from src.coordinador.cliente import obtener_cliente, tarjeta_del_cliente
+
+
+_REGISTRO = obtener_registro()
 
 
 def _una_linea(texto: str) -> str:
@@ -25,10 +29,13 @@ async def descubrir() -> list[dict]:
                     "nombre": tarjeta.name,
                     "descripcion": tarjeta.description,
                     "cliente": cliente,
+                    "url": tarjeta.supported_interfaces[0].url
+                    if tarjeta.supported_interfaces
+                    else url,
                 }
             )
         except Exception as error:
             detalle = _una_linea(str(error)) or error.__class__.__name__
-            print(f"No se pudo descubrir el agente en {url}: {detalle}")
+            _REGISTRO.warning("No se pudo descubrir el agente en %s: %s", url, detalle)
 
     return catalogo
