@@ -2,6 +2,7 @@
 
 import asyncio
 import os
+import time
 from typing import Literal
 from uuid import uuid4
 
@@ -13,11 +14,13 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from pydantic import BaseModel, Field, create_model
 
+from src.comun.registro import obtener_registro, recortar, segundos
 from src.coordinador.catalogo import descubrir
 from src.coordinador.cliente import preguntar
 
 
 load_dotenv()
+_REGISTRO = obtener_registro()
 MODELO = os.getenv("MODELO", "gemini-3.5-flash-lite")
 _MODELO_SUPERVISOR = init_chat_model(
     model=None,
@@ -101,15 +104,14 @@ def _crear_grafo(catalogo: list[dict]):
 
     async def supervisor(estado: EstadoSupervisor) -> dict:
         if not catalogo:
-            return {"agente": "ninguno", "motivo": "No hay agentes disponibles."}
-
-        decision_modelo = await modelo_estructurado.ainvoke(
-            [SystemMessage(content=prompt_sistema), *estado["messages"]]
-        )
-        return {
-            "agente": decision_modelo.agente,
-            "motivo": decision_modelo.motivo,
-        }
+            agente, motivo = "ninguno", "No hay agentes disponibles."
+        else:
+            decision_modelo = await modelo_estructurado.ainvoke(
+                [SystemMessage(content=prompt_sistema), *estado["messages"]]
+            )
+            agente, motivo = decision_modelo.agente, decision_modelo.motivo
+        _REGISTRO.info("supervisor eligió %s · motivo: %s", agente, _una_linea(motivo))
+        return {"agente": agente, "motivo": motivo}
 
     async def agente_remoto(
         estado: EstadoSupervisor, config: RunnableConfig
@@ -132,14 +134,22 @@ def _crear_grafo(catalogo: list[dict]):
             estado["messages"][-1],
         )
         context_id = config.get("configurable", {}).get("thread_id") or str(uuid4())
+        _REGISTRO.info("A2A → %s · enviando", seleccionado.get("url", nombre))
+        inicio = time.perf_counter()
         try:
             respuesta = await preguntar(
                 seleccionado["cliente"],
                 _texto_mensaje(pregunta_usuario),
                 context_id,
             )
+            _REGISTRO.info(
+                "A2A ← %s · respuesta recibida en %s",
+                nombre,
+                segundos(time.perf_counter() - inicio),
+            )
         except Exception as error:
             detalle = _una_linea(str(error)) or error.__class__.__name__
+            _REGISTRO.warning("A2A ✗ %s · error: %s", nombre, detalle)
             respuesta = f"No pude consultar al agente remoto: {detalle}"
 
         return {
@@ -218,14 +228,22 @@ async def inicializar_supervisor(imprimir: bool = False) -> None:
             )
             graph = _crear_grafo(_CATALOGO)
             _INICIALIZADO = bool(_CATALOGO)
+            _REGISTRO.info(
+                "catálogo listo · %d agente(s): %s",
+                len(_CATALOGO),
+                ", ".join(elemento["nombre"] for elemento in _CATALOGO) or "ninguno",
+            )
             if imprimir:
                 print(f"Supervisor con {len(_CATALOGO)} agentes")
 
 
 async def _consultar(texto: str, context_id: str) -> dict:
     """Ejecuta el grafo una vez y devuelve su estado final."""
-    await inicializar_supervisor()
     identificador = context_id or str(uuid4())
+    _REGISTRO.info(
+        "pregunta recibida · context_id=%s · «%s»", identificador, recortar(texto)
+    )
+    await inicializar_supervisor()
     return await graph.ainvoke(
         {"messages": [HumanMessage(content=texto)]},
         config={"configurable": {"thread_id": identificador}},

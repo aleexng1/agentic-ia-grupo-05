@@ -10,6 +10,9 @@ Se levanta con: uvicorn app:app --reload --port 8000
 - /agentes/{nombre}/.well-known/agent-card.json   ficha de cada agente
 - /salud                  chequeo de salud
 
+Cada consulta deja líneas de registro (logging) en la salida estándar:
+pregunta, agente elegido y su motivo, envío A2A y tiempo de respuesta.
+
 El coordinador descubre las fichas en la primera pregunta (no al arrancar), porque
 las sirve esta misma app y durante el arranque sus rutas todavía no responden.
 Las consulta por http://127.0.0.1:{puerto}/agentes/{nombre}; el puerto real debe
@@ -23,11 +26,14 @@ from src.agente_eduardo import server as agente_eduardo
 from src.agente_matias import server as agente_matias
 from src.agente_sebastian import server as agente_sebastian
 from src.comun.config import puerto, ruta_agente
+from src.comun.registro import configurar_registro
 from src.comun.servidor import crear_app, registrar_agente
 from src.coordinador.cliente import cerrar_clientes
 from src.coordinador.graph import responder, responder_detallado
 from src.coordinador.server import tarjeta as tarjeta_coordinador
 
+
+configurar_registro()
 
 AGENTES = {
     "matias": agente_matias,
