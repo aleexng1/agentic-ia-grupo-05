@@ -1,6 +1,6 @@
 """Descubrimiento de agentes disponibles mediante sus tarjetas A2A."""
 
-from src.comun.config import urls_agentes
+from src.comun.config import modo_interno, urls_agentes
 from src.coordinador.cliente import obtener_cliente, tarjeta_del_cliente
 
 
@@ -12,10 +12,13 @@ def _una_linea(texto: str) -> str:
 async def descubrir() -> list[dict]:
     """Descarga tarjetas y crea el catálogo de los agentes que respondan."""
     catalogo = []
+    # En la app única las fichas publican URL_BASE (pública); el coordinador las
+    # consulta por la dirección interna para no pasar por el router de Heroku.
+    interno = modo_interno()
 
     for url in urls_agentes():
         try:
-            cliente = await obtener_cliente(url)
+            cliente = await obtener_cliente(url, usar_esta_direccion=interno)
             tarjeta = tarjeta_del_cliente(cliente)
             catalogo.append(
                 {

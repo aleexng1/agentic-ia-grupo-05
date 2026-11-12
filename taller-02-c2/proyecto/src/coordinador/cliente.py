@@ -33,8 +33,13 @@ _CLIENTE_HTTP: httpx.AsyncClient | None = None
 _CANDADO = asyncio.Lock()
 
 
-async def obtener_cliente(url: str):
-    """Descarga la tarjeta A2A una vez y reutiliza el cliente por URL."""
+async def obtener_cliente(url: str, usar_esta_direccion: bool = False):
+    """Descarga la tarjeta A2A una vez y reutiliza el cliente por URL.
+
+    Con usar_esta_direccion=True el JSON-RPC se envía a la misma dirección por la que
+    se descargó la ficha, aunque la ficha publique otra (la pública de URL_BASE).
+    Solo cambia la copia local del coordinador; la ficha publicada queda igual.
+    """
     global _CLIENTE_HTTP
 
     direccion = url.strip().rstrip("/")
@@ -61,6 +66,9 @@ async def obtener_cliente(url: str):
         tarjeta = await resolver.get_agent_card(
             http_kwargs={"timeout": TIEMPO_LIMITE}
         )
+        if usar_esta_direccion:
+            for interfaz in tarjeta.supported_interfaces:
+                interfaz.url = direccion
         configuracion = ClientConfig(
             streaming=False,
             polling=True,

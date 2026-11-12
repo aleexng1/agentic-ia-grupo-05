@@ -54,13 +54,71 @@ def test_ficha_de_cada_agente(cliente, nombre, nombre_ficha):
     assert _url_de_ficha(ficha) == url_agente(nombre)
 
 
-def test_urls_agentes_vacia_usa_las_rutas_internas(monkeypatch):
+@pytest.mark.parametrize(
+    ("port", "puerto_env", "esperado"),
+    [("5123", "9000", 5123), ("", "9000", 9000), ("", "", 8000)],
+)
+def test_puerto_real_port_luego_puerto(monkeypatch, port, puerto_env, esperado):
+    from src.comun import config
+
+    monkeypatch.setenv("PORT", port)
+    monkeypatch.setenv("PUERTO", puerto_env)
+    assert config.puerto() == esperado
+
+
+def test_urls_agentes_vacia_usa_la_direccion_interna(monkeypatch):
+    """Sin URLS_AGENTES el coordinador usa 127.0.0.1 y el puerto real, no URL_BASE."""
     from src.comun import config
 
     monkeypatch.setenv("URL_BASE", "https://ejemplo.herokuapp.com/")
     monkeypatch.setenv("URLS_AGENTES", "")
+    monkeypatch.setenv("PORT", "5123")
+    assert config.modo_interno()
     assert config.urls_agentes() == [
-        f"https://ejemplo.herokuapp.com/agentes/{nombre}" for nombre in NOMBRES_FICHAS
+        f"http://127.0.0.1:5123/agentes/{nombre}" for nombre in NOMBRES_FICHAS
+    ]
+    # La ficha pública sigue mostrando URL_BASE.
+    assert config.url_agente("alex") == "https://ejemplo.herokuapp.com/agentes/alex"
+
+
+def test_descubrir_en_modo_interno_usa_la_direccion_interna(monkeypatch):
+    """El coordinador descubre las 4 fichas y les envía el JSON-RPC por la ruta interna.
+
+    Las peticiones van directo a la app en memoria (sin red ni Gemini).
+    """
+    import asyncio
+
+    import httpx
+
+    from src.comun import config
+    from src.coordinador import catalogo, cliente as modulo_cliente
+
+    monkeypatch.setenv("URL_BASE", "https://ejemplo.herokuapp.com")
+    monkeypatch.setenv("URLS_AGENTES", "")
+    monkeypatch.setenv("PORT", "5123")
+
+    async def _probar():
+        modulo_cliente._CLIENTE_HTTP = httpx.AsyncClient(
+            transport=httpx.ASGITransport(app=modulo_app.app)
+        )
+        try:
+            encontrados = await catalogo.descubrir()
+            return [
+                (
+                    elemento["nombre"],
+                    modulo_cliente.tarjeta_del_cliente(elemento["cliente"])
+                    .supported_interfaces[0]
+                    .url,
+                )
+                for elemento in encontrados
+            ]
+        finally:
+            await modulo_cliente.cerrar_clientes()
+
+    resultado = asyncio.run(_probar())
+    assert resultado == [
+        (nombre_ficha, f"http://127.0.0.1:5123/agentes/{nombre}")
+        for nombre, nombre_ficha in NOMBRES_FICHAS.items()
     ]
 
 
@@ -68,6 +126,7 @@ def test_urls_agentes_con_valores_se_respeta(monkeypatch):
     from src.comun import config
 
     monkeypatch.setenv("URLS_AGENTES", "https://uno.example/ , https://dos.example")
+    assert not config.modo_interno()
     assert config.urls_agentes() == ["https://uno.example", "https://dos.example"]
 
 

@@ -49,3 +49,14 @@ agentes de ejemplo de la clase (viajes y restaurantes).
 ## Operación en Heroku
 
 ## Límites conocidos
+
+- **La memoria de la conversación vive en la RAM del servidor.** Se pierde al reiniciar
+  la app y también cuando Heroku la duerme por inactividad: después de eso el chat parte
+  de cero aunque el navegador conserve su `context_id`.
+- **En Heroku debe usarse `WEB_CONCURRENCY=1`** (`heroku config:set WEB_CONCURRENCY=1`).
+  Así corre una sola copia del programa; con varias, cada pregunta puede caer en una copia
+  distinta, con otra memoria, y el chat pierde el hilo.
+- Dentro de la app única el coordinador llama a los agentes por
+  `http://127.0.0.1:{puerto}/agentes/{nombre}` (puerto de `PORT`, o de `PUERTO` en local),
+  para no volver a pasar por el router de Heroku, que corta las peticiones a los 30
+  segundos. En local, `PUERTO` debe coincidir con el `--port` de uvicorn.
