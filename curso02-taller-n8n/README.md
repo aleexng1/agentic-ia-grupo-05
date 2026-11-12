@@ -55,19 +55,44 @@ python main.py router --diagrama                               # imprime el Merm
 uvicorn api.app:app --reload --port 8000
 ```
 
-- Swagger: http://localhost:8000/docs
-- `GET /health` → `{"ok": true, "modelo": "..."}`
-- `POST /chat` con `{"user_id", "texto"}` → `{"ruta", "motivo", "respuesta"}` (422 si el body es inválido, 502 si falla el modelo)
+- Swagger: http://localhost:8000/docs (usa el botón **Authorize** 🔒 para poner la clave y probar `/chat`)
+- `GET /health` → `{"ok": true, "modelo": "..."}` (abierto)
+- `POST /chat` con la cabecera `X-API-Key` y `{"user_id", "texto"}` → `{"ruta", "motivo", "respuesta"}`
+  (401 sin clave o con clave incorrecta, 422 si el body es inválido, 502 si falla el modelo)
 
-Ejemplo:
+Ejemplo (lee la clave desde `.env` para no escribirla a mano):
 
 ```bash
 curl -s -X POST http://localhost:8000/chat \
   -H "Content-Type: application/json" \
+  -H "X-API-Key: $(grep '^API_KEY=' .env | cut -d= -f2-)" \
   -d '{"user_id": "cliente-123", "texto": "¿tienen la polera azul en talla M?"}'
 ```
 
-En Bruno, abre la carpeta `bruno/` como colección y elige el entorno `local` o `nube` (la URL base está en la variable `baseUrl`).
+En Bruno, abre la carpeta `bruno/` como colección y elige el entorno `local` o `nube`. La URL base está en la
+variable `baseUrl` y la clave en `apiKey`. Los archivos traen un texto de ejemplo: pon tu clave real desde la
+app de Bruno marcando `apiKey` como **Secret** (así no queda escrita en `bruno/environments/*.bru`) y no subas
+la clave real al repo.
+
+## Clave de la API
+
+`POST /chat` está protegido: sin la cabecera `X-API-Key` correcta responde **401**, para que nadie que conozca la
+URL pueda usar el agente y gastar la cuota del modelo. Si el servidor no tiene `API_KEY` configurada, `/chat`
+rechaza **todas** las peticiones (no queda abierto) y lo deja anotado en el log.
+
+1. **Generar una clave** (dentro de `curso02-taller-n8n/` con el `.venv` activo):
+
+   ```bash
+   python -c "import secrets; print(secrets.token_urlsafe(32))"
+   ```
+
+2. **En local:** ponla en `.env` como `API_KEY=<tu-clave>`. `.env` está en el `.gitignore` y no se sube.
+   `.env.example` solo trae un valor ficticio.
+
+3. **En la nube:** créala como **variable de entorno del servidor** (`API_KEY`) en el panel del servicio donde
+   despliegues. No va en el código ni en el repo.
+
+Quien llame a `/chat` (n8n, Bruno, curl) debe mandar la cabecera `X-API-Key: <tu-clave>`.
 
 ## Correr las pruebas
 

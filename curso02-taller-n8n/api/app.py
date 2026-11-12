@@ -4,10 +4,13 @@
 """
 
 import logging
+import os
+import secrets
 from contextlib import asynccontextmanager
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import Depends, FastAPI, HTTPException, Request, Security
+from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.config import MODELO
@@ -25,6 +28,9 @@ Recibe el mensaje de un cliente de la tienda y lo deriva a uno de tres agentes:
 - **generica**: mensajes sin relación con la tienda o saludos sin un pedido concreto.
 
 La conversación se recuerda por `user_id`: cada usuario tiene su propio hilo de memoria.
+
+**Autenticación:** `POST /chat` exige la cabecera `X-API-Key`. Usa el botón **Authorize** (candado) para probarlo
+desde aquí. `GET /health` es abierto.
 """
 
 TAGS = [
@@ -33,11 +39,37 @@ TAGS = [
 ]
 
 
+MENSAJE_401 = "Falta la cabecera X-API-Key o la clave no es válida."
+
+api_key_header = APIKeyHeader(
+    name="X-API-Key",
+    auto_error=False,
+    description="Clave de acceso a POST /chat (variable API_KEY del servidor).",
+)
+
+
+def api_key_configurada() -> str:
+    """Se lee en cada petición para que un cambio en el entorno no requiera tocar el código."""
+    return os.getenv("API_KEY", "").strip()
+
+
+def exigir_api_key(clave: str | None = Security(api_key_header)) -> None:
+    esperada = api_key_configurada()
+    if not esperada:
+        # Sin clave configurada no se deja /chat abierto: se rechaza todo.
+        log.error("API_KEY no está configurada en el servidor: se rechaza la petición a /chat.")
+        raise HTTPException(status_code=401, detail=MENSAJE_401)
+    if not clave or not secrets.compare_digest(clave.encode(), esperada.encode()):
+        raise HTTPException(status_code=401, detail=MENSAJE_401)
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # El grafo se compila una sola vez, al arrancar.
     app.state.grafo = construir_grafo()
     log.info("Grafo del router compilado (modelo: %s)", MODELO)
+    if not api_key_configurada():
+        log.error("API_KEY no está configurada: POST /chat rechazará todas las peticiones con 401.")
     yield
 
 
@@ -113,8 +145,14 @@ def health() -> HealthResponse:
     tags=["chat"],
     response_model=ChatResponse,
     summary="Clasifica un mensaje y responde",
+    dependencies=[Depends(exigir_api_key)],
     responses={
         200: {"description": "Mensaje clasificado y respondido."},
+        401: {
+            "model": ErrorResponse,
+            "description": "Falta la cabecera `X-API-Key` o la clave no es válida.",
+            "content": {"application/json": {"example": {"detail": MENSAJE_401}}},
+        },
         422: {"description": "Body inválido: falta `user_id` o `texto`, o vienen vacíos."},
         502: {"model": ErrorResponse, "description": "El modelo de lenguaje falló o no respondió."},
     },
