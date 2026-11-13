@@ -31,10 +31,79 @@ automática.
 
 ## 3. Prompts que usé
 
-**Pendiente.** Las instrucciones que di a Claude Code deben quedar en
-[`evidencias/alex/prompts.md`](evidencias/alex/prompts.md), pegadas textuales, y hoy ese
-archivo está **vacío** (solo tiene el título y la nota). **No se inventó ningún prompt.** Esta
-sección se completa citándolos tal cual cuando el archivo esté lleno.
+Mis instrucciones a Claude Code están **completas y textuales** en
+[`evidencias/alex/prompts.md`](evidencias/alex/prompts.md): son cinco instrucciones
+principales, cada una con sus continuaciones. Ese archivo explica cómo se hicieron
+(cita textual de su encabezado):
+
+> Instrucciones dadas a Claude Code (en Linux Mint), en orden, copiadas tal cual. Los
+> prompts se prepararon con ayuda de Claude (claude.ai) y Alex los revisó, los ajustó
+> según los resultados de cada paso y los pegó en Claude Code. Las respuestas cortas de
+> continuación ("sigue", "arréglalo") también se incluyen.
+
+Las instrucciones largas las **resumo aquí y las enlazo** (el texto completo está en el
+archivo, sin cambios); las cortas las **cito tal cual**.
+
+| Nº | Qué pedí (resumen) | Texto completo |
+| --- | --- | --- |
+| 1 | **Base del proyecto** (rama `c2t2/alex-base`): crear la rama; la carpeta `taller-02-c2/` como copia de `taller-01-c2/proyecto` sin los agentes de ejemplo, con las carpetas de evidencias y un README inicial; la app única `app.py` (coordinador en la raíz, agentes en `/agentes/{nombre}`, descubrimiento de fichas en la primera pregunta, `URLS_AGENTES`, `/salud`, y `agente` y `motivo` por separado en `/panel/consultar`); `.env.example`; los archivos de Heroku en la raíz (preguntándome antes si alguno ya existía); `AGENTS.md`; `tests/test_app.py`; y cerrar con `pytest` y el arranque como Heroku, sin hacer push. | [prompts.md · 1](evidencias/alex/prompts.md#1--base-del-proyecto-rama-c2t2alex-base) |
+| 2 | **Ajuste de la base, publicación y ramas del grupo**, en dos fases. Fase 1: la llamada interna del coordinador por `127.0.0.1:{puerto real}` (de `PORT` o `PUERTO`), los límites conocidos (memoria en RAM y `WEB_CONCURRENCY=1`), la prueba, `pytest`, el arranque como Heroku y el commit; luego detenerse. Fase 2 (tras mi «sigue»): push, PR «Taller 2 C2: base del proyecto (app única + Heroku)» unido sin borrar la rama, main local al día y las cuatro ramas del grupo con su tabla. | [prompts.md · 2](evidencias/alex/prompts.md#2--ajuste-de-la-base-publicación-y-ramas-del-grupo) |
+| 3 | **Registro A2A y README**: el registro con `logging` (cuatro tipos de línea, pregunta de máximo 80 caracteres, sin claves ni cabeceras, formato con hora) y su prueba; y las secciones del README que no dependen de otros (instalación, configuración, iniciar/probar/detener, cómo funciona, dependencias externas), dejando las de otros como «pendiente» y sin rutas absolutas. | [prompts.md · 3](evidencias/alex/prompts.md#3--registro-a2a-y-readme) |
+| 4 | **Revisión de los PR #76 y #77**, en dos fases. Fase 1, un informe sin cambiar nada: alcance, seguridad (secretos, imágenes, `compare_digest`, a qué direcciones se envía la cabecera `X-API-Key`, la clave en el frontend), contrato frontend ↔ servidor, los dos `xfail`, la unión de ambos, las evidencias y el estado de #75, en una tabla con ✅ / ⚠️ / ❌. Fase 2 (tras mi «sigue»): integrar en mi rama, aplicar solo los arreglos chicos, probar el arranque como Heroku (hasta 4 preguntas reales) y abrir un PR sin unirlo. | [prompts.md · 4](evidencias/alex/prompts.md#4--revisión-de-los-pr-de-matías-76-y-eduardo-77) |
+| 5 | **Unir los PR, evidencias y documento**, en tres fases: unir #76, #77 y #78 comprobando antes que no hubiera conflictos; el guion de capturas (con recomendaciones para mi Linux Mint y un máximo de 6 preguntas reales) y `prompts.md`; revisar las capturas; y escribir este documento, completar «Preparación manual» del README y abrir el PR «Taller 2 C2: documento y evidencias de Alex» sin unirlo. | [prompts.md · 5](evidencias/alex/prompts.md#5--unir-los-pr-evidencias-y-documento-de-alex) |
+
+### Continuaciones cortas, citadas tal cual
+
+Después de probar una pregunta real con la base (instrucción 2):
+
+```text
+sigue
+```
+
+Para unir el PR #75 (instrucción 3):
+
+```text
+Une el PR #75 a main con gh pr merge 75 --merge, sin borrar la rama. Después
+actualiza main local y confirma que c2t2/alex-integracion y main apuntan al mismo
+commit.
+```
+
+Tras leer el informe de la revisión (instrucción 4):
+
+```text
+sigue, incluyendo el cambio del frontend (mostrar detail y el texto correcto del 503).
+Dos agregados:
+- Las comprobaciones del frontend de Eduardo necesitan Playwright y Chrome, que no
+  están en requirements.txt. No los agregues ahí (Heroku no los necesita): crea
+  taller-02-c2/proyecto/requirements-dev.txt con lo que haga falta para correrlas y
+  agrega al README, en la sección de pruebas, cómo instalarlo y el comando exacto
+  (pytest ../evidencias/eduardo/test_panel_eduardo.py -v -rx desde
+  taller-02-c2/proyecto). Declara que son opcionales y que necesitan Chrome.
+- En la nota de "estado tras la integración" del documento de Eduardo, deja claro
+  qué cambié yo en panel.html y por qué, para que él lo revise al volver a probar.
+```
+
+Cuando GitHub marcó el #78 con conflictos por la doble unión de los mismos commits, sin
+archivos en conflicto (instrucción 5):
+
+```text
+arréglalo: git merge origin/main dentro de c2t2/alex-integracion y push. Después
+confirma que GitHub ya no marque el #78 como CONFLICTING, únelo con
+gh pr merge 78 --merge sin borrar la rama, actualiza main local, corre pytest
+(deberían ser 168) y deja c2t2/alex-integracion al día con main. Los archivos
+sin commit (GUION.md y prompts.md) no los toques ni los pierdas: si el merge lo
+exige, guárdalos con git stash y recupéralos al final. Después quedo con las
+capturas.
+```
+
+La última continuación de la instrucción 5, el **«Cambio de plan para las capturas»**, es
+más larga: pedí tomar las capturas de forma automática con un script de Playwright y Chrome
+sin ventana, contra la app real y con una `CLAVE_API` temporal solo en el entorno, con una
+franja de fecha y hora en cada imagen, y revisar después el registro. Está completa en
+[prompts.md · «Cambio de plan para las capturas»](evidencias/alex/prompts.md#5--unir-los-pr-evidencias-y-documento-de-alex).
+
+**Límite de esta sección:** `prompts.md` llega hasta ese «Cambio de plan». La instrucción que
+pidió completar esta sección y unir el PR #79 todavía no está en el archivo.
 
 ## 4. Decisiones de la base y por qué
 
@@ -180,7 +249,7 @@ En `taller-02-c2/evidencias/alex/`:
 - `05-ninguno.png`, `06-datos-faltantes.png`
 - `registro-local.txt`: la salida completa del servidor de esa corrida
 - `capturar_evidencias.py` y `GUION.md`: cómo se tomaron y cómo repetirlas
-- `prompts.md`: **vacío**, pendiente (ver la sección 3)
+- `prompts.md`: mis instrucciones a Claude Code, textuales (ver la sección 3)
 
 Revisé cada imagen a tamaño completo: se ve lo que pide el guion y no aparecen claves (el
 campo de ingreso se ve con puntos), correos, rutas con mi nombre de usuario, direcciones IP
@@ -195,8 +264,8 @@ públicas ni notificaciones.
   el comando del `Procfile` en mi computador no demuestra que funcione en Heroku.
 - **Las capturas son automáticas**, no las tomó una persona. Llevan la franja y el área de
   conversación expandida que agrega el script. El script solo funciona en Linux y macOS.
-- **`prompts.md` está vacío**: la sección 3 queda pendiente hasta que yo pegue mis
-  instrucciones, textuales.
+- **`prompts.md` no incluye las últimas instrucciones**: llega hasta el «Cambio de plan para
+  las capturas» (ver el límite al final de la sección 3).
 - **Las respuestas de Gemini varían** entre corridas, y los datos de los agentes son ficticios.
 - **Eduardo tiene pendientes suyos:** ejecutar de verdad el acceso permitido y rechazado desde
   su frontend contra la app integrada (R05–R07 y R09 de su documento), actualizar sus
