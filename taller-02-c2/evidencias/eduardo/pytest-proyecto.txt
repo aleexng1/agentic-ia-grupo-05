@@ -1,0 +1,9 @@
+Entorno: LOCAL (Windows, Python 3.12.10)
+Fecha: 2026-11-13T09:56:03-03:00
+Directorio: taller-02-c2/proyecto
+Comando: .venv/Scripts/python -m pytest -q -p no:cacheprovider
+Alcance: suite existente, sin Gemini; incluye dobles de prueba.
+
+........................................................................ [ 63%]
+..........................................                               [100%]
+114 passed in 2.46s

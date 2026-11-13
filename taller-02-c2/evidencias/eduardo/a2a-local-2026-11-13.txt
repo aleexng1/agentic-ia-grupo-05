@@ -1,0 +1,91 @@
+Entorno: LOCAL. Fecha de las ejecuciones: 2026-11-13.
+Procedencia: taller-02-c2-uvicorn-20261113-1.log, registro temporal del servidor
+iniciado desde proyecto con .venv/Scripts/python -m uvicorn app:app --host 127.0.0.1 --port 8000.
+
+Extracción limitada a líneas del coordinador, Message/Arguments de A2A y HTTP
+de los agentes. No incluye .env, claves, cabeceras, cuerpos de respuesta ni trazas.
+Se revisaron los fragmentos contra los valores privados configurados, sin publicarlos.
+Se recuperó la codificación cp1252 interpretada como cp850 por PowerShell; el archivo
+original estaba redirigido en UTF-16. Este extracto está guardado en UTF-8.
+
+LÍMITE: faltan las líneas A2A normales con fecha/hora. Su escritura falló con
+UnicodeEncodeError al imprimir las flechas en la consola. Se conservan las líneas
+Message/Arguments disponibles, incluidas las secuencias literales \u2192 y \u2190;
+NO se reconstruyen mensajes ni horas faltantes. Los tiempos proceden de Arguments.
+Los HTTP 200 y las selecciones respaldan las cuatro ejecuciones, pero NO certifican
+por sí solos las cifras o textos completos observados por Eduardo en el panel,
+ni demuestran autorización efectiva. No se repitieron llamadas al proveedor al extraer.
+
+--- Revisión de codificación y fragmentos no recuperables ---
+SHA-256 del registro fuente en la primera lectura de esta revisión:
+afa67bed73284947d82f09734f045ac01dff61e73eef11b15a06f6e8c6e3c2c7
+
+El registro del servidor sigue activo y recibió líneas adicionales durante la
+revisión. Se verificó que esta huella coincide con un prefijo completo de la fuente,
+terminado en salto de línea; las 29 líneas extraídas siguen presentes sin cambios.
+La huella no describe los agregados posteriores ni implica una fuente inmutable.
+
+La lectura estricta de UTF-16 y la reversión cp850/cp1252 son reversibles, sin usar
+errors=replace ni errors=ignore. No aparecen caracteres de reemplazo U+FFFD en el
+texto corregido. Las 29 líneas de evidencia de abajo coinciden literalmente con
+la fuente corregida; se conservaron sus contenidos y las secuencias \u2192/\u2190.
+No se modificó el archivo fuente ni se repitieron las ejecuciones.
+
+Se encontraron ocho UnicodeEncodeError: cuatro al escribir la flecha de envío
+y cuatro al escribir la de recepción. Se conservaron cuatro pares Message/Arguments
+de envío, cuatro de recepción y un HTTP 200 por agente. El fallo de escritura es
+anterior a la redirección: cambiar la decodificación del archivo no puede recuperar
+las líneas normales que nunca llegaron a escribirse.
+
+Fragmentos que NO pueden recuperarse desde este registro:
+- Eduardo: línea normal de envío y de recepción con prefijo/fecha/hora (dos).
+- Matías: línea normal de envío y de recepción con prefijo/fecha/hora (dos).
+- Alex: línea normal de envío y de recepción con prefijo/fecha/hora (dos).
+- Sebastián: línea normal de envío y de recepción con prefijo/fecha/hora (dos).
+- Finales de las cuatro preguntas: el coordinador las recorta a 80 caracteres.
+  Las preguntas visibles en las capturas son otra evidencia; no se insertan en el log.
+- Cuerpos completos de las cuatro respuestas: no se registraban por diseño;
+  su contenido se revisa en las capturas manuales, no se deduce de los HTTP 200.
+
+Las horas de las preguntas y selecciones sí están disponibles abajo. No se usan
+para inventar las horas faltantes de envío/recepción. Los tiempos 4,6 / 4,0 / 5,4 /
+5,2 s proceden de Arguments, no de una nueva medición ni de reconstruir mensajes.
+Para futuras ejecuciones, coordinar salida UTF-8 tanto en Python como en la consola
+y su redirección. No se cambió código/configuración ni se reinició el servidor aquí.
+
+--- Eduardo ---
+2026-11-13 10:47:10 INFO    [coordinador] pregunta recibida · context_id=25f82b8f-2ed9-471a-81aa-38537df31086 · «Necesito estimar el presupuesto simulado de una feria tecnológica para 80 perso…»
+2026-11-13 10:47:11 INFO    [coordinador] catálogo listo · 4 agente(s): Agente de Matias, Agente de Alex, Agente de Eduardo, Agente de Sebastian
+2026-11-13 10:47:13 INFO    [coordinador] supervisor eligió Agente de Eduardo · motivo: El usuario solicita estimar el presupuesto simulado de una feria, lo cual corresponde a las funciones de este agente.
+Message: 'A2A \u2192 %s · enviando'
+Arguments: ('http://127.0.0.1:8000/agentes/eduardo',)
+INFO:     127.0.0.1:59821 - "POST /agentes/eduardo HTTP/1.1" 200 OK
+Message: 'A2A \u2190 %s · respuesta recibida en %s'
+Arguments: ('Agente de Eduardo', '4,6 s')
+
+--- Matías ---
+2026-11-13 10:57:56 INFO    [coordinador] pregunta recibida · context_id=cc91e5c8-b06f-4857-848c-85f6e039943c · «Quiero organizar una feria cultural para público familiar, de 3 horas de duraci…»
+2026-11-13 10:57:58 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita un programa de actividades y horarios para una feria cultural.
+Message: 'A2A \u2192 %s · enviando'
+Arguments: ('http://127.0.0.1:8000/agentes/matias',)
+INFO:     127.0.0.1:52236 - "POST /agentes/matias HTTP/1.1" 200 OK
+Message: 'A2A \u2190 %s · respuesta recibida en %s'
+Arguments: ('Agente de Matias', '4,0 s')
+
+--- Alex ---
+2026-11-13 11:04:25 INFO    [coordinador] pregunta recibida · context_id=63d52008-a199-47dc-8a82-00bdc4484ee7 · «Necesito un recinto interior para una feria tecnológica de 80 personas. Recomié…»
+2026-11-13 11:04:27 INFO    [coordinador] supervisor eligió Agente de Alex · motivo: El usuario solicita la recomendación de recintos para una feria indicando capacidad y características.
+Message: 'A2A \u2192 %s · enviando'
+Arguments: ('http://127.0.0.1:8000/agentes/alex',)
+INFO:     127.0.0.1:53231 - "POST /agentes/alex HTTP/1.1" 200 OK
+Message: 'A2A \u2190 %s · respuesta recibida en %s'
+Arguments: ('Agente de Alex', '5,4 s')
+
+--- Sebastián ---
+2026-11-13 11:10:46 INFO    [coordinador] pregunta recibida · context_id=d2a9ef60-7c8c-41a1-8dd1-d2b1623de665 · «Necesito una propuesta de catering para una feria tecnológica de 80 personas, d…»
+2026-11-13 11:10:48 INFO    [coordinador] supervisor eligió Agente de Sebastian · motivo: El usuario solicita una propuesta de catering y menús especiales sin requerir precios.
+Message: 'A2A \u2192 %s · enviando'
+Arguments: ('http://127.0.0.1:8000/agentes/sebastian',)
+INFO:     127.0.0.1:65212 - "POST /agentes/sebastian HTTP/1.1" 200 OK
+Message: 'A2A \u2190 %s · respuesta recibida en %s'
+Arguments: ('Agente de Sebastian', '5,2 s')

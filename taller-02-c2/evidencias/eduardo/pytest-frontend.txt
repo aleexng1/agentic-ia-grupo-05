@@ -1,0 +1,76 @@
+Entorno: LOCAL (Windows, Python 3.12.10)
+Fecha: 2026-11-13T10:01:34-03:00
+Navegador: Chrome 157.0.8103.78 headless
+Playwright: 1.65.1
+Directorio: taller-02-c2/proyecto
+Comando: .venv/Scripts/python -m pytest ../evidencias/eduardo/test_panel_eduardo.py -v -rx --tb=short --xfail-tb --show-capture=no -p no:cacheprovider
+RESPUESTAS SIMULADAS: sin Gemini ni A2A; solo loopback.
+Autorizacion: los xfail registran una brecha real pendiente, no un acceso protegido aprobado.
+Timeout: reloj virtual, no 65 segundos de espera real.
+Movil: viewport 320/390 px, no telefono fisico.
+
+============================= test session starts =============================
+platform win32 -- Python 3.12.10, pytest-9.2.0, pluggy-1.7.0 -- <REPOSITORIO>\taller-02-c2\proyecto\.venv\Scripts\python.exe
+rootdir: <REPOSITORIO>\taller-02-c2
+plugins: anyio-4.16.0, langsmith-0.14.17
+collecting ... collected 41 items
+
+..\evidencias\eduardo\test_panel_eduardo.py::test_contrato_http_y_cache_sin_proveedor PASSED [  2%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_entrada_invalida_servidor_actual[cuerpo0-400] PASSED [  4%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_entrada_invalida_servidor_actual[cuerpo1-422] PASSED [  7%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_entrada_invalida_servidor_actual[cuerpo2-422] PASSED [  9%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_adaptacion_respuesta_simple_y_contexto_opcional PASSED [ 12%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_autorizacion_real_pendiente_en_app[ausente] XFAIL [ 14%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_autorizacion_real_pendiente_en_app[incorrecta] XFAIL [ 17%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_ingreso_enmascarado_sin_validacion_ficticia PASSED [ 19%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_cabecera_contrato_memoria_y_recarga PASSED [ 21%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_muestra_agente_motivo_y_texto_literal_simulados[Agente de Matias] PASSED [ 24%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_muestra_agente_motivo_y_texto_literal_simulados[Agente de Alex] PASSED [ 26%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_muestra_agente_motivo_y_texto_literal_simulados[Agente de Eduardo] PASSED [ 29%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_muestra_agente_motivo_y_texto_literal_simulados[Agente de Sebastian] PASSED [ 31%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_muestra_agente_motivo_y_texto_literal_simulados[ninguno] PASSED [ 34%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_no_interpreta_html_ni_altera_espacios PASSED [ 36%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_rechazo_de_acceso_simulado[401-application/json] PASSED [ 39%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_rechazo_de_acceso_simulado[401-text/html] PASSED [ 41%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_rechazo_de_acceso_simulado[403-text/html] PASSED [ 43%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[400-Entrada inv\xe1lida] PASSED [ 46%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[422-Entrada inv\xe1lida] PASSED [ 48%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[413-demasiado larga] PASSED [ 51%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[429-l\xedmite de consultas] PASSED [ 53%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[502-proveedor o al agente] PASSED [ 56%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[503-proveedor o al agente] PASSED [ 58%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[500-servidor no pudo] PASSED [ 60%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[408-tiempo de espera del servidor] PASSED [ 63%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[504-tiempo de espera del servidor] PASSED [ 65%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_errores_http_simulados_sin_detalles_crudos[404-HTTP 404] PASSED [ 68%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_respuesta_no_json_o_incompleta_simulada[text/html-<h1>Proxy</h1>-no es JSON] PASSED [ 70%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_respuesta_no_json_o_incompleta_simulada[application/json-{-JSON inv\xe1lido] PASSED [ 73%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_respuesta_no_json_o_incompleta_simulada[application/json-null-formato inesperado] PASSED [ 75%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_respuesta_no_json_o_incompleta_simulada[application/json-{"respuesta": "incompleta"}-formato inesperado] PASSED [ 78%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_desconexion_simulada PASSED [ 80%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_timeout_simulado_con_reloj_virtual PASSED [ 82%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_espera_y_prevencion_de_duplicados PASSED [ 85%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_nueva_conversacion_descarta_respuesta_tardia_aun_sin_abort[red] PASSED [ 87%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_nueva_conversacion_descarta_respuesta_tardia_aun_sin_abort[json] PASSED [ 90%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_cambiar_clave_cancela_pendiente_y_limpia_historial PASSED [ 92%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_teclado_validacion_local_y_sugerencias PASSED [ 95%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_movil_sin_desborde_y_controles_tactiles[320] PASSED [ 97%]
+..\evidencias\eduardo\test_panel_eduardo.py::test_movil_sin_desborde_y_controles_tactiles[390] PASSED [100%]
+
+================================== XFAILURES ==================================
+______________ test_autorizacion_real_pendiente_en_app[ausente] _______________
+..\evidencias\eduardo\test_panel_eduardo.py:207: in test_autorizacion_real_pendiente_en_app
+    assert respuesta.status_code == 401, "El servidor debe rechazar la consulta antes de invocar al coordinador."
+E   AssertionError: El servidor debe rechazar la consulta antes de invocar al coordinador.
+E   assert 200 == 401
+E    +  where 200 = <Response [200 OK]>.status_code
+_____________ test_autorizacion_real_pendiente_en_app[incorrecta] _____________
+..\evidencias\eduardo\test_panel_eduardo.py:207: in test_autorizacion_real_pendiente_en_app
+    assert respuesta.status_code == 401, "El servidor debe rechazar la consulta antes de invocar al coordinador."
+E   AssertionError: El servidor debe rechazar la consulta antes de invocar al coordinador.
+E   assert 200 == 401
+E    +  where 200 = <Response [200 OK]>.status_code
+=========================== short test summary info ===========================
+XFAIL ..\evidencias\eduardo\test_panel_eduardo.py::test_autorizacion_real_pendiente_en_app[ausente] - DEPENDENCIA Matías: CLAVE_API aún no se valida en el servidor.
+XFAIL ..\evidencias\eduardo\test_panel_eduardo.py::test_autorizacion_real_pendiente_en_app[incorrecta] - DEPENDENCIA Matías: CLAVE_API aún no se valida en el servidor.
+======================= 39 passed, 2 xfailed in 37.43s ========================
