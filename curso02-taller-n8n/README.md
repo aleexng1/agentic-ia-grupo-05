@@ -94,6 +94,46 @@ rechaza **todas** las peticiones (no queda abierto) y lo deja anotado en el log.
 
 Quien llame a `/chat` (n8n, Bruno, curl) debe mandar la cabecera `X-API-Key: <tu-clave>`.
 
+## Túnel para n8n
+
+Para que n8n pueda llamar a la API de este PC, se expone con un **túnel rápido de Cloudflare**
+(`cloudflared`, modo *quick tunnel*, sin cuenta).
+
+1. **Levantarlo** (desde `curso02-taller-n8n/`; el script activa el `.venv` solo):
+
+   ```bash
+   ./scripts/tunel.sh
+   ```
+
+   Levanta la API en el puerto 8000, espera a que `/health` responda, abre el túnel e imprime algo así:
+
+   ```
+   URL pública :  https://palabras-al-azar.trycloudflare.com
+   Para n8n    :  https://palabras-al-azar.trycloudflare.com/chat
+   ```
+
+   Deja esa terminal abierta: ahí se ven las peticiones que llegan. **Ctrl+C** apaga la API y el túnel.
+
+2. **Probarlo** (en otra terminal, con el `.venv` activo):
+
+   ```bash
+   python scripts/probar_tunel.py https://palabras-al-azar.trycloudflare.com
+   ```
+
+   Hace 3 pruebas: `GET /health` → 200, `POST /chat` sin clave → 401 y `POST /chat` con la clave de `.env` → 200.
+   La clave se lee de `.env` y nunca se imprime.
+
+3. **En n8n**, en el nodo **Endpoint Agente** (HTTP Request): método `POST`, URL `…trycloudflare.com/chat`,
+   cabecera `X-API-Key` con tu clave y body `{"user_id", "texto"}`.
+
+Ten en cuenta:
+
+- **La URL cambia cada vez que se reinicia el túnel.** Después de cada `./scripts/tunel.sh` hay que copiar la
+  nueva URL en el nodo **Endpoint Agente** de n8n.
+- **Solo funciona mientras el PC y el script estén corriendo.** Si apagas el PC, cierras la terminal o haces
+  Ctrl+C, n8n deja de poder llamar a `/chat`.
+- El túnel es público: cualquiera con la URL puede llegar a la API. Por eso `/chat` exige la `X-API-Key`.
+
 ## Correr las pruebas
 
 ```bash
