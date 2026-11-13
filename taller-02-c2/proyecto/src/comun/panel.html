@@ -4,12 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f5f6f8">
-  <title>Agentes · Panel de viaje</title>
+  <title>Planifica tu feria · Grupo 5</title>
   <style>
     :root {
       color-scheme: light;
       --tinta: #172b3a;
-      --tinta-suave: #617482;
+      --tinta-suave: #526672;
       --fondo: #f5f6f8;
       --papel: #ffffff;
       --borde: #e4e9ed;
@@ -21,8 +21,14 @@
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
     * { box-sizing: border-box; }
+    [hidden] { display: none !important; }
     body { margin: 0; background: var(--fondo); color: var(--tinta); }
-    button, textarea { font: inherit; }
+    button, input, textarea { font: inherit; }
+    button { min-height: 44px; }
+    button:disabled { cursor: not-allowed; opacity: .6; }
+    :focus-visible { outline: 3px solid var(--azul); outline-offset: 3px; }
+    .salto { position: absolute; top: -100px; left: 12px; z-index: 1; padding: 12px; background: white; color: var(--azul); }
+    .salto:focus { top: 12px; }
     .barra-superior {
       height: 72px; display: flex; align-items: center; justify-content: space-between;
       padding: 0 clamp(20px, 5vw, 72px); background: rgba(255,255,255,.86);
@@ -37,17 +43,17 @@
     .estado-global { display: flex; align-items: center; gap: 9px; color: var(--tinta-suave); font-size: 13px; }
     .enlace-estudio { color: var(--azul); font-size: 13px; text-decoration: none; font-weight: 750; }
     .enlace-estudio:hover { text-decoration: underline; }
-    .punto { width: 8px; height: 8px; border-radius: 50%; background: #39a67d; box-shadow: 0 0 0 4px #e7f5ef; }
+    .punto { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--tinta-suave); }
     .contenedor { width: min(1180px, calc(100% - 40px)); margin: 44px auto 60px; }
     .encabezado { margin-bottom: 26px; }
     .sobretitulo { color: var(--azul); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
     h1 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -.055em; margin: 10px 0 8px; }
-    .bajada { color: var(--tinta-suave); margin: 0; font-size: 15px; }
+    .bajada { color: var(--tinta-suave); margin: 0; font-size: 15px; line-height: 1.6; }
     .rejilla { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 22px; align-items: start; }
     .columna { display: grid; gap: 18px; }
     .tarjeta { background: var(--papel); border: 1px solid var(--borde); border-radius: 20px; box-shadow: var(--sombra); }
     .lista-agentes { padding: 20px 14px 14px; }
-    .titulo-seccion { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: #80909a; font-weight: 800; margin: 0 8px 13px; }
+    .titulo-seccion { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 800; margin: 0 8px 13px; }
     .agente {
       width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 10px;
       border: 1px solid transparent; border-radius: 14px; text-align: left; color: inherit; background: transparent;
@@ -65,7 +71,7 @@
     .nota-datos strong { font-size: 13px; }
     .nota-datos p { margin: 7px 0 0; color: #786e58; line-height: 1.55; font-size: 12px; }
     .chat { overflow: hidden; }
-    .chat-cabecera { display: flex; justify-content: space-between; align-items: center; padding: 19px 22px; border-bottom: 1px solid var(--borde); }
+    .chat-cabecera { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; padding: 19px 22px; border-bottom: 1px solid var(--borde); }
     .chat-identidad { display: flex; align-items: center; gap: 11px; }
     .chat-identidad .agente-icono { background: var(--menta); }
     .chat-identidad strong { display: block; font-size: 14px; }
@@ -75,22 +81,35 @@
     .mensaje { max-width: min(82%, 570px); display: flex; flex-direction: column; gap: 5px; animation: aparecer .2s ease-out; }
     @keyframes aparecer { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .mensaje.usuario { align-self: flex-end; align-items: flex-end; }
-    .mensaje.agente { align-self: flex-start; }
+    .mensaje.asistente { align-self: flex-start; }
     .burbuja { padding: 12px 15px; line-height: 1.55; font-size: 14px; white-space: pre-wrap; overflow-wrap: anywhere; border-radius: 16px; }
-    .mensaje.agente .burbuja { background: #f0f4f5; border-bottom-left-radius: 5px; }
+    .burbuja :is(h3, h4, h5, h6) { display: inline; margin: 0; font-size: 1.05em; letter-spacing: normal; }
+    .burbuja code { font-family: ui-monospace, monospace; font-size: .95em; }
+    .mensaje.asistente .burbuja { background: #f0f4f5; border-bottom-left-radius: 5px; }
     .mensaje.usuario .burbuja { background: var(--azul); color: white; border-bottom-right-radius: 5px; }
-    .hora { padding: 0 4px; font-size: 10px; color: #91a0a8; }
+    .hora { padding: 0 4px; font-size: 12px; color: var(--tinta-suave); white-space: pre-wrap; overflow-wrap: anywhere; }
     .sugerencias { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 22px 15px; }
     .sugerencia { cursor: pointer; border: 1px solid #dce8e5; background: white; color: var(--azul-oscuro); border-radius: 999px; padding: 8px 11px; font-size: 11px; transition: .15s ease; }
     .sugerencia:hover { background: var(--menta); border-color: #b8d9ce; }
     .entrada { margin: 0 18px 18px; padding: 9px; display: flex; align-items: flex-end; gap: 10px; border: 1px solid #dce3e7; border-radius: 16px; background: #fbfcfc; }
     .entrada:focus-within { border-color: #7bb6a2; box-shadow: 0 0 0 3px rgba(41, 132, 108, .1); }
-    textarea { resize: none; min-height: 42px; max-height: 120px; flex: 1; padding: 11px 9px; border: 0; outline: 0; color: var(--tinta); background: transparent; font-size: 14px; }
-    textarea::placeholder { color: #9aa7ae; }
+    textarea { resize: vertical; min-width: 0; min-height: 48px; max-height: 180px; flex: 1; padding: 11px 9px; border: 0; color: var(--tinta); background: transparent; font-size: 16px; }
+    textarea::placeholder { color: var(--tinta-suave); }
     .enviar { cursor: pointer; border: 0; border-radius: 12px; padding: 0 17px; height: 42px; color: white; background: var(--azul); font-size: 13px; font-weight: 750; transition: .15s; }
     .enviar:hover { background: var(--azul-oscuro); }
-    .enviar:disabled { cursor: wait; opacity: .6; }
-    .pie { text-align: center; padding: 0 20px 20px; color: #95a1a8; font-size: 10px; }
+    .pie { padding: 0 20px 18px; margin: 0; color: var(--tinta-suave); font-size: 12px; line-height: 1.6; }
+    .acceso { max-width: 580px; margin: 0 auto; padding: clamp(20px, 4vw, 32px); }
+    .acceso h2 { margin-top: 0; }
+    .acceso p { line-height: 1.6; }
+    .acceso label { display: block; font-weight: 700; margin-bottom: 8px; }
+    .acceso input { width: 100%; min-height: 48px; padding: 10px 12px; border: 1px solid var(--tinta-suave); border-radius: 10px; font-size: 16px; }
+    .acceso .enviar { margin-top: 16px; width: 100%; }
+    .ayuda { color: var(--tinta-suave); font-size: 13px; }
+    .error { color: #a32121; font-size: 14px; line-height: 1.6; overflow-wrap: anywhere; }
+    .aviso-entrada { margin: 0 20px 12px; }
+    .acciones { display: flex; flex-wrap: wrap; gap: 8px; }
+    .secundario { cursor: pointer; padding: 8px 12px; border: 1px solid var(--borde); border-radius: 10px; background: white; color: var(--azul-oscuro); font-size: 13px; }
+    .secundario:hover { background: var(--menta); }
     .indicador { display: inline-flex; gap: 4px; padding: 13px 15px; background: #f0f4f5; border-radius: 15px; }
     .indicador i { width: 5px; height: 5px; border-radius: 50%; background: #82979e; animation: latido 1s infinite alternate; }
     .indicador i:nth-child(2) { animation-delay: .2s; } .indicador i:nth-child(3) { animation-delay: .4s; }
@@ -99,6 +118,8 @@
       .barra-superior { height: 62px; padding: 0 18px; }
       .contenedor { width: min(100% - 24px, 620px); margin: 28px auto 40px; }
       .rejilla { grid-template-columns: 1fr; }
+      .chat { grid-row: 1; }
+      .columna { grid-row: 2; }
       .lista-agentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); padding: 12px; }
       .titulo-seccion { grid-column: 1 / -1; margin-bottom: 5px; }
       .agente { padding: 9px 6px; flex-direction: column; align-items: flex-start; gap: 7px; }
@@ -112,37 +133,61 @@
       .sugerencias { padding: 0 14px 13px; }
       .entrada { margin: 0 12px 13px; }
       .estado-global { font-size: 11px; }
+      .barra-superior { gap: 16px; }
+      .estado-global { max-width: 55%; }
+      .mensaje { max-width: 95%; }
+      .acciones { width: 100%; }
+      .acciones button { flex: 1; }
+      .enviar { padding: 0 12px; min-height: 48px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition: none !important; }
     }
   </style>
 </head>
 <body>
+  <a class="salto" href="#contenido">Ir al contenido</a>
   <header class="barra-superior">
     <div class="marca">
       <div class="marca-icono" aria-hidden="true">✳</div>
       <div>AGENTES<small>CONSOLA A2A</small></div>
     </div>
-    <div class="estado-global"><span class="punto"></span><span>Coordinador + 4 agentes</span></div>
+    <div class="estado-global"><span class="punto" aria-hidden="true"></span><span id="estado-global">Sin clave cargada</span></div>
   </header>
 
-  <main class="contenedor">
+  <main class="contenedor" id="contenido" tabindex="-1">
     <section class="encabezado">
       <div class="sobretitulo">Tu equipo de asistentes</div>
       <h1>Planifica tu feria</h1>
       <p class="bajada">El coordinador elige al agente que corresponde y te muestra su respuesta.</p>
     </section>
 
-    <div class="rejilla">
+    <section class="tarjeta acceso" id="acceso" aria-labelledby="titulo-acceso">
+      <h2 id="titulo-acceso">Ingresa tu clave de acceso</h2>
+      <p>Usa la clave de la aplicación que te entregó el equipo, <strong>no tu clave de Google</strong>.</p>
+      <form id="formulario-acceso" autocomplete="off">
+        <label for="clave">Clave de la aplicación</label>
+        <input id="clave" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="ayuda-clave error-acceso" required autofocus>
+        <p class="ayuda" id="ayuda-clave">Solo se conserva en memoria hasta recargar o cambiar la clave. Se envía al servidor en la cabecera X-API-Key de cada consulta. Cargarla aquí no confirma acceso: la autorización debe comprobarla el servidor.</p>
+        <p class="error" id="error-acceso" role="alert" hidden></p>
+        <button class="enviar" type="submit">Continuar al chat</button>
+      </form>
+    </section>
+
+    <noscript><p class="error">Activa JavaScript para ingresar la clave y consultar el chat.</p></noscript>
+
+    <div class="rejilla" id="panel-chat" hidden>
       <aside class="columna" aria-label="Agentes del proyecto">
         <section class="tarjeta lista-agentes">
           <h2 class="titulo-seccion">Mis agentes</h2>
           <div class="agente activo" aria-current="true">
             <div class="agente-icono" aria-hidden="true">✣</div>
             <div class="agente-texto"><span class="agente-nombre">Coordinador</span><span class="agente-detalle">Elige y delega por A2A</span></div>
-            <span class="etiqueta">ACTIVO</span>
+            <span class="etiqueta">SUPERVISOR</span>
           </div>
           <div class="agente">
             <div class="agente-icono" aria-hidden="true">◷</div>
-            <div class="agente-texto"><span class="agente-nombre">Matias</span><span class="agente-detalle">Programa y horarios</span></div>
+            <div class="agente-texto"><span class="agente-nombre">Matías</span><span class="agente-detalle">Programa y horarios</span></div>
             <span class="etiqueta">A2A</span>
           </div>
           <div class="agente">
@@ -157,7 +202,7 @@
           </div>
           <div class="agente">
             <div class="agente-icono" aria-hidden="true">☕</div>
-            <div class="agente-texto"><span class="agente-nombre">Sebastian</span><span class="agente-detalle">Comida y catering</span></div>
+            <div class="agente-texto"><span class="agente-nombre">Sebastián</span><span class="agente-detalle">Comida y catering</span></div>
             <span class="etiqueta">A2A</span>
           </div>
         </section>
@@ -171,17 +216,15 @@
         <header class="chat-cabecera">
           <div class="chat-identidad">
             <div class="agente-icono" aria-hidden="true">✣</div>
-            <div><strong>Coordinador</strong><span><span class="punto" style="display:inline-block;width:6px;height:6px;box-shadow:none;margin-right:5px"></span>Listo para ayudarte</span></div>
+            <div><strong>Coordinador</strong><span>Programa, lugar, presupuesto y comida</span></div>
           </div>
-          <span class="protocolo">A2A · LANGGRAPH</span>
+          <div class="acciones">
+            <button class="secundario" id="nueva-conversacion" type="button">Nueva conversación</button>
+            <button class="secundario" id="cambiar-clave" type="button">Cambiar clave</button>
+          </div>
         </header>
 
-        <div class="conversacion" id="conversacion" aria-live="polite">
-          <div class="mensaje agente">
-            <div class="burbuja">¡Hola! Te ayudo a planificar una feria: programa, lugar, presupuesto y comida. ¿Qué necesitas?</div>
-            <span class="hora">Coordinador</span>
-          </div>
-        </div>
+        <div class="conversacion" id="conversacion" role="log" aria-label="Historial de la conversación" aria-live="polite" aria-relevant="additions text" aria-busy="false" tabindex="0"></div>
 
         <div class="sugerencias" aria-label="Preguntas sugeridas">
           <button class="sugerencia" type="button" data-pregunta="Necesito armar el programa de una feria infantil de 3 horas que parta a las 15:00.">◷ Programa</button>
@@ -190,33 +233,92 @@
           <button class="sugerencia" type="button" data-pregunta="Feria gastronómica de 4 horas desde las 12:00 para 120 personas, ¿qué les damos de comer?">☕ Comida</button>
         </div>
 
-        <form class="entrada" id="formulario">
-          <textarea id="pregunta" rows="1" placeholder="Escribe tu pregunta sobre la feria..." aria-label="Tu pregunta" required></textarea>
+        <form class="entrada" id="formulario" autocomplete="off">
+          <textarea id="pregunta" rows="2" placeholder="Escribe tu pregunta sobre la feria..." aria-label="Tu pregunta" aria-describedby="ayuda-pregunta aviso-entrada" required></textarea>
           <button class="enviar" id="enviar" type="submit">Enviar&nbsp; ↑</button>
         </form>
-        <div class="pie">El agente puede tardar unos segundos mientras consulta sus herramientas.</div>
+        <p class="error aviso-entrada" id="aviso-entrada" role="alert" hidden></p>
+        <p class="pie" id="estado-consulta" role="status">La autorización se comprueba en el servidor al consultar.</p>
+        <p class="pie" id="ayuda-pregunta">Enter envía · Mayús + Enter agrega una línea. Espera máxima: 65 segundos. Los resultados son de demostración; no permiten reservar ni pagar.</p>
       </section>
     </div>
   </main>
 
   <script>
+  (() => {
+    "use strict";
+    const acceso = document.getElementById("acceso");
+    const panelChat = document.getElementById("panel-chat");
+    const formularioAcceso = document.getElementById("formulario-acceso");
+    const campoClave = document.getElementById("clave");
+    const errorAcceso = document.getElementById("error-acceso");
     const formulario = document.getElementById("formulario");
     const pregunta = document.getElementById("pregunta");
     const conversacion = document.getElementById("conversacion");
     const botonEnviar = document.getElementById("enviar");
-    const claveContexto = "contexto-coordinador";
-    let contextId = sessionStorage.getItem(claveContexto);
-    if (!contextId) {
-      contextId = crypto.randomUUID();
-      sessionStorage.setItem(claveContexto, contextId);
+    const sugerencias = document.querySelectorAll(".sugerencia");
+    const estadoGlobal = document.getElementById("estado-global");
+    const estadoConsulta = document.getElementById("estado-consulta");
+    const avisoEntrada = document.getElementById("aviso-entrada");
+    const TIEMPO_LIMITE_MS = 65000;
+    // No se usan almacenamiento web, cookies, URL ni registros para la clave.
+    let claveApi = "";
+    let idContexto = crypto.randomUUID();
+    let solicitudPendiente = null;
+
+    function agregarFormatoEnLinea(destino, texto) {
+      // Subconjunto deliberado: código en línea y negritas. El resto queda literal.
+      const patron = /(`+)([^`\r\n]+)\1|(\*\*|__)([^\r\n]+?)\3/g;
+      let posicion = 0;
+      for (const parte of texto.matchAll(patron)) {
+        const delimitador = parte[1] || parte[3];
+        const fin = parte.index + parte[0].length;
+        // No interpretar parcialmente delimitadores más largos o incompletos.
+        if (texto[parte.index - 1] === delimitador[0] || texto[fin] === delimitador[0]) continue;
+        destino.appendChild(document.createTextNode(texto.slice(posicion, parte.index)));
+        const nodo = document.createElement(parte[1] ? "code" : "strong");
+        nodo.textContent = parte[1] ? parte[2] : parte[4];
+        destino.appendChild(nodo);
+        posicion = fin;
+      }
+      destino.appendChild(document.createTextNode(texto.slice(posicion)));
     }
 
-    function agregarMensaje(texto, tipo, etiqueta) {
+    function presentarRespuesta(destino, texto) {
+      const fragmento = document.createDocumentFragment();
+      let bloqueLiteral = null;
+      // Conservar exactamente espacios y saltos; solo retirar marcas reconocidas.
+      for (const linea of texto.split(/(\r\n|\r|\n)/)) {
+        const cerca = /^ {0,3}(`{3,}|~{3,})(.*)$/.exec(linea);
+        // Los bloques cercados no forman parte del subconjunto: quedan íntegros.
+        if (bloqueLiteral || cerca) {
+          fragmento.appendChild(document.createTextNode(linea));
+          if (!bloqueLiteral) bloqueLiteral = cerca[1];
+          else if (cerca && cerca[1][0] === bloqueLiteral[0]
+                   && cerca[1].length >= bloqueLiteral.length && !cerca[2].trim()) bloqueLiteral = null;
+          continue;
+        }
+        const titulo = /^( {0,3})(#{1,6})[\t ]+(.+)$/.exec(linea);
+        if (titulo) {
+          fragmento.appendChild(document.createTextNode(titulo[1]));
+          const nodo = document.createElement(`h${Math.min(titulo[2].length + 2, 6)}`);
+          agregarFormatoEnLinea(nodo, titulo[3]);
+          fragmento.appendChild(nodo);
+        } else {
+          agregarFormatoEnLinea(fragmento, linea);
+        }
+      }
+      // Nunca interpretar HTML, enlaces, imágenes ni atributos del modelo.
+      destino.replaceChildren(fragmento);
+    }
+
+    function agregarMensaje(texto, tipo, etiqueta, conFormato = false) {
       const contenedor = document.createElement("div");
       contenedor.className = `mensaje ${tipo}`;
       const burbuja = document.createElement("div");
       burbuja.className = "burbuja";
-      burbuja.textContent = texto;
+      if (conFormato) presentarRespuesta(burbuja, texto);
+      else burbuja.textContent = texto;
       const pie = document.createElement("span");
       pie.className = "hora";
       pie.textContent = etiqueta;
@@ -226,58 +328,204 @@
       return contenedor;
     }
 
+    function fijarEspera(esperando) {
+      botonEnviar.disabled = esperando;
+      botonEnviar.textContent = esperando ? "Consultando…" : "Enviar ↑";
+      sugerencias.forEach((boton) => { boton.disabled = esperando; });
+      conversacion.setAttribute("aria-busy", String(esperando));
+    }
+
+    function cancelarPendiente() {
+      const anterior = solicitudPendiente;
+      // Invalidar antes de abortar: un fetch ya resuelto también debe descartarse.
+      solicitudPendiente = null;
+      if (anterior) {
+        window.clearTimeout(anterior.temporizador);
+        anterior.control.abort();
+        anterior.espera.remove();
+      }
+      fijarEspera(false);
+    }
+
+    function nuevaConversacion() {
+      cancelarPendiente();
+      idContexto = crypto.randomUUID();
+      conversacion.replaceChildren();
+      agregarMensaje("¡Hola! Te ayudo a planificar una feria: programa, lugar, presupuesto y comida. ¿Qué necesitas?", "asistente", "Coordinador");
+      pregunta.value = "";
+      pregunta.removeAttribute("aria-invalid");
+      avisoEntrada.hidden = true;
+      estadoConsulta.textContent = "Nueva conversación. La autorización se comprueba en cada consulta.";
+      if (!panelChat.hidden) pregunta.focus();
+    }
+
+    function mostrarAcceso(mensaje) {
+      cancelarPendiente();
+      claveApi = "";
+      campoClave.value = "";
+      panelChat.hidden = true;
+      acceso.hidden = false;
+      estadoGlobal.textContent = "Sin clave cargada";
+      errorAcceso.textContent = mensaje;
+      errorAcceso.hidden = !mensaje;
+      campoClave.focus();
+    }
+
+    function mensajeHttp(estado) {
+      if (estado === 400 || estado === 422) return "Entrada inválida. Revisa la pregunta y vuelve a enviarla.";
+      if (estado === 413) return "La pregunta es demasiado larga. Acórtala y vuelve a enviarla.";
+      if (estado === 408 || estado === 504) return "Se agotó el tiempo de espera del servidor. Puedes reintentar; la consulta anterior podría seguir procesándose.";
+      if (estado === 429) return "El servicio alcanzó su límite de consultas. Espera un momento antes de reintentar.";
+      if (estado === 502 || estado === 503) return "No se pudo consultar al proveedor o al agente. Inténtalo más tarde; si persiste, avisa al equipo.";
+      if (estado >= 500) return "El servidor no pudo completar la consulta. Inténtalo más tarde.";
+      return `No se pudo completar la consulta (HTTP ${estado}). Si persiste, avisa al equipo.`;
+    }
+
+    formularioAcceso.addEventListener("submit", (evento) => {
+      evento.preventDefault();
+      if (!campoClave.value.trim()) {
+        errorAcceso.textContent = "Ingresa una clave de acceso para continuar.";
+        errorAcceso.hidden = false;
+        campoClave.focus();
+        return;
+      }
+      claveApi = campoClave.value;
+      campoClave.value = "";
+      errorAcceso.textContent = "";
+      errorAcceso.hidden = true;
+      acceso.hidden = true;
+      panelChat.hidden = false;
+      estadoGlobal.textContent = "Clave en memoria · acceso por verificar";
+      pregunta.focus();
+    });
+
     formulario.addEventListener("submit", async (evento) => {
       evento.preventDefault();
+      if (solicitudPendiente || !claveApi) return;
       const texto = pregunta.value.trim();
-      if (!texto || botonEnviar.disabled) return;
+      if (!texto) {
+        avisoEntrada.textContent = "Escribe una pregunta; no puede contener solo espacios.";
+        avisoEntrada.hidden = false;
+        pregunta.setAttribute("aria-invalid", "true");
+        pregunta.focus();
+        return;
+      }
 
+      avisoEntrada.hidden = true;
+      pregunta.removeAttribute("aria-invalid");
       agregarMensaje(texto, "usuario", "Tú");
       pregunta.value = "";
-      botonEnviar.disabled = true;
-      const espera = agregarMensaje("", "agente", "Consultando...");
+      fijarEspera(true);
+      estadoConsulta.textContent = "Consultando al coordinador… Puedes iniciar una conversación nueva para dejar de esperar.";
+      const espera = agregarMensaje("", "asistente", "Consultando…");
       const indicador = document.createElement("span");
       indicador.className = "indicador";
-      indicador.innerHTML = "<i></i><i></i><i></i>";
+      indicador.setAttribute("aria-hidden", "true");
+      for (let punto = 0; punto < 3; punto += 1) indicador.appendChild(document.createElement("i"));
       espera.querySelector(".burbuja").appendChild(indicador);
 
-      const control = new AbortController();
-      const temporizador = window.setTimeout(() => control.abort(), 65000);
+      const solicitud = { control: new AbortController(), espera, agotada: false };
+      solicitudPendiente = solicitud;
+      solicitud.temporizador = window.setTimeout(() => {
+        solicitud.agotada = true;
+        solicitud.control.abort();
+      }, TIEMPO_LIMITE_MS);
       try {
         const respuesta = await fetch("/panel/consultar", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ texto, context_id: contextId }),
-          signal: control.signal
+          headers: { "Content-Type": "application/json", "Accept": "application/json", "X-API-Key": claveApi },
+          body: JSON.stringify({ texto, context_id: idContexto }),
+          signal: solicitud.control.signal,
+          cache: "no-store",
+          credentials: "omit",
+          redirect: "error"
         });
-        const datos = await respuesta.json();
-        espera.remove();
-        if (!respuesta.ok) throw new Error(datos.detail || "No se pudo consultar al agente.");
-        if (datos.context_id) {
-          contextId = datos.context_id;
-          sessionStorage.setItem(claveContexto, contextId);
+        if (solicitudPendiente !== solicitud) return;
+        // Clasificar por estado, incluso si un proxy devuelve HTML. Nunca mostrar
+        // cuerpos de error crudos: pueden contener trazas o credenciales del proveedor.
+        if (respuesta.status === 401 || respuesta.status === 403) {
+          if (!pregunta.value) pregunta.value = texto;
+          mostrarAcceso(`Acceso rechazado (${respuesta.status}). Ingresa una clave válida. Tu pregunta se conserva para reintentar.`);
+          return;
         }
-        // El servidor entrega el agente y el motivo por separado: se muestran bajo la respuesta.
-        const origen = datos.agente && datos.agente !== "ninguno" ? datos.agente : "Coordinador";
-        agregarMensaje(datos.respuesta, "agente", datos.motivo ? `${origen} · ${datos.motivo}` : origen);
-      } catch (error) {
+        if (!respuesta.ok) throw new Error(mensajeHttp(respuesta.status));
+        const tipo = respuesta.headers.get("content-type") || "";
+        if (!/\bapplication\/(?:[\w.-]+\+)?json\b/i.test(tipo)) {
+          throw new Error("El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.");
+        }
+        let datos;
+        try {
+          datos = await respuesta.json();
+        } catch {
+          throw new Error("El servidor devolvió JSON inválido. Inténtalo de nuevo; si persiste, avisa al equipo.");
+        }
+        if (solicitudPendiente !== solicitud) return;
+        if (!datos || typeof datos.respuesta !== "string" || !datos.respuesta.trim()
+            || typeof datos.context_id !== "string" || !datos.context_id.trim()
+            || typeof datos.agente !== "string" || typeof datos.motivo !== "string") {
+          throw new Error("La respuesta del servidor está incompleta o tiene un formato inesperado. Avisa al equipo.");
+        }
         espera.remove();
-        const mensaje = error.name === "AbortError"
-          ? "La consulta tardó demasiado. Inténtalo nuevamente."
-          : (error.message || "No se pudo conectar con el agente.").replace(/[\r\n]+/g, " ");
-        agregarMensaje(mensaje, "agente", "Aviso");
+        idContexto = datos.context_id;
+        // Solo presentación DOM: no resumir, recalcular ni insertar HTML del modelo.
+        const mensaje = agregarMensaje(datos.respuesta, "asistente", `Agente: ${datos.agente || "No informado"}`, true);
+        const motivo = document.createElement("span");
+        motivo.className = "hora";
+        motivo.textContent = `Motivo: ${datos.motivo || "No informado"}`;
+        mensaje.appendChild(motivo);
+        conversacion.scrollTop = conversacion.scrollHeight;
+        estadoGlobal.textContent = "Clave en memoria · validación a cargo del servidor";
+        estadoConsulta.textContent = "Respuesta recibida.";
+      } catch (error) {
+        if (solicitudPendiente !== solicitud) return;
+        espera.remove();
+        const mensaje = solicitud.agotada
+          ? "La consulta superó los 65 segundos de espera. Puedes reintentar; la consulta anterior podría seguir procesándose."
+          : error instanceof TypeError || error.name === "AbortError"
+            ? "No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida."
+            : error.message;
+        agregarMensaje(mensaje, "asistente", "Aviso");
+        if (!pregunta.value) pregunta.value = texto;
+        estadoConsulta.textContent = "La consulta no se completó. Puedes revisar la pregunta y reintentar.";
       } finally {
-        window.clearTimeout(temporizador);
-        botonEnviar.disabled = false;
-        pregunta.focus();
+        window.clearTimeout(solicitud.temporizador);
+        // No alterar controles, foco ni mensajes de una conversación posterior.
+        if (solicitudPendiente === solicitud) {
+          solicitudPendiente = null;
+          fijarEspera(false);
+          if (document.activeElement === document.body || document.activeElement === botonEnviar) pregunta.focus();
+        }
       }
     });
 
-    document.querySelectorAll(".sugerencia").forEach((boton) => {
+    pregunta.addEventListener("input", () => {
+      avisoEntrada.hidden = true;
+      pregunta.removeAttribute("aria-invalid");
+    });
+    pregunta.addEventListener("keydown", (evento) => {
+      if (evento.key === "Enter" && !evento.shiftKey && !evento.isComposing) {
+        evento.preventDefault();
+        formulario.requestSubmit();
+      }
+    });
+    sugerencias.forEach((boton) => {
       boton.addEventListener("click", () => {
+        if (solicitudPendiente || !claveApi) return;
         pregunta.value = boton.dataset.pregunta;
         formulario.requestSubmit();
       });
     });
+    document.getElementById("nueva-conversacion").addEventListener("click", nuevaConversacion);
+    document.getElementById("cambiar-clave").addEventListener("click", () => {
+      nuevaConversacion();
+      mostrarAcceso("");
+    });
+    window.addEventListener("pagehide", () => {
+      nuevaConversacion();
+      mostrarAcceso("");
+    });
+    nuevaConversacion();
+  })();
   </script>
 </body>
 </html>

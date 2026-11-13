@@ -3,7 +3,7 @@
 from pathlib import Path
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Response
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
 
@@ -23,15 +23,26 @@ def crear_panel(responder) -> APIRouter:
 
     responder(texto, context_id) puede devolver un texto o un diccionario con
     "respuesta", "agente" y "motivo" (así lo hace el coordinador).
+    La autorización de X-API-Key corresponde al servidor (aporte de Matías),
+    no a la pantalla de ingreso. Este router no sustituye esa protección.
     """
     router = APIRouter()
 
     @router.get("/", include_in_schema=False)
     async def mostrar_panel() -> FileResponse:
-        return FileResponse(_ARCHIVO_PANEL, media_type="text/html; charset=utf-8")
+        return FileResponse(
+            _ARCHIVO_PANEL,
+            media_type="text/html; charset=utf-8",
+            headers={
+                "Cache-Control": "no-store",
+                "Referrer-Policy": "no-referrer",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
 
     @router.post("/panel/consultar")
-    async def consultar(solicitud: ConsultaPanel) -> dict[str, str]:
+    async def consultar(solicitud: ConsultaPanel, respuesta_http: Response) -> dict[str, str]:
+        respuesta_http.headers["Cache-Control"] = "no-store"
         texto = solicitud.texto.strip()
         if not texto:
             raise HTTPException(status_code=400, detail="Escribe una pregunta para continuar.")
