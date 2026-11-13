@@ -1,0 +1,17 @@
+Evidencia 6 · Sin conexión con Gemini (simulada: proxy inexistente solo para internet)
+======================================================================================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:19
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Sin conexión con Gemini (la clave de acceso sí es correcta)
+$ curl -i -X POST http://127.0.0.1:8002/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora?", "context_id": "evidencia-sin-conexion"}'
+
+HTTP/1.1 502 Bad Gateway
+date: Fri, 13 Nov 2026 13:19:13 GMT
+server: uvicorn
+content-length: 149
+content-type: application/json
+
+{"detail":"No se pudo consultar al agente: No hay conexión con Gemini o con uno de los agentes. Revisa la conexión a internet e intenta de nuevo."}
+
+------------------------------------------------------------

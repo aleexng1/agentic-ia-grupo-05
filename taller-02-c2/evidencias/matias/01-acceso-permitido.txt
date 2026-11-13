@@ -1,0 +1,17 @@
+Evidencia 1 · Acceso permitido
+==============================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:17
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Acceso permitido: clave correcta y una pregunta real
+$ curl -i -X POST http://127.0.0.1:8000/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora?", "context_id": "evidencia-permitido"}'
+
+HTTP/1.1 200 OK
+date: Fri, 13 Nov 2026 13:17:58 GMT
+server: uvicorn
+content-length: 483
+content-type: application/json
+
+{"respuesta":"Aquí tienes una propuesta de programa:\n\n* **16:00 - 17:00**: Visita guiada al patrimonio del barrio (60 min)\n* **17:00 - 17:30**: Presentación de danza folclórica (30 min)\n* **17:30 - 18:00**: Ronda de cuentacuentos (30 min)\n\nEl programa no ocupa toda la duración pedida; hay 60 minutos libres.","context_id":"evidencia-permitido","agente":"Agente de Matias","motivo":"El usuario necesita armar un programa de actividades y horarios para una feria cultural."}
+
+------------------------------------------------------------

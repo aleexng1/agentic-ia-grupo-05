@@ -78,7 +78,7 @@ Todas las variables van en `proyecto/.env`, que nunca se sube al repositorio
 | `MODELO` | Modelo de Gemini que usan el coordinador y los agentes (por defecto `gemini-3.5-flash-lite`). |
 | `PUERTO` | Puerto local de la app (por defecto `8000`). Debe ser el mismo del `--port` de uvicorn; en Heroku manda `PORT`. |
 | `URL_BASE` | Dirección pública de la app, sin barra final. Las fichas se publican como `URL_BASE/agentes/{nombre}`. En local, `http://127.0.0.1:8000`. |
-| `CLAVE_API` | Clave de acceso a la API: ver la sección Seguridad, más abajo. |
+| `CLAVE_API` | **Obligatoria.** Clave de acceso a la API: toda consulta debe enviarla en la cabecera `X-API-Key`. Si está vacía, el servidor avisa al arrancar y rechaza todas las consultas con 503. Distinta de `GOOGLE_API_KEY`; cómo elegirla, en la sección Seguridad. |
 | `URLS_AGENTES` | Vacía = el coordinador usa los cuatro agentes de esta misma app. Con direcciones separadas por comas = modo distribuido (un agente por computador, como en el taller anterior). |
 
 ## Cómo iniciar / probar / detener
@@ -171,7 +171,92 @@ volver a entrar por el router de Heroku, que corta las peticiones a los 30 segun
 
 ## Seguridad
 
-Pendiente: Matías (validación de `CLAVE_API` y manejo de errores en el servidor).
+La app es una API con clave: cualquiera puede ver la página y las fichas, pero solo quien
+tiene la clave puede hacer consultas.
+
+### La clave de acceso (`CLAVE_API`)
+
+`CLAVE_API` es la contraseña que el servidor exige para aceptar una consulta. **No es la
+clave de Gemini** (`GOOGLE_API_KEY`): esa la usa el servidor para hablar con Google y no se
+comparte con nadie; la de acceso es la que se le da a quien puede usar el chat.
+
+**Cómo elegirla.** Larga y al azar, no una palabra ni una contraseña que uses en otro lado.
+Una forma de generarla (sirve en Windows, Linux y macOS):
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Pégala en `CLAVE_API=` del `.env` (local) o en las Config Vars de Heroku. No la escribas en
+el código, en capturas ni en el chat del grupo. Para cambiarla, cambia el valor y reinicia
+la app: la anterior deja de servir.
+
+### Qué se protege
+
+| Ruta | Acceso |
+| --- | --- |
+| `POST /panel/consultar` (la consulta del chat) | Con clave |
+| `POST /` y `POST /agentes/{nombre}` (JSON-RPC A2A del coordinador y de cada agente) | Con clave |
+| `GET /` (la página), las fichas `/.well-known/agent-card.json` y `GET /salud` | Públicas |
+
+La clave viaja en la cabecera `X-API-Key`:
+
+```bash
+curl -i -X POST http://127.0.0.1:8000/panel/consultar \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: TU_CLAVE_API" \
+  -d '{"texto": "¿Qué actividades pongo en una feria infantil de 3 horas?"}'
+```
+
+```powershell
+# Windows (PowerShell)
+Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/panel/consultar `
+  -Headers @{ "X-API-Key" = "TU_CLAVE_API" } -ContentType "application/json; charset=utf-8" `
+  -Body ([System.Text.Encoding]::UTF8.GetBytes('{"texto": "¿Qué actividades pongo en una feria infantil de 3 horas?"}'))
+```
+
+### Respuestas y errores
+
+Todo error tiene la forma `{"detail": "mensaje en español, en una sola línea"}`, sin trazas
+de Python ni claves. Un error nunca se presenta como una respuesta exitosa.
+
+| Código | Cuándo | Ejemplo de `detail` |
+| --- | --- | --- |
+| 200 | La consulta se respondió. | (el JSON con `respuesta`, `agente` y `motivo`) |
+| 400 | La pregunta está vacía. | `Escribe una pregunta para continuar.` |
+| 401 | Falta la clave o es incorrecta. | `Falta la clave de acceso. Envíala en la cabecera X-API-Key.` / `La clave de acceso es incorrecta.` |
+| 502 | Falló Gemini, la conexión o un agente. | `No se pudo consultar al agente: La clave de Gemini (GOOGLE_API_KEY) no es válida. Revísala en el .env o en las Config Vars de Heroku.` |
+| 503 | El servidor no tiene `CLAVE_API`. | `El servidor no tiene configurada la clave de acceso (CLAVE_API), así que no acepta consultas. Avisa a quien lo administra.` |
+
+Las fallas del proveedor que se reconocen con un mensaje propio son: clave de Gemini
+inválida o ausente, sin cuota o créditos, sin permiso, modelo inexistente, tiempo de espera
+agotado, sin conexión y servicio no disponible. Cualquier otra falla se resume en una línea.
+
+### Cómo está hecho
+
+- La clave se compara con `secrets.compare_digest`, para no revelarla por el tiempo que
+  tarda en fallar (`src/comun/seguridad.py`).
+- La clave nunca aparece en el código, en la página ni en los registros. Cuando se rechaza
+  una petición, el registro guarda solo la ruta y el motivo (`sin clave`, `clave incorrecta`).
+- El coordinador se llama a sí mismo por A2A, así que su cliente interno envía la cabecera,
+  **solo** hacia esta misma app (`127.0.0.1` y el puerto real). A los agentes de otros
+  computadores del modo distribuido (`URLS_AGENTES`) nunca se les envía.
+- Si `CLAVE_API` está vacía, la app no queda abierta: avisa con un error al arrancar y
+  responde 503 a toda consulta. `/salud` y las fichas siguen respondiendo, para poder
+  diagnosticarla.
+- Los errores se traducen en `src/comun/errores.py`. El registro del servidor conserva el
+  detalle técnico original (sin claves), útil en la terminal y en `heroku logs`.
+
+### Límites de la seguridad
+
+- Hay **una sola clave** para todas las personas: no distingue quién consulta.
+- No hay límite de intentos ni bloqueo tras varias claves incorrectas.
+- En local la conexión es HTTP; en Heroku la plataforma entrega HTTPS.
+- La seguridad de la clave depende de cómo se comparta: quien la tenga puede gastar la cuota
+  de Gemini del servidor.
+
+Pruebas automáticas: `python -m pytest tests/test_seguridad.py`. Evidencias de acceso
+permitido y rechazado, y de las fallas del proveedor: `evidencias/matias/`.
 
 ## Operación en Heroku
 

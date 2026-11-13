@@ -24,6 +24,9 @@ from a2a.types import (
     TaskState,
 )
 
+from src.comun import seguridad
+from src.comun.config import puerto
+
 
 TIEMPO_LIMITE = 10.0
 TIEMPO_MAXIMO_TAREA = 60.0
@@ -31,6 +34,18 @@ _CLIENTES = {}
 _TARJETAS_CLIENTES: dict[int, AgentCard] = {}
 _CLIENTE_HTTP: httpx.AsyncClient | None = None
 _CANDADO = asyncio.Lock()
+
+
+async def _agregar_clave_interna(solicitud: httpx.Request) -> None:
+    """Agrega la clave de acceso solo a las llamadas hacia esta misma app.
+
+    El coordinador se llama a sí mismo por A2A (127.0.0.1 y el puerto real), y esas rutas
+    exigen X-API-Key. A cualquier otra dirección (los agentes de otros computadores en el
+    modo distribuido) no se envía: la clave nunca sale de esta app.
+    """
+    clave = seguridad.clave_configurada()
+    if clave and solicitud.url.host == "127.0.0.1" and solicitud.url.port == puerto():
+        solicitud.headers[seguridad.CABECERA] = clave
 
 
 async def obtener_cliente(url: str, usar_esta_direccion: bool = False):
@@ -57,6 +72,7 @@ async def obtener_cliente(url: str, usar_esta_direccion: bool = False):
             _CLIENTE_HTTP = httpx.AsyncClient(
                 timeout=TIEMPO_LIMITE,
                 verify=ssl.create_default_context(),
+                event_hooks={"request": [_agregar_clave_interna]},
             )
 
         resolver = A2ACardResolver(

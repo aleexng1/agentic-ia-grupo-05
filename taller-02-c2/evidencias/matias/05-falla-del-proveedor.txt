@@ -1,0 +1,17 @@
+Evidencia 5 · Falla del proveedor (GOOGLE_API_KEY inválida a propósito)
+=======================================================================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:18
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Falla del proveedor: clave de Gemini inválida (la clave de acceso sí es correcta)
+$ curl -i -X POST http://127.0.0.1:8001/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora?", "context_id": "evidencia-falla-gemini"}'
+
+HTTP/1.1 502 Bad Gateway
+date: Fri, 13 Nov 2026 13:18:55 GMT
+server: uvicorn
+content-length: 148
+content-type: application/json
+
+{"detail":"No se pudo consultar al agente: La clave de Gemini (GOOGLE_API_KEY) no es válida. Revísala en el .env o en las Config Vars de Heroku."}
+
+------------------------------------------------------------

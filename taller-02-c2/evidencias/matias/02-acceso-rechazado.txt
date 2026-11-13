@@ -1,0 +1,56 @@
+Evidencia 2 · Acceso rechazado
+==============================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:17
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Acceso rechazado: sin la cabecera X-API-Key
+$ curl -i -X POST http://127.0.0.1:8000/panel/consultar -H "Content-Type: application/json" -d '{"texto": "Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora?", "context_id": "evidencia-rechazo"}'
+
+HTTP/1.1 401 Unauthorized
+date: Fri, 13 Nov 2026 13:17:50 GMT
+server: uvicorn
+content-length: 73
+content-type: application/json
+
+{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+------------------------------------------------------------
+
+### Acceso rechazado: clave incorrecta
+$ curl -i -X POST http://127.0.0.1:8000/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: clave-incorrecta" -d '{"texto": "Tengo una feria cultural de 3 horas desde las 16:00 para público familiar, ¿qué actividades pongo y a qué hora?", "context_id": "evidencia-rechazo"}'
+
+HTTP/1.1 401 Unauthorized
+date: Fri, 13 Nov 2026 13:17:50 GMT
+server: uvicorn
+content-length: 46
+content-type: application/json
+
+{"detail":"La clave de acceso es incorrecta."}
+
+------------------------------------------------------------
+
+### JSON-RPC A2A de un agente sin clave
+$ curl -i -X POST http://127.0.0.1:8000/agentes/matias -H "Content-Type: application/json" -H "A2A-Version: 1.0" -d '{"jsonrpc": "2.0", "id": "1", "method": "SendMessage", "params": {"message": {"role": "ROLE_USER", "messageId": "m1", "contextId": "c1", "parts": [{"text": "hola"}]}}}'
+
+HTTP/1.1 401 Unauthorized
+date: Fri, 13 Nov 2026 13:17:51 GMT
+server: uvicorn
+content-length: 73
+content-type: application/json
+
+{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+------------------------------------------------------------
+
+### JSON-RPC A2A del coordinador sin clave
+$ curl -i -X POST http://127.0.0.1:8000/ -H "Content-Type: application/json" -H "A2A-Version: 1.0" -d '{"jsonrpc": "2.0", "id": "1", "method": "SendMessage", "params": {"message": {"role": "ROLE_USER", "messageId": "m1", "contextId": "c1", "parts": [{"text": "hola"}]}}}'
+
+HTTP/1.1 401 Unauthorized
+date: Fri, 13 Nov 2026 13:17:51 GMT
+server: uvicorn
+content-length: 73
+content-type: application/json
+
+{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+------------------------------------------------------------

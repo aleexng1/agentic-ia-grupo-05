@@ -9,6 +9,8 @@ from a2a.server.events import EventQueue
 from a2a.types import Message, Part, Role
 from a2a.utils.errors import UnsupportedOperationError
 
+from src.comun.errores import traducir_error
+
 
 class Executor(AgentExecutor):
     """Ejecuta la función responder y publica su resultado en A2A."""
@@ -26,10 +28,9 @@ class Executor(AgentExecutor):
                 respuesta = await respuesta
             texto_respuesta = str(respuesta)
         except Exception as error:
-            detalle = str(error).replace("\r", " ").replace("\n", " ").strip()
-            if not detalle:
-                detalle = error.__class__.__name__
-            texto_respuesta = f"No pude procesar el mensaje: {detalle}"
+            # Un error no se presenta como respuesta: se informa como error A2A, con un
+            # mensaje de una línea, sin traza ni claves.
+            raise RuntimeError(traducir_error(error)) from None
 
         mensaje = Message(
             message_id=str(uuid4()),

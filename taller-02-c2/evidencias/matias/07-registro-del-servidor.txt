@@ -1,0 +1,19 @@
+Evidencia 7 · Registro del servidor (rechazos y arranque sin CLAVE_API)
+=====================================================================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:20
+El registro solo guarda el motivo y la ruta del rechazo: nunca la clave ni las cabeceras.
+
+### Rechazos registrados por el servidor con CLAVE_API configurada (puerto 8000)
+2026-11-13 10:17:50 WARNING [coordinador] acceso rechazado · POST /panel/consultar · sin clave
+2026-11-13 10:17:51 WARNING [coordinador] acceso rechazado · POST /panel/consultar · clave incorrecta
+2026-11-13 10:17:51 WARNING [coordinador] acceso rechazado · POST /agentes/matias · sin clave
+2026-11-13 10:17:51 WARNING [coordinador] acceso rechazado · POST / · sin clave
+
+### Arranque con CLAVE_API vacía (puerto 8003)
+2026-11-13 10:20:29 ERROR   [coordinador] CLAVE_API está vacía: el servidor rechaza todas las consultas (503) hasta que se configure. Defínela en el .env (o en las Config Vars de Heroku) y reinicia.
+2026-11-13 10:20:30 WARNING [coordinador] acceso rechazado · POST /panel/consultar · servidor sin CLAVE_API
+
+### Consulta contra ese servidor sin CLAVE_API: responde 503 y no queda abierto
+$ curl -i -X POST http://127.0.0.1:8003/panel/consultar -H "X-API-Key: cualquiera" -d '{"texto":"hola"}'
+HTTP/1.1 503 Service Unavailable
+{"detail":"El servidor no tiene configurada la clave de acceso (CLAVE_API), así que no acepta consultas. Avisa a quien lo administra."}
