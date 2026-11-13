@@ -14,6 +14,7 @@ from langgraph.checkpoint.memory import MemorySaver
 from langgraph.graph import END, START, MessagesState, StateGraph
 from pydantic import BaseModel, Field, create_model
 
+from src.comun.errores import ErrorDeServicio, detalle_tecnico, traducir_error
 from src.comun.registro import obtener_registro, recortar, segundos
 from src.coordinador.catalogo import descubrir
 from src.coordinador.cliente import preguntar
@@ -104,12 +105,15 @@ def _crear_grafo(catalogo: list[dict]):
 
     async def supervisor(estado: EstadoSupervisor) -> dict:
         if not catalogo:
-            agente, motivo = "ninguno", "No hay agentes disponibles."
-        else:
-            decision_modelo = await modelo_estructurado.ainvoke(
-                [SystemMessage(content=prompt_sistema), *estado["messages"]]
+            # No es una respuesta válida: sin agentes no hay a quién consultar.
+            raise ErrorDeServicio(
+                "No hay agentes disponibles: el coordinador no pudo conectarse con "
+                "ninguno. Intenta de nuevo en unos minutos."
             )
-            agente, motivo = decision_modelo.agente, decision_modelo.motivo
+        decision_modelo = await modelo_estructurado.ainvoke(
+            [SystemMessage(content=prompt_sistema), *estado["messages"]]
+        )
+        agente, motivo = decision_modelo.agente, decision_modelo.motivo
         _REGISTRO.info("supervisor eligió %s · motivo: %s", agente, _una_linea(motivo))
         return {"agente": agente, "motivo": motivo}
 
@@ -148,9 +152,11 @@ def _crear_grafo(catalogo: list[dict]):
                 segundos(time.perf_counter() - inicio),
             )
         except Exception as error:
-            detalle = _una_linea(str(error)) or error.__class__.__name__
-            _REGISTRO.warning("A2A ✗ %s · error: %s", nombre, detalle)
-            respuesta = f"No pude consultar al agente remoto: {detalle}"
+            # Un error del agente no se presenta como si fuera su respuesta: se levanta
+            # y el panel lo entrega como 502 con un mensaje claro.
+            # El registro guarda el detalle técnico; la persona recibe el mensaje claro.
+            _REGISTRO.warning("A2A ✗ %s · error: %s", nombre, detalle_tecnico(error))
+            raise ErrorDeServicio(traducir_error(error)) from None
 
         return {
             "respuesta": respuesta,
@@ -243,11 +249,19 @@ async def _consultar(texto: str, context_id: str) -> dict:
     _REGISTRO.info(
         "pregunta recibida · context_id=%s · «%s»", identificador, recortar(texto)
     )
-    await inicializar_supervisor()
-    return await graph.ainvoke(
-        {"messages": [HumanMessage(content=texto)]},
-        config={"configurable": {"thread_id": identificador}},
-    )
+    try:
+        await inicializar_supervisor()
+        return await graph.ainvoke(
+            {"messages": [HumanMessage(content=texto)]},
+            config={"configurable": {"thread_id": identificador}},
+        )
+    except ErrorDeServicio:
+        raise
+    except Exception as error:
+        # Falla de Gemini (clave, cuota, conexión...) o del coordinador: un mensaje de
+        # una línea, sin traza ni claves, que el panel entrega como 502.
+        _REGISTRO.error("consulta fallida · %s", detalle_tecnico(error))
+        raise ErrorDeServicio(traducir_error(error)) from None
 
 
 async def responder(texto: str, context_id: str) -> str:

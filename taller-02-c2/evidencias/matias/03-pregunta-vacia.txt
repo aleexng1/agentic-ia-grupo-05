@@ -1,0 +1,17 @@
+Evidencia 3 · Pregunta vacía
+============================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:17
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Pregunta vacía con la clave correcta
+$ curl -i -X POST http://127.0.0.1:8000/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "   ", "context_id": "evidencia-vacio"}'
+
+HTTP/1.1 400 Bad Request
+date: Fri, 13 Nov 2026 13:17:51 GMT
+server: uvicorn
+content-length: 49
+content-type: application/json
+
+{"detail":"Escribe una pregunta para continuar."}
+
+------------------------------------------------------------

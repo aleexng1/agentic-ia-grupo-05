@@ -1,0 +1,45 @@
+Evidencia 4 · Rutas públicas sin clave
+======================================
+Entorno: LOCAL (127.0.0.1) · Fecha: 2026-11-13 10:17
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### Ruta pública: /salud sin clave
+$ curl -i -X GET http://127.0.0.1:8000/salud
+
+HTTP/1.1 200 OK
+date: Fri, 13 Nov 2026 13:17:51 GMT
+server: uvicorn
+content-length: 11
+content-type: application/json
+
+{"ok":true}
+
+------------------------------------------------------------
+
+### Ruta pública: ficha A2A de un agente sin clave
+$ curl -i -X GET http://127.0.0.1:8000/agentes/matias/.well-known/agent-card.json
+
+HTTP/1.1 200 OK
+date: Fri, 13 Nov 2026 13:17:52 GMT
+server: uvicorn
+etag: W/"4a4823d3e1f671a5c96bfe9f3de888dbe1b008903408081b46d110adb7bce3bb"
+content-length: 1011
+content-type: application/json
+
+{"name":"Agente de Matias","description":"Arma el programa de actividades y el horario de ferias tecnológicas, gastronómicas, culturales o infantiles de 30 minutos a 8 horas, para público familiar, adulto o estudiantes. No responde sobre lugares ni capacidad, comida ni costos, y no reserva ni confirma el programa definitivo: entrega solo propuestas.","supportedInterfaces":[{"url":"http://127.0.0.1:8000/agentes/matias","protocolBinding":"JSONRPC","protocolVersion":"1.0"}],"version":"1.0.0","capabilities":{"streaming":false},"defaultInputModes":["text/plain"],"defaultOutputModes":["text/plain"],"skills":[{"id":"armar_programa","name":"Armar programa de feria","description":"Propone las actividades que caben en el tiempo disponible, con su hora de inicio y término, según tipo de evento, público y hora de inicio.","tags":["armar_programa"],"examples":["Necesito armar el programa de una feria infantil de 3 horas que parta a las 15:00."],"inputModes":["text/plain"],"outputModes":["text/plain"]}]}
+
+------------------------------------------------------------
+
+### Ruta pública: ficha A2A del coordinador sin clave
+$ curl -i -X GET http://127.0.0.1:8000/.well-known/agent-card.json
+
+HTTP/1.1 200 OK
+date: Fri, 13 Nov 2026 13:17:52 GMT
+server: uvicorn
+etag: W/"4e3961bb36113b83d6803a8f877b1cd297cb80ea27fb20de0d65e5d0f79bed9e"
+content-length: 1037
+content-type: application/json
+
+{"name":"Coordinador","description":"Recibe preguntas sobre la organización de una feria o evento y las delega por A2A al agente que corresponde: programa y horarios (Matias), lugares y capacidad (Alex), presupuesto y costos (Eduardo) o comida y catering (Sebastian). No tiene conocimiento propio sobre esos temas ni reserva ni confirma nada.","supportedInterfaces":[{"url":"http://127.0.0.1:8000","protocolBinding":"JSONRPC","protocolVersion":"1.0"}],"version":"1.0.0","capabilities":{"streaming":false},"defaultInputModes":["text/plain"],"defaultOutputModes":["text/plain"],"skills":[{"id":"delegar_consulta","name":"Consultar al agente del planificador de eventos","description":"Elige el agente especializado según la pregunta (programa, lugares, presupuesto o comida), se la envía por A2A y repite su respuesta indicando cuál respondió.","tags":["delegar_consulta"],"examples":["Estoy organizando una feria tecnológica: ¿qué actividades puedo incluir en 4 horas?"],"inputModes":["text/plain"],"outputModes":["text/plain"]}]}
+
+------------------------------------------------------------

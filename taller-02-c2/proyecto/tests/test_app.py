@@ -149,8 +149,11 @@ def test_panel_consultar_entrega_agente_y_motivo(cliente, monkeypatch):
     monkeypatch.setattr(modulo_graph, "inicializar_supervisor", _sin_descubrir)
     monkeypatch.setattr(modulo_graph, "graph", _GrafoFalso())
 
+    # El panel exige la clave de acceso (ver tests/test_seguridad.py).
     respuesta = cliente.post(
-        "/panel/consultar", json={"texto": "¿Dónde hago la feria?", "context_id": "prueba"}
+        "/panel/consultar",
+        json={"texto": "¿Dónde hago la feria?", "context_id": "prueba"},
+        headers={"X-API-Key": "clave-de-prueba-solo-para-pytest"},
     )
     assert respuesta.status_code == 200
     assert respuesta.json() == {

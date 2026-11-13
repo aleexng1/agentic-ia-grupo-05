@@ -6,6 +6,7 @@ import logging
 import pytest
 
 from src.comun import registro as modulo_registro
+from src.comun.errores import ErrorDeServicio
 from src.coordinador import graph as modulo_graph
 
 
@@ -86,8 +87,13 @@ def test_registro_de_un_error_a2a(monkeypatch, lineas):
         raise TimeoutError("La tarea A2A no terminó\nen 60 segundos.")
 
     _preparar(monkeypatch, _preguntar)
-    asyncio.run(modulo_graph.responder("¿Dónde hago la feria?", "ctx-2"))
+    # Un error del agente ya no se devuelve como si fuera su respuesta: la consulta falla
+    # con un mensaje claro (el panel lo entrega como 502).
+    with pytest.raises(ErrorDeServicio) as falla:
+        asyncio.run(modulo_graph.responder("¿Dónde hago la feria?", "ctx-2"))
+    assert "tiempo de espera" in str(falla.value)
 
+    # El registro conserva el detalle técnico original, en una línea.
     assert lineas[-1] == "A2A ✗ Agente de Alex · error: La tarea A2A no terminó en 60 segundos."
 
 
