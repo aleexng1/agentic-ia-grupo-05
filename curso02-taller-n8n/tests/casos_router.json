@@ -4,6 +4,7 @@
   {"mensaje": "¿aceptan pago en cuotas sin interés?", "esperado": "preventa"},
   {"mensaje": "busco zapatillas para correr, ¿cuál me recomiendan?", "esperado": "preventa"},
   {"mensaje": "si compro hoy, ¿cuánto demora el despacho a Concepción?", "esperado": "preventa"},
+  {"mensaje": "quiero comprar un televisor", "esperado": "preventa"},
 
   {"mensaje": "¿cuándo llega lo que compré ayer?", "esperado": "postventa"},
   {"mensaje": "tengo un problema con una polera", "esperado": "postventa"},

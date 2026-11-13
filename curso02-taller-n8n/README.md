@@ -138,7 +138,7 @@ Ten en cuenta:
 
 ```bash
 python scripts/test_router.py   # tabla: mensaje, esperado, obtenido, ✔/✘, motivo y resumen
-pytest                          # router (≥ 13/15, llama al modelo) + API (sin modelo)
+pytest                          # router (máximo 2 fallos, llama al modelo) + API (sin modelo)
 pytest tests/test_api.py        # solo la API, rápido y sin gastar cuota
 ```
 
