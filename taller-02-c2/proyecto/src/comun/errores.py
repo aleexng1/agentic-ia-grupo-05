@@ -103,7 +103,15 @@ def traducir_error(error: BaseException) -> str:
     crudo = f"{error.__class__.__name__} {texto}".lower()
     if _contiene(crudo, "api key not valid", "api_key_invalid", "invalid api key", "api key expired"):
         return MENSAJE_CLAVE_GEMINI
-    if _contiene(crudo, "api key must be", "no api key", "api key is missing", "missing api key") or (
+    if _contiene(
+        crudo,
+        "api key must be",
+        "no api key",
+        "api key is missing",
+        "missing api key",
+        "api key required",
+        "provide api_key",
+    ) or (
         "google_api_key" in crudo and _contiene(crudo, "not set", "missing", "must be")
     ):
         return MENSAJE_SIN_CLAVE_GEMINI

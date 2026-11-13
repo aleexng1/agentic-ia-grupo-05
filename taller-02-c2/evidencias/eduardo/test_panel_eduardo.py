@@ -3,7 +3,7 @@ r"""Comprobaciones LOCAL del panel; sin Gemini ni credenciales reales.
 Desde proyecto: .venv\Scripts\python -m pytest ../evidencias/eduardo/test_panel_eduardo.py
 Requiere playwright como dependencia de desarrollo y Chrome instalado (o
 CANAL_NAVEGADOR=msedge). Las respuestas del navegador son SIMULADAS.
-Las dos pruebas xfail registran la autorización pendiente, no la aprueban.
+La prueba de autorización usa las rutas reales de app.py y exige el 401 del control de acceso.
 """
 
 import json
@@ -197,10 +197,13 @@ def test_adaptacion_respuesta_simple_y_contexto_opcional():
         assert resultado["agente"] == resultado["motivo"] == ""
 
 
-@pytest.mark.xfail(reason="DEPENDENCIA Matías: CLAVE_API aún no se valida en el servidor.", strict=False)
 @pytest.mark.parametrize("cabecera", ["ausente", "incorrecta"])
-def test_autorizacion_real_pendiente_en_app(cabecera, monkeypatch):
-    """Rutas de app.py reales; solo el grafo/proveedor se sustituye para no usar red."""
+def test_autorizacion_real_en_app(cabecera, monkeypatch):
+    """Rutas de app.py reales; solo el grafo/proveedor se sustituye para no usar red.
+
+    Antes de integrar el control de acceso de Matías esta prueba estaba marcada xfail
+    (nombre anterior: test_autorizacion_real_pendiente_en_app). Ahora debe pasar.
+    """
     import app as modulo_app
     from src.coordinador import graph as modulo_graph
 
@@ -388,7 +391,7 @@ def test_rechazo_de_acceso_simulado(pagina, estado, tipo):
 
 @pytest.mark.parametrize("estado,esperado", [
     (400, "Entrada inválida"), (422, "Entrada inválida"), (413, "demasiado larga"),
-    (429, "límite de consultas"), (502, "proveedor o al agente"), (503, "proveedor o al agente"),
+    (429, "límite de consultas"), (502, "proveedor o al agente"), (503, "no está configurado"),
     (500, "servidor no pudo"), (408, "tiempo de espera del servidor"),
     (504, "tiempo de espera del servidor"), (404, "HTTP 404"),
 ])
@@ -406,6 +409,55 @@ def test_errores_http_simulados_sin_detalles_crudos(pagina, estado, esperado):
     expect(pagina.locator("#enviar")).to_be_enabled()
     if estado == 502:
         capturar(pagina, "05-proveedor-fallido-simulado.png", "502 SIMULADO · sin fallo real del proveedor")
+
+
+@pytest.mark.parametrize("estado,detalle", [
+    (400, "Escribe una pregunta para continuar."),
+    (502, "No se pudo consultar al agente: La clave de Gemini (GOOGLE_API_KEY) no es válida."),
+    (503, "El servidor no tiene configurada la clave de acceso (CLAVE_API), así que no acepta consultas."),
+])
+def test_muestra_el_detail_del_servidor_simulado(pagina, estado, detalle):
+    """Contrato con el servidor: {"detail": "mensaje"} se muestra tal cual, como texto."""
+    ingresar(pagina)
+    simular_json(pagina, {"detail": detalle}, estado)
+    enviar(pagina)
+    expect(pagina.locator(".mensaje.asistente .burbuja").last).to_have_text(detalle)
+    expect(pagina.locator("#pregunta")).to_have_value(PREGUNTA)
+    expect(pagina.locator("#enviar")).to_be_enabled()
+
+
+@pytest.mark.parametrize("cuerpo,esperado", [
+    ({"detail": [{"msg": "campo requerido"}]}, "Entrada inválida"),
+    ({"detail": "x" * 301}, "Entrada inválida"),
+    ({"detail": 42}, "Entrada inválida"),
+    ({}, "Entrada inválida"),
+])
+def test_detail_no_valido_usa_el_texto_fijo(pagina, cuerpo, esperado):
+    ingresar(pagina)
+    simular_json(pagina, cuerpo, 400)
+    enviar(pagina)
+    burbuja = pagina.locator(".mensaje.asistente .burbuja").last
+    expect(burbuja).to_contain_text(esperado)
+    assert "campo requerido" not in pagina.content() and "xxxx" not in pagina.content()
+
+
+def test_detail_es_texto_y_no_html_ni_multilinea(pagina):
+    ingresar(pagina)
+    simular_json(pagina, {"detail": "Falla <b>grave</b>\n<img src=x onerror=window.inyeccion=true>   fin"}, 502)
+    enviar(pagina)
+    burbuja = pagina.locator(".mensaje.asistente .burbuja").last
+    expect(burbuja).to_have_text("Falla <b>grave</b> <img src=x onerror=window.inyeccion=true> fin")
+    assert burbuja.locator("b, img").count() == 0
+    assert pagina.evaluate("window.inyeccion === undefined")
+
+
+def test_401_con_detail_lo_muestra_en_el_ingreso(pagina):
+    ingresar(pagina)
+    simular_json(pagina, {"detail": "La clave de acceso es incorrecta."}, 401)
+    enviar(pagina)
+    expect(pagina.locator("#error-acceso")).to_contain_text("Acceso rechazado (401). La clave de acceso es incorrecta.")
+    expect(pagina.locator("#clave")).to_be_focused()
+    expect(pagina.locator("#pregunta")).to_have_value(PREGUNTA)
 
 
 @pytest.mark.parametrize("tipo,cuerpo,esperado", [

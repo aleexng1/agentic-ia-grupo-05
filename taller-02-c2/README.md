@@ -111,6 +111,24 @@ python main.py coordinador "Necesito el programa de una feria infantil de 3 hora
 python -m pytest
 ```
 
+**Comprobaciones del frontend (opcionales).** Son pruebas del chat en un navegador real
+(Chrome), escritas por Eduardo en `evidencias/eduardo/test_panel_eduardo.py`. Son
+**opcionales**: no hacen falta para usar ni desplegar la app, y **necesitan Chrome instalado**
+(con Edge: `CANAL_NAVEGADOR=msedge`). Playwright, que las maneja, no está en
+`requirements.txt` (Heroku no lo necesita) sino en `requirements-dev.txt`:
+
+```bash
+# desde taller-02-c2/proyecto, con el entorno virtual activado
+pip install -r requirements-dev.txt
+pytest ../evidencias/eduardo/test_panel_eduardo.py -v -rx
+```
+
+No usan Gemini ni la red: las respuestas del servidor son simuladas. Por defecto **regeneran
+las capturas PNG** de `evidencias/eduardo/`; para no sobrescribir las de la entrega, apunta
+`CARPETA_CAPTURAS` a una carpeta temporal antes de correrlas
+(Linux y macOS: `CARPETA_CAPTURAS=/tmp/capturas pytest ...`;
+PowerShell: `$env:CARPETA_CAPTURAS = "$env:TEMP\capturas"`).
+
 Mientras la app corre, su terminal muestra una línea por cada paso de una consulta:
 
 ```text
@@ -270,6 +288,10 @@ Pendiente: Sebastián.
 - **En Heroku debe usarse `WEB_CONCURRENCY=1`** (`heroku config:set WEB_CONCURRENCY=1`).
   Así corre una sola copia del programa; con varias, cada pregunta puede caer en una copia
   distinta, con otra memoria, y el chat pierde el hilo.
+- **El modo distribuido no funciona con agentes protegidos de otros computadores.** Cada
+  app exige su propia `CLAVE_API` y el coordinador solo envía la suya a esta misma app
+  (nunca a direcciones de terceros, a propósito), así que un agente remoto que también la
+  exija lo rechazará con 401.
 - Dentro de la app única el coordinador llama a los agentes por
   `http://127.0.0.1:{puerto}/agentes/{nombre}` (puerto de `PORT`, o de `PUERTO` en local),
   para no volver a pasar por el router de Heroku, que corta las peticiones a los 30

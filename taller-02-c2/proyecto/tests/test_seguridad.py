@@ -414,6 +414,11 @@ def test_un_agente_que_falla_se_informa_como_error_a2a():
     [
         ("API key not valid. Please pass a valid API key.", errores.MENSAJE_CLAVE_GEMINI),
         ("API_KEY_INVALID", errores.MENSAJE_CLAVE_GEMINI),
+        (
+            "1 validation error for ChatGoogleGenerativeAI Value error, API key required for "
+            "Gemini Developer API. Provide api_key parameter or set GOOGLE_API_KEY/GEMINI_API_KEY",
+            errores.MENSAJE_SIN_CLAVE_GEMINI,
+        ),
         ("402 RESOURCE_EXHAUSTED credits depleted", errores.MENSAJE_SIN_CUOTA),
         ("429 Too Many Requests: quota exceeded", errores.MENSAJE_SIN_CUOTA),
         ("403 PERMISSION_DENIED", errores.MENSAJE_SIN_PERMISO),

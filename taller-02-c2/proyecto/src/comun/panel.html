@@ -371,12 +371,30 @@
       campoClave.focus();
     }
 
+    const LARGO_MAXIMO_DETALLE = 300;
+
+    // El servidor responde los errores como {"detail": "mensaje en una línea"} (400, 401, 502, 503).
+    // Solo se acepta un texto corto de ese campo en una respuesta JSON; cualquier otra cosa
+    // (HTML de un proxy, trazas, listas de validación) se descarta y se usa el texto fijo.
+    async function detalleDelServidor(respuesta) {
+      if (!/\bapplication\/(?:[\w.-]+\+)?json\b/i.test(respuesta.headers.get("content-type") || "")) return "";
+      try {
+        const cuerpo = await respuesta.json();
+        if (!cuerpo || typeof cuerpo.detail !== "string") return "";
+        const detalle = cuerpo.detail.replace(/\s+/g, " ").trim();
+        return detalle.length <= LARGO_MAXIMO_DETALLE ? detalle : "";
+      } catch {
+        return "";
+      }
+    }
+
     function mensajeHttp(estado) {
       if (estado === 400 || estado === 422) return "Entrada inválida. Revisa la pregunta y vuelve a enviarla.";
       if (estado === 413) return "La pregunta es demasiado larga. Acórtala y vuelve a enviarla.";
       if (estado === 408 || estado === 504) return "Se agotó el tiempo de espera del servidor. Puedes reintentar; la consulta anterior podría seguir procesándose.";
       if (estado === 429) return "El servicio alcanzó su límite de consultas. Espera un momento antes de reintentar.";
-      if (estado === 502 || estado === 503) return "No se pudo consultar al proveedor o al agente. Inténtalo más tarde; si persiste, avisa al equipo.";
+      if (estado === 502) return "No se pudo consultar al proveedor o al agente. Inténtalo más tarde; si persiste, avisa al equipo.";
+      if (estado === 503) return "El servidor no está configurado para recibir consultas (falta su clave de acceso). Avisa a quien lo administra.";
       if (estado >= 500) return "El servidor no pudo completar la consulta. Inténtalo más tarde.";
       return `No se pudo completar la consulta (HTTP ${estado}). Si persiste, avisa al equipo.`;
     }
@@ -444,11 +462,17 @@
         // Clasificar por estado, incluso si un proxy devuelve HTML. Nunca mostrar
         // cuerpos de error crudos: pueden contener trazas o credenciales del proveedor.
         if (respuesta.status === 401 || respuesta.status === 403) {
+          const detalle = respuesta.status === 401 ? await detalleDelServidor(respuesta) : "";
+          if (solicitudPendiente !== solicitud) return;
           if (!pregunta.value) pregunta.value = texto;
-          mostrarAcceso(`Acceso rechazado (${respuesta.status}). Ingresa una clave válida. Tu pregunta se conserva para reintentar.`);
+          mostrarAcceso(`Acceso rechazado (${respuesta.status}). ${detalle ? detalle + " " : ""}Ingresa una clave válida. Tu pregunta se conserva para reintentar.`);
           return;
         }
-        if (!respuesta.ok) throw new Error(mensajeHttp(respuesta.status));
+        if (!respuesta.ok) {
+          const detalle = [400, 502, 503].includes(respuesta.status) ? await detalleDelServidor(respuesta) : "";
+          if (solicitudPendiente !== solicitud) return;
+          throw new Error(detalle || mensajeHttp(respuesta.status));
+        }
         const tipo = respuesta.headers.get("content-type") || "";
         if (!/\bapplication\/(?:[\w.-]+\+)?json\b/i.test(tipo)) {
           throw new Error("El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.");
