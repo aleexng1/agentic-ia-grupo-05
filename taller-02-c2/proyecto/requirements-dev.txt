@@ -1,0 +1,7 @@
+# Dependencias OPCIONALES para correr las comprobaciones del frontend en un navegador real.
+# Heroku NO las usa: el requirements.txt de la raíz del repo solo apunta a requirements.txt.
+# Instalación (desde taller-02-c2/proyecto, con el entorno virtual activado):
+#   pip install -r requirements-dev.txt
+-r requirements.txt
+# Controla el navegador. No hace falta "playwright install": usa el Chrome ya instalado.
+playwright>=1.50,<2

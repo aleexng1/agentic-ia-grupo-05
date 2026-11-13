@@ -108,3 +108,23 @@ def test_formato_de_segundos_y_recorte():
     assert modulo_registro.segundos(2.345) == "2,3 s"
     assert modulo_registro.recortar("a" * 100) == "a" * 79 + "…"
     assert modulo_registro.recortar("hola\nmundo") == "hola mundo"
+
+
+def test_el_registro_no_pierde_lineas_en_una_consola_cp1252():
+    """En Windows con la salida redirigida (cp1252), «→» y «←» no se podían escribir."""
+    import io
+
+    salida = io.TextIOWrapper(io.BytesIO(), encoding="cp1252")
+    modulo_registro.tolerar_codificacion(salida)
+    manejador = logging.StreamHandler(salida)
+    manejador.setFormatter(logging.Formatter(modulo_registro.FORMATO))
+    registro = logging.getLogger("prueba-cp1252")
+    registro.propagate = False
+    registro.addHandler(manejador)
+    registro.error("A2A → %s · enviando", "http://127.0.0.1:8000/agentes/alex")
+    registro.error("A2A ✗ %s · error: tiempo agotado", "Agente de Alex")
+    salida.flush()
+
+    texto = salida.buffer.getvalue().decode("cp1252")
+    assert "enviando" in texto and "tiempo agotado" in texto
+    assert "\\u2192" in texto and "\\u2717" in texto

@@ -2,6 +2,53 @@
 
 **Entorno: LOCAL · Fecha: 2026-11-13 · Rama: `c2t2/eduardo-frontend` · Base: `18e7f7d`.**
 
+## Estado tras la integración (nota de Alex · 2026-11-13 · rama `c2t2/alex-integracion`)
+
+Eduardo: esta nota va **antes** de tu texto. Lo que sigue describe tu rama *antes* de
+integrar y se conserva como registro, así que dice cosas que ya cambiaron (por ejemplo,
+«el PR de Matías sigue abierto» o los dos `xfail`). Revísala y vuelve a probar.
+
+**Integración.** Se unieron main + `c2t2/matias-seguridad` + `c2t2/eduardo-frontend` sin
+conflictos. Resultados LOCAL de esta rama: `pytest` del proyecto **168 aprobadas**;
+comprobaciones del frontend **55 aprobadas**. Los dos diagnósticos `xfail` (V22 y V23)
+**pasan**: con el control de acceso de Matías, un POST sin clave o con clave incorrecta da
+401 antes de ejecutar al coordinador. Quité la marca `xfail` y renombré la prueba a
+`test_autorizacion_real_en_app` (antes `..._pendiente_en_app`).
+
+**Qué cambié yo en `panel.html` (tu zona) y por qué.** Revísalo:
+
+| Cambio | Por qué |
+| --- | --- |
+| Nueva función `detalleDelServidor`: si la respuesta es JSON y trae `detail` como texto de hasta 300 caracteres, ese texto se muestra (siempre con `textContent`, en una línea). Si no cumple, se usa el texto fijo de antes. | El contrato acordado con Matías dice que el servidor responde `{"detail": "mensaje"}` y que el frontend lo muestra. Tu código elegía un texto por código y no leía `detail`, así que la persona no veía, por ejemplo, «La clave de Gemini no es válida» o «Falta configurar GOOGLE_API_KEY». |
+| Se aplica a 400, 502 y 503. Los demás códigos (429, 500, 504, 404…) siguen con tus textos fijos, y un `detail` que no sea texto (por ejemplo la lista de un 422) también. | Matías solo garantiza mensajes claros y sin claves ni trazas en esos tres códigos. Tu criterio de no mostrar cuerpos crudos se mantiene para todo lo demás. |
+| En el 401 el `detail` se agrega al aviso de la pantalla de ingreso: «Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida…». | Distingue «clave incorrecta» de otros rechazos. Sigue volviendo al ingreso y conservando la pregunta. |
+| El texto fijo del 503 ya no es el del 502. Ahora: «El servidor no está configurado para recibir consultas (falta su clave de acceso). Avisa a quien lo administra.» | Un 503 del servidor significa que falta `CLAVE_API`. Es un problema de configuración de quien administra, no una falla del proveedor o de un agente como decía el texto compartido con el 502. |
+| Después de leer el cuerpo se vuelve a comprobar que la solicitud sigue vigente. | Para no pisar una conversación nueva con una respuesta tardía; es la misma regla que ya usabas. |
+
+**Cambios en tu archivo de comprobaciones** (`evidencias/eduardo/test_panel_eduardo.py`):
+el 503 espera ahora «no está configurado»; se quitó la marca `xfail`; y se agregaron 9
+comprobaciones: el `detail` se muestra en 400/502/503 (3), un `detail` inválido o largo
+usa el texto fijo (4), el `detail` se muestra como texto y no como HTML (1) y el 401 con
+`detail` vuelve al ingreso (1). Esas 9 más tus 44 anteriores dan las 55 aprobadas.
+
+**Verificación mía** (LOCAL, Chrome real contra la app real, con una clave temporal): con
+clave incorrecta aparece el 401 con su `detail`; con clave correcta, una pregunta real
+mostró «Agente: Agente de Matias» y su motivo; un servidor sin `CLAVE_API` mostró el
+`detail` del 503; y uno sin `GOOGLE_API_KEY`, el 502 ya traducido.
+
+**Lo que te toca (no lo hice yo):**
+
+1. Revisar mis cambios de `panel.html` y repetir tus comprobaciones.
+2. Ejecutar de verdad R05, R06, R07 y R09 (secciones 3 y 5) contra la app integrada y
+   con evidencia real; sigue sin existir evidencia real del frontend con acceso permitido y
+   rechazado. Las capturas 04 y 05 son simuladas.
+3. Actualizar las secciones 3 y 5, que todavía dicen que la protección de Matías no está
+   integrada y que los `xfail` siguen pendientes.
+4. Decidir sobre `src/agente_eduardo/demo.html`: ya no se sirve desde la app única y su
+   `fetch` no envía la clave, así que daría 401 si se sirviera.
+5. Cuidado al repetir las comprobaciones: por defecto regeneran tus capturas 01–08. Usa
+   `CARPETA_CAPTURAS` (ver el README del taller).
+
 ## 1. Aporte y límites
 
 Reutilicé el panel de la app única para consultar al coordinador desde un navegador.

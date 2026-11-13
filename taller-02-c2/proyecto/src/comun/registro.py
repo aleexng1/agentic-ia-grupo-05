@@ -19,6 +19,20 @@ def obtener_registro() -> logging.Logger:
     return logging.getLogger(NOMBRE_REGISTRO)
 
 
+def tolerar_codificacion(flujo) -> None:
+    """Hace que un carácter que la consola no puede escribir se escape en vez de fallar.
+
+    En Windows, con la salida redirigida a un archivo, Python usa cp1252 y no puede escribir
+    «→», «←» ni «✗»: esa línea del registro se perdía con UnicodeEncodeError. Con
+    backslashreplace sale como «\\u2192» y la línea se conserva. Si el flujo no admite
+    reconfigurarse (por ejemplo, el de pytest), se deja como está.
+    """
+    try:
+        flujo.reconfigure(errors="backslashreplace")
+    except (AttributeError, ValueError, OSError):
+        pass
+
+
 def configurar_registro(nivel: int = logging.INFO) -> logging.Logger:
     """Envía el registro del coordinador a stdout con fecha y hora.
 
@@ -29,6 +43,7 @@ def configurar_registro(nivel: int = logging.INFO) -> logging.Logger:
     registro.setLevel(nivel)
     registro.propagate = False
     if not any(getattr(manejador, "_registro_coordinador", False) for manejador in registro.handlers):
+        tolerar_codificacion(sys.stdout)
         manejador = logging.StreamHandler(sys.stdout)
         manejador.setFormatter(logging.Formatter(FORMATO, datefmt=FORMATO_HORA))
         manejador._registro_coordinador = True
