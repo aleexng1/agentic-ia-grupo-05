@@ -31,14 +31,42 @@ agentes de ejemplo de la clase (viajes y restaurantes).
 
 ## Integrantes
 
-| Integrante | Aporte |
-| --- | --- |
-| Alex | Base e integración |
-| Matías | Seguridad y errores |
-| Eduardo | Frontend del chat |
-| Sebastián | Heroku y operación |
+| Integrante | Aporte | Documento y evidencias |
+| --- | --- | --- |
+| Alex | **Base e integración:** la app única con el coordinador y los cuatro agentes, el registro A2A, los archivos de despliegue de la raíz y la revisión e integración de los demás aportes. | [documento-Alex.md](documento-Alex.md) · [evidencias/alex/](evidencias/alex/) |
+| Matías | **Seguridad y errores:** control de acceso con la clave `CLAVE_API` (cabecera `X-API-Key`) y errores claros del servidor (400, 401, 502 y 503). | [documento-Matias.md](documento-Matias.md) · [evidencias/matias/](evidencias/matias/) |
+| Eduardo | **Frontend del chat:** el panel web con ingreso de clave, el chat y la presentación de errores. | [documento-Eduardo.md](documento-Eduardo.md) · [evidencias/eduardo/](evidencias/eduardo/) |
+| Sebastián | **Heroku y operación:** el despliegue y la sección «Operación en Heroku». **Pendiente:** aún no entrega su aporte. | Pendiente |
 
 ## Preparación manual
+
+Dos cosas que se hacen a mano, una sola vez, antes de instalar:
+
+**1. Obtener una clave de Gemini (`GOOGLE_API_KEY`).** Es la clave con la que el servidor
+habla con Google; cada persona usa la suya.
+
+1. Entra a Google AI Studio (`https://aistudio.google.com`) con una cuenta de Google.
+2. Abre la sección de claves de API («Get API key» / «Obtener clave de API»; el nombre exacto
+   del botón puede cambiar) y crea una clave.
+3. Cópiala y pégala en `GOOGLE_API_KEY=` de `proyecto/.env` (se crea en Instalación).
+
+La clave tiene límites de uso gratuitos y la responsabilidad de cuidarla es tuya: no la
+subas al repositorio, no la pegues en el chat del grupo ni la muestres en capturas. Es
+**distinta** de la clave de acceso de la app.
+
+**2. Generar la clave de acceso de la app (`CLAVE_API`).** Es la contraseña que el servidor
+exige para aceptar consultas; la eliges tú. Genera una larga y al azar (sirve en Windows,
+Linux y macOS):
+
+```bash
+python -c "import secrets; print(secrets.token_urlsafe(32))"
+```
+
+Pégala en `CLAVE_API=` de `proyecto/.env`, y es la que escribirás en la pantalla de ingreso
+del chat. Cómo funciona, qué protege y qué errores devuelve: sección **Seguridad**, más abajo.
+
+**Heroku:** la cuenta, el CLI y el despliegue los explica la sección «Operación en Heroku».
+Pendiente: Sebastián.
 
 ## Instalación
 
@@ -128,6 +156,10 @@ las capturas PNG** de `evidencias/eduardo/`; para no sobrescribir las de la entr
 `CARPETA_CAPTURAS` a una carpeta temporal antes de correrlas
 (Linux y macOS: `CARPETA_CAPTURAS=/tmp/capturas pytest ...`;
 PowerShell: `$env:CARPETA_CAPTURAS = "$env:TEMP\capturas"`).
+
+Las capturas de evidencia de Alex (`evidencias/alex/`) se toman con un script y se pueden
+repetir: ver [evidencias/alex/GUION.md](evidencias/alex/GUION.md). Usan Chrome y 6 preguntas
+reales a Gemini.
 
 Mientras la app corre, su terminal muestra una línea por cada paso de una consulta:
 
