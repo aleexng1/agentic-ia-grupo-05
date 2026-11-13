@@ -1,0 +1,58 @@
+# Registro del servidor · LOCAL · 2026-11-13 19:57:04
+# Comando, desde la raíz del repositorio y con PORT=8000 (igual que el Procfile):
+#   sh -c 'cd taller-02-c2/proyecto && uvicorn app:app --host 0.0.0.0 --port $PORT'
+# CLAVE_API temporal solo en el entorno del proceso. La salida sigue tal cual; solo se
+# reemplazan rutas del equipo por <carpeta-del-repo>.
+# ------------------------------------------------------------------------------
+INFO:     Started server process [59440]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     127.0.0.1:45978 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45994 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:45994 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:45994 - "GET / HTTP/1.1" 200 OK
+2026-11-13 19:57:08 WARNING [coordinador] acceso rechazado · POST /panel/consultar · clave incorrecta
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 401 Unauthorized
+2026-11-13 19:57:08 INFO    [coordinador] pregunta recibida · context_id=793ff1ce-e573-495e-a602-5db88ed86757 · «Necesito armar el programa de una feria infantil de 3 horas desde las 15:00.»
+INFO:     127.0.0.1:46012 - "GET /agentes/matias/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46012 - "GET /agentes/alex/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46012 - "GET /agentes/eduardo/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:46012 - "GET /agentes/sebastian/.well-known/agent-card.json HTTP/1.1" 200 OK
+2026-11-13 19:57:08 INFO    [coordinador] catálogo listo · 4 agente(s): Agente de Matias, Agente de Alex, Agente de Eduardo, Agente de Sebastian
+2026-11-13 19:57:10 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita armar el programa de actividades para una feria infantil.
+2026-11-13 19:57:10 INFO    [coordinador] A2A → http://127.0.0.1:8000/agentes/matias · enviando
+INFO:     127.0.0.1:46012 - "POST /agentes/matias HTTP/1.1" 200 OK
+2026-11-13 19:57:14 INFO    [coordinador] A2A ← Agente de Matias · respuesta recibida en 4,1 s
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+2026-11-13 19:57:15 INFO    [coordinador] pregunta recibida · context_id=9b949a99-180e-4e03-a9fa-3f61091c9e75 · «Necesito un recinto interior para una feria tecnológica de 80 personas.»
+2026-11-13 19:57:17 INFO    [coordinador] supervisor eligió Agente de Alex · motivo: El usuario solicita la recomendación de un recinto interior con capacidad para 80 personas.
+2026-11-13 19:57:17 INFO    [coordinador] A2A → http://127.0.0.1:8000/agentes/alex · enviando
+INFO:     127.0.0.1:46012 - "POST /agentes/alex HTTP/1.1" 200 OK
+2026-11-13 19:57:21 INFO    [coordinador] A2A ← Agente de Alex · respuesta recibida en 4,6 s
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+2026-11-13 19:57:22 INFO    [coordinador] pregunta recibida · context_id=b9e239c8-6712-4297-ae63-040792bbd6a9 · «¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4…»
+2026-11-13 19:57:24 INFO    [coordinador] supervisor eligió Agente de Eduardo · motivo: Se encarga de estimar presupuestos simulados para ferias y eventos.
+2026-11-13 19:57:24 INFO    [coordinador] A2A → http://127.0.0.1:8000/agentes/eduardo · enviando
+INFO:     127.0.0.1:46012 - "POST /agentes/eduardo HTTP/1.1" 200 OK
+2026-11-13 19:57:28 INFO    [coordinador] A2A ← Agente de Eduardo · respuesta recibida en 4,4 s
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+2026-11-13 19:57:28 INFO    [coordinador] pregunta recibida · context_id=a5ea21d7-fe2c-4792-bfec-5b66598cf832 · «Necesito una propuesta de catering para una feria tecnológica de 80 personas, d…»
+2026-11-13 19:57:30 INFO    [coordinador] supervisor eligió Agente de Sebastian · motivo: La solicitud pide una propuesta de catering con especificaciones de alimentación y restricciones dietéticas.
+2026-11-13 19:57:30 INFO    [coordinador] A2A → http://127.0.0.1:8000/agentes/sebastian · enviando
+INFO:     127.0.0.1:46012 - "POST /agentes/sebastian HTTP/1.1" 200 OK
+2026-11-13 19:57:35 INFO    [coordinador] A2A ← Agente de Sebastian · respuesta recibida en 4,4 s
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+2026-11-13 19:57:35 INFO    [coordinador] pregunta recibida · context_id=3143281b-4d4c-4b84-a189-3442cca1e945 · «¿Cómo resuelvo una integral cuadrática?»
+2026-11-13 19:57:37 INFO    [coordinador] supervisor eligió ninguno · motivo: La pregunta es sobre matemáticas y no corresponde a las funciones de ningún agente del catálogo.
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+2026-11-13 19:57:38 INFO    [coordinador] pregunta recibida · context_id=53fdda0f-b2db-4bf7-8801-7e54f727f50b · «¿Dónde hago una feria?»
+2026-11-13 19:57:39 INFO    [coordinador] supervisor eligió Agente de Alex · motivo: El usuario solicita recomendaciones de lugares para hacer una feria.
+2026-11-13 19:57:39 INFO    [coordinador] A2A → http://127.0.0.1:8000/agentes/alex · enviando
+INFO:     127.0.0.1:46012 - "POST /agentes/alex HTTP/1.1" 200 OK
+2026-11-13 19:57:41 INFO    [coordinador] A2A ← Agente de Alex · respuesta recibida en 1,6 s
+INFO:     127.0.0.1:46002 - "POST /panel/consultar HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [59440]
