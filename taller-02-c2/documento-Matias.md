@@ -239,10 +239,17 @@ evidencias, en los registros ni en el código.
 
 ## 7. Límites y pendientes
 
+- Una revisión de Sebastián notó que un programa de 6 horas dejaba 140 minutos libres: el
+  catálogo de mi agente (`agente_matias/tools.py`) era corto. Agregué 3 o 4 actividades
+  ficticias por tipo de evento y ahora un evento de 6 horas deja entre 5 y 90 minutos libres
+  (salvo «infantil» para adultos o estudiantes, que sigue sin actividades por diseño). La
+  herramienta nunca altera la duración pedida y el agente informa los minutos libres.
 - Hay una sola clave para todas las personas, sin límite de intentos ni bloqueo.
 - La conexión en local es HTTP; en Heroku la plataforma entrega HTTPS.
 - **Resuelto en la integración:** el panel de Eduardo envía la clave en la cabecera
   `X-API-Key` y muestra el `detail` de los errores 400, 401, 502 y 503.
 - **Resuelto en Heroku (Sebastián):** `CLAVE_API` y `GOOGLE_API_KEY` están en las Config
-  Vars y las pruebas 11 a 14 pasan en remoto. La `CLAVE_API` debe rotarse al terminar la
-  entrega, porque se compartió en un chat privado para poder probar.
+  Vars y las pruebas 11 a 14 pasan en remoto. La `CLAVE_API` usada en las pruebas se
+  compartió en un chat privado, así que debe rotarse **antes de entregar** y la clave nueva
+  debe pasarse a quien evalúe por un canal privado (si se rotara después de entregar, la
+  persona evaluadora perdería el acceso).
