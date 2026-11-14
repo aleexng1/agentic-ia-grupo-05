@@ -1,0 +1,77 @@
+Evidencia 8 · Pruebas REMOTAS en Heroku
+=======================================
+Entorno: REMOTO (https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com) · Fecha: 2026-11-14 11:43
+La clave de acceso se muestra enmascarada (********); en la ejecución real se envió la verdadera.
+
+### 8.1 Rutas públicas sin clave
+$ curl -i https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/salud
+HTTP/1.1 200 OK
+Content-Length: 11
+Content-Type: application/json
+Date: Sat, 14 Nov 2026 14:43:58 GMT
+Nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+Report-To: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=fG5opot8IG%2FNwChwobHNOervCtYAw0jebRCa8Scubwc%3D\u0026sid=af571f24-03ee-46d1-9f90-ab9030c2c74c\u0026ts=1794667439"}],"max_age":3600}
+Reporting-Endpoints: heroku-nel="https://nel.heroku.com/reports?s=fG5opot8IG%2FNwChwobHNOervCtYAw0jebRCa8Scubwc%3D&sid=af571f24-03ee-46d1-9f90-ab9030c2c74c&ts=1794667439"
+Server: Heroku
+Via: 1.1 heroku-router
+
+{"ok":true}
+
+### 8.2 Sin clave → 401
+$ curl -i -X POST https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar -H "Content-Type: application/json" -d '{"texto": "hola"}'
+HTTP/1.1 401 Unauthorized
+Content-Length: 73
+Content-Type: application/json
+Date: Sat, 14 Nov 2026 14:43:59 GMT
+Nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+Report-To: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=fG5opot8IG%2FNwChwobHNOervCtYAw0jebRCa8Scubwc%3D\u0026sid=af571f24-03ee-46d1-9f90-ab9030c2c74c\u0026ts=1794667439"}],"max_age":3600}
+Reporting-Endpoints: heroku-nel="https://nel.heroku.com/reports?s=fG5opot8IG%2FNwChwobHNOervCtYAw0jebRCa8Scubwc%3D&sid=af571f24-03ee-46d1-9f90-ab9030c2c74c&ts=1794667439"
+Server: Heroku
+Via: 1.1 heroku-router
+
+{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+### 8.3 Clave incorrecta → 401
+$ curl -i -X POST https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "hola"}'
+HTTP/1.1 401 Unauthorized
+Content-Length: 46
+Content-Type: application/json
+Date: Sat, 14 Nov 2026 14:43:59 GMT
+Nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+Report-To: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=i1%2FuxTVXpsbQJjgdYWcvmQFtPQhq9cbtyNkMJagg%2Be8%3D\u0026sid=af571f24-03ee-46d1-9f90-ab9030c2c74c\u0026ts=1794667440"}],"max_age":3600}
+Reporting-Endpoints: heroku-nel="https://nel.heroku.com/reports?s=i1%2FuxTVXpsbQJjgdYWcvmQFtPQhq9cbtyNkMJagg%2Be8%3D&sid=af571f24-03ee-46d1-9f90-ab9030c2c74c&ts=1794667440"
+Server: Heroku
+Via: 1.1 heroku-router
+
+{"detail":"La clave de acceso es incorrecta."}
+
+### 8.4 Clave correcta, pregunta vacía → 400
+$ curl -i -X POST https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "   "}'
+HTTP/1.1 400 Bad Request
+Content-Length: 49
+Content-Type: application/json
+Date: Sat, 14 Nov 2026 14:44:00 GMT
+Nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+Report-To: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=i1%2FuxTVXpsbQJjgdYWcvmQFtPQhq9cbtyNkMJagg%2Be8%3D\u0026sid=af571f24-03ee-46d1-9f90-ab9030c2c74c\u0026ts=1794667440"}],"max_age":3600}
+Reporting-Endpoints: heroku-nel="https://nel.heroku.com/reports?s=i1%2FuxTVXpsbQJjgdYWcvmQFtPQhq9cbtyNkMJagg%2Be8%3D&sid=af571f24-03ee-46d1-9f90-ab9030c2c74c&ts=1794667440"
+Server: Heroku
+Via: 1.1 heroku-router
+
+{"detail":"Escribe una pregunta para continuar."}
+
+### 8.5 Clave correcta, pregunta real → 200
+$ curl -i -X POST https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar -H "Content-Type: application/json" -H "X-API-Key: ********" -d '{"texto": "Arma un programa de 3 horas para una feria tecnologica con publico familiar, empezando a las 10:00."}'
+HTTP/1.1 200 OK
+Cache-Control: no-store
+Content-Length: 729
+Content-Type: application/json
+Date: Sat, 14 Nov 2026 14:44:00 GMT
+Nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+Report-To: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=2LvsdiB8pO%2FZ1HXpIAEx%2BskRLpo3fwmk9OKA9VHrzT0%3D\u0026sid=af571f24-03ee-46d1-9f90-ab9030c2c74c\u0026ts=1794667441"}],"max_age":3600}
+Reporting-Endpoints: heroku-nel="https://nel.heroku.com/reports?s=2LvsdiB8pO%2FZ1HXpIAEx%2BskRLpo3fwmk9OKA9VHrzT0%3D&sid=af571f24-03ee-46d1-9f90-ab9030c2c74c&ts=1794667441"
+Server: Heroku
+Via: 1.1 heroku-router
+
+{"respuesta":"Aquí tienes una propuesta de programa para la feria tecnológica (recuerda que no cotizamos lugares ni costos):\n\n* **10:00 - 11:00**: Taller de robótica con kits (Armado y programación básica de un robot pequeño.)\n* **11:00 - 11:30**: Demo de realidad virtual (Turnos cortos con cascos disponibles en el stand.)\n* **11:30 - 12:15**: Juegos de lógica y programación sin pantalla (Tableros y tarjetas para aprender a dar instrucciones paso a paso.)\n\nEl programa no ocupa toda la duración pedida; hay 45 minutos libres.","context_id":"40ae65e2-d3da-4a9c-b82f-efed67143855","agente":"Agente de Matias","motivo":"El usuario solicita la creación de un programa de actividades para una feria tecnológica."}
+
+------------------------------------------------------------

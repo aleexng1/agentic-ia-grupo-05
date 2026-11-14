@@ -20,7 +20,7 @@ corrió las pruebas.
 | Archivo | Qué hace |
 | --- | --- |
 | `proyecto/src/comun/seguridad.py` | Middleware que exige la cabecera `X-API-Key` en toda petición que envía datos (POST, PUT, PATCH, DELETE), la compara con `CLAVE_API` usando `secrets.compare_digest` y responde `401` con `{"detail": "mensaje"}`. Deja públicas la página, las fichas y `/salud`. Si `CLAVE_API` está vacía, avisa al arrancar y responde `503` a toda consulta: la app no queda abierta. |
-| `proyecto/src/comun/errores.py` | Traduce las fallas de Gemini, de la red o de un agente a un mensaje de una línea en español, sin traza ni claves. Oculta cualquier clave que aparezca en un mensaje. |
+| `proyecto/src/comun/errores.py` | Traduce las fallas de Gemini, de la red o de un agente a un mensaje de una línea en español, sin traza ni claves. Oculta cualquier clave que aparezca en un mensaje. Alex agregó después dos frases al reconocimiento de «falta la clave de Gemini» (`api key required`, `provide api_key`); es el único cambio ajeno. |
 | `proyecto/tests/test_seguridad.py` | 52 pruebas de acceso y errores, sin llamar a Gemini. |
 | `proyecto/tests/conftest.py` | Define una `CLAVE_API` falsa solo para pytest, para que las pruebas no dependan del `.env` de quien las corre. |
 
@@ -194,7 +194,31 @@ aparte, con otro puerto.
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 | --- | --- | --- | --- | --- |
-| LOCAL · 2026-11-13 | `python -m pytest` desde `taller-02-c2/proyecto` | Todas pasan, sin usar la clave de Gemini | `166 passed` (114 existentes + 52 nuevas) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
+| LOCAL · 2026-11-14 | `python -m pytest` desde `taller-02-c2/proyecto` sobre `main` integrado | Todas pasan, sin usar la clave de Gemini | `168 passed` (116 existentes + 52 nuevas; el 2026-11-13 eran 166, antes de integrar los cambios de Alex y Eduardo) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
+
+### Prueba 11 · Acceso permitido en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku, `grupo05-taller2-seba-94d12914f3eb.herokuapp.com`) · 2026-11-14 11:43 | `POST /panel/consultar` con `X-API-Key` correcta y «Arma un programa de 3 horas para una feria tecnologica con publico familiar, empezando a las 10:00.» | `200` con `respuesta`, `agente` y `motivo` | `200`. Eligió al Agente de Matias y devolvió un programa de tres actividades desde las 10:00, con 45 minutos libres. | La clave de acceso se pasó en privado y está enmascarada. Antes de que Sebastián cargara la clave de Gemini, la misma consulta dio `502` con «Falta configurar la clave de Gemini…», sin presentarse como éxito. Evidencia: `08-remoto-heroku.txt` (8.5). |
+
+### Prueba 12 · Acceso rechazado en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `POST /panel/consultar` sin clave, y con `X-API-Key` falsa | `401` en ambos | `401` `{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}` y `401` `{"detail":"La clave de acceso es incorrecta."}` | Mismo comportamiento que en local. Evidencia: `08-remoto-heroku.txt` (8.2 y 8.3). |
+
+### Prueba 13 · Pregunta vacía en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `POST /panel/consultar` con clave correcta y `{"texto": "   "}` | `400` | `400` `{"detail":"Escribe una pregunta para continuar."}` | Evidencia: `08-remoto-heroku.txt` (8.4). |
+
+### Prueba 14 · Rutas públicas en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `GET /salud` sin clave (las fichas se revisaron aparte con el mismo resultado) | `200` | `200` `{"ok":true}`; la ficha del coordinador y la de Alex también dieron `200` | La ficha del coordinador trae la URL pública real de Heroku. Evidencia: `08-remoto-heroku.txt` (8.1). |
 
 ## 6. Evidencias
 
@@ -208,6 +232,7 @@ enmascarada (`********`):
 - `05-falla-del-proveedor.txt`
 - `06-sin-conexion.txt`
 - `07-registro-del-servidor.txt`
+- `08-remoto-heroku.txt` (pruebas 11 a 14, entorno REMOTO)
 
 Verifiqué que ninguna clave real, ni la de acceso ni la de Gemini, aparece en las
 evidencias, en los registros ni en el código.
@@ -216,8 +241,8 @@ evidencias, en los registros ni en el código.
 
 - Hay una sola clave para todas las personas, sin límite de intentos ni bloqueo.
 - La conexión en local es HTTP; en Heroku la plataforma entrega HTTPS.
-- **Pendiente para la integración:** el frontend de Eduardo tiene que enviar la clave en la
-  cabecera `X-API-Key` y mostrar el `detail` de los errores 400, 401, 502 y 503. Con la
-  clave mala o ausente hoy recibiría `401`; con el servidor sin `CLAVE_API`, `503`.
-- **Pendiente para Heroku (Sebastián):** definir `CLAVE_API` en las Config Vars. Sin ella, el
-  servidor arranca pero rechaza toda consulta con `503`.
+- **Resuelto en la integración:** el panel de Eduardo envía la clave en la cabecera
+  `X-API-Key` y muestra el `detail` de los errores 400, 401, 502 y 503.
+- **Resuelto en Heroku (Sebastián):** `CLAVE_API` y `GOOGLE_API_KEY` están en las Config
+  Vars y las pruebas 11 a 14 pasan en remoto. La `CLAVE_API` debe rotarse al terminar la
+  entrega, porque se compartió en un chat privado para poder probar.
