@@ -1,0 +1,102 @@
+{
+  "fecha": "2026-11-14T13:55:05-03:00",
+  "entorno": "LOCAL",
+  "commit_base": "741305bf0fed986b523898114bb1d851d28d063b",
+  "cambios_sin_commit": true,
+  "sha256_archivos_probados": {
+    "taller-02-c2/proyecto/src/comun/panel.html": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+    "taller-02-c2/evidencias/eduardo/test_panel_eduardo.py": "865212ceb1062ecb8d278ac62e14dd47705a2f5febac327dc8621c24850d47ed",
+    "taller-02-c2/evidencias/eduardo/validar_cierre_local.py": "ef1629fcabd3b3173cf6953ade7f45700804d17fcb022ff820746d2bffe34451"
+  },
+  "demo_taller_2_retirada": true,
+  "tipo": "HTTP y app integrada reales, sin dobles",
+  "casos": [
+    {
+      "caso": "R06",
+      "fecha": "2026-11-14T13:55:29-03:00",
+      "pregunta": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?",
+      "aprobado": true,
+      "http": 401,
+      "cuerpo": {
+        "detail": "Falta la clave de acceso. Envíala en la cabecera X-API-Key."
+      },
+      "actividad_acumulada": {
+        "preguntas_coordinador": 0,
+        "envios_a2a": 0,
+        "recepciones_a2a": 0,
+        "rechazos": 1
+      },
+      "captura": "r06-sin-clave.png"
+    },
+    {
+      "caso": "R07",
+      "fecha": "2026-11-14T13:55:31-03:00",
+      "pregunta": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?",
+      "aprobado": true,
+      "http": 401,
+      "cuerpo": {
+        "detail": "La clave de acceso es incorrecta."
+      },
+      "aviso": "Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.",
+      "pregunta_conservada": true,
+      "campo_clave_vacio": true,
+      "actividad_acumulada": {
+        "preguntas_coordinador": 0,
+        "envios_a2a": 0,
+        "recepciones_a2a": 0,
+        "rechazos": 2
+      },
+      "captura": "r07-clave-incorrecta.png"
+    },
+    {
+      "caso": "R05",
+      "fecha": "2026-11-14T13:55:32-03:00",
+      "pregunta": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?",
+      "aprobado": true,
+      "http": 200,
+      "cuerpo": {
+        "respuesta": "A continuación, se presenta la estimación presupuestaria simulada:\n\n* **Partidas:**\n  * Recinto referencial: $800.000 CLP\n  * Personal: $768.000 CLP\n  * Equipamiento: $200.000 CLP\n  * Alimentación genérica: $144.000 CLP\n  * Logística: $64.000 CLP\n* **Subtotal:** $1.976.000 CLP\n* **Contingencia (10%):** $197.600 CLP\n* **Total:** $2.173.600 CLP\n\n**Supuestos:**\n* La duración se calcula en 8 bloques de 30 minutos, redondeando hacia arriba.\n* La contingencia es 10 % del subtotal, redondeada hacia arriba al peso.\n* La alimentación es genérica y no define menú, dieta, proveedor ni cantidades de platos.\n\n**Advertencia:**\nSimulación con importes completamente ficticios; no son precios reales y no constituyen autorización de gasto. Impuestos no modelados.",
+        "context_id": "db682b8d-ee3a-4e58-a43b-84caea9f7389",
+        "agente": "Agente de Eduardo",
+        "motivo": "El usuario solicita estimar un presupuesto simulado para un evento."
+      },
+      "texto_visible": "A continuación, se presenta la estimación presupuestaria simulada:\n\n* Partidas:\n  * Recinto referencial: $800.000 CLP\n  * Personal: $768.000 CLP\n  * Equipamiento: $200.000 CLP\n  * Alimentación genérica: $144.000 CLP\n  * Logística: $64.000 CLP\n* Subtotal: $1.976.000 CLP\n* Contingencia (10%): $197.600 CLP\n* Total: $2.173.600 CLP\n\nSupuestos:\n* La duración se calcula en 8 bloques de 30 minutos, redondeando hacia arriba.\n* La contingencia es 10 % del subtotal, redondeada hacia arriba al peso.\n* La alimentación es genérica y no define menú, dieta, proveedor ni cantidades de platos.\n\nAdvertencia:\nSimulación con importes completamente ficticios; no son precios reales y no constituyen autorización de gasto. Impuestos no modelados.",
+      "uso_proveedor": "consulta real; sin reintento",
+      "actividad_acumulada": {
+        "preguntas_coordinador": 1,
+        "envios_a2a": 1,
+        "recepciones_a2a": 1,
+        "rechazos": 2
+      },
+      "captura": "r05-acceso-permitido.png"
+    },
+    {
+      "caso": "R09",
+      "fecha": "2026-11-14T13:55:42-03:00",
+      "pregunta": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?",
+      "aprobado": true,
+      "configuracion": "otro proceso; CLAVE_API temporal activa; GOOGLE_API_KEY y GEMINI_API_KEY vacías; dotenv deshabilitado",
+      "limite": "falla real de configuración del proveedor; no acredita rechazo remoto, cuota ni indisponibilidad de Gemini",
+      "http": 502,
+      "cuerpo": {
+        "detail": "No se pudo consultar al agente: Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars."
+      },
+      "aviso": "No se pudo consultar al agente: Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars.",
+      "pregunta_conservada": true,
+      "actividad_acumulada": {
+        "preguntas_coordinador": 1,
+        "envios_a2a": 0,
+        "recepciones_a2a": 0,
+        "rechazos": 0
+      },
+      "captura": "r09-proveedor-sin-configuracion.png"
+    }
+  ],
+  "duracion_segundos": 45.02,
+  "finalizacion": "2026-11-14T13:55:50-03:00",
+  "archivos_conservados": {
+    "taller-02-c2/proyecto/.env": true,
+    "taller-01-c2/evidencias/eduardo/03-ficha-telefono.jpg": true,
+    "taller-01-c2/proyecto/src/agente_eduardo/demo.html": true
+  }
+}

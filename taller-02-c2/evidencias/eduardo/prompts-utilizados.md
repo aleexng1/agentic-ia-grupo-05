@@ -152,3 +152,49 @@ En esta continuación se localizaron y revisaron las seis capturas originales, s
 modificarlas. Se corrigieron los enlaces y se documentaron los límites de recuperación
 del registro real. No se cambió código ni se repitieron pruebas o consultas al proveedor.
 La autorización integrada y los dos `xfail` siguen pendientes.
+
+## Cierre integrado real · solicitud del 14-11-2026
+
+El texto anterior es histórico. La solicitud siguiente reemplaza aquellos pendientes
+como objetivo activo; no se inventaron instrucciones ni se incorporaron credenciales:
+
+```text
+Continúa el cierre de mi aporte en c2t2/eduardo-frontend.
+
+Lee README.md y AGENTS.md. Comprueba el estado de Git y conserva
+cualquier cambio local y la foto del Taller 1. Ejecuta git fetch origin
+e incorpora origin/main con git merge --ff-only origin/main.
+Si no puede avanzar así, informa la causa sin descartar trabajo.
+
+Revisa los cambios integrados de Alex. Corrige únicamente el mensaje
+genérico del 503: cuando no exista un detail JSON válido debe indicar
+indisponibilidad temporal, sin afirmar que falta CLAVE_API. Conserva
+el detail válido como texto seguro. Ajusta la prueba de 503 con HTML
+y conserva la comprobación del 503 JSON del backend.
+
+Ejecuta las pruebas del proyecto y del frontend. Configura
+CARPETA_CAPTURAS en una carpeta nueva para conservar las evidencias
+anteriores. Registra los resultados reales, sin asumir conteos.
+
+Ejecuta R05, R06, R07 y R09 contra la app LOCAL integrada, con capturas
+y registros sanitizados. Para R09 usa un proceso aislado con configuración
+temporal; conserva intacto mi .env y no modifiques Heroku.
+No muestres claves en comandos, salidas, capturas ni documentos.
+
+Actualiza documento-Eduardo.md con el estado vigente, commit probado,
+fecha, resultados y pendientes reales. Conserva las pruebas antiguas
+como históricas y diferencia simulaciones de llamadas reales.
+
+Comprueba las referencias funcionales de src/agente_eduardo/demo.html.
+Si está sin uso, retira solo esa copia del Taller 2 y documenta la decisión.
+
+Limita los cambios a mi zona. No hagas commit ni push todavía.
+Entrega el resumen y la selección exacta de archivos para el nuevo PR.
+```
+
+También se volvió a proporcionar `proyecto/AGENTS.md`; sus reglas no se cambiaron.
+Resultados medidos, capturas y límites de cada caso:
+[`cierre-integrado-2026-11-14/README.md`](cierre-integrado-2026-11-14/README.md).
+Se hizo una sola consulta funcional real R05, sin reintentos; R06/R07 son rechazos
+reales y R09 es un error real de configuración en otro proceso. No se modificaron
+prompts de agentes ni archivos de otras personas. Sin commit ni push.

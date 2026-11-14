@@ -1,4 +1,25 @@
-# Evidencias de Eduardo · LOCAL · 2026-11-13
+# Evidencias de Eduardo · LOCAL
+
+## Vigente · 2026-11-14 · cierre integrado
+
+Base `741305bf0fed986b523898114bb1d851d28d063b` más ajustes locales sin commit.
+**168 pruebas del proyecto y 68 del frontend aprobadas, sin `xfail`.** R05 real con
+coordinador/A2A/Gemini devuelve 200; R06 y R07 reales, 401; R09 aislado sin configuración
+del proveedor, 502. Este último no acredita una caída remota ni cuota agotada de Gemini.
+
+Todo lo nuevo se encuentra en
+[`cierre-integrado-2026-11-14/README.md`](cierre-integrado-2026-11-14/README.md), con
+capturas separadas de regresión **simulada** y casos HTTP **reales**, registros
+sanitizados, huellas de archivos probados y selección exacta del nuevo PR.
+`validar_cierre_local.py` reproduce ambas fases sin modificar `.env` ni Heroku.
+
+Las capturas y logs antiguos no se regeneraron. El apartado inferior y los prompts
+anteriores describen sus propias fechas; no representan pendientes actuales.
+
+## Histórico · 2026-11-13
+
+<details>
+<summary>Abrir índice y límites de las evidencias anteriores, conservados</summary>
 
 Entrega y matriz de casos: [`../../documento-Eduardo.md`](../../documento-Eduardo.md).
 
@@ -51,3 +72,5 @@ los dos registros originales en este cierre. Se incorporaron solo las capturas n
 y, sin esa variable, escribe las capturas en esta carpeta. Revisar resultados y fechas
 antes de archivar otra ejecución. Las rutas personales de los encabezados de pytest se sustituyeron
 por `<REPOSITORIO>`; no se alteraron resultados ni mensajes de prueba.
+
+</details>

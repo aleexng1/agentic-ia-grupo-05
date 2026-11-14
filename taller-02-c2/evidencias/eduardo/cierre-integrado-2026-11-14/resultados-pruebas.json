@@ -1,0 +1,32 @@
+{
+  "fecha": "2026-11-14T13:55:05-03:00",
+  "entorno": "LOCAL",
+  "commit_base": "741305bf0fed986b523898114bb1d851d28d063b",
+  "cambios_sin_commit": true,
+  "sha256_archivos_probados": {
+    "taller-02-c2/proyecto/src/comun/panel.html": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+    "taller-02-c2/evidencias/eduardo/test_panel_eduardo.py": "865212ceb1062ecb8d278ac62e14dd47705a2f5febac327dc8621c24850d47ed",
+    "taller-02-c2/evidencias/eduardo/validar_cierre_local.py": "ef1629fcabd3b3173cf6953ade7f45700804d17fcb022ff820746d2bffe34451"
+  },
+  "demo_taller_2_retirada": true,
+  "tipo": "automatizadas; proveedor y respuestas simulados",
+  "suites": [
+    {
+      "suite": "proyecto",
+      "codigo_salida": 0,
+      "resumen": "168 passed in 10.88s"
+    },
+    {
+      "suite": "frontend",
+      "codigo_salida": 0,
+      "resumen": "======================== 68 passed in 69.11s (0:01:09) ========================"
+    }
+  ],
+  "duracion_segundos": 94.12,
+  "finalizacion": "2026-11-14T13:56:39-03:00",
+  "archivos_conservados": {
+    "taller-02-c2/proyecto/.env": true,
+    "taller-01-c2/evidencias/eduardo/03-ficha-telefono.jpg": true,
+    "taller-01-c2/proyecto/src/agente_eduardo/demo.html": true
+  }
+}

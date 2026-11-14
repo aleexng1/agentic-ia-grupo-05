@@ -1,0 +1,58 @@
+{
+  "fecha": "2026-11-14T14:05:43-03:00",
+  "entorno": "LOCAL",
+  "commit_base": "741305bf0fed986b523898114bb1d851d28d063b",
+  "head_igual_a_origin_main": true,
+  "nuevos_commits_sobre_origin_main": 0,
+  "indice_vacio": true,
+  "git_diff_check_salida": 0,
+  "seleccion": {
+    "archivo": "archivos-para-pr.txt",
+    "rutas": 29,
+    "sin_duplicados": true,
+    "solo_zona_eduardo": true,
+    "archivos_omitidos_fuera_de_foto_taller_1": [],
+    "archivos_faltantes_fuera_de_demo_retirada": [],
+    "foto_y_env_excluidos": true,
+    "modificados_seguidos": 5,
+    "eliminaciones": [
+      "taller-02-c2/proyecto/src/agente_eduardo/demo.html"
+    ],
+    "nuevos_seleccionados": 23
+  },
+  "conservacion": {
+    "env_sha256_igual_al_inicio": true,
+    "foto_sha256_igual_al_inicio": true,
+    "foto_sigue_sin_seguimiento": true,
+    "taller_1_sin_cambios_seguidos": true,
+    "archivos_historicos_comprobados": 21,
+    "capturas_historicas_binarias_identicas": 14,
+    "historicos_con_cambios": [],
+    "texto_historico_documento_y_nota_alex_integros": true,
+    "prompts_anteriores_integros": true,
+    "archivos_probados_conservan_huellas": {
+      "resultados-pruebas.json": true,
+      "resultados-locales.json": true
+    }
+  },
+  "privacidad": {
+    "metodo": "Comparación en memoria con valores privados del entorno y dotenv, sus formas URL y patrón de claves Google; no se publican valores ni fragmentos.",
+    "archivos_con_valores_privados": [],
+    "archivos_con_patron_de_clave_google": [],
+    "capturas_nuevas_revisadas_visualmente_en_la_sesion": 12,
+    "limite": "La revisión visual y de texto no es una auditoría integral de seguridad."
+  },
+  "enlaces_locales_markdown_rotos": [],
+  "puertos_de_los_hijos_ya_cerrados": {
+    "servidor-integrado.txt": true,
+    "servidor-r09-aislado.txt": true
+  },
+  "heroku": "No se ejecutaron comandos de Heroku ni se cambió su configuración.",
+  "pendientes_reales": [
+    "R08, R10, R11 y R12 reales",
+    "Otros tres agentes con formato actual",
+    "Heroku/HTTPS",
+    "Revisión del PR y autorización posterior de commit/push"
+  ],
+  "revision_aprobada": true
+}

@@ -394,7 +394,7 @@
       if (estado === 408 || estado === 504) return "Se agotó el tiempo de espera del servidor. Puedes reintentar; la consulta anterior podría seguir procesándose.";
       if (estado === 429) return "El servicio alcanzó su límite de consultas. Espera un momento antes de reintentar.";
       if (estado === 502) return "No se pudo consultar al proveedor o al agente. Inténtalo más tarde; si persiste, avisa al equipo.";
-      if (estado === 503) return "El servidor no está configurado para recibir consultas (falta su clave de acceso). Avisa a quien lo administra.";
+      if (estado === 503) return "El servicio no está disponible temporalmente. Inténtalo más tarde; si persiste, avisa al equipo.";
       if (estado >= 500) return "El servidor no pudo completar la consulta. Inténtalo más tarde.";
       return `No se pudo completar la consulta (HTTP ${estado}). Si persiste, avisa al equipo.`;
     }
