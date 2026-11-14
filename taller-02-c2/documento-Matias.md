@@ -220,6 +220,18 @@ aparte, con otro puerto.
 | --- | --- | --- | --- | --- |
 | REMOTO (Heroku) · 2026-11-14 11:43 | `GET /salud` sin clave (las fichas se revisaron aparte con el mismo resultado) | `200` | `200` `{"ok":true}`; la ficha del coordinador y la de Alex también dieron `200` | La ficha del coordinador trae la URL pública real de Heroku. Evidencia: `08-remoto-heroku.txt` (8.1). |
 
+### Prueba 15 · Capturas del panel con acceso permitido (LOCAL)
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL (`http://127.0.0.1:8000/`) · 2026-11-14 12:47 | En el panel, con una clave de prueba local: «Arma un programa de 6 horas para una feria tecnológica con público de adultos, empezando a las 10:00» | La respuesta del Agente de Matias aparece en el chat | Siete actividades de 10:00 a 15:55 y «hay 5 minutos libres». Debajo se ve `Agente: Agente de Matias`. | Muestra también el catálogo ampliado (antes un evento así dejaba 140 minutos libres). La clave de acceso no se ve. Evidencia: `local-00-pantalla-de-ingreso.png` (clave oculta con puntos) y `local-01-respuesta-con-exito.png`. |
+
+### Prueba 16 · Captura del panel con clave incorrecta (LOCAL)
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL (`http://127.0.0.1:8000/`) · 2026-11-14 12:44 | En el panel, entrar con una clave que no es la del servidor (la de Heroku, que no sirve en el servidor local) y enviar una pregunta | El servidor rechaza con `401` y el panel lo dice con claridad | El panel vuelve a la pantalla de ingreso con «Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.» | La pantalla de ingreso acepta cualquier texto: la clave solo se comprueba en el servidor, al enviar la primera pregunta. Evidencia: `local-02-clave-incorrecta.png`. |
+
 ## 6. Evidencias
 
 Salidas de `curl` guardadas tal cual en `evidencias/matias/`, con la clave de acceso
@@ -233,6 +245,8 @@ enmascarada (`********`):
 - `06-sin-conexion.txt`
 - `07-registro-del-servidor.txt`
 - `08-remoto-heroku.txt` (pruebas 11 a 14, entorno REMOTO)
+- `local-00-pantalla-de-ingreso.png`, `local-01-respuesta-con-exito.png` y
+  `local-02-clave-incorrecta.png` (capturas del panel, pruebas 15 y 16, entorno LOCAL)
 
 Verifiqué que ninguna clave real, ni la de acceso ni la de Gemini, aparece en las
 evidencias, en los registros ni en el código.
