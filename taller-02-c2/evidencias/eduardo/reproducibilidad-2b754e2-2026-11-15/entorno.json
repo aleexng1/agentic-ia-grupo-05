@@ -1,0 +1,362 @@
+{
+  "fuente": {
+    "fecha": "2026-11-15T12:52:53-03:00",
+    "commit": "2b754e2e2bb8b035888f281ced1b3c36d6b1bab4",
+    "arbol": "6e863c914c436921c5bffdd0abc59199467cef09",
+    "rama": "c2t2/eduardo-frontend",
+    "git_inicial": "?? taller-01-c2/evidencias/eduardo/03-ficha-telefono.jpg",
+    "indice_inicial": "",
+    "remoto": "2b754e2e2bb8b035888f281ced1b3c36d6b1bab4\trefs/heads/c2t2/eduardo-frontend\n2b754e2e2bb8b035888f281ced1b3c36d6b1bab4\trefs/pull/82/head",
+    "python_base": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+    "archivos_protegidos": 422,
+    "archivos_venv_original": 9191,
+    "servidores_python_previos": [
+      {
+        "direccion": "127.0.0.1",
+        "puerto": 8000,
+        "pid": 3772,
+        "nombre": "python",
+        "inicio": "2026-11-13T13:42:33.3252507Z"
+      }
+    ],
+    "huellas_fuente": {
+      "requirements.txt": "5055fddcb96fb5af8c826e7936a2054d67db01307e697b89f0a0fe4297aa0740",
+      "requirements-dev.txt": "7e014337b07109f79e7b50d88961f6eba87f69a7ad6f7be22317489734f7ba34",
+      "app.py": "4a5667f5dc53e93dd57e8350bda1681bf20fc5e8008acfcda70b717b0ed15bb3",
+      "src/comun/panel.html": "643b529b4fe24d50ed37fe5ad567b05866ab0ab6bd23bebac7dd491a6042f3c6"
+    }
+  },
+  "instalacion": {
+    "fecha": "2026-11-15T12:53:46-03:00",
+    "pasos": [
+      {
+        "comando": "py -3.12 -m venv .venv",
+        "salida": 0,
+        "inicio": "2026-11-15T12:52:59-03:00",
+        "fin": "2026-11-15T12:53:06-03:00"
+      },
+      {
+        "comando": "<COPIA>/taller-02-c2/proyecto\\.venv\\Scripts\\python.exe -m pip list --format=json",
+        "salida": 0,
+        "inicio": "2026-11-15T12:53:06-03:00",
+        "fin": "2026-11-15T12:53:06-03:00"
+      },
+      {
+        "comando": "<COPIA>/taller-02-c2/proyecto\\.venv\\Scripts\\python.exe -m pip install --no-cache-dir --timeout 30 -r requirements.txt",
+        "salida": 0,
+        "inicio": "2026-11-15T12:53:06-03:00",
+        "fin": "2026-11-15T12:53:45-03:00"
+      },
+      {
+        "comando": "<COPIA>/taller-02-c2/proyecto\\.venv\\Scripts\\python.exe -m pip check",
+        "salida": 0,
+        "inicio": "2026-11-15T12:53:45-03:00",
+        "fin": "2026-11-15T12:53:46-03:00"
+      }
+    ],
+    "instalacion_salida": 0,
+    "pip_check_salida": 0,
+    "pyvenv_cfg": "home = <USUARIO>\\AppData\\Local\\Programs\\Python\\Python312\ninclude-system-site-packages = false\nversion = 3.12.10\nexecutable = <USUARIO>\\AppData\\Local\\Programs\\Python\\Python312\\python.exe\ncommand = <USUARIO>\\AppData\\Local\\Programs\\Python\\Python312\\python.exe -m venv <COPIA>/taller-02-c2/proyecto\\.venv\n",
+    "python": "Python 3.12.10"
+  },
+  "paquetes_iniciales": [
+    {
+      "name": "pip",
+      "version": "25.0.1"
+    }
+  ],
+  "paquetes_instalados": [
+    {
+      "name": "a2a-sdk",
+      "version": "1.3.0"
+    },
+    {
+      "name": "aiologic",
+      "version": "0.17.1"
+    },
+    {
+      "name": "annotated-doc",
+      "version": "0.0.6"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.8.0"
+    },
+    {
+      "name": "anyio",
+      "version": "4.16.0"
+    },
+    {
+      "name": "certifi",
+      "version": "2026.10.23"
+    },
+    {
+      "name": "cffi",
+      "version": "2.1.1"
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.5.2"
+    },
+    {
+      "name": "click",
+      "version": "8.5.1"
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6"
+    },
+    {
+      "name": "cryptography",
+      "version": "50.0.2"
+    },
+    {
+      "name": "culsans",
+      "version": "0.11.0"
+    },
+    {
+      "name": "distro",
+      "version": "1.9.0"
+    },
+    {
+      "name": "fastapi",
+      "version": "0.163.1"
+    },
+    {
+      "name": "filetype",
+      "version": "1.2.0"
+    },
+    {
+      "name": "google-api-core",
+      "version": "2.44.0"
+    },
+    {
+      "name": "google-auth",
+      "version": "2.62.2"
+    },
+    {
+      "name": "google-genai",
+      "version": "3.3.0"
+    },
+    {
+      "name": "googleapis-common-protos",
+      "version": "1.76.0"
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0"
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9"
+    },
+    {
+      "name": "httpcore2",
+      "version": "2.16.0"
+    },
+    {
+      "name": "httptools",
+      "version": "0.9.0"
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1"
+    },
+    {
+      "name": "httpx2",
+      "version": "2.16.0"
+    },
+    {
+      "name": "idna",
+      "version": "3.20"
+    },
+    {
+      "name": "iniconfig",
+      "version": "2.3.1"
+    },
+    {
+      "name": "json-rpc",
+      "version": "1.15.0"
+    },
+    {
+      "name": "jsonpatch",
+      "version": "1.47"
+    },
+    {
+      "name": "jsonpointer",
+      "version": "3.12"
+    },
+    {
+      "name": "langchain",
+      "version": "1.5.0"
+    },
+    {
+      "name": "langchain-core",
+      "version": "1.8.1"
+    },
+    {
+      "name": "langchain-google-genai",
+      "version": "4.5.0"
+    },
+    {
+      "name": "langchain-protocol",
+      "version": "0.0.21"
+    },
+    {
+      "name": "langgraph",
+      "version": "1.2.22"
+    },
+    {
+      "name": "langgraph-checkpoint",
+      "version": "4.3.2"
+    },
+    {
+      "name": "langgraph-prebuilt",
+      "version": "1.1.2"
+    },
+    {
+      "name": "langgraph-sdk",
+      "version": "0.4.14"
+    },
+    {
+      "name": "langsmith",
+      "version": "0.14.17"
+    },
+    {
+      "name": "opentelemetry-api",
+      "version": "1.45.2"
+    },
+    {
+      "name": "orjson",
+      "version": "3.13.0"
+    },
+    {
+      "name": "ormsgpack",
+      "version": "1.13.1"
+    },
+    {
+      "name": "packaging",
+      "version": "26.3"
+    },
+    {
+      "name": "pip",
+      "version": "25.0.1"
+    },
+    {
+      "name": "pluggy",
+      "version": "1.7.0"
+    },
+    {
+      "name": "proto-plus",
+      "version": "1.29.0"
+    },
+    {
+      "name": "protobuf",
+      "version": "7.36.2"
+    },
+    {
+      "name": "pyasn1",
+      "version": "0.6.5"
+    },
+    {
+      "name": "pyasn1_modules",
+      "version": "0.4.2"
+    },
+    {
+      "name": "pycparser",
+      "version": "3.12"
+    },
+    {
+      "name": "pydantic",
+      "version": "2.14.3"
+    },
+    {
+      "name": "pydantic_core",
+      "version": "2.50.4"
+    },
+    {
+      "name": "Pygments",
+      "version": "2.21.0"
+    },
+    {
+      "name": "pytest",
+      "version": "9.2.0"
+    },
+    {
+      "name": "python-dotenv",
+      "version": "1.2.4"
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2"
+    },
+    {
+      "name": "requests-toolbelt",
+      "version": "1.0.0"
+    },
+    {
+      "name": "sniffio",
+      "version": "1.3.1"
+    },
+    {
+      "name": "sse-starlette",
+      "version": "3.7.0"
+    },
+    {
+      "name": "starlette",
+      "version": "1.10.0"
+    },
+    {
+      "name": "tenacity",
+      "version": "9.1.4"
+    },
+    {
+      "name": "truststore",
+      "version": "0.10.5"
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0"
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.5"
+    },
+    {
+      "name": "urllib3",
+      "version": "2.8.0"
+    },
+    {
+      "name": "uuid_utils",
+      "version": "0.19.0"
+    },
+    {
+      "name": "uvicorn",
+      "version": "0.54.0"
+    },
+    {
+      "name": "watchfiles",
+      "version": "1.3.0"
+    },
+    {
+      "name": "websockets",
+      "version": "17.4"
+    },
+    {
+      "name": "wrapt",
+      "version": "2.5.2"
+    },
+    {
+      "name": "xxhash",
+      "version": "4.1.0"
+    },
+    {
+      "name": "zstandard",
+      "version": "0.25.0"
+    }
+  ]
+}

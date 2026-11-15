@@ -1,0 +1,37 @@
+LOCAL · http://127.0.0.1:52009 · PID propio 38236
+FALLA INDUCIDA EN ENTORNO CONTROLADO · lento · sin Gemini ni Heroku
+Registro sanitizado en memoria; no se guardan cabeceras.
+
+INFO:     Started server process [34472]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:52009 (Press CTRL+C to quit)
+INFO:     127.0.0.1:52010 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52013 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52013 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+ENSAYO lento: solicitud 1 recibida; sin proveedor
+ENSAYO lento: solicitud 2 recibida; sin proveedor
+ENSAYO lento: respuesta generada tras 0.000 s reales
+INFO:     127.0.0.1:56494 - "POST /panel/consultar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK
+ENSAYO lento: respuesta generada tras 70.009 s reales
+INFO:     127.0.0.1:56495 - "GET /estado-ensayo HTTP/1.1" 200 OK

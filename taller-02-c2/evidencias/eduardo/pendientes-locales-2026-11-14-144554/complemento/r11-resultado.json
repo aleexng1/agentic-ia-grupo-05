@@ -1,0 +1,52 @@
+{
+  "caso": "R11",
+  "fecha": "2026-11-14T15:00:07-03:00",
+  "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+  "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+  "pregunta": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+  "retardo_configurado_segundos": 70,
+  "reloj_virtual": false,
+  "esperado": "Timeout tras más de 65 s REALES; recuperar controles y no recibir la respuesta vieja en la conversación nueva.",
+  "captura_espera": "r11-espera-real-inducida.png",
+  "inicio_espera": "2026-11-14T15:00:08.477-03:00",
+  "fin_espera": "2026-11-14T15:01:13.959-03:00",
+  "espera_real_hasta_aviso_segundos": 65.47177,
+  "aviso": "La consulta superó los 65 segundos de espera. Puedes reintentar; la consulta anterior podría seguir procesándose.",
+  "pregunta_conservada": true,
+  "controles_recuperados": true,
+  "captura_timeout": "r11-timeout-real-inducido.png",
+  "eventos_servidor": [
+    {
+      "fecha": "2026-11-14T15:00:08-03:00",
+      "context_id": "a5974f2b-37dc-47fc-a3eb-2f267b2ba0e2",
+      "texto": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+      "finalizado": true,
+      "duracion_real_segundos": 70.009151,
+      "finalizacion": "2026-11-14T15:01:18-03:00",
+      "respuesta_generada": "RESPUESTA_TARDIA_R11_ENSAYO"
+    },
+    {
+      "fecha": "2026-11-14T15:01:14-03:00",
+      "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+      "texto": "Consulta inmediata de ensayo en la conversación NUEVA de R11.",
+      "finalizado": true,
+      "duracion_real_segundos": 2.8e-05,
+      "finalizacion": "2026-11-14T15:01:14-03:00",
+      "respuesta_generada": "Respuesta de ensayo para la conversación nueva; sin proveedor."
+    }
+  ],
+  "nueva_conversacion": {
+    "http": 200,
+    "cuerpo": {
+      "respuesta": "Respuesta de ensayo para la conversación nueva; sin proveedor.",
+      "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+      "agente": "Servidor de ensayo aislado",
+      "motivo": "Condición inducida; no usa Gemini ni Heroku."
+    }
+  },
+  "contexto_nuevo": true,
+  "respuesta_vieja_ausente": true,
+  "observacion": "El navegador abortó la petición a los 65 s. El ensayo generó la respuesta vieja a los 70 s, pero no llegó a la conversación nueva; no se forzó a fetch a ignorar AbortSignal.",
+  "captura_nueva": "r11-nueva-sin-respuesta-vieja.png",
+  "aprobado": true
+}

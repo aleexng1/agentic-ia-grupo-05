@@ -1,4 +1,69 @@
-# Evidencias de Eduardo · LOCAL · 2026-11-13
+# Evidencias de Eduardo · LOCAL
+
+## Vigente · 2026-11-15 · reproducibilidad de 2b754e2
+
+**`2b754e2e2bb8b035888f281ced1b3c36d6b1bab4` publicado**, tanto en
+`c2t2/eduardo-frontend` como en `refs/pull/82/head`. Las evidencias de la continuación
+del 14-11-2026 **ya están publicadas dentro del PR #82, fusionado en `main`** mediante
+**`71df3e80adea7ec675db73eefe884cb82eeffc9a`**. La rama local incorporó `origin/main`
+mediante `git fetch origin` y `git merge --ff-only origin/main`, conservando las 12 rutas.
+**`2b754e2` sigue siendo la versión utilizada en la instalación limpia**, no el commit
+de fusión; no se cambiaron las fechas ni los resultados de las pruebas.
+
+Comprobación nueva en una copia temporal de ese commit, Python **3.12.10** y `.venv`
+nueva, sin paquetes del entorno actual: instalación **0**, `pip check` **0**, arranque
+correcto en **58569**, panel/salud **200**, rechazos **401/401** y vacío/espacios
+autorizados **400/400**. No se detectaron dependencias faltantes para este alcance.
+**Sin Gemini, suites completas, navegador ni Heroku.** El panel se comprobó por HTTP,
+incluida la igualdad de su HTML con el commit, no mediante una regresión visual nueva.
+
+[`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md):
+comandos, versiones, resultados primarios y conservación. La tabla para la futura
+validación **REMOTA**, toda pendiente y con versión desplegada por confirmar, está en
+[`documento-Eduardo.md`](../../documento-Eduardo.md#validación-remota-futura--todavía-no-ejecutada).
+Solo las 12 rutas del manifiesto de este cierre quedan preparadas en el índice,
+sin commit ni push. No cambió código de producción ni se repitieron pruebas.
+
+## Pendientes locales completados · 2026-11-14 · publicados en 2b754e2
+
+Base probada **`d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91`**; publicación posterior
+en **`2b754e2`, PR #82 ya fusionado**. No se cambia la fecha ni la base de aquellas comprobaciones.
+Carpeta: [`pendientes-locales-2026-11-14-144554/`](pendientes-locales-2026-11-14-144554/README.md).
+Contiene R08 (400/422 con autorización válida), R10 (desconexión y restauración del
+servidor propio), R11 (65,472 s reales hasta el aviso; demora de 70,009 s) y R12 (200 HTML).
+**R11/R12 son fallas inducidas en un entorno controlado, no fallas reales de Gemini ni
+Heroku.** Incluye también una consulta real por agente de Matías, Alex y Sebastián, con
+el panel actual: pregunta, respuesta íntegra, agente, motivo, capturas y registro A2A.
+
+Se conservan los intentos instrumentales incompletos/no aprobados, separados de los
+resultados finales. Las tres consultas reales no se repitieron. `.env`, todas las capturas
+históricas, foto y demo del Taller 1 y servidor previo del puerto 8000 se conservaron.
+La selección exacta de aquella continuación publicada está en
+[`archivos-modificados.txt`](pendientes-locales-2026-11-14-144554/archivos-modificados.txt).
+
+## Cierre integrado anterior · 2026-11-14 · publicado en d8cce13
+
+Base probada `741305bf0fed986b523898114bb1d851d28d063b` más ajustes publicados
+posteriormente en `d8cce13`, PR #82; no es trabajo todavía pendiente de commit/push.
+**168 pruebas del proyecto y 68 del frontend aprobadas, sin `xfail`.** R05 real con
+coordinador/A2A/Gemini devuelve 200; R06 y R07 reales, 401; R09 aislado sin configuración
+del proveedor, 502. Este último no acredita una caída remota ni cuota agotada de Gemini.
+
+Las evidencias de aquel cierre se encuentran en
+[`cierre-integrado-2026-11-14/README.md`](cierre-integrado-2026-11-14/README.md), con
+capturas separadas de regresión **simulada** y casos HTTP **reales**, registros
+sanitizados, huellas de archivos probados y selección histórica del PR #82.
+`validar_cierre_local.py` reproduce ambas fases sin modificar `.env` ni Heroku.
+
+Las capturas y logs antiguos no se regeneraron. Los documentos de aquella ejecución
+conservan su corte temporal anterior a la publicación; el estado vigente está arriba.
+El apartado inferior y los prompts
+anteriores describen sus propias fechas; no representan pendientes actuales.
+
+## Histórico · 2026-11-13
+
+<details>
+<summary>Abrir índice y límites de las evidencias anteriores, conservados</summary>
 
 Entrega y matriz de casos: [`../../documento-Eduardo.md`](../../documento-Eduardo.md).
 
@@ -51,3 +116,5 @@ los dos registros originales en este cierre. Se incorporaron solo las capturas n
 y, sin esa variable, escribe las capturas en esta carpeta. Revisar resultados y fechas
 antes de archivar otra ejecución. Las rutas personales de los encabezados de pytest se sustituyeron
 por `<REPOSITORIO>`; no se alteraron resultados ni mensajes de prueba.
+
+</details>

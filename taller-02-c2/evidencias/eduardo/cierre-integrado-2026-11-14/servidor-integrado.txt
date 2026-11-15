@@ -1,0 +1,28 @@
+LOCAL · 2026-11-14T13:55:42-03:00 · proceso integrado · http://127.0.0.1:54792
+App real app:app, sin dobles. Configuración solo en el entorno del hijo.
+Registro sanitizado antes de escribir; salida UTF-8.
+
+INFO:     Started server process [4372]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:54792 (Press CTRL+C to quit)
+INFO:     127.0.0.1:52997 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52998 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:52998 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+2026-11-14 13:55:31 WARNING [coordinador] acceso rechazado · POST /panel/consultar · sin clave
+INFO:     127.0.0.1:64530 - "POST /panel/consultar HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52998 - "GET / HTTP/1.1" 200 OK
+2026-11-14 13:55:32 WARNING [coordinador] acceso rechazado · POST /panel/consultar · clave incorrecta
+INFO:     127.0.0.1:64531 - "POST /panel/consultar HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:52998 - "GET / HTTP/1.1" 200 OK
+2026-11-14 13:55:32 INFO    [coordinador] pregunta recibida · context_id=db682b8d-ee3a-4e58-a43b-84caea9f7389 · «¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4…»
+INFO:     127.0.0.1:64532 - "GET /agentes/matias/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64532 - "GET /agentes/alex/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64532 - "GET /agentes/eduardo/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64532 - "GET /agentes/sebastian/.well-known/agent-card.json HTTP/1.1" 200 OK
+2026-11-14 13:55:33 INFO    [coordinador] catálogo listo · 4 agente(s): Agente de Matias, Agente de Alex, Agente de Eduardo, Agente de Sebastian
+2026-11-14 13:55:36 INFO    [coordinador] supervisor eligió Agente de Eduardo · motivo: El usuario solicita estimar un presupuesto simulado para un evento.
+2026-11-14 13:55:36 INFO    [coordinador] A2A → http://127.0.0.1:54792/agentes/eduardo · enviando
+INFO:     127.0.0.1:64532 - "POST /agentes/eduardo HTTP/1.1" 200 OK
+2026-11-14 13:55:41 INFO    [coordinador] A2A ← Agente de Eduardo · respuesta recibida en 5,1 s
+INFO:     127.0.0.1:64531 - "POST /panel/consultar HTTP/1.1" 200 OK

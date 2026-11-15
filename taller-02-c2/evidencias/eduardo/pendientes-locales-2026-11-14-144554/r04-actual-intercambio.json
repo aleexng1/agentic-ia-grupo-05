@@ -1,0 +1,18 @@
+{
+  "caso": "R04-actual",
+  "fecha": "2026-11-14T14:51:13-03:00",
+  "entorno": "LOCAL app:app integrada; panel actual",
+  "persona": "Sebastián",
+  "pregunta": "Necesito catering para una feria tecnológica de 80 personas, de 10:00 a 14:00 (4 horas), con 10 vegetarianas y 5 sin gluten. Indica servicios, horarios, dietas y litros de agua; datos simulados, sin contratar nada.",
+  "esperado": "200, contrato de cuatro campos, Agente de Sebastian, motivo y respuesta íntegra visibles.",
+  "procedencia": "Consulta real al coordinador, A2A y Gemini; no hay dobles ni interceptación HTTP.",
+  "reintentos_del_ejecutor": 0,
+  "http": 200,
+  "cuerpo": {
+    "respuesta": "Propuesta de catering para la feria tecnológica (datos ficticios, sin contratación ni precios):\n\n- **11:00 - Coffee break**\n  - **Bebidas:** 88 tazas de Café o té.\n  - **Menú general (65 personas):** 143 unidades de Sándwich de miga, 143 unidades de Queque o galletas, 72 vasos de Fruta picada.\n  - **Dietas especiales:**\n    - Vegetariano (10 personas): 22 unidades de Sándwich de miga de queso y tomate, 11 vasos de Fruta picada.\n    - Sin gluten (5 personas): 11 unidades de Sándwich en pan sin gluten, 11 unidades de Galletas de avena sin gluten.\n\n- **13:30 - Box lunch**\n  - **Bebidas:** 88 unidades de Jugo o bebida.\n  - **Menú general (65 personas):** 72 unidades de Sándwich gourmet, 72 unidades de Ensalada individual, 72 unidades de Postre individual.\n  - **Dietas especiales:**\n    - Vegetariano (10 personas): 11 unidades de Sándwich de verduras grilladas y queso.\n    - Sin gluten (5 personas): 6 unidades de Ensalada completa con pollo y quínoa, 6 unidades de Postre sin gluten.\n\n**Agua total:** 88 litros (0,5 L por persona por cada 2 horas de evento, con 10 % de margen).\n\n*Notas:*\n- Las cantidades incluyen un 10 % de margen y están redondeadas hacia arriba.\n- Es una propuesta orientativa y no incluye precios ni reservas de proveedores.\n- Esta propuesta no garantiza seguridad para alergias graves; eso debe confirmarlo directamente una persona con el proveedor.",
+    "context_id": "c0a7867b-6243-4fc4-8b20-ecb293d9d24e",
+    "agente": "Agente de Sebastian",
+    "motivo": "El usuario solicita propuestas de comida, horarios, dietas especiales y cantidades de agua para un evento."
+  },
+  "duracion_real_segundos": 6.164
+}

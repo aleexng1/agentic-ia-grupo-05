@@ -1,0 +1,18 @@
+{
+  "caso": "R01-actual",
+  "fecha": "2026-11-14T14:50:56-03:00",
+  "entorno": "LOCAL app:app integrada; panel actual",
+  "persona": "Matías",
+  "pregunta": "Necesito un programa para una feria cultural familiar de 3 horas, desde las 16:00. Indica actividades, horarios y cualquier tiempo libre, con las condiciones de demostración.",
+  "esperado": "200, contrato de cuatro campos, Agente de Matias, motivo y respuesta íntegra visibles.",
+  "procedencia": "Consulta real al coordinador, A2A y Gemini; no hay dobles ni interceptación HTTP.",
+  "reintentos_del_ejecutor": 0,
+  "http": 200,
+  "cuerpo": {
+    "respuesta": "Aquí tienes una propuesta de programa cultural familiar para 3 horas a partir de las 16:00:\n\n- **16:00 - 17:00**: Visita guiada al patrimonio del barrio (Recorrido a pie de unos 40 minutos con historia local.)\n- **17:00 - 17:30**: Presentación de danza folclórica (Un espectáculo corto en el escenario principal.)\n- **17:30 - 18:00**: Ronda de cuentacuentos (Historias para escuchar en grupo, sentados en el suelo.)\n\nEl programa no ocupa toda la duración pedida; quedan 60 minutos libres. Recuerda que esto es solo una propuesta.",
+    "context_id": "86ed9764-50f2-445a-a0a8-caa93e3ea031",
+    "agente": "Agente de Matias",
+    "motivo": "El usuario solicita un programa detallado de actividades y horarios para una feria cultural."
+  },
+  "duracion_real_segundos": 7.824
+}

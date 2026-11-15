@@ -152,3 +152,131 @@ En esta continuación se localizaron y revisaron las seis capturas originales, s
 modificarlas. Se corrigieron los enlaces y se documentaron los límites de recuperación
 del registro real. No se cambió código ni se repitieron pruebas o consultas al proveedor.
 La autorización integrada y los dos `xfail` siguen pendientes.
+
+## Cierre integrado real · solicitud del 14-11-2026
+
+El texto anterior es histórico. La solicitud siguiente reemplaza aquellos pendientes
+como objetivo activo; no se inventaron instrucciones ni se incorporaron credenciales:
+
+```text
+Continúa el cierre de mi aporte en c2t2/eduardo-frontend.
+
+Lee README.md y AGENTS.md. Comprueba el estado de Git y conserva
+cualquier cambio local y la foto del Taller 1. Ejecuta git fetch origin
+e incorpora origin/main con git merge --ff-only origin/main.
+Si no puede avanzar así, informa la causa sin descartar trabajo.
+
+Revisa los cambios integrados de Alex. Corrige únicamente el mensaje
+genérico del 503: cuando no exista un detail JSON válido debe indicar
+indisponibilidad temporal, sin afirmar que falta CLAVE_API. Conserva
+el detail válido como texto seguro. Ajusta la prueba de 503 con HTML
+y conserva la comprobación del 503 JSON del backend.
+
+Ejecuta las pruebas del proyecto y del frontend. Configura
+CARPETA_CAPTURAS en una carpeta nueva para conservar las evidencias
+anteriores. Registra los resultados reales, sin asumir conteos.
+
+Ejecuta R05, R06, R07 y R09 contra la app LOCAL integrada, con capturas
+y registros sanitizados. Para R09 usa un proceso aislado con configuración
+temporal; conserva intacto mi .env y no modifiques Heroku.
+No muestres claves en comandos, salidas, capturas ni documentos.
+
+Actualiza documento-Eduardo.md con el estado vigente, commit probado,
+fecha, resultados y pendientes reales. Conserva las pruebas antiguas
+como históricas y diferencia simulaciones de llamadas reales.
+
+Comprueba las referencias funcionales de src/agente_eduardo/demo.html.
+Si está sin uso, retira solo esa copia del Taller 2 y documenta la decisión.
+
+Limita los cambios a mi zona. No hagas commit ni push todavía.
+Entrega el resumen y la selección exacta de archivos para el nuevo PR.
+```
+
+También se volvió a proporcionar `proyecto/AGENTS.md`; sus reglas no se cambiaron.
+Resultados medidos, capturas y límites de cada caso:
+[`cierre-integrado-2026-11-14/README.md`](cierre-integrado-2026-11-14/README.md).
+Se hizo una sola consulta funcional real R05, sin reintentos; R06/R07 son rechazos
+reales y R09 es un error real de configuración en otro proceso. No se modificaron
+prompts de agentes ni archivos de otras personas. Sin commit ni push.
+
+## Continuación real · pendientes locales y PR #82 · 14-11-2026
+
+Solicitud recibida, sin credenciales:
+
+```text
+Continúa en c2t2/eduardo-frontend. El commit d8cce13 ya está publicado y el PR #82 está abierto.
+
+Lee las instrucciones aplicables y taller-02-c2/documento-Eduardo.md. Revisa el estado de Git y conserva cualquier cambio existente.
+
+Completa los pendientes locales documentados:
+- R08: con autorización válida, comprobar 400 para texto de espacios y 422 cuando falta texto.
+- R10: comprobar el mensaje de desconexión deteniendo únicamente el servidor LOCAL de ensayo; restaurarlo después.
+- R11: comprobar el timeout con más de 65 segundos reales de espera en un entorno aislado.
+- R12: comprobar una respuesta HTML mediante un servidor de ensayo.
+
+Clasifica R11 y R12 como fallas inducidas en un entorno controlado, sin presentarlas como fallas reales de Gemini o Heroku.
+
+Realiza una consulta real a los agentes de Matías, Alex y Sebastián con el panel actual. Guarda pregunta, respuesta, agente, motivo y capturas sin secretos.
+
+Usa una carpeta nueva para las evidencias. Actualiza mi documento con entorno, fecha, solicitud, resultado esperado, obtenido y observaciones. Corrige también la nota vigente que todavía deja commit/push pendientes: ahora existe el PR #82.
+
+Trabaja solo en mi zona. Conserva .env, capturas históricas y la foto del Taller 1. No modifiques Heroku ni muestres credenciales.
+
+Si no cambia código, no repitas las suites completas ya aprobadas. Si detectas un defecto y lo corriges, ejecuta las pruebas pertinentes. No hagas commit ni push todavía; entrega el resultado y la lista exacta de archivos modificados.
+```
+
+También se proporcionaron otra vez las reglas de `proyecto/AGENTS.md`; se conservaron.
+Se verificó `d8cce13` en la rama remota. No se modificó el código de producción ni se
+repitieron suites completas. Se hicieron una sola consulta funcional a cada uno de los
+tres agentes y comprobaciones dirigidas de R08/R10/R11/R12. R11/R12 son condiciones
+inducidas sin proveedor; no se presentan como fallas remotas. Las incidencias del
+instrumental se conservaron y se completaron sin repetir las consultas reales.
+
+Resultados, procedencia y capturas:
+[`pendientes-locales-2026-11-14-144554/README.md`](pendientes-locales-2026-11-14-144554/README.md).
+Esta continuación queda sin `git add`, commit ni push; **el PR #82 anterior ya está abierto**.
+
+**Nota de publicación · 15-11-2026:** el párrafo anterior conserva el cierre de aquella
+ejecución. Sus evidencias se publicaron después en **`2b754e2`, dentro del PR #82**;
+la mención histórica a «sin commit/push» no es un pendiente vigente.
+
+## Comprobación de reproducibilidad · solicitud del 15-11-2026
+
+Solicitud real recibida, sin credenciales:
+
+```text
+Comprueba la reproducibilidad de mi entrega y corrige su estado documental.
+
+Lee las instrucciones aplicables y revisa Git. Conserva mi instalación, .env, servidores existentes y archivos ajenos.
+
+1. Usa una copia temporal del commit publicado 2b754e2 y un entorno virtual nuevo con Python 3.12. Sigue la instalación del README sin reutilizar paquetes de mi .venv actual. Registra versiones, comandos y resultados.
+
+2. Comprueba instalación de dependencias, pip check, arranque, panel y /salud. Usa un puerto libre y configura coherentemente el puerto interno de la app. Comprueba rechazo sin clave y con clave incorrecta, y entrada vacía con autorización válida. Usa una clave temporal privada. No consultes Gemini en esta comprobación.
+
+3. Si falta una dependencia o instrucción, documenta el problema y su responsable; no modifiques archivos ajenos ni amplíes el alcance.
+
+4. Corrige en mis documentos las referencias vigentes a “sin commit/push”: las evidencias ya se publicaron en 2b754e2 dentro del PR #82. Conserva las bases probadas, fechas, resultados y registros históricos.
+
+5. Prepara una tabla breve para la futura validación REMOTA, con resultados todavía pendientes y versión desplegada por confirmar.
+
+Guarda únicamente evidencias útiles en mi zona. No repitas las suites completas por rutina, no modifiques Heroku y no hagas commit ni push. Entrega hallazgos, alcance realmente comprobado y lista exacta de cambios.
+```
+
+Se leyeron README y `proyecto/AGENTS.md`. Git confirmó el commit en `HEAD`, rama remota
+y cabecera del PR #82. Se usaron `git archive`, Python 3.12.10 y una `.venv` nueva fuera
+del repositorio, inicialmente solo con pip 25.0.1. Instalación y `pip check`: salida 0;
+arranque correcto, panel/salud 200, rechazos 401/401 y vacío/espacios autorizados 400/400.
+No se detectó dependencia faltante para estas comprobaciones. No hubo preguntas al
+proveedor, suites completas ni pruebas remotas. No se modificaron producción, `.env`,
+instalación existente ni archivos ajenos. Las referencias vigentes se corrigieron sin
+reescribir los registros históricos; se añadió una tabla REMOTA enteramente pendiente.
+
+Comandos, versiones, resultados y alcance:
+[`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md).
+
+**Estado vigente de preparación:** el PR #82 está **fusionado en `main`** mediante
+`71df3e8`. Se ejecutaron `git fetch origin` y `git merge --ff-only origin/main` en
+`c2t2/eduardo-frontend`, conservando las 12 rutas, ahora preparadas en el índice.
+La instalación limpia sigue referida a **`2b754e2`**, con sus fechas y resultados
+originales. No se repitieron pruebas, se modificó código ni se hizo commit/push.
+La validación REMOTA permanece pendiente, con versión desplegada por confirmar.
