@@ -1,8 +1,9 @@
 # Pendientes locales de Eduardo · 14-11-2026
 
 **Base publicada:** `d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91`, rama
-`c2t2/eduardo-frontend`, **PR #82 abierto**. Esta nueva continuación no tiene commit/push
-ni staging. Solo cambian documentación y evidencias de Eduardo, no producción.
+`c2t2/eduardo-frontend`. Esta continuación se publicó en el commit `2b754e2` y el
+**PR #82 se unió a `main`** el 2026-11-15. Solo cambian documentación y evidencias de
+Eduardo, no producción.
 
 **Entorno:** Windows; Python 3.12.10; Playwright 1.65.1; httpx 0.28.1;
 Chrome 157.0.8103.78 sin ventana, vista de 1280 × 960. `.venv` reutilizada, sin instalar

@@ -3,8 +3,8 @@
 ## Vigente · 2026-11-14 · pendientes locales y PR #82
 
 Base **`d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91` publicada** en
-`c2t2/eduardo-frontend`; **PR #82 abierto**. La continuación actual queda sin commit,
-push ni staging. No cambió código de producción ni se repitieron las suites completas.
+`c2t2/eduardo-frontend`; la continuación se publicó en `2b754e2` y el **PR #82 se unió a
+`main`** el 2026-11-15. No cambió código de producción ni se repitieron las suites completas.
 
 Carpeta nueva: [`pendientes-locales-2026-11-14-144554/`](pendientes-locales-2026-11-14-144554/README.md).
 Contiene R08 (400/422 con autorización válida), R10 (desconexión y restauración del

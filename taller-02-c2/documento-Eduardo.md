@@ -1,16 +1,15 @@
 # Eduardo Basaure · Frontend · Taller 2 del Curso 2 · Grupo 5
 
 **Estado vigente: LOCAL · 2026-11-14 · Rama `c2t2/eduardo-frontend` ·
-commit publicado `d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91` ·
-[PR #82 abierto](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82).**
+publicado en los commits `d8cce13` y `2b754e2` · [PR #82](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82) unido a `main` el 2026-11-15.**
 
 ## 1. Continuación vigente: pendientes locales completados
 
 Se comprobó la rama, `HEAD`, el índice y el estado de trabajo antes de editar.
 `git ls-remote origin refs/heads/c2t2/eduardo-frontend` confirmó **`d8cce13` publicado**.
 El PR #82 ya existe, según la actualización de Eduardo: **no está pendiente abrirlo
-ni hacer commit/push del cierre integrado anterior**. Esta continuación queda local,
-sin `git add`, commit ni push y sin modificar el PR.
+ni hacer commit/push del cierre integrado anterior**. Esta continuación se publicó
+después en el commit `2b754e2` del mismo PR, que se unió a `main` el 2026-11-15.
 
 **Resultado:** R08 y R10 aprobados con la app LOCAL real; R11 y R12 aprobados como
 **fallas inducidas en un entorno controlado**, sin proveedor y sin Heroku. Además se
@@ -125,9 +124,8 @@ y **no se repitió** en esta continuación.
 
 ## 5. Publicación y pendientes que sí permanecen
 
-- El **PR #82 está abierto con `d8cce13` publicado**. Pendiente: revisión humana de Alex
-  y autorización de Eduardo para publicar **esta nueva continuación**, no para crear
-  otra vez el PR ni publicar el commit anterior. Aquí no se hizo commit, push ni staging.
+- El **PR #82 se unió a `main` el 2026-11-15**, después de la revisión de Alex, con el
+  cierre integrado (`d8cce13`) y esta continuación (`2b754e2`).
 - R08/R10/R11/R12 y las tres consultas con formato actual **ya no están pendientes**.
   R11/R12 solo acreditan manejo del frontend ante fallas **inducidas y controladas**.
 - Heroku/HTTPS, su router y el despliegue público siguen fuera del alcance de esta

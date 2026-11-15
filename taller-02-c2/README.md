@@ -105,7 +105,7 @@ Todas las variables van en `proyecto/.env`, que nunca se sube al repositorio
 | `GOOGLE_API_KEY` | Clave propia de Gemini (Google AI Studio). Sin ella los agentes no pueden responder. |
 | `MODELO` | Modelo de Gemini que usan el coordinador y los agentes (por defecto `gemini-3.5-flash-lite`). |
 | `PUERTO` | Puerto local de la app (por defecto `8000`). Debe ser el mismo del `--port` de uvicorn; en Heroku manda `PORT`. |
-| `URL_BASE` | Dirección pública de la app, sin barra final. Las fichas se publican como `URL_BASE/agentes/{nombre}`. En local, `http://127.0.0.1:8000`. |
+| `URL_BASE` | Dirección pública de la app, sin barra final. Las fichas se publican como `URL_BASE/agentes/{nombre}`. En local, `http://127.0.0.1:8000`. En Heroku debe coincidir **exactamente** con el hostname real de la app, que en las apps nuevas lleva un sufijo: es `https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com`, no `https://grupo05-taller2-seba.herokuapp.com`. Se ve en «Web URL» de `heroku apps:info`. |
 | `CLAVE_API` | **Obligatoria.** Clave de acceso a la API: toda consulta debe enviarla en la cabecera `X-API-Key`. Si está vacía, el servidor avisa al arrancar y rechaza todas las consultas con 503. Distinta de `GOOGLE_API_KEY`; cómo elegirla, en la sección Seguridad. |
 | `URLS_AGENTES` | Vacía = el coordinador usa los cuatro agentes de esta misma app. Con direcciones separadas por comas = modo distribuido (un agente por computador, como en el taller anterior). |
 
@@ -241,6 +241,13 @@ Pégala en `CLAVE_API=` del `.env` (local) o en las Config Vars de Heroku. No la
 el código, en capturas ni en el chat del grupo. Para cambiarla, cambia el valor y reinicia
 la app: la anterior deja de servir.
 
+**Rotarla antes de entregar.** La clave usada durante las pruebas circuló entre el grupo,
+así que antes de la entrega se genera una nueva, se carga en Heroku
+(`heroku config:set CLAVE_API=<la nueva> -a grupo05-taller2-seba`, que reinicia la app) y
+se entrega a quien evalúa **por una vía privada**. Debe hacerse antes y no después de
+entregar: al rotarla, la clave anterior deja de servir y la persona evaluadora perdería el
+acceso.
+
 ### Qué se protege
 
 | Ruta | Acceso |
@@ -277,6 +284,12 @@ de Python ni claves. Un error nunca se presenta como una respuesta exitosa.
 | 401 | Falta la clave o es incorrecta. | `Falta la clave de acceso. Envíala en la cabecera X-API-Key.` / `La clave de acceso es incorrecta.` |
 | 502 | Falló Gemini, la conexión o un agente. | `No se pudo consultar al agente: La clave de Gemini (GOOGLE_API_KEY) no es válida. Revísala en el .env o en las Config Vars de Heroku.` |
 | 503 | El servidor no tiene `CLAVE_API`. | `El servidor no tiene configurada la clave de acceso (CLAVE_API), así que no acepta consultas. Avisa a quien lo administra.` |
+
+Un **503 en HTML** no lo genera esta app: lo responde el router de Heroku cuando la app está
+dormida o caída, o cuando una consulta pasa de 30 segundos. Como no trae el `detail` de
+arriba, el panel no puede saber que la causa sea `CLAVE_API` y muestra un aviso genérico:
+«El servicio no está disponible temporalmente. Inténtalo más tarde; si persiste, avisa al
+equipo.» El 503 de esta app siempre trae su `detail` y el panel lo muestra tal cual.
 
 Las fallas del proveedor que se reconocen con un mensaje propio son: clave de Gemini
 inválida o ausente, sin cuota o créditos, sin permiso, modelo inexistente, tiempo de espera

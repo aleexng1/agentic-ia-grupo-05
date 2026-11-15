@@ -68,4 +68,5 @@ sin los errores históricos de codificación.
   pendientes R08/R10/R11/R12, otros agentes con formato actual y despliegue público.
 
 Las pruebas del 13-11-2026 se mantienen como históricas en la carpeta superior y en el
-documento, no como estado actual. **Sin `git add`, commit ni push en este cierre.**
+documento, no como estado actual. Este cierre se publicó después en el commit `d8cce13`
+(PR #82, unido a `main` el 2026-11-15).
