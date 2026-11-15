@@ -198,3 +198,40 @@ Resultados medidos, capturas y límites de cada caso:
 Se hizo una sola consulta funcional real R05, sin reintentos; R06/R07 son rechazos
 reales y R09 es un error real de configuración en otro proceso. No se modificaron
 prompts de agentes ni archivos de otras personas. Sin commit ni push.
+
+## Continuación real · pendientes locales y PR #82 · 14-11-2026
+
+Solicitud recibida, sin credenciales:
+
+```text
+Continúa en c2t2/eduardo-frontend. El commit d8cce13 ya está publicado y el PR #82 está abierto.
+
+Lee las instrucciones aplicables y taller-02-c2/documento-Eduardo.md. Revisa el estado de Git y conserva cualquier cambio existente.
+
+Completa los pendientes locales documentados:
+- R08: con autorización válida, comprobar 400 para texto de espacios y 422 cuando falta texto.
+- R10: comprobar el mensaje de desconexión deteniendo únicamente el servidor LOCAL de ensayo; restaurarlo después.
+- R11: comprobar el timeout con más de 65 segundos reales de espera en un entorno aislado.
+- R12: comprobar una respuesta HTML mediante un servidor de ensayo.
+
+Clasifica R11 y R12 como fallas inducidas en un entorno controlado, sin presentarlas como fallas reales de Gemini o Heroku.
+
+Realiza una consulta real a los agentes de Matías, Alex y Sebastián con el panel actual. Guarda pregunta, respuesta, agente, motivo y capturas sin secretos.
+
+Usa una carpeta nueva para las evidencias. Actualiza mi documento con entorno, fecha, solicitud, resultado esperado, obtenido y observaciones. Corrige también la nota vigente que todavía deja commit/push pendientes: ahora existe el PR #82.
+
+Trabaja solo en mi zona. Conserva .env, capturas históricas y la foto del Taller 1. No modifiques Heroku ni muestres credenciales.
+
+Si no cambia código, no repitas las suites completas ya aprobadas. Si detectas un defecto y lo corriges, ejecuta las pruebas pertinentes. No hagas commit ni push todavía; entrega el resultado y la lista exacta de archivos modificados.
+```
+
+También se proporcionaron otra vez las reglas de `proyecto/AGENTS.md`; se conservaron.
+Se verificó `d8cce13` en la rama remota. No se modificó el código de producción ni se
+repitieron suites completas. Se hicieron una sola consulta funcional a cada uno de los
+tres agentes y comprobaciones dirigidas de R08/R10/R11/R12. R11/R12 son condiciones
+inducidas sin proveedor; no se presentan como fallas remotas. Las incidencias del
+instrumental se conservaron y se completaron sin repetir las consultas reales.
+
+Resultados, procedencia y capturas:
+[`pendientes-locales-2026-11-14-144554/README.md`](pendientes-locales-2026-11-14-144554/README.md).
+Esta continuación queda sin `git add`, commit ni push; **el PR #82 anterior ya está abierto**.

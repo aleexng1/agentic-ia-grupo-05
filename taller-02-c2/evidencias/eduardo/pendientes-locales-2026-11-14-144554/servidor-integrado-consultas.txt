@@ -1,0 +1,39 @@
+LOCAL · http://127.0.0.1:49878 · PID propio 34224
+App real app:app, sin dobles
+Registro sanitizado en memoria; no se guardan cabeceras.
+
+INFO:     Started server process [22936]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:49878 (Press CTRL+C to quit)
+INFO:     127.0.0.1:49890 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49894 - "POST /panel/consultar HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:49894 - "POST /panel/consultar HTTP/1.1" 422 Unprocessable Entity
+INFO:     127.0.0.1:49895 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49895 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:49895 - "GET / HTTP/1.1" 200 OK
+2026-11-14 14:50:57 INFO    [coordinador] pregunta recibida · context_id=86ed9764-50f2-445a-a0a8-caa93e3ea031 · «Necesito un programa para una feria cultural familiar de 3 horas, desde las 16:…»
+INFO:     127.0.0.1:49901 - "GET /agentes/matias/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49901 - "GET /agentes/alex/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49901 - "GET /agentes/eduardo/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49901 - "GET /agentes/sebastian/.well-known/agent-card.json HTTP/1.1" 200 OK
+2026-11-14 14:50:57 INFO    [coordinador] catálogo listo · 4 agente(s): Agente de Matias, Agente de Alex, Agente de Eduardo, Agente de Sebastian
+2026-11-14 14:51:00 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita un programa detallado de actividades y horarios para una feria cultural.
+2026-11-14 14:51:00 INFO    [coordinador] A2A → http://127.0.0.1:49878/agentes/matias · enviando
+INFO:     127.0.0.1:49901 - "POST /agentes/matias HTTP/1.1" 200 OK
+2026-11-14 14:51:04 INFO    [coordinador] A2A ← Agente de Matias · respuesta recibida en 4,5 s
+INFO:     127.0.0.1:49900 - "POST /panel/consultar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57435 - "GET / HTTP/1.1" 200 OK
+2026-11-14 14:51:05 INFO    [coordinador] pregunta recibida · context_id=36362f43-e3c5-44a0-8b70-dd8652d3994d · «Necesito un recinto interior para una feria tecnológica de 80 personas. Recomie…»
+2026-11-14 14:51:08 INFO    [coordinador] supervisor eligió Agente de Alex · motivo: El usuario solicita la recomendación de recintos para una feria, incluyendo capacidad y características.
+2026-11-14 14:51:08 INFO    [coordinador] A2A → http://127.0.0.1:49878/agentes/alex · enviando
+INFO:     127.0.0.1:49901 - "POST /agentes/alex HTTP/1.1" 200 OK
+2026-11-14 14:51:12 INFO    [coordinador] A2A ← Agente de Alex · respuesta recibida en 4,9 s
+INFO:     127.0.0.1:49900 - "POST /panel/consultar HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57440 - "GET / HTTP/1.1" 200 OK
+2026-11-14 14:51:13 INFO    [coordinador] pregunta recibida · context_id=c0a7867b-6243-4fc4-8b20-ecb293d9d24e · «Necesito catering para una feria tecnológica de 80 personas, de 10:00 a 14:00 (…»
+2026-11-14 14:51:15 INFO    [coordinador] supervisor eligió Agente de Sebastian · motivo: El usuario solicita propuestas de comida, horarios, dietas especiales y cantidades de agua para un evento.
+2026-11-14 14:51:15 INFO    [coordinador] A2A → http://127.0.0.1:49878/agentes/sebastian · enviando
+INFO:     127.0.0.1:49901 - "POST /agentes/sebastian HTTP/1.1" 200 OK
+2026-11-14 14:51:19 INFO    [coordinador] A2A ← Agente de Sebastian · respuesta recibida en 4,1 s
+INFO:     127.0.0.1:49900 - "POST /panel/consultar HTTP/1.1" 200 OK

@@ -1,0 +1,25 @@
+{
+  "caso": "R12",
+  "fecha": "2026-11-14T15:05:35-03:00",
+  "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+  "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+  "pregunta": "Ensayo aislado R12: devolver HTML deliberadamente, sin consultar proveedores.",
+  "esperado": "200 text/html real: aviso no JSON, cuerpo no insertado ni ejecutado, pregunta y controles recuperados.",
+  "respuesta_al_panel": {
+    "http": 200,
+    "tipo": "text/html; charset=utf-8"
+  },
+  "segunda_solicitud_httpx_al_mismo_ensayo": {
+    "http": 200,
+    "tipo": "text/html; charset=utf-8",
+    "cuerpo_html_recibido": "<!doctype html><html><body><h1 id=\"html-ensayo\">HTML_CONTROLADO_R12</h1><script>window.htmlEnsayoEjecutado = true;</script></body></html>",
+    "observacion": "Solicitud adicional para conservar el HTML crudo de ensayo; no es una segunda consulta a Gemini ni una captura del aviso del cliente HTTP."
+  },
+  "aviso": "El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.",
+  "html_no_insertado": true,
+  "script_no_ejecutado": true,
+  "pregunta_conservada": true,
+  "controles_recuperados": true,
+  "aprobado": true,
+  "captura": "r12-html-controlado.png"
+}

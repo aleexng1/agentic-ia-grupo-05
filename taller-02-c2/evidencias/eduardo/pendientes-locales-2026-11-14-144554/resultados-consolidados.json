@@ -1,0 +1,285 @@
+{
+  "generado": "2026-11-14T15:09:02-03:00",
+  "tipo": "Índice consolidado posterior; no sustituye las fuentes primarias",
+  "entorno": {
+    "sistema": "Windows",
+    "python": "3.12.10",
+    "playwright": "1.65.1",
+    "httpx": "0.28.1",
+    "chrome": "157.0.8103.78",
+    "modo": "sin ventana; viewport 1280x960; loopback"
+  },
+  "base": "d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91",
+  "rama": "c2t2/eduardo-frontend",
+  "commit_publicado_confirmado": "git ls-remote origin refs/heads/c2t2/eduardo-frontend",
+  "pr_abierto_informado_por_eduardo": 82,
+  "sha256_panel_probado": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+  "codigo_produccion_modificado": false,
+  "suites_completas_repetidas": false,
+  "consultas_funcionales_reales_al_coordinador": 3,
+  "reenvios_de_esas_preguntas_por_el_ejecutor": 0,
+  "casos": [
+    {
+      "caso": "R08",
+      "fecha_fuente": "2026-11-14T14:50:56-03:00",
+      "entorno": "LOCAL app:app real integrada, autorización temporal válida",
+      "esperado": "400 para texto de espacios y 422 cuando falta texto; sin invocar el grafo",
+      "origen_del_registro": "Consolidación posterior de la captura y del log HTTP originales: el ejecutor inicial no alcanzó a guardar su resumen final. No es un JSON primario de la transacción.",
+      "fuentes": [
+        "r08-entrada-protegida.png",
+        "servidor-integrado-consultas.txt",
+        "verificar_pendientes.py"
+      ],
+      "solicitudes": [
+        {
+          "cuerpo_enviado": {
+            "texto": "   ",
+            "context_id": "r08-espacios-protegido"
+          },
+          "http_esperado": 400,
+          "http_obtenido": 400,
+          "cuerpo_recibido_transcrito_de_captura": {
+            "detail": "Escribe una pregunta para continuar."
+          }
+        },
+        {
+          "cuerpo_enviado": {
+            "context_id": "r08-sin-texto-protegido"
+          },
+          "http_esperado": 422,
+          "http_obtenido": 422,
+          "cuerpo_recibido_transcrito_de_captura": {
+            "detail": [
+              {
+                "type": "missing",
+                "loc": [
+                  "body",
+                  "texto"
+                ],
+                "msg": "Field required",
+                "input": {
+                  "context_id": "r08-sin-texto-protegido"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "preguntas_al_coordinador_antes_de_consultas_reales": 0,
+      "envios_a2a_antes_de_consultas_reales": 0,
+      "captura": "r08-entrada-protegida.png",
+      "observacion": "Cliente HTTP real para eludir la validación local del formulario. La imagen rotula esa visualización, no un aviso nativo del panel. 422 conserva la estructura estándar de FastAPI.",
+      "aprobado": true
+    },
+    {
+      "caso": "R01-actual",
+      "fecha": "2026-11-14T14:50:56-03:00",
+      "entorno": "LOCAL app:app integrada; panel actual",
+      "persona": "Matías",
+      "pregunta": "Necesito un programa para una feria cultural familiar de 3 horas, desde las 16:00. Indica actividades, horarios y cualquier tiempo libre, con las condiciones de demostración.",
+      "esperado": "200, contrato de cuatro campos, Agente de Matias, motivo y respuesta íntegra visibles.",
+      "procedencia": "Consulta real al coordinador, A2A y Gemini; no hay dobles ni interceptación HTTP.",
+      "reintentos_del_ejecutor": 0,
+      "http": 200,
+      "cuerpo": {
+        "respuesta": "Aquí tienes una propuesta de programa cultural familiar para 3 horas a partir de las 16:00:\n\n- **16:00 - 17:00**: Visita guiada al patrimonio del barrio (Recorrido a pie de unos 40 minutos con historia local.)\n- **17:00 - 17:30**: Presentación de danza folclórica (Un espectáculo corto en el escenario principal.)\n- **17:30 - 18:00**: Ronda de cuentacuentos (Historias para escuchar en grupo, sentados en el suelo.)\n\nEl programa no ocupa toda la duración pedida; quedan 60 minutos libres. Recuerda que esto es solo una propuesta.",
+        "context_id": "86ed9764-50f2-445a-a0a8-caa93e3ea031",
+        "agente": "Agente de Matias",
+        "motivo": "El usuario solicita un programa detallado de actividades y horarios para una feria cultural."
+      },
+      "duracion_real_segundos": 7.824,
+      "aprobado": true,
+      "captura": "r01-actual-consulta-real.png",
+      "fuente": "r01-actual-intercambio.json",
+      "registro": "servidor-integrado-consultas.txt",
+      "actividad_comprobable_en_log": {
+        "envios_a2a_al_agente": 1,
+        "recepciones_del_agente": 1
+      }
+    },
+    {
+      "caso": "R02-actual",
+      "fecha": "2026-11-14T14:51:04-03:00",
+      "entorno": "LOCAL app:app integrada; panel actual",
+      "persona": "Alex",
+      "pregunta": "Necesito un recinto interior para una feria tecnológica de 80 personas. Recomienda opciones con aforo, características, accesibilidad y advertencias de disponibilidad; no reserves nada.",
+      "esperado": "200, contrato de cuatro campos, Agente de Alex, motivo y respuesta íntegra visibles.",
+      "procedencia": "Consulta real al coordinador, A2A y Gemini; no hay dobles ni interceptación HTTP.",
+      "reintentos_del_ejecutor": 0,
+      "http": 200,
+      "cuerpo": {
+        "respuesta": "Aquí tienes las opciones de recintos interiores:\n\n1. **Colegio Villa Cuarzo (patio techado y salas)** (Villa Cuarzo)\n- Capacidad máxima: 120 personas\n- Ocupación: 66,7 %\n- Superficie: 450 m² (5,6 m² por persona)\n- Stands estimados: 20\n- Estacionamientos: 20\n- Accesible: sí\n\n2. **Salón Cumbre del Hotel Alto Quillay** (Alto Quillay)\n- Capacidad máxima: 180 personas\n- Ocupación: 44,4 %\n- Superficie: 300 m² (3,8 m² por persona)\n- Stands estimados: 13\n- Estacionamientos: 60\n- Accesible: sí\n\n3. **Galpón Cultural Rinconada Azul** (Rinconada Azul)\n- Capacidad máxima: 250 personas\n- Ocupación: 32,0 %\n- Superficie: 600 m² (7,5 m² por persona)\n- Stands estimados: 26\n- Estacionamientos: 15\n- Accesible: no\n- Aviso: queda grande: con 80 personas se ocupa solo el 32.0 % y el lugar se verá vacío.\n\nNo realizo reservas. Datos ficticios: la disponibilidad y el aforo legal los confirma una persona con el recinto.",
+        "context_id": "36362f43-e3c5-44a0-8b70-dd8652d3994d",
+        "agente": "Agente de Alex",
+        "motivo": "El usuario solicita la recomendación de recintos para una feria, incluyendo capacidad y características."
+      },
+      "duracion_real_segundos": 7.154,
+      "aprobado": true,
+      "captura": "r02-actual-consulta-real.png",
+      "fuente": "r02-actual-intercambio.json",
+      "registro": "servidor-integrado-consultas.txt",
+      "actividad_comprobable_en_log": {
+        "envios_a2a_al_agente": 1,
+        "recepciones_del_agente": 1
+      }
+    },
+    {
+      "caso": "R04-actual",
+      "fecha": "2026-11-14T14:51:13-03:00",
+      "entorno": "LOCAL app:app integrada; panel actual",
+      "persona": "Sebastián",
+      "pregunta": "Necesito catering para una feria tecnológica de 80 personas, de 10:00 a 14:00 (4 horas), con 10 vegetarianas y 5 sin gluten. Indica servicios, horarios, dietas y litros de agua; datos simulados, sin contratar nada.",
+      "esperado": "200, contrato de cuatro campos, Agente de Sebastian, motivo y respuesta íntegra visibles.",
+      "procedencia": "Consulta real al coordinador, A2A y Gemini; no hay dobles ni interceptación HTTP.",
+      "reintentos_del_ejecutor": 0,
+      "http": 200,
+      "cuerpo": {
+        "respuesta": "Propuesta de catering para la feria tecnológica (datos ficticios, sin contratación ni precios):\n\n- **11:00 - Coffee break**\n  - **Bebidas:** 88 tazas de Café o té.\n  - **Menú general (65 personas):** 143 unidades de Sándwich de miga, 143 unidades de Queque o galletas, 72 vasos de Fruta picada.\n  - **Dietas especiales:**\n    - Vegetariano (10 personas): 22 unidades de Sándwich de miga de queso y tomate, 11 vasos de Fruta picada.\n    - Sin gluten (5 personas): 11 unidades de Sándwich en pan sin gluten, 11 unidades de Galletas de avena sin gluten.\n\n- **13:30 - Box lunch**\n  - **Bebidas:** 88 unidades de Jugo o bebida.\n  - **Menú general (65 personas):** 72 unidades de Sándwich gourmet, 72 unidades de Ensalada individual, 72 unidades de Postre individual.\n  - **Dietas especiales:**\n    - Vegetariano (10 personas): 11 unidades de Sándwich de verduras grilladas y queso.\n    - Sin gluten (5 personas): 6 unidades de Ensalada completa con pollo y quínoa, 6 unidades de Postre sin gluten.\n\n**Agua total:** 88 litros (0,5 L por persona por cada 2 horas de evento, con 10 % de margen).\n\n*Notas:*\n- Las cantidades incluyen un 10 % de margen y están redondeadas hacia arriba.\n- Es una propuesta orientativa y no incluye precios ni reservas de proveedores.\n- Esta propuesta no garantiza seguridad para alergias graves; eso debe confirmarlo directamente una persona con el proveedor.",
+        "context_id": "c0a7867b-6243-4fc4-8b20-ecb293d9d24e",
+        "agente": "Agente de Sebastian",
+        "motivo": "El usuario solicita propuestas de comida, horarios, dietas especiales y cantidades de agua para un evento."
+      },
+      "duracion_real_segundos": 6.164,
+      "aprobado": true,
+      "captura": "r04-actual-consulta-real.png",
+      "fuente": "r04-actual-intercambio.json",
+      "registro": "servidor-integrado-consultas.txt",
+      "actividad_comprobable_en_log": {
+        "envios_a2a_al_agente": 1,
+        "recepciones_del_agente": 1
+      }
+    },
+    {
+      "caso": "R10",
+      "fecha": "2026-11-14T15:05:17-03:00",
+      "entorno": "LOCAL app:app de ensayo propia",
+      "pregunta": "Comprobación LOCAL R10: ¿puedes recibir esta pregunta?",
+      "aprobado": true,
+      "esperado": "Desconexión real al detener solo el servidor propio: aviso, pregunta conservada y controles recuperados; restaurarlo en el mismo puerto.",
+      "direccion": "http://127.0.0.1:54738",
+      "pid_raiz_detenido": 25448,
+      "pid_servidor_detenido": 25892,
+      "salud_durante_detencion": "ConnectError",
+      "aviso": "No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida.",
+      "fallos_red": [
+        {
+          "ruta": "/panel/consultar",
+          "fallo": "net::ERR_CONNECTION_REFUSED"
+        }
+      ],
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "espera_real_segundos": 0.04,
+      "captura": "finalizacion/r10-desconexion-real.png",
+      "restauracion": {
+        "fecha": "2026-11-14T15:05:33-03:00",
+        "mismo_puerto": true,
+        "pid_raiz_nuevo": 43964,
+        "pid_servidor_nuevo": 21636,
+        "salud_http": 200,
+        "portada_http": 200,
+        "post_autorizado_espacios_http": 400,
+        "limpieza_final": "Se restauró y comprobó primero; después se cerraron solo los procesos propios de esta validación."
+      },
+      "captura_restauracion": "finalizacion/r10-restaurado.png",
+      "fuente": "finalizacion/r10-resultado.json"
+    },
+    {
+      "caso": "R11",
+      "fecha": "2026-11-14T15:00:07-03:00",
+      "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+      "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+      "pregunta": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+      "retardo_configurado_segundos": 70,
+      "reloj_virtual": false,
+      "esperado": "Timeout tras más de 65 s REALES; recuperar controles y no recibir la respuesta vieja en la conversación nueva.",
+      "captura_espera": "complemento/r11-espera-real-inducida.png",
+      "inicio_espera": "2026-11-14T15:00:08.477-03:00",
+      "fin_espera": "2026-11-14T15:01:13.959-03:00",
+      "espera_real_hasta_aviso_segundos": 65.47177,
+      "aviso": "La consulta superó los 65 segundos de espera. Puedes reintentar; la consulta anterior podría seguir procesándose.",
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "captura_timeout": "complemento/r11-timeout-real-inducido.png",
+      "eventos_servidor": [
+        {
+          "fecha": "2026-11-14T15:00:08-03:00",
+          "context_id": "a5974f2b-37dc-47fc-a3eb-2f267b2ba0e2",
+          "texto": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+          "finalizado": true,
+          "duracion_real_segundos": 70.009151,
+          "finalizacion": "2026-11-14T15:01:18-03:00",
+          "respuesta_generada": "RESPUESTA_TARDIA_R11_ENSAYO"
+        },
+        {
+          "fecha": "2026-11-14T15:01:14-03:00",
+          "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+          "texto": "Consulta inmediata de ensayo en la conversación NUEVA de R11.",
+          "finalizado": true,
+          "duracion_real_segundos": 2.8e-05,
+          "finalizacion": "2026-11-14T15:01:14-03:00",
+          "respuesta_generada": "Respuesta de ensayo para la conversación nueva; sin proveedor."
+        }
+      ],
+      "nueva_conversacion": {
+        "http": 200,
+        "cuerpo": {
+          "respuesta": "Respuesta de ensayo para la conversación nueva; sin proveedor.",
+          "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+          "agente": "Servidor de ensayo aislado",
+          "motivo": "Condición inducida; no usa Gemini ni Heroku."
+        }
+      },
+      "contexto_nuevo": true,
+      "respuesta_vieja_ausente": true,
+      "observacion": "El navegador abortó la petición a los 65 s. El ensayo generó la respuesta vieja a los 70 s, pero no llegó a la conversación nueva; no se forzó a fetch a ignorar AbortSignal.",
+      "captura_nueva": "complemento/r11-nueva-sin-respuesta-vieja.png",
+      "aprobado": true,
+      "fuente": "complemento/r11-resultado.json"
+    },
+    {
+      "caso": "R12",
+      "fecha": "2026-11-14T15:05:35-03:00",
+      "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+      "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+      "pregunta": "Ensayo aislado R12: devolver HTML deliberadamente, sin consultar proveedores.",
+      "esperado": "200 text/html real: aviso no JSON, cuerpo no insertado ni ejecutado, pregunta y controles recuperados.",
+      "respuesta_al_panel": {
+        "http": 200,
+        "tipo": "text/html; charset=utf-8"
+      },
+      "segunda_solicitud_httpx_al_mismo_ensayo": {
+        "http": 200,
+        "tipo": "text/html; charset=utf-8",
+        "cuerpo_html_recibido": "<!doctype html><html><body><h1 id=\"html-ensayo\">HTML_CONTROLADO_R12</h1><script>window.htmlEnsayoEjecutado = true;</script></body></html>",
+        "observacion": "Solicitud adicional para conservar el HTML crudo de ensayo; no es una segunda consulta a Gemini ni una captura del aviso del cliente HTTP."
+      },
+      "aviso": "El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.",
+      "html_no_insertado": true,
+      "script_no_ejecutado": true,
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "aprobado": true,
+      "captura": "finalizacion/r12-html-controlado.png",
+      "fuente": "finalizacion/r12-resultado.json"
+    }
+  ],
+  "incidencias_instrumentales_conservadas": [
+    {
+      "fase": "primera ejecución",
+      "resultado": "Límite de 360 segundos del comando; no se generó resultados-locales.json. Se conservaron intercambios, logs y capturas. R10 no alcanzó su envío por el chequeo del puerto detenido.",
+      "no_es_defecto_del_panel": true
+    },
+    {
+      "fase": "complemento",
+      "resultado": "R10: ConnectTimeout del chequeo auxiliar previo al envío. R12: límite de 120 s esperando response.text() del instrumental; el log sí registra 200 HTML. R11 aprobado con registro completo.",
+      "fuente": "complemento/resultados-complemento.json",
+      "no_es_falla_de_gemini_ni_heroku": true
+    },
+    {
+      "fase": "finalización dirigida",
+      "resultado": "R10 y R12 aprobados. Se acepta ConnectError/ConnectTimeout en el chequeo auxiliar; se valida primero el panel y se conserva el HTML con una segunda solicitud httpx rotulada. No se modificó producción.",
+      "fuente": "finalizacion/resultados-finalizacion.json"
+    }
+  ]
+}

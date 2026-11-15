@@ -1,0 +1,153 @@
+{
+  "inicio": "2026-11-14T14:59:45-03:00",
+  "entorno": "LOCAL Windows",
+  "base": "d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91",
+  "sha256_panel_probado": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+  "sha256_ejecutor": "fdc27ad8798d85bdfedbb979a7021baf3ecabeba12a9ef57c17ef0f38cf1a87a",
+  "sha256_ejecutor_original": "b86b6de536211abaa2864111724a04469e2086259d668a8bffd38ae20bd012b3",
+  "consultas_a_gemini": 0,
+  "suites_completas_repetidas": false,
+  "casos": [
+    {
+      "caso": "R10",
+      "fecha": "2026-11-14T14:59:46-03:00",
+      "entorno": "LOCAL app:app de ensayo propia",
+      "pregunta": "Comprobación LOCAL R10: ¿puedes recibir esta pregunta?",
+      "aprobado": false,
+      "esperado": "Aviso de conexión al detener solo el servidor propio; pregunta y controles recuperados; restaurarlo en el mismo puerto.",
+      "direccion": "http://127.0.0.1:58119",
+      "pid_raiz_detenido": 30932,
+      "pid_servidor_detenido": 31508,
+      "error": "ConnectTimeout: ",
+      "restauracion": {
+        "fecha": "2026-11-14T15:00:04-03:00",
+        "mismo_puerto": true,
+        "pid_raiz_nuevo": 40824,
+        "pid_servidor_nuevo": 34776,
+        "salud_http": 200,
+        "portada_http": 200,
+        "post_autorizado_espacios_http": 400,
+        "limpieza_final": "Restauración verificada; después se cierran exclusivamente los procesos propios."
+      },
+      "captura_restauracion": "r10-restaurado-mismo-puerto.png"
+    },
+    {
+      "caso": "R11",
+      "fecha": "2026-11-14T15:00:07-03:00",
+      "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+      "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+      "pregunta": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+      "retardo_configurado_segundos": 70,
+      "reloj_virtual": false,
+      "esperado": "Timeout tras más de 65 s REALES; recuperar controles y no recibir la respuesta vieja en la conversación nueva.",
+      "captura_espera": "r11-espera-real-inducida.png",
+      "inicio_espera": "2026-11-14T15:00:08.477-03:00",
+      "fin_espera": "2026-11-14T15:01:13.959-03:00",
+      "espera_real_hasta_aviso_segundos": 65.47177,
+      "aviso": "La consulta superó los 65 segundos de espera. Puedes reintentar; la consulta anterior podría seguir procesándose.",
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "captura_timeout": "r11-timeout-real-inducido.png",
+      "eventos_servidor": [
+        {
+          "fecha": "2026-11-14T15:00:08-03:00",
+          "context_id": "a5974f2b-37dc-47fc-a3eb-2f267b2ba0e2",
+          "texto": "Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.",
+          "finalizado": true,
+          "duracion_real_segundos": 70.009151,
+          "finalizacion": "2026-11-14T15:01:18-03:00",
+          "respuesta_generada": "RESPUESTA_TARDIA_R11_ENSAYO"
+        },
+        {
+          "fecha": "2026-11-14T15:01:14-03:00",
+          "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+          "texto": "Consulta inmediata de ensayo en la conversación NUEVA de R11.",
+          "finalizado": true,
+          "duracion_real_segundos": 2.8e-05,
+          "finalizacion": "2026-11-14T15:01:14-03:00",
+          "respuesta_generada": "Respuesta de ensayo para la conversación nueva; sin proveedor."
+        }
+      ],
+      "nueva_conversacion": {
+        "http": 200,
+        "cuerpo": {
+          "respuesta": "Respuesta de ensayo para la conversación nueva; sin proveedor.",
+          "context_id": "9fdde580-9394-4d8d-8aab-c1c59d577013",
+          "agente": "Servidor de ensayo aislado",
+          "motivo": "Condición inducida; no usa Gemini ni Heroku."
+        }
+      },
+      "contexto_nuevo": true,
+      "respuesta_vieja_ausente": true,
+      "observacion": "El navegador abortó la petición a los 65 s. El ensayo generó la respuesta vieja a los 70 s, pero no llegó a la conversación nueva; no se forzó a fetch a ignorar AbortSignal.",
+      "captura_nueva": "r11-nueva-sin-respuesta-vieja.png",
+      "aprobado": true
+    },
+    {
+      "caso": "R12",
+      "aprobado": false,
+      "error": "TimeoutError: "
+    }
+  ],
+  "procesos": [
+    {
+      "nombre": "r10-antes",
+      "modo": "integrado",
+      "direccion": "http://127.0.0.1:58119",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 30932,
+      "inicio": "2026-11-14T14:59:46-03:00",
+      "pid_servidor_propio": 31508,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T14:59:55-03:00",
+      "codigo_salida": 1
+    },
+    {
+      "nombre": "r10-restaurado",
+      "modo": "integrado",
+      "direccion": "http://127.0.0.1:58119",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 40824,
+      "inicio": "2026-11-14T14:59:57-03:00",
+      "pid_servidor_propio": 34776,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:00:05-03:00",
+      "codigo_salida": 1
+    },
+    {
+      "nombre": "r11",
+      "modo": "lento",
+      "direccion": "http://127.0.0.1:58149",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 5388,
+      "inicio": "2026-11-14T15:00:05-03:00",
+      "pid_servidor_propio": 38560,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:01:19-03:00",
+      "codigo_salida": 1
+    },
+    {
+      "nombre": "r12",
+      "modo": "html",
+      "direccion": "http://127.0.0.1:58186",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 38756,
+      "inicio": "2026-11-14T15:01:19-03:00",
+      "pid_servidor_propio": 32116,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:03:20-03:00",
+      "codigo_salida": 1
+    }
+  ],
+  "navegador": "157.0.8103.78",
+  "finalizacion": "2026-11-14T15:03:21-03:00",
+  "todos_los_hijos_detenidos": true
+}

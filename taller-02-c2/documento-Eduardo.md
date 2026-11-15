@@ -1,8 +1,156 @@
 # Eduardo Basaure · Frontend · Taller 2 del Curso 2 · Grupo 5
 
-**Estado vigente: LOCAL · 2026-11-14 · Rama `c2t2/eduardo-frontend`.**
+**Estado vigente: LOCAL · 2026-11-14 · Rama `c2t2/eduardo-frontend` ·
+commit publicado `d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91` ·
+[PR #82 abierto](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82).**
 
-## 1. Cierre integrado vigente
+## 1. Continuación vigente: pendientes locales completados
+
+Se comprobó la rama, `HEAD`, el índice y el estado de trabajo antes de editar.
+`git ls-remote origin refs/heads/c2t2/eduardo-frontend` confirmó **`d8cce13` publicado**.
+El PR #82 ya existe, según la actualización de Eduardo: **no está pendiente abrirlo
+ni hacer commit/push del cierre integrado anterior**. Esta continuación queda local,
+sin `git add`, commit ni push y sin modificar el PR.
+
+**Resultado:** R08 y R10 aprobados con la app LOCAL real; R11 y R12 aprobados como
+**fallas inducidas en un entorno controlado**, sin proveedor y sin Heroku. Además se
+hicieron **tres consultas funcionales reales**, una a cada agente de Matías, Alex y
+Sebastián, desde el panel actual protegido. Las tres devolvieron 200, agente y motivo.
+No se reenviaron esas preguntas ni se sustituyeron respuestas HTTP.
+
+**Entorno de estas comprobaciones:** Windows, Python **3.12.10**, Playwright **1.65.1**,
+httpx **0.28.1**, Chrome **157.0.8103.78** sin ventana, vista de 1280 × 960 y procesos
+propios en loopback. Casos ejecutados entre **14:50:56 y 15:05:37, UTC−03:00**, del
+**14-11-2026**, en tres fases con incidencias instrumentales descritas en la sección 4.
+Se reutilizó `.venv`, sin cambiar dependencias. El código de producción no cambió;
+**no se repitieron las suites completas** de 168 y 68 pruebas ya aprobadas.
+
+Carpeta nueva, sin sobrescribir evidencias anteriores:
+[`pendientes-locales-2026-11-14-144554/`](evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md).
+El [índice consolidado](evidencias/eduardo/pendientes-locales-2026-11-14-144554/resultados-consolidados.json)
+identifica la procedencia de cada resultado; no se presenta como un registro primario
+generado por la primera ejecución incompleta.
+
+Al inicio solo existía la foto sin seguimiento del Taller 1. Se conservaron `.env`,
+esa foto, la demo del Taller 1 y todas las capturas históricas. Había un servidor previo
+en **127.0.0.1:8000, PID 3772**, iniciado el 13-11-2026: **no se detuvo ni reinició** y
+siguió escuchando con el mismo PID al terminar. La configuración de puertos, direcciones
+internas y clave temporal se pasó solo a procesos hijos, sin editar `.env` ni Heroku.
+
+## 2. R08, R10, R11 y R12 · resultados vigentes
+
+Todas las fechas de esta tabla son **2026-11-14, UTC−03:00**. Los valores de las claves
+no se guardaron; se usó autorización temporal válida en los servidores propios.
+
+| Caso / entorno / fecha | Solicitud | Resultado esperado | Resultado obtenido y evidencia | Observaciones |
+| --- | --- | --- | --- | --- |
+| **R08 · app LOCAL integrada · 14:50:56** | POST autorizado con `{"texto":"   ","context_id":"r08-espacios-protegido"}`; luego `{"context_id":"r08-sin-texto-protegido"}` | **400** para espacios y **422** sin `texto`, antes del coordinador | **400**, `Escribe una pregunta para continuar.`; **422**, validación estándar en `body.texto`. Antes de las consultas reales: **0 preguntas al coordinador y 0 envíos A2A**. [Captura](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r08-entrada-protegida.png), [log](evidencias/eduardo/pendientes-locales-2026-11-14-144554/servidor-integrado-consultas.txt) | HTTP real con httpx; el formulario impide enviar espacios. La imagen rotula la visualización del cliente HTTP, **no un aviso nativo del panel**. La consolidación transcribe el cuerpo visible de esa captura; el primer ejecutor no guardó su JSON final. El 422 incluye `Field required`, sin traza. |
+| **R10 · app LOCAL de ensayo propia · 15:05:17–15:05:33** | Cargar el panel; detener solo su servidor propio; enviar «Comprobación LOCAL R10: ¿puedes recibir esta pregunta?» | Aviso de conexión, pregunta conservada y controles recuperados; restaurar el servidor después | **`net::ERR_CONNECTION_REFUSED`** y «No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida.»; pregunta conservada y envío/sugerencias habilitados. [Desconexión](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/r10-desconexion-real.png), [restauración](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/r10-restaurado.png), [resultado](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/r10-resultado.json) | Se detuvo únicamente el árbol del PID propio **25448**, servidor **25892**, puerto **54738**. Se restauró en **el mismo puerto**, servidor **21636**: `/salud` 200, panel 200 y POST autorizado con espacios 400. Después de comprobar la restauración se cerraron solo los procesos propios. No se cortó la red del equipo ni se tocó el puerto 8000. |
+| **R11 · ensayo LOCAL aislado · 15:00:08–15:01:18** | Mantener pendiente «Ensayo aislado R11: mantener esta consulta pendiente durante 70 segundos reales.»; tras el aviso, iniciar otra conversación y consultar al ensayo | Timeout tras **más de 65 s reales**, recuperación y ausencia de la respuesta anterior en la conversación nueva | Aviso «La consulta superó los 65 segundos de espera…» tras **65,471770 s reales**; servidor demoró **70,009151 s**. Pregunta conservada, controles recuperados, contexto nuevo y respuesta vieja ausente. [Espera](evidencias/eduardo/pendientes-locales-2026-11-14-144554/complemento/r11-espera-real-inducida.png), [timeout](evidencias/eduardo/pendientes-locales-2026-11-14-144554/complemento/r11-timeout-real-inducido.png), [conversación nueva](evidencias/eduardo/pendientes-locales-2026-11-14-144554/complemento/r11-nueva-sin-respuesta-vieja.png), [mediciones](evidencias/eduardo/pendientes-locales-2026-11-14-144554/complemento/r11-resultado.json) | **Falla inducida en entorno controlado, no falla real de Gemini ni Heroku**. Sin reloj virtual, interceptación HTTP ni cambio del límite de 65 s. El navegador abortó; el servidor generó la respuesta vieja a los 70 s, pero no se entregó a la conversación nueva. No se obligó a `fetch` a ignorar `AbortSignal`. |
+| **R12 · ensayo LOCAL aislado · 15:05:35–15:05:37** | «Ensayo aislado R12: devolver HTML deliberadamente, sin consultar proveedores.»; el servidor devuelve **200 `text/html`**, con un título y un script de ensayo | Aviso no JSON, sin insertar ni ejecutar el HTML; conservar pregunta y recuperar controles | «El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.»; marcador HTML ausente y script no ejecutado. [Captura](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/r12-html-controlado.png), [resultado](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/r12-resultado.json), [log](evidencias/eduardo/pendientes-locales-2026-11-14-144554/finalizacion/servidor-r12-html.txt) | **Falla inducida en entorno controlado, no falla real de Gemini ni Heroku**. Se sirve el panel intacto por HTTP real. El HTML crudo se conserva mediante **una segunda solicitud httpx** al mismo ensayo, identificada por separado; no se atribuye a una lectura del cuerpo del navegador. No es una prueba del router público de Heroku. |
+
+## 3. Matías, Alex y Sebastián · consultas reales con el panel actual
+
+**Esperado común:** una conversación nueva por caso, autorización válida, HTTP 200,
+contrato `respuesta/context_id/agente/motivo`, agente correcto y respuesta/motivo visibles.
+**Obtenido común:** aprobado en los tres casos, **un envío y una recepción A2A por agente**;
+las respuestas completas, sin resumir ni recalcular, están en los JSON enlazados. Las
+capturas muestran Markdown básico del panel actual, pregunta, respuesta, agente y motivo.
+Los datos siguen siendo ficticios: «real» describe la llamada a coordinador/A2A/Gemini,
+no una reserva, cotización ni contratación real.
+
+### R01-actual · Matías · LOCAL · 14-11-2026 · 14:50:56
+
+- **Solicitud exacta:** «Necesito un programa para una feria cultural familiar de 3 horas,
+  desde las 16:00. Indica actividades, horarios y cualquier tiempo libre, con las
+  condiciones de demostración.»
+- **Obtenido:** **200**, `Agente de Matias`; programa 16:00–18:00 y **60 minutos libres**
+  informados, conservados tal como llegaron. Motivo: «El usuario solicita un programa
+  detallado de actividades y horarios para una feria cultural.»
+- **Evidencias:** [pregunta y respuesta completas](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r01-actual-intercambio.json),
+  [captura actual](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r01-actual-consulta-real.png).
+
+### R02-actual · Alex · LOCAL · 14-11-2026 · 14:51:04
+
+- **Solicitud exacta:** «Necesito un recinto interior para una feria tecnológica de 80
+  personas. Recomienda opciones con aforo, características, accesibilidad y advertencias
+  de disponibilidad; no reserves nada.»
+- **Obtenido:** **200**, `Agente de Alex`; **tres recintos**, aforos 120/180/250,
+  características, accesibilidad y advertencias de demostración. Motivo: «El usuario
+  solicita la recomendación de recintos para una feria, incluyendo capacidad y características.»
+- **Evidencias:** [pregunta y respuesta completas](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r02-actual-intercambio.json),
+  [captura actual](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r02-actual-consulta-real.png).
+
+### R04-actual · Sebastián · LOCAL · 14-11-2026 · 14:51:13
+
+- **Solicitud exacta:** «Necesito catering para una feria tecnológica de 80 personas,
+  de 10:00 a 14:00 (4 horas), con 10 vegetarianas y 5 sin gluten. Indica servicios,
+  horarios, dietas y litros de agua; datos simulados, sin contratar nada.»
+- **Obtenido:** **200**, `Agente de Sebastian`; servicios **11:00 y 13:30**, dietas
+  **65/10/5**, **88 litros de agua**, unidades y advertencias completas. Motivo: «El usuario
+  solicita propuestas de comida, horarios, dietas especiales y cantidades de agua para un evento.»
+- **Evidencias:** [pregunta y respuesta completas](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r04-actual-intercambio.json),
+  [captura actual](evidencias/eduardo/pendientes-locales-2026-11-14-144554/r04-actual-consulta-real.png).
+
+Registro común: [servidor integrado](evidencias/eduardo/pendientes-locales-2026-11-14-144554/servidor-integrado-consultas.txt).
+No se guardaron cabeceras de petición, HAR, trazas de navegador ni claves. Las capturas
+añaden una franja de procedencia y amplían la altura del chat, sin editar las respuestas.
+Las seis capturas del 13-11-2026 permanecen como históricas anteriores al Markdown.
+R05 de Eduardo, con el panel actual, ya está documentado en el cierre integrado anterior
+y **no se repitió** en esta continuación.
+
+## 4. Instrumental, conservación y comprobaciones
+
+- La primera ejecución terminó por el límite de **360 s del comando**, sin generar su
+  `resultados-locales.json`. Se conservaron sus tres intercambios reales, capturas y logs.
+  R08 queda respaldado por su captura completa y por el log, con esa limitación explícita.
+- En el complemento, R10 se detuvo en un **`ConnectTimeout` del chequeo auxiliar**, antes
+  de enviar desde el panel. R12 alcanzó HTTP 200 HTML, pero el instrumental quedó esperando
+  `response.text()` sobre un cuerpo que el panel descarta. Esos resultados **no aprobados**
+  se conservan en [resultados-complemento.json](evidencias/eduardo/pendientes-locales-2026-11-14-144554/complemento/resultados-complemento.json);
+  no se reinterpretan como fallas del panel, de Gemini o de Heroku.
+- Se ajustó solo el **instrumental nuevo de evidencias**: control del árbol del PID
+  propio en Windows, guardado inmediato por caso, aceptación de los dos errores de
+  conexión en el chequeo auxiliar y lectura del HTML por un cliente HTTP adicional.
+  R10/R12 se completaron en una fase dirigida; R11 se repitió para conservar también
+  mediciones JSON completas. **No se repitieron las tres consultas a los agentes**.
+- No se detectó un defecto del frontend y no se editaron `panel.html`, `panel.py`, los
+  agentes, seguridad ni archivos de otras personas. No se ejecutaron pytest ni las suites
+  completas: se mantienen sus resultados anteriores, identificados por su propia fecha.
+- [Revisión final](evidencias/eduardo/pendientes-locales-2026-11-14-144554/revision-final.json):
+  conservación de los **90 archivos protegidos** de la línea base, incluido `.env`,
+  capturas/logs históricos, foto y demo del Taller 1 y código de producción; comprobación
+  de alcance, secretos, enlaces y ausencia de cambios en el índice. No es una auditoría
+  integral de seguridad. La línea base con huellas privadas quedó fuera del repositorio.
+
+## 5. Publicación y pendientes que sí permanecen
+
+- El **PR #82 está abierto con `d8cce13` publicado**. Pendiente: revisión humana de Alex
+  y autorización de Eduardo para publicar **esta nueva continuación**, no para crear
+  otra vez el PR ni publicar el commit anterior. Aquí no se hizo commit, push ni staging.
+- R08/R10/R11/R12 y las tres consultas con formato actual **ya no están pendientes**.
+  R11/R12 solo acreditan manejo del frontend ante fallas **inducidas y controladas**.
+- Heroku/HTTPS, su router y el despliegue público siguen fuera del alcance de esta
+  validación LOCAL. No se cambiaron Config Vars, despliegues ni procesos remotos.
+- Se conserva la observación previa para Matías: un `detail` seguro para el DOM no
+  equivale a sanitizar secretos; revisar futuros responders y el `str(error)` genérico
+  del backend y las cabeceras de no caché de errores. No se amplió ese alcance.
+- La [lista exacta de archivos de esta continuación](evidencias/eduardo/pendientes-locales-2026-11-14-144554/archivos-modificados.txt)
+  separa los documentos modificados y las evidencias nuevas. Excluye la foto previa,
+  `.env`, `.venv` y cualquier archivo ajeno. No sustituye la selección histórica del commit
+  ya publicado. La solicitud real se añadió a [prompts-utilizados.md](evidencias/eduardo/prompts-utilizados.md).
+
+## Histórico conservado · cierre integrado del 14-11-2026
+
+**El siguiente bloque registra la ejecución anterior a esta continuación.** Sus resultados
+se publicaron después en **`d8cce13`, PR #82**. Las menciones originales a «sin commit/push»,
+«nuevo PR» y pendientes R08/R10/R11/R12 describen ese corte temporal, **no el estado vigente**.
+No se sobrescribieron los archivos de sus evidencias.
+
+<details>
+<summary>Abrir registro del cierre integrado anterior (13:55, UTC−03:00)</summary>
+
+## 1. Cierre integrado previo (registro original)
 
 Se ejecutaron `git fetch origin` y `git merge --ff-only origin/main`: avance sin
 conflictos desde `7047ab8` hasta **`741305bf0fed986b523898114bb1d851d28d063b`**
@@ -167,6 +315,8 @@ La revisión final confirmó 14 capturas históricas binarias idénticas, huella
 vigentes, índice vacío, ningún valor privado detectado en la selección y ningún enlace
 local roto. Se revisaron visualmente las 12 capturas nuevas; esto no sustituye una
 auditoría integral de seguridad.
+
+</details>
 
 ## Histórico conservado · 2026-11-13
 

@@ -1,0 +1,118 @@
+{
+  "inicio": "2026-11-14T15:05:16-03:00",
+  "base": "d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91",
+  "sha256_panel_probado": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+  "sha256_ejecutor": "816fd30a27d5b1a5988c4a1cb261d17b31e257f44c3e5ffdd06f488d289e0d50",
+  "sha256_ejecutor_original": "b86b6de536211abaa2864111724a04469e2086259d668a8bffd38ae20bd012b3",
+  "sha256_ejecutor_complemento": "fdc27ad8798d85bdfedbb979a7021baf3ecabeba12a9ef57c17ef0f38cf1a87a",
+  "consultas_a_gemini": 0,
+  "suites_completas_repetidas": false,
+  "casos": [
+    {
+      "caso": "R10",
+      "fecha": "2026-11-14T15:05:17-03:00",
+      "entorno": "LOCAL app:app de ensayo propia",
+      "pregunta": "Comprobación LOCAL R10: ¿puedes recibir esta pregunta?",
+      "aprobado": true,
+      "esperado": "Desconexión real al detener solo el servidor propio: aviso, pregunta conservada y controles recuperados; restaurarlo en el mismo puerto.",
+      "direccion": "http://127.0.0.1:54738",
+      "pid_raiz_detenido": 25448,
+      "pid_servidor_detenido": 25892,
+      "salud_durante_detencion": "ConnectError",
+      "aviso": "No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida.",
+      "fallos_red": [
+        {
+          "ruta": "/panel/consultar",
+          "fallo": "net::ERR_CONNECTION_REFUSED"
+        }
+      ],
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "espera_real_segundos": 0.04,
+      "captura": "r10-desconexion-real.png",
+      "restauracion": {
+        "fecha": "2026-11-14T15:05:33-03:00",
+        "mismo_puerto": true,
+        "pid_raiz_nuevo": 43964,
+        "pid_servidor_nuevo": 21636,
+        "salud_http": 200,
+        "portada_http": 200,
+        "post_autorizado_espacios_http": 400,
+        "limpieza_final": "Se restauró y comprobó primero; después se cerraron solo los procesos propios de esta validación."
+      },
+      "captura_restauracion": "r10-restaurado.png"
+    },
+    {
+      "caso": "R12",
+      "fecha": "2026-11-14T15:05:35-03:00",
+      "entorno": "LOCAL aislado, servidor de ensayo sin proveedor",
+      "clasificacion": "Falla inducida en entorno controlado; NO es falla real de Gemini ni Heroku.",
+      "pregunta": "Ensayo aislado R12: devolver HTML deliberadamente, sin consultar proveedores.",
+      "esperado": "200 text/html real: aviso no JSON, cuerpo no insertado ni ejecutado, pregunta y controles recuperados.",
+      "respuesta_al_panel": {
+        "http": 200,
+        "tipo": "text/html; charset=utf-8"
+      },
+      "segunda_solicitud_httpx_al_mismo_ensayo": {
+        "http": 200,
+        "tipo": "text/html; charset=utf-8",
+        "cuerpo_html_recibido": "<!doctype html><html><body><h1 id=\"html-ensayo\">HTML_CONTROLADO_R12</h1><script>window.htmlEnsayoEjecutado = true;</script></body></html>",
+        "observacion": "Solicitud adicional para conservar el HTML crudo de ensayo; no es una segunda consulta a Gemini ni una captura del aviso del cliente HTTP."
+      },
+      "aviso": "El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.",
+      "html_no_insertado": true,
+      "script_no_ejecutado": true,
+      "pregunta_conservada": true,
+      "controles_recuperados": true,
+      "aprobado": true,
+      "captura": "r12-html-controlado.png"
+    }
+  ],
+  "procesos": [
+    {
+      "nombre": "r10-antes",
+      "modo": "integrado",
+      "direccion": "http://127.0.0.1:54738",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 25448,
+      "inicio": "2026-11-14T15:05:17-03:00",
+      "pid_servidor_propio": 25892,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:05:24-03:00",
+      "codigo_salida": 1
+    },
+    {
+      "nombre": "r10-restaurado",
+      "modo": "integrado",
+      "direccion": "http://127.0.0.1:54738",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 43964,
+      "inicio": "2026-11-14T15:05:26-03:00",
+      "pid_servidor_propio": 21636,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:05:34-03:00",
+      "codigo_salida": 1
+    },
+    {
+      "nombre": "r12-html",
+      "modo": "html",
+      "direccion": "http://127.0.0.1:54770",
+      "propio": true,
+      "detenido": true,
+      "pid_raiz_propio": 29840,
+      "inicio": "2026-11-14T15:05:34-03:00",
+      "pid_servidor_propio": 35448,
+      "salud_inicial": 200,
+      "taskkill_arbol_propio_salida": 0,
+      "fin": "2026-11-14T15:05:37-03:00",
+      "codigo_salida": 1
+    }
+  ],
+  "navegador": "157.0.8103.78",
+  "finalizacion": "2026-11-14T15:05:37-03:00",
+  "todos_los_hijos_detenidos": true
+}
