@@ -235,3 +235,48 @@ instrumental se conservaron y se completaron sin repetir las consultas reales.
 Resultados, procedencia y capturas:
 [`pendientes-locales-2026-11-14-144554/README.md`](pendientes-locales-2026-11-14-144554/README.md).
 Esta continuación queda sin `git add`, commit ni push; **el PR #82 anterior ya está abierto**.
+
+**Nota de publicación · 15-11-2026:** el párrafo anterior conserva el cierre de aquella
+ejecución. Sus evidencias se publicaron después en **`2b754e2`, dentro del PR #82**;
+la mención histórica a «sin commit/push» no es un pendiente vigente.
+
+## Comprobación de reproducibilidad · solicitud del 15-11-2026
+
+Solicitud real recibida, sin credenciales:
+
+```text
+Comprueba la reproducibilidad de mi entrega y corrige su estado documental.
+
+Lee las instrucciones aplicables y revisa Git. Conserva mi instalación, .env, servidores existentes y archivos ajenos.
+
+1. Usa una copia temporal del commit publicado 2b754e2 y un entorno virtual nuevo con Python 3.12. Sigue la instalación del README sin reutilizar paquetes de mi .venv actual. Registra versiones, comandos y resultados.
+
+2. Comprueba instalación de dependencias, pip check, arranque, panel y /salud. Usa un puerto libre y configura coherentemente el puerto interno de la app. Comprueba rechazo sin clave y con clave incorrecta, y entrada vacía con autorización válida. Usa una clave temporal privada. No consultes Gemini en esta comprobación.
+
+3. Si falta una dependencia o instrucción, documenta el problema y su responsable; no modifiques archivos ajenos ni amplíes el alcance.
+
+4. Corrige en mis documentos las referencias vigentes a “sin commit/push”: las evidencias ya se publicaron en 2b754e2 dentro del PR #82. Conserva las bases probadas, fechas, resultados y registros históricos.
+
+5. Prepara una tabla breve para la futura validación REMOTA, con resultados todavía pendientes y versión desplegada por confirmar.
+
+Guarda únicamente evidencias útiles en mi zona. No repitas las suites completas por rutina, no modifiques Heroku y no hagas commit ni push. Entrega hallazgos, alcance realmente comprobado y lista exacta de cambios.
+```
+
+Se leyeron README y `proyecto/AGENTS.md`. Git confirmó el commit en `HEAD`, rama remota
+y cabecera del PR #82. Se usaron `git archive`, Python 3.12.10 y una `.venv` nueva fuera
+del repositorio, inicialmente solo con pip 25.0.1. Instalación y `pip check`: salida 0;
+arranque correcto, panel/salud 200, rechazos 401/401 y vacío/espacios autorizados 400/400.
+No se detectó dependencia faltante para estas comprobaciones. No hubo preguntas al
+proveedor, suites completas ni pruebas remotas. No se modificaron producción, `.env`,
+instalación existente ni archivos ajenos. Las referencias vigentes se corrigieron sin
+reescribir los registros históricos; se añadió una tabla REMOTA enteramente pendiente.
+
+Comandos, versiones, resultados y alcance:
+[`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md).
+
+**Estado vigente de preparación:** el PR #82 está **fusionado en `main`** mediante
+`71df3e8`. Se ejecutaron `git fetch origin` y `git merge --ff-only origin/main` en
+`c2t2/eduardo-frontend`, conservando las 12 rutas, ahora preparadas en el índice.
+La instalación limpia sigue referida a **`2b754e2`**, con sus fechas y resultados
+originales. No se repitieron pruebas, se modificó código ni se hizo commit/push.
+La validación REMOTA permanece pendiente, con versión desplegada por confirmar.
