@@ -19,10 +19,10 @@ incluida la igualdad de su HTML con el commit, no mediante una regresión visual
 
 [`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md):
 comandos, versiones, resultados primarios y conservación. La tabla para la futura
-validación **REMOTA**, toda pendiente y con versión desplegada por confirmar, está en
+validación **REMOTA**, toda pendiente (versión desplegada: ver
+[`pruebas-remotas.md`](../sebastian/pruebas-remotas.md)), está en
 [`documento-Eduardo.md`](../../documento-Eduardo.md#validación-remota-futura--todavía-no-ejecutada).
-Solo las 12 rutas del manifiesto de este cierre quedan preparadas en el índice,
-sin commit ni push. No cambió código de producción ni se repitieron pruebas.
+Solo las 12 rutas del manifiesto de este cierre se publicaron en `8a5bb9b`, PR #84. No cambió código de producción ni se repitieron pruebas.
 
 ## Pendientes locales completados · 2026-11-14 · publicados en 2b754e2
 

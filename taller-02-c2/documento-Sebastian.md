@@ -82,3 +82,5 @@ Durante una sesión de diagnóstico se mostraron por error variables de otra apl
 - La memoria de la conversación vive en la RAM del dyno. Si Heroku lo duerme o se reinicia, el chat parte de cero.
 - El dyno Eco se duerme tras 30 minutos sin visitas; la primera respuesta puede tardar varios segundos.
 - Rotar `CLAVE_API` al cerrar la entrega.
+- Despliegue final de `main` después de unir #80 (cambia el catálogo del agente de Matías) y #81. Al hacerlo,
+  anotar aquí la release y el commit desplegados: lo de arriba corresponde al commit `741305b`.

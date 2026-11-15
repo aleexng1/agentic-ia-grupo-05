@@ -276,7 +276,8 @@ Comandos, versiones, resultados y alcance:
 
 **Estado vigente de preparación:** el PR #82 está **fusionado en `main`** mediante
 `71df3e8`. Se ejecutaron `git fetch origin` y `git merge --ff-only origin/main` en
-`c2t2/eduardo-frontend`, conservando las 12 rutas, ahora preparadas en el índice.
+`c2t2/eduardo-frontend`, conservando las 12 rutas, publicadas en `8a5bb9b`, PR #84.
 La instalación limpia sigue referida a **`2b754e2`**, con sus fechas y resultados
-originales. No se repitieron pruebas, se modificó código ni se hizo commit/push.
-La validación REMOTA permanece pendiente, con versión desplegada por confirmar.
+originales. No se repitieron pruebas ni se modificó código.
+La validación REMOTA permanece pendiente; versión desplegada: ver
+[`pruebas-remotas.md`](../sebastian/pruebas-remotas.md).

@@ -6,8 +6,7 @@ No se consultó Gemini. Esto **no** certifica toda la aplicación ni un desplieg
 
 **Estado de publicación:** el **PR #82 está fusionado en `main`** mediante
 `71df3e80adea7ec675db73eefe884cb82eeffc9a`. La rama local incorporó ese commit por
-fast-forward y las 12 rutas del cierre quedan preparadas en el índice, sin commit
-ni push. **La versión usada para la instalación limpia sigue siendo `2b754e2`**;
+fast-forward y las 12 rutas del cierre se publicaron en `8a5bb9b`, PR #84. **La versión usada para la instalación limpia sigue siendo `2b754e2`**;
 sus fechas y resultados originales no se cambiaron ni se repitieron las pruebas.
 
 ## Fuente y aislamiento
@@ -21,7 +20,7 @@ sus fechas y resultados originales no se cambiaron ni se repitieron las pruebas.
   referencias; no actualiza ramas ni el PR. El avance posterior a `71df3e8` no cambia
   la procedencia de la instalación limpia.
 - Fuente exportada con `git archive`, sin copiar `.env`, `.venv` ni archivos sin seguimiento.
-  La copia y el entorno nuevo están bajo la carpeta temporal aprobada de OpenCode, fuera
+  La copia y el entorno nuevo están bajo la carpeta temporal, fuera
   del repositorio. No se creó un worktree ni se cambió la rama de trabajo.
 - Python **3.12.10, Windows AMD64**; pip **25.0.1**. La `.venv` recién creada contenía
   **solo pip**; `include-system-site-packages = false`. Se quitaron `PYTHONPATH`,
@@ -72,8 +71,7 @@ elige otro puerto libre en cada ejecución y emite exactamente dos GET y cuatro 
 & "<VENV_NUEVO>\Scripts\python.exe" -B "<EVIDENCIAS>\comprobar_http.py" --proyecto "<COPIA>\taller-02-c2\proyecto" --destino "<OTRO_DESTINO_NUEVO>" --etiqueta readme
 ```
 
-Registro de instalación: **12:52:59–12:53:46, UTC−03:00**. HTTP:
-**12:54:18–12:54:24**, del **15-11-2026**. Todas las salidas de instalación y `pip check`
+Todas las salidas de instalación y `pip check`
 fueron **0**. Versiones principales resueltas:
 
 | Paquete | Versión | Paquete | Versión |
@@ -91,17 +89,17 @@ idénticas mañana ni compatibilidad en otros sistemas operativos.
 
 ## Resultados primarios
 
-| Comprobación | Esperado | Obtenido |
-| --- | --- | --- |
-| Instalar `requirements.txt` | Salida 0 | **0**, sin dependencias adicionales. |
-| `pip check` | Sin incompatibilidades declaradas | **0**, `No broken requirements found.` |
-| Arranque | `Application startup complete.` | **Completado**, puerto 58569. |
-| `GET /salud` | 200, `{"ok":true}` | **200**, cuerpo exacto. |
-| `GET /` | 200 y panel del commit | **200**, HTML idéntico por SHA-256, título `Planifica tu feria · Grupo 5`, `no-store`. |
-| POST con espacios, sin clave | 401 antes de validar texto | **401**, `Falta la clave de acceso. Envíala en la cabecera X-API-Key.` |
-| POST con espacios, clave incorrecta | 401 | **401**, `La clave de acceso es incorrecta.` |
-| POST `{"texto":""}`, clave válida | 400 | **400**, `Escribe una pregunta para continuar.` |
-| POST `{"texto":"   "}`, clave válida | 400 | **400**, mismo detalle. |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | Instalar `requirements.txt` | Salida 0 | **0**, sin dependencias adicionales. | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | `pip check` | Sin incompatibilidades declaradas | **0**, `No broken requirements found.` | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | Arranque | `Application startup complete.` | **Completado**, puerto 58569. | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | `GET /salud` | 200, `{"ok":true}` | **200**, cuerpo exacto. | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | `GET /` | 200 y panel del commit | **200**, HTML idéntico por SHA-256, título `Planifica tu feria · Grupo 5`, `no-store`. | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST con espacios, sin clave | 401 antes de validar texto | **401**, `Falta la clave de acceso. Envíala en la cabecera X-API-Key.` | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST con espacios, clave incorrecta | 401 | **401**, `La clave de acceso es incorrecta.` | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST `{"texto":""}`, clave válida | 400 | **400**, `Escribe una pregunta para continuar.` | — |
+| LOCAL · Windows AMD64, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST `{"texto":"   "}`, clave válida | 400 | **400**, mismo detalle. | — |
 
 Los rechazos también usan texto de espacios para no poder iniciar una pregunta
 funcional aunque hubiera una regresión de autorización. No hay dobles de aplicación
@@ -133,12 +131,13 @@ La ejecución original de instalación terminó sin staging, fetch/merge, commit
 ni cambios de Heroku. En la preparación posterior de este cierre se ejecutaron
 `git fetch origin` y `git merge --ff-only origin/main`: **`2b754e2` → `71df3e8`**,
 sin diferencias de contenido entre esos commits y conservando las 12 rutas locales.
-Solo esas 12 rutas del manifiesto se preparan en el índice; **sin commit ni push**.
+Esas 12 rutas del manifiesto se publicaron en `8a5bb9b`, PR #84.
 No se modificaron código, resultados primarios ni fechas de pruebas. No se consultó
 Gemini, se repitieron pruebas ni se modificó Heroku durante esta preparación.
 
 La [tabla REMOTA futura](../../../documento-Eduardo.md#validación-remota-futura--todavía-no-ejecutada)
-queda enteramente **pendiente**, con URL y versión desplegada **por confirmar**. No se
+queda enteramente **pendiente**, con URL y versión desplegada en
+[`pruebas-remotas.md`](../../sebastian/pruebas-remotas.md). No se
 heredan resultados LOCAL ni se asume que publicar Git equivale a desplegar Heroku.
 
 ## Evidencias útiles guardadas
