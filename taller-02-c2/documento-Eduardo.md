@@ -13,24 +13,24 @@ en **`2b754e2`**. Las evidencias del 14-11-2026 se publicaron en ese commit dent
 **PR #82, ya fusionado en `main`**. Para preparar este cierre se ejecutaron después
 `git fetch origin` y `git merge --ff-only origin/main`: avance **`2b754e2` → `71df3e8`**,
 sin diferencias de contenido entre esos commits y conservando las 12 rutas locales.
-Estas 12 rutas quedan preparadas en el índice, exclusivamente según el manifiesto,
-**sin commit ni push**. No se repitieron pruebas ni se cambió código; la versión y las
+Estas 12 rutas, exclusivamente según el manifiesto, se **publicaron en `8a5bb9b`,
+PR #84**. No se repitieron pruebas ni se cambió código; la versión y las
 fechas de la instalación limpia se mantienen, sin atribuir pruebas nuevas a `71df3e8`.
 
 Se exportó ese commit con `git archive` a una carpeta temporal fuera del repositorio.
 Desde su `taller-02-c2/proyecto` se siguió la instalación Windows del README con
 **Python 3.12.10** y una `.venv` nueva: inicialmente solo tenía **pip 25.0.1** y
 `include-system-site-packages = false`. No se reutilizaron paquetes de la instalación
-actual. Instalación: **12:52:59–12:53:46, UTC−03:00**; HTTP: **12:54:18–12:54:24**.
+actual.
 
-| Comprobación LOCAL nueva | Resultado medido |
-| --- | --- |
-| `pip install -r requirements.txt` (sin caché) | Salida **0**, sin añadir dependencias fuera del README. |
-| `pip check` | Salida **0**, `No broken requirements found.` |
-| Arranque `app:app` en loopback | Completado, puerto libre **58569**; `PORT = PUERTO = 58569`, `URL_BASE = http://127.0.0.1:58569`, `URLS_AGENTES` vacía. |
-| Panel `GET /` y `GET /salud` | **200** ambos; HTML idéntico al del commit, `Cache-Control: no-store`; salud `{"ok":true}`. |
-| POST sin clave / clave incorrecta | **401 / 401**, con los detalles de acceso correspondientes. |
-| POST vacío / espacios, con clave temporal válida | **400 / 400**, `Escribe una pregunta para continuar.` |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | `pip install -r requirements.txt` (sin caché) | Salida 0 | Salida **0**, sin añadir dependencias fuera del README. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | `pip check` | Sin incompatibilidades declaradas | Salida **0**, `No broken requirements found.` | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | Arranque `app:app` en loopback | `Application startup complete.` | Completado, puerto libre **58569**. | `PORT = PUERTO = 58569`, `URL_BASE = http://127.0.0.1:58569`, `URLS_AGENTES` vacía. |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | Panel `GET /` y `GET /salud` | 200; panel del commit y `{"ok":true}` | **200** ambos; HTML idéntico al del commit, `Cache-Control: no-store`; salud `{"ok":true}`. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST sin clave / clave incorrecta | 401 / 401 | **401 / 401**, con los detalles de acceso correspondientes. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST vacío / espacios, con clave temporal válida | 400 / 400 | **400 / 400**, `Escribe una pregunta para continuar.` | — |
 
 No se detectó una dependencia o instrucción faltante que bloquee **este alcance**.
 No se editaron requirements, README grupales ni archivos de otras personas. Las versiones
@@ -49,19 +49,19 @@ es ese cierre deliberado, no un fallo de arranque. El puerto propio quedó cerra
 
 ### Validación REMOTA futura · todavía no ejecutada
 
-**URL, fecha y versión realmente desplegada: por confirmar por Sebastián, coordinando
-con Alex.** No se supone que Heroku ejecute `2b754e2` por estar publicado en Git.
+**URL, fecha y versión desplegada en Heroku: ver
+[`evidencias/sebastian/pruebas-remotas.md`](evidencias/sebastian/pruebas-remotas.md).** No se supone que Heroku ejecute `2b754e2` por estar publicado en Git.
 Conservar evidencia sanitizada por caso, sin claves, y contrastar la versión antes
 de atribuirle resultados. No se accedió ni se cambió Heroku en esta comprobación.
 
-| Caso REMOTO / responsable | Esperado | Obtenido / evidencia |
-| --- | --- | --- |
-| Identidad del despliegue y HTTPS · Sebastián / Alex | URL, TLS, release y commit desplegado identificados. | **Pendiente; versión por confirmar.** |
-| Panel y `/salud` · Sebastián / Eduardo | 200; panel vigente y `{"ok":true}`. | **Pendiente.** |
-| R06/R07: sin clave e incorrecta · Matías / Eduardo | 401 antes del coordinador; aviso seguro. | **Pendiente.** |
-| R08: vacío autorizado · Matías / Eduardo | 400; sin ejecutar agentes. | **Pendiente.** |
-| R01/R02/R04/R05: un agente por conversación · Eduardo / equipo | Con autorización y cuota acordadas: 200, respuesta íntegra, agente, motivo y contexto. | **Pendiente; no se consultó al proveedor aquí.** |
-| Errores y límite del router · Sebastián / Matías / Eduardo | Error entendible, sin secretos; diferenciar router y timeout del panel. Fallas inducidas solo en entorno/ventana autorizados. | **Pendiente; no equivale a los ensayos LOCAL.** |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO · Heroku · todavía no ejecutada | Identidad del despliegue y HTTPS | URL, TLS, release y commit desplegado identificados. | **Pendiente.** | Responsables: Sebastián / Alex. Versión desplegada: ver [`pruebas-remotas.md`](evidencias/sebastian/pruebas-remotas.md). |
+| REMOTO · Heroku · todavía no ejecutada | Panel y `/salud` | 200; panel vigente y `{"ok":true}`. | **Pendiente.** | Responsables: Sebastián / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R06/R07: sin clave e incorrecta | 401 antes del coordinador; aviso seguro. | **Pendiente.** | Responsables: Matías / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R08: vacío autorizado | 400; sin ejecutar agentes. | **Pendiente.** | Responsables: Matías / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R01/R02/R04/R05: un agente por conversación | Con autorización y cuota acordadas: 200, respuesta íntegra, agente, motivo y contexto. | **Pendiente.** | Responsables: Eduardo / equipo. No se consultó al proveedor aquí. |
+| REMOTO · Heroku · todavía no ejecutada | Errores y límite del router | Error entendible, sin secretos; diferenciar router y timeout del panel. Fallas inducidas solo en entorno/ventana autorizados. | **Pendiente.** | Responsables: Sebastián / Matías / Eduardo. No equivale a los ensayos LOCAL. |
 
 ## 1. Pendientes locales completados · ejecución del 14-11-2026
 
@@ -187,7 +187,7 @@ y **no se repitió** en esta continuación.
 - El cierre integrado se publicó en **`d8cce13`** y la continuación de evidencias en
   **`2b754e2`, dentro del PR #82, ya fusionado** en `main` mediante **`71df3e8`**.
   No está pendiente integrar ese PR. Las 12 rutas del cierre documental y la instalación
-  limpia quedan preparadas en el índice; su commit y push no se han realizado.
+  limpia se publicaron en `8a5bb9b`, PR #84.
 - R08/R10/R11/R12 y las tres consultas con formato actual **ya no están pendientes**.
   R11/R12 solo acreditan manejo del frontend ante fallas **inducidas y controladas**.
 - Heroku/HTTPS, su router y el despliegue público siguen fuera del alcance de esta
