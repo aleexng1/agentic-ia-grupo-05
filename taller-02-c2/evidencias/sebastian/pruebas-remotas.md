@@ -30,7 +30,7 @@ Las claves no aparecen en este archivo. La `CLAVE_API` y la `GOOGLE_API_KEY` viv
 
 ## Logs
 
-Extracto de `logs-heroku.txt`: líneas de `[coordinador]` y de las rutas `/panel/consultar`, `/salud` y `/agentes/*`. Se muestran el rechazo sin clave (401), la clave incorrecta (401), la falla de Gemini (502) y las consultas exitosas.
+Extracto de `logs-heroku.txt`: líneas de `[coordinador]` y de las rutas `/panel/consultar`, `/salud` y `/agentes/*`. Se muestran el rechazo sin clave (401), la clave incorrecta (401), las validaciones (400) y las consultas exitosas. Este extracto no incluye los 502 de las filas 7 y 8, porque esas pruebas se hicieron antes de cargar la clave correcta.
 
 ## Notas
 

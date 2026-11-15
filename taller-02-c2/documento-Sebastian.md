@@ -69,9 +69,7 @@ Las pruebas corrieron el 14/11/2026 contra la URL pública. Las respuestas compl
 
 ## 5. Incidente de exposición de claves
 
-Un comando mío de diagnóstico mostró las Config Vars de `blooming-wave-76449`, otra app de la cuenta de Heroku que no es de este proyecto. Ese output incluyó claves de terceros. No las usé ni las repetí en ningún archivo del repositorio. Quedó como acción pendiente del dueño de esa app rotarlas.
-
-No es un incidente de este proyecto, pero lo dejo registrado por transparencia.
+Durante una sesión de diagnóstico se mostraron por error variables de otra aplicación de la misma cuenta de Heroku, que no pertenece a este proyecto. No se usaron ni se repitieron en ningún archivo del repositorio. Las claves de esa aplicación deben rotarse por su dueño.
 
 ## 6. Seguridad del despliegue
 
