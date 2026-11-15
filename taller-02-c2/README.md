@@ -310,7 +310,66 @@ permitido y rechazado, y de las fallas del proveedor: `evidencias/matias/`.
 
 ## Operación en Heroku
 
-Pendiente: Sebastián.
+La app está desplegada en Heroku con la cuenta de Sebastián, en la app
+`grupo05-taller2-seba`. Dirección pública:
+**https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/**
+
+Los comandos usan la [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) (`heroku login` una vez).
+Se ejecutan desde la raíz del repositorio.
+
+**Variables de entorno (Config Vars).** Nunca van en el repo; se cargan con la CLI:
+
+```bash
+heroku config:set GOOGLE_API_KEY=... -a grupo05-taller2-seba
+heroku config:set CLAVE_API=... -a grupo05-taller2-seba
+heroku config:set MODELO=gemini-3.5-flash-lite WEB_CONCURRENCY=1 -a grupo05-taller2-seba
+heroku config:set URL_BASE=https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com -a grupo05-taller2-seba
+```
+
+`PORT` lo asigna Heroku; no se define. `GOOGLE_API_KEY` es la clave de Gemini; `CLAVE_API` es la
+clave de acceso (se genera con `python -c "import secrets; print(secrets.token_urlsafe(32))"`).
+
+**Desplegar (o volver a desplegar) `main`.** El Procfile y `requirements.txt` están en la raíz; `.slugignore`
+deja fuera todo lo que no es `taller-02-c2/proyecto`. Primero, la primera vez, asocia la app como remoto:
+
+```bash
+heroku git:remote -a grupo05-taller2-seba
+```
+
+Luego cada despliegue:
+
+```bash
+git switch main && git pull
+git push heroku main
+```
+
+`Automatic Deploys` está desactivado: solo se despliega cuando se hace el `git push`.
+
+**Ver logs:**
+
+```bash
+heroku logs --tail -a grupo05-taller2-seba
+```
+
+**Detener la app** (sin borrarla, deja de consumir horas del dyno):
+
+```bash
+heroku ps:scale web=0 -a grupo05-taller2-seba
+```
+
+Para volver a levantarla: `heroku ps:scale web=1 -a grupo05-taller2-seba`.
+Como alternativa, Maintenance Mode: `heroku maintenance:on -a grupo05-taller2-seba`.
+
+**Qué cuesta.** El dyno web es **Eco** (5 USD/mes por la suscripción Eco, con 1000 horas compartidas entre
+todas las apps Eco de la cuenta). Con el dyno detenido no se consumen horas. Eco se duerme tras 30 minutos
+sin visitas: la primera respuesta después de un rato tarda varios segundos.
+
+**Por qué `WEB_CONCURRENCY=1`.** Con más de un proceso, cada copia tendría su propia memoria: la
+conversación (que vive en la RAM, ver Límites conocidos) se repartiría entre copias y el chat perdería el hilo.
+
+**Acceso para el evaluador.** La URL de arriba es pública y se puede dar tal cual. La `CLAVE_API` **no** va en
+el repositorio ni en el README: se entrega por una vía privada. Quien administra la app puede leerla con
+`heroku config:get CLAVE_API -a grupo05-taller2-seba`.
 
 ## Límites conocidos
 
