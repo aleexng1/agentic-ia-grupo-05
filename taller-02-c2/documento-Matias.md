@@ -22,6 +22,7 @@ corrió las pruebas.
 | `proyecto/src/comun/seguridad.py` | Middleware que exige la cabecera `X-API-Key` en toda petición que envía datos (POST, PUT, PATCH, DELETE), la compara con `CLAVE_API` usando `secrets.compare_digest` y responde `401` con `{"detail": "mensaje"}`. Deja públicas la página, las fichas y `/salud`. Si `CLAVE_API` está vacía, avisa al arrancar y responde `503` a toda consulta: la app no queda abierta. |
 | `proyecto/src/comun/errores.py` | Traduce las fallas de Gemini, de la red o de un agente a un mensaje de una línea en español, sin traza ni claves. Oculta cualquier clave que aparezca en un mensaje. Alex agregó después dos frases al reconocimiento de «falta la clave de Gemini» (`api key required`, `provide api_key`); es el único cambio ajeno. |
 | `proyecto/tests/test_seguridad.py` | 52 pruebas de acceso y errores, sin llamar a Gemini. |
+| `proyecto/tests/test_tools_matias.py` | 86 pruebas de la herramienta `armar_programa` de mi agente (a pedido de Alex): el programa nunca pasa de la duración pedida, los minutos libres cuadran, las horas son consecutivas, los alias de público, y los datos inválidos devuelven lista vacía con motivo. |
 | `proyecto/tests/conftest.py` | Define una `CLAVE_API` falsa solo para pytest, para que las pruebas no dependan del `.env` de quien las corre. |
 
 ### Cambios mínimos en archivos de otras personas
@@ -194,7 +195,7 @@ aparte, con otro puerto.
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 | --- | --- | --- | --- | --- |
-| LOCAL · 2026-11-14 | `python -m pytest` desde `taller-02-c2/proyecto` sobre `main` integrado | Todas pasan, sin usar la clave de Gemini | `168 passed` (116 existentes + 52 nuevas; el 2026-11-13 eran 166, antes de integrar los cambios de Alex y Eduardo) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
+| LOCAL · 2026-11-15 | `python -m pytest` desde `taller-02-c2/proyecto` sobre `main` integrado más mis cambios | Todas pasan, sin usar la clave de Gemini | `254 passed` (168 que ya pasaban en `main`, de las cuales 52 son mías de seguridad, más 86 nuevas de `test_tools_matias.py`) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
 
 ### Prueba 11 · Acceso permitido en Heroku
 
