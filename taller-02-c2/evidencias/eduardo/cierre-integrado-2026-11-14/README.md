@@ -7,13 +7,12 @@ resultados. Los documentos se actualizaron después, sin cambiar esos archivos p
 
 ## Automatización sin proveedor real
 
-| Evidencia | Resultado / procedencia |
-| --- | --- |
-| [pytest-proyecto.txt](pytest-proyecto.txt) | **168 passed in 10.88s**, salida 0. Pruebas del proyecto, con dobles; sin credenciales reales. |
-| [pytest-frontend.txt](pytest-frontend.txt) | **68 passed in 69.11s**, salida 0; sin `xfail`. Incluye 401 reales de middleware con grafo sustituido y 503 JSON/HTML de regresión. |
-| [resultados-pruebas.json](resultados-pruebas.json) | Fecha, commit base, huellas, salidas y comprobaciones de conservación. |
-| [capturas-regresion/](capturas-regresion/) | Ocho capturas de esta repetición: 01, 02, 04, 05, 06, 07, 08 y 09. Las respuestas/errores/demoras son **SIMULADOS**, salvo la propia pantalla de ingreso real. No se genera una nueva 03 en la suite actual. |
-| [09-503-html-simulado.png](capturas-regresion/09-503-html-simulado.png) | HTML de proxy simulado: indisponibilidad temporal, sin atribuirlo a `CLAVE_API`. |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL · Windows, Python 3.12.10, pytest 9.2.0, Playwright 1.65.1, Chrome · 2026-11-14 | Suite del proyecto, desde `proyecto` | Salida 0 | **168 passed in 10.88s**, salida 0. | Pruebas del proyecto, con dobles; sin credenciales reales. Registro: [pytest-proyecto.txt](pytest-proyecto.txt). |
+| LOCAL · Windows, Python 3.12.10, pytest 9.2.0, Playwright 1.65.1, Chrome · 2026-11-14 | Suite del frontend (`test_panel_eduardo.py`), con `CARPETA_CAPTURAS` en `capturas-regresion` | Salida 0 | **68 passed in 69.11s**, salida 0; sin `xfail`. | Incluye 401 reales de middleware con grafo sustituido y 503 JSON/HTML de regresión. Registro: [pytest-frontend.txt](pytest-frontend.txt). [capturas-regresion/](capturas-regresion/): Ocho capturas de esta repetición: 01, 02, 04, 05, 06, 07, 08 y 09. Las respuestas/errores/demoras son **SIMULADOS**, salvo la propia pantalla de ingreso real. No se genera una nueva 03 en la suite actual. [09-503-html-simulado.png](capturas-regresion/09-503-html-simulado.png): HTML de proxy simulado: indisponibilidad temporal, sin atribuirlo a `CLAVE_API`. |
+
+Fecha, commit base, huellas, salidas y comprobaciones de conservación de ambas suites: [resultados-pruebas.json](resultados-pruebas.json).
 
 Ejecución con Python 3.12.10, pytest 9.2.0, Playwright 1.65.1 y Chrome instalado.
 `CARPETA_CAPTURAS` apuntó a `capturas-regresion` de esta carpeta nueva. Las capturas
@@ -29,15 +28,15 @@ inerte; el cambio genérico no borra esa información válida.
 ## Casos HTTP reales, sin dobles
 
 [resultados-locales.json](resultados-locales.json) conserva pregunta exacta, estado,
-cuerpo, comprobaciones y respuesta visible. Ejecución 13:55:05–13:55:50, UTC−03:00;
-orden R06 → R07 → R05 → R09. R05 no se reintentó.
+cuerpo, comprobaciones y respuesta visible. Orden R06 → R07 → R05 → R09. R05 no se
+reintentó. Pregunta exacta en los cuatro casos: «¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?»
 
-| Caso | Obtenido | Captura y registro |
-| --- | --- | --- |
-| R05 · clave temporal válida | **200**. Agente de Eduardo, motivo, presupuesto $2.173.600 CLP, supuestos y advertencias. **Llamada real al coordinador, A2A y Gemini**, con precios de demostración. | [r05-acceso-permitido.png](r05-acceso-permitido.png), [servidor-integrado.txt](servidor-integrado.txt) |
-| R06 · sin cabecera de acceso | **401** con detalle de clave ausente; aún 0 preguntas al coordinador y 0 envíos A2A. | [r06-sin-clave.png](r06-sin-clave.png), mismo registro integrado |
-| R07 · clave incorrecta en panel | **401** con detalle, retorno al ingreso, campo de clave vacío y pregunta conservada; aún 0 preguntas al coordinador y 0 envíos A2A. | [r07-clave-incorrecta.png](r07-clave-incorrecta.png), mismo registro integrado |
-| R09 · otro proceso sin configuración del proveedor | **502** con detalle sanitizado de falta de configuración de Gemini; pregunta conservada y envío habilitado. Error real del SDK, **no prueba de rechazo remoto, cuota ni caída de Gemini**. | [r09-proveedor-sin-configuracion.png](r09-proveedor-sin-configuracion.png), [servidor-r09-aislado.txt](servidor-r09-aislado.txt) |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL · app integrada · 2026-11-14, 13:55:32 (UTC−03:00) | **R05 · clave temporal válida**: Panel con clave válida | 200, contrato de cuatro campos, agente y motivo | **200**. Agente de Eduardo, motivo, presupuesto $2.173.600 CLP, supuestos y advertencias. **Llamada real al coordinador, A2A y Gemini**, con precios de demostración. | [r05-acceso-permitido.png](r05-acceso-permitido.png), [servidor-integrado.txt](servidor-integrado.txt) |
+| LOCAL · app integrada · 2026-11-14, 13:55:29 (UTC−03:00) | **R06 · sin cabecera de acceso**: Cliente HTTP sin `X-API-Key` | 401 antes del coordinador | **401** con detalle de clave ausente; aún 0 preguntas al coordinador y 0 envíos A2A. | [r06-sin-clave.png](r06-sin-clave.png), mismo registro integrado |
+| LOCAL · app integrada · 2026-11-14, 13:55:31 (UTC−03:00) | **R07 · clave incorrecta en panel**: Clave incorrecta en el panel | 401, volver al ingreso y conservar pregunta | **401** con detalle, retorno al ingreso, campo de clave vacío y pregunta conservada; aún 0 preguntas al coordinador y 0 envíos A2A. | [r07-clave-incorrecta.png](r07-clave-incorrecta.png), mismo registro integrado |
+| LOCAL · otro proceso sin configuración del proveedor · 2026-11-14, 13:55:42 (UTC−03:00) | **R09 · otro proceso sin configuración del proveedor**: Otro proceso LOCAL autorizado, sin configuración válida del proveedor | error 502/503 sanitizado | **502** con detalle sanitizado de falta de configuración de Gemini; pregunta conservada y envío habilitado. Error real del SDK, **no prueba de rechazo remoto, cuota ni caída de Gemini**. | [r09-proveedor-sin-configuracion.png](r09-proveedor-sin-configuracion.png), [servidor-r09-aislado.txt](servidor-r09-aislado.txt) |
 
 R06 usa httpx sin `X-API-Key`. Su imagen incorpora una visualización rotulada del estado
 y JSON realmente recibidos; no finge que el panel tenga un flujo nativo de envío sin
