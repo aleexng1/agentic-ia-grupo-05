@@ -1,15 +1,75 @@
 # Eduardo Basaure · Frontend · Taller 2 del Curso 2 · Grupo 5
 
-**Estado vigente: LOCAL · 2026-11-14 · Rama `c2t2/eduardo-frontend` ·
-publicado en los commits `d8cce13` y `2b754e2` · [PR #82](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82) unido a `main` el 2026-11-15.**
+**Estado vigente: LOCAL · 2026-11-15 · Rama `c2t2/eduardo-frontend` ·
+[PR #82 fusionado](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82).**
 
-## 1. Continuación vigente: pendientes locales completados
+**Base vigente tras el avance de `origin/main`: `71df3e80adea7ec675db73eefe884cb82eeffc9a`.
+Versión utilizada en la instalación limpia: `2b754e2e2bb8b035888f281ced1b3c36d6b1bab4`.**
 
-Se comprobó la rama, `HEAD`, el índice y el estado de trabajo antes de editar.
-`git ls-remote origin refs/heads/c2t2/eduardo-frontend` confirmó **`d8cce13` publicado**.
-El PR #82 ya existe, según la actualización de Eduardo: **no está pendiente abrirlo
-ni hacer commit/push del cierre integrado anterior**. Esta continuación se publicó
-después en el commit `2b754e2` del mismo PR, que se unió a `main` el 2026-11-15.
+## Reproducibilidad · comprobación nueva del 15-11-2026
+
+Durante la instalación limpia, `HEAD`, la rama remota y `refs/pull/82/head` coincidían
+en **`2b754e2`**. Las evidencias del 14-11-2026 se publicaron en ese commit dentro del
+**PR #82, ya fusionado en `main`**. Para preparar este cierre se ejecutaron después
+`git fetch origin` y `git merge --ff-only origin/main`: avance **`2b754e2` → `71df3e8`**,
+sin diferencias de contenido entre esos commits y conservando las 12 rutas locales.
+Estas 12 rutas quedan preparadas en el índice, exclusivamente según el manifiesto,
+**sin commit ni push**. No se repitieron pruebas ni se cambió código; la versión y las
+fechas de la instalación limpia se mantienen, sin atribuir pruebas nuevas a `71df3e8`.
+
+Se exportó ese commit con `git archive` a una carpeta temporal fuera del repositorio.
+Desde su `taller-02-c2/proyecto` se siguió la instalación Windows del README con
+**Python 3.12.10** y una `.venv` nueva: inicialmente solo tenía **pip 25.0.1** y
+`include-system-site-packages = false`. No se reutilizaron paquetes de la instalación
+actual. Instalación: **12:52:59–12:53:46, UTC−03:00**; HTTP: **12:54:18–12:54:24**.
+
+| Comprobación LOCAL nueva | Resultado medido |
+| --- | --- |
+| `pip install -r requirements.txt` (sin caché) | Salida **0**, sin añadir dependencias fuera del README. |
+| `pip check` | Salida **0**, `No broken requirements found.` |
+| Arranque `app:app` en loopback | Completado, puerto libre **58569**; `PORT = PUERTO = 58569`, `URL_BASE = http://127.0.0.1:58569`, `URLS_AGENTES` vacía. |
+| Panel `GET /` y `GET /salud` | **200** ambos; HTML idéntico al del commit, `Cache-Control: no-store`; salud `{"ok":true}`. |
+| POST sin clave / clave incorrecta | **401 / 401**, con los detalles de acceso correspondientes. |
+| POST vacío / espacios, con clave temporal válida | **400 / 400**, `Escribe una pregunta para continuar.` |
+
+No se detectó una dependencia o instrucción faltante que bloquee **este alcance**.
+No se editaron requirements, README grupales ni archivos de otras personas. Las versiones
+resueltas, comandos, cuerpos HTTP y registros están en
+[`reproducibilidad-2b754e2-2026-11-15/`](evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/README.md).
+Los rangos de requirements no fijan una resolución idéntica en fechas futuras.
+
+**Límites:** solo instalación, arranque y seis comprobaciones HTTP puntuales; no se
+repitieron las suites completas ni la interacción del navegador. Se usó una clave
+temporal privada, únicamente en memoria/entorno del hijo, y se deshabilitó dotenv en
+ese hijo, con credenciales del proveedor vacías. Todos los POST llevaban texto vacío
+o espacios para no llegar al coordinador: **0 preguntas y 0 envíos A2A en el log; no
+se consultó Gemini**. No acredita respuestas funcionales nuevas, Heroku ni HTTPS.
+Se cerró únicamente el árbol del proceso propio; el código de salida 1 tras `taskkill`
+es ese cierre deliberado, no un fallo de arranque. El puerto propio quedó cerrado.
+
+### Validación REMOTA futura · todavía no ejecutada
+
+**URL, fecha y versión realmente desplegada: por confirmar por Sebastián, coordinando
+con Alex.** No se supone que Heroku ejecute `2b754e2` por estar publicado en Git.
+Conservar evidencia sanitizada por caso, sin claves, y contrastar la versión antes
+de atribuirle resultados. No se accedió ni se cambió Heroku en esta comprobación.
+
+| Caso REMOTO / responsable | Esperado | Obtenido / evidencia |
+| --- | --- | --- |
+| Identidad del despliegue y HTTPS · Sebastián / Alex | URL, TLS, release y commit desplegado identificados. | **Pendiente; versión por confirmar.** |
+| Panel y `/salud` · Sebastián / Eduardo | 200; panel vigente y `{"ok":true}`. | **Pendiente.** |
+| R06/R07: sin clave e incorrecta · Matías / Eduardo | 401 antes del coordinador; aviso seguro. | **Pendiente.** |
+| R08: vacío autorizado · Matías / Eduardo | 400; sin ejecutar agentes. | **Pendiente.** |
+| R01/R02/R04/R05: un agente por conversación · Eduardo / equipo | Con autorización y cuota acordadas: 200, respuesta íntegra, agente, motivo y contexto. | **Pendiente; no se consultó al proveedor aquí.** |
+| Errores y límite del router · Sebastián / Matías / Eduardo | Error entendible, sin secretos; diferenciar router y timeout del panel. Fallas inducidas solo en entorno/ventana autorizados. | **Pendiente; no equivale a los ensayos LOCAL.** |
+
+## 1. Pendientes locales completados · ejecución del 14-11-2026
+
+En aquella ejecución se comprobó la rama, `HEAD`, el índice y el estado de trabajo.
+`git ls-remote origin refs/heads/c2t2/eduardo-frontend` confirmó entonces **`d8cce13`
+publicado**, base de estas pruebas. La ejecución terminó sin `git add`, commit ni push;
+sus documentos y evidencias se publicaron después en **`2b754e2`, PR #82**. Esa base
+histórica no se sustituye por el commit de publicación posterior.
 
 **Resultado:** R08 y R10 aprobados con la app LOCAL real; R11 y R12 aprobados como
 **fallas inducidas en un entorno controlado**, sin proveedor y sin Heroku. Además se
@@ -24,7 +84,7 @@ propios en loopback. Casos ejecutados entre **14:50:56 y 15:05:37, UTC−03:00**
 Se reutilizó `.venv`, sin cambiar dependencias. El código de producción no cambió;
 **no se repitieron las suites completas** de 168 y 68 pruebas ya aprobadas.
 
-Carpeta nueva, sin sobrescribir evidencias anteriores:
+Carpeta de aquella ejecución, sin sobrescribir evidencias anteriores:
 [`pendientes-locales-2026-11-14-144554/`](evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md).
 El [índice consolidado](evidencias/eduardo/pendientes-locales-2026-11-14-144554/resultados-consolidados.json)
 identifica la procedencia de cada resultado; no se presenta como un registro primario
@@ -124,8 +184,10 @@ y **no se repitió** en esta continuación.
 
 ## 5. Publicación y pendientes que sí permanecen
 
-- El **PR #82 se unió a `main` el 2026-11-15**, después de la revisión de Alex, con el
-  cierre integrado (`d8cce13`) y esta continuación (`2b754e2`).
+- El cierre integrado se publicó en **`d8cce13`** y la continuación de evidencias en
+  **`2b754e2`, dentro del PR #82, ya fusionado** en `main` mediante **`71df3e8`**.
+  No está pendiente integrar ese PR. Las 12 rutas del cierre documental y la instalación
+  limpia quedan preparadas en el índice; su commit y push no se han realizado.
 - R08/R10/R11/R12 y las tres consultas con formato actual **ya no están pendientes**.
   R11/R12 solo acreditan manejo del frontend ante fallas **inducidas y controladas**.
 - Heroku/HTTPS, su router y el despliegue público siguen fuera del alcance de esta
@@ -133,10 +195,10 @@ y **no se repitió** en esta continuación.
 - Se conserva la observación previa para Matías: un `detail` seguro para el DOM no
   equivale a sanitizar secretos; revisar futuros responders y el `str(error)` genérico
   del backend y las cabeceras de no caché de errores. No se amplió ese alcance.
-- La [lista exacta de archivos de esta continuación](evidencias/eduardo/pendientes-locales-2026-11-14-144554/archivos-modificados.txt)
-  separa los documentos modificados y las evidencias nuevas. Excluye la foto previa,
-  `.env`, `.venv` y cualquier archivo ajeno. No sustituye la selección histórica del commit
-  ya publicado. La solicitud real se añadió a [prompts-utilizados.md](evidencias/eduardo/prompts-utilizados.md).
+- La [lista de la continuación del 14-11-2026, ya publicada](evidencias/eduardo/pendientes-locales-2026-11-14-144554/archivos-modificados.txt)
+  se conserva como histórica. La [lista exacta de esta revisión del 15-11-2026](evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/archivos-modificados.txt)
+  excluye la foto previa, `.env`, `.venv` y cualquier archivo ajeno. Las solicitudes reales
+  se conservan en [prompts-utilizados.md](evidencias/eduardo/prompts-utilizados.md).
 
 ## Histórico conservado · cierre integrado del 14-11-2026
 

@@ -1,0 +1,12 @@
+taller-02-c2/documento-Eduardo.md
+taller-02-c2/evidencias/eduardo/README.md
+taller-02-c2/evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md
+taller-02-c2/evidencias/eduardo/prompts-utilizados.md
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/README.md
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/archivos-modificados.txt
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/comprobar_http.py
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/entorno.json
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/instalacion.txt
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/resultados-http.json
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/revision-final.json
+taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/servidor.txt
