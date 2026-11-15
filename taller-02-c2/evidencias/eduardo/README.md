@@ -1,4 +1,47 @@
-# Evidencias de Eduardo · LOCAL · 2026-11-13
+# Evidencias de Eduardo · LOCAL
+
+## Vigente · 2026-11-14 · pendientes locales y PR #82
+
+Base **`d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91` publicada** en
+`c2t2/eduardo-frontend`; **PR #82 abierto**. La continuación actual queda sin commit,
+push ni staging. No cambió código de producción ni se repitieron las suites completas.
+
+Carpeta nueva: [`pendientes-locales-2026-11-14-144554/`](pendientes-locales-2026-11-14-144554/README.md).
+Contiene R08 (400/422 con autorización válida), R10 (desconexión y restauración del
+servidor propio), R11 (65,472 s reales hasta el aviso; demora de 70,009 s) y R12 (200 HTML).
+**R11/R12 son fallas inducidas en un entorno controlado, no fallas reales de Gemini ni
+Heroku.** Incluye también una consulta real por agente de Matías, Alex y Sebastián, con
+el panel actual: pregunta, respuesta íntegra, agente, motivo, capturas y registro A2A.
+
+Se conservan los intentos instrumentales incompletos/no aprobados, separados de los
+resultados finales. Las tres consultas reales no se repitieron. `.env`, todas las capturas
+históricas, foto y demo del Taller 1 y servidor previo del puerto 8000 se conservaron.
+La selección exacta nueva está en
+[`archivos-modificados.txt`](pendientes-locales-2026-11-14-144554/archivos-modificados.txt).
+
+## Cierre integrado anterior · 2026-11-14 · publicado en d8cce13
+
+Base probada `741305bf0fed986b523898114bb1d851d28d063b` más ajustes publicados
+posteriormente en `d8cce13`, PR #82; no es trabajo todavía pendiente de commit/push.
+**168 pruebas del proyecto y 68 del frontend aprobadas, sin `xfail`.** R05 real con
+coordinador/A2A/Gemini devuelve 200; R06 y R07 reales, 401; R09 aislado sin configuración
+del proveedor, 502. Este último no acredita una caída remota ni cuota agotada de Gemini.
+
+Las evidencias de aquel cierre se encuentran en
+[`cierre-integrado-2026-11-14/README.md`](cierre-integrado-2026-11-14/README.md), con
+capturas separadas de regresión **simulada** y casos HTTP **reales**, registros
+sanitizados, huellas de archivos probados y selección histórica del PR #82.
+`validar_cierre_local.py` reproduce ambas fases sin modificar `.env` ni Heroku.
+
+Las capturas y logs antiguos no se regeneraron. Los documentos de aquella ejecución
+conservan su corte temporal anterior a la publicación; el estado vigente está arriba.
+El apartado inferior y los prompts
+anteriores describen sus propias fechas; no representan pendientes actuales.
+
+## Histórico · 2026-11-13
+
+<details>
+<summary>Abrir índice y límites de las evidencias anteriores, conservados</summary>
 
 Entrega y matriz de casos: [`../../documento-Eduardo.md`](../../documento-Eduardo.md).
 
@@ -51,3 +94,5 @@ los dos registros originales en este cierre. Se incorporaron solo las capturas n
 y, sin esa variable, escribe las capturas en esta carpeta. Revisar resultados y fechas
 antes de archivar otra ejecución. Las rutas personales de los encabezados de pytest se sustituyeron
 por `<REPOSITORIO>`; no se alteraron resultados ni mensajes de prueba.
+
+</details>

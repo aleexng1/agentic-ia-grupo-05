@@ -1,0 +1,19 @@
+LOCAL · 2026-11-14T13:55:49-03:00 · proceso r09-aislado · http://127.0.0.1:64562
+App real app:app, sin dobles. Configuración solo en el entorno del hijo.
+Registro sanitizado antes de escribir; salida UTF-8.
+
+INFO:     Started server process [42332]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:64562 (Press CTRL+C to quit)
+INFO:     127.0.0.1:64576 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64583 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64583 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+2026-11-14 13:55:49 INFO    [coordinador] pregunta recibida · context_id=b47da971-77ec-4408-98bb-1ebf3f02aee2 · «¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4…»
+INFO:     127.0.0.1:64588 - "GET /agentes/matias/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64588 - "GET /agentes/alex/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64588 - "GET /agentes/eduardo/.well-known/agent-card.json HTTP/1.1" 200 OK
+INFO:     127.0.0.1:64588 - "GET /agentes/sebastian/.well-known/agent-card.json HTTP/1.1" 200 OK
+2026-11-14 13:55:49 INFO    [coordinador] catálogo listo · 4 agente(s): Agente de Matias, Agente de Alex, Agente de Eduardo, Agente de Sebastian
+2026-11-14 13:55:49 ERROR   [coordinador] consulta fallida · 1 validation error for ChatGoogleGenerativeAI Value error, API key required for Gemini Developer API. Provide api_key parameter or set GOOGLE_API_KEY/GEMINI_API_KEY environment variable. [type=value_error, input_value={'model': 'gemini-3.5-fla...': {}, 'base_url': None}, input_type=dict] For furthe…
+INFO:     127.0.0.1:64587 - "POST /panel/consultar HTTP/1.1" 502 Bad Gateway

@@ -391,7 +391,7 @@ def test_rechazo_de_acceso_simulado(pagina, estado, tipo):
 
 @pytest.mark.parametrize("estado,esperado", [
     (400, "Entrada inválida"), (422, "Entrada inválida"), (413, "demasiado larga"),
-    (429, "límite de consultas"), (502, "proveedor o al agente"), (503, "no está configurado"),
+    (429, "límite de consultas"), (502, "proveedor o al agente"), (503, "no está disponible temporalmente"),
     (500, "servidor no pudo"), (408, "tiempo de espera del servidor"),
     (504, "tiempo de espera del servidor"), (404, "HTTP 404"),
 ])
@@ -405,6 +405,11 @@ def test_errores_http_simulados_sin_detalles_crudos(pagina, estado, esperado):
     expect(aviso).to_contain_text(esperado)
     assert "\n" not in aviso.text_content()
     assert "DETALLE_INTERNO_NO_MOSTRAR" not in pagina.content()
+    if estado == 503:
+        assert "CLAVE_API" not in aviso.text_content()
+        assert "clave de acceso" not in aviso.text_content()
+        assert "configurad" not in aviso.text_content()
+        capturar(pagina, "09-503-html-simulado.png", "503 HTML SIMULADO · indisponibilidad temporal, causa desconocida")
     expect(pagina.locator("#pregunta")).to_have_value(PREGUNTA)
     expect(pagina.locator("#enviar")).to_be_enabled()
     if estado == 502:
@@ -426,24 +431,43 @@ def test_muestra_el_detail_del_servidor_simulado(pagina, estado, detalle):
     expect(pagina.locator("#enviar")).to_be_enabled()
 
 
-@pytest.mark.parametrize("cuerpo,esperado", [
-    ({"detail": [{"msg": "campo requerido"}]}, "Entrada inválida"),
-    ({"detail": "x" * 301}, "Entrada inválida"),
-    ({"detail": 42}, "Entrada inválida"),
-    ({}, "Entrada inválida"),
+@pytest.mark.parametrize("estado,esperado", [
+    (400, "Entrada inválida"), (503, "no está disponible temporalmente"),
 ])
-def test_detail_no_valido_usa_el_texto_fijo(pagina, cuerpo, esperado):
+@pytest.mark.parametrize("cuerpo", [
+    {"detail": [{"msg": "campo requerido"}]}, {"detail": "x" * 301},
+    {"detail": 42}, {}, {"detail": ""}, {"detail": " \n "}, {"detail": None},
+])
+def test_detail_no_valido_usa_el_texto_fijo(pagina, estado, cuerpo, esperado):
     ingresar(pagina)
-    simular_json(pagina, cuerpo, 400)
+    simular_json(pagina, cuerpo, estado)
     enviar(pagina)
     burbuja = pagina.locator(".mensaje.asistente .burbuja").last
     expect(burbuja).to_contain_text(esperado)
     assert "campo requerido" not in pagina.content() and "xxxx" not in pagina.content()
+    if estado == 503:
+        assert "CLAVE_API" not in burbuja.text_content()
+        assert "clave de acceso" not in burbuja.text_content()
 
 
-def test_detail_es_texto_y_no_html_ni_multilinea(pagina):
+@pytest.mark.parametrize("cuerpo", ["{", "null"])
+def test_503_con_json_roto_o_nulo_usa_indisponibilidad_temporal(pagina, cuerpo):
     ingresar(pagina)
-    simular_json(pagina, {"detail": "Falla <b>grave</b>\n<img src=x onerror=window.inyeccion=true>   fin"}, 502)
+    pagina.route("**/panel/consultar", lambda ruta: ruta.fulfill(
+        status=503, content_type="application/json", body=cuerpo
+    ))
+    enviar(pagina)
+    aviso = pagina.locator(".mensaje.asistente .burbuja").last
+    expect(aviso).to_contain_text("no está disponible temporalmente")
+    assert "clave de acceso" not in aviso.text_content() and "CLAVE_API" not in aviso.text_content()
+    expect(pagina.locator("#pregunta")).to_have_value(PREGUNTA)
+    expect(pagina.locator("#enviar")).to_be_enabled()
+
+
+@pytest.mark.parametrize("estado", [502, 503])
+def test_detail_es_texto_y_no_html_ni_multilinea(pagina, estado):
+    ingresar(pagina)
+    simular_json(pagina, {"detail": "Falla <b>grave</b>\n<img src=x onerror=window.inyeccion=true>   fin"}, estado)
     enviar(pagina)
     burbuja = pagina.locator(".mensaje.asistente .burbuja").last
     expect(burbuja).to_have_text("Falla <b>grave</b> <img src=x onerror=window.inyeccion=true> fin")

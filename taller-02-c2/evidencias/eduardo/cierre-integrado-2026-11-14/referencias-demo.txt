@@ -1,0 +1,41 @@
+LOCAL · 2026-11-14 · base 741305bf0fed986b523898114bb1d851d28d063b + cambios locales
+Revisión de referencias funcionales; no usa Gemini ni publica configuración privada.
+
+1. Búsqueda en la base integrada, ANTES de la retirada lógica del nuevo PR:
+   git grep -n -E 'demo\.html|/demo|_ARCHIVO_DEMO|StaticFiles' HEAD -- taller-02-c2/proyecto
+   Resultado observado: sin coincidencias; salida 1 (no es un error de ejecución).
+   Búsqueda más amplia en Python/HTML/Markdown/configuración del repositorio:
+   Taller 2 solo tiene menciones documentales en documento-Eduardo.md,
+   documento-Alex.md y evidencias/alex/prompts.md.
+   Taller 1 sí tiene _ARCHIVO_DEMO y su ruta en agente_eduardo/server.py,
+   además de una mención en su README. Esos archivos NO se retiraron ni editaron.
+
+2. Código de publicación revisado:
+   taller-02-c2/proyecto/app.py construye crear_app y registra los cuatro agentes.
+   src/comun/servidor.py incluye crear_panel; no monta archivos estáticos.
+   src/comun/panel.py sirve únicamente src/comun/panel.html en GET /.
+   src/agente_eduardo/server.py solo define responder y tarjeta; no lee demo.html.
+   La demo antigua no enviaba X-API-Key y no es el panel protegido integrado.
+
+3. Inventario observado con app.app.openapi()['paths'], sin cargar dotenv:
+   /
+   /.well-known/agent-card.json
+   /agentes/alex
+   /agentes/alex/.well-known/agent-card.json
+   /agentes/eduardo
+   /agentes/eduardo/.well-known/agent-card.json
+   /agentes/matias
+   /agentes/matias/.well-known/agent-card.json
+   /agentes/sebastian
+   /agentes/sebastian/.well-known/agent-card.json
+   /panel/consultar
+   /salud
+
+4. Comprobación HTTP adicional con TestClient de app:app, sin dobles ni proveedor:
+   GET /: 200
+   GET /demo: 404
+   GET /agentes/eduardo/demo: 404
+   GET /src/agente_eduardo/demo.html: 404
+
+Decisión: eliminar SOLO taller-02-c2/proyecto/src/agente_eduardo/demo.html.
+La copia funcional y la foto del Taller 1 se conservan, sin cambios de contenido.

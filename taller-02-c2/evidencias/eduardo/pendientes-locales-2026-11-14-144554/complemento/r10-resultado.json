@@ -1,0 +1,23 @@
+{
+  "caso": "R10",
+  "fecha": "2026-11-14T14:59:46-03:00",
+  "entorno": "LOCAL app:app de ensayo propia",
+  "pregunta": "Comprobación LOCAL R10: ¿puedes recibir esta pregunta?",
+  "aprobado": false,
+  "esperado": "Aviso de conexión al detener solo el servidor propio; pregunta y controles recuperados; restaurarlo en el mismo puerto.",
+  "direccion": "http://127.0.0.1:58119",
+  "pid_raiz_detenido": 30932,
+  "pid_servidor_detenido": 31508,
+  "error": "ConnectTimeout: ",
+  "restauracion": {
+    "fecha": "2026-11-14T15:00:04-03:00",
+    "mismo_puerto": true,
+    "pid_raiz_nuevo": 40824,
+    "pid_servidor_nuevo": 34776,
+    "salud_http": 200,
+    "portada_http": 200,
+    "post_autorizado_espacios_http": 400,
+    "limpieza_final": "Restauración verificada; después se cierran exclusivamente los procesos propios."
+  },
+  "captura_restauracion": "r10-restaurado-mismo-puerto.png"
+}

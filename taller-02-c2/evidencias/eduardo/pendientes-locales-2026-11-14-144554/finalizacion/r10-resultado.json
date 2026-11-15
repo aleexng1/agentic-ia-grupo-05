@@ -1,0 +1,34 @@
+{
+  "caso": "R10",
+  "fecha": "2026-11-14T15:05:17-03:00",
+  "entorno": "LOCAL app:app de ensayo propia",
+  "pregunta": "Comprobación LOCAL R10: ¿puedes recibir esta pregunta?",
+  "aprobado": true,
+  "esperado": "Desconexión real al detener solo el servidor propio: aviso, pregunta conservada y controles recuperados; restaurarlo en el mismo puerto.",
+  "direccion": "http://127.0.0.1:54738",
+  "pid_raiz_detenido": 25448,
+  "pid_servidor_detenido": 25892,
+  "salud_durante_detencion": "ConnectError",
+  "aviso": "No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida.",
+  "fallos_red": [
+    {
+      "ruta": "/panel/consultar",
+      "fallo": "net::ERR_CONNECTION_REFUSED"
+    }
+  ],
+  "pregunta_conservada": true,
+  "controles_recuperados": true,
+  "espera_real_segundos": 0.04,
+  "captura": "r10-desconexion-real.png",
+  "restauracion": {
+    "fecha": "2026-11-14T15:05:33-03:00",
+    "mismo_puerto": true,
+    "pid_raiz_nuevo": 43964,
+    "pid_servidor_nuevo": 21636,
+    "salud_http": 200,
+    "portada_http": 200,
+    "post_autorizado_espacios_http": 400,
+    "limpieza_final": "Se restauró y comprobó primero; después se cerraron solo los procesos propios de esta validación."
+  },
+  "captura_restauracion": "r10-restaurado.png"
+}
