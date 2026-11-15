@@ -384,6 +384,11 @@ conversación (que vive en la RAM, ver Límites conocidos) se repartiría entre 
 el repositorio ni en el README: se entrega por una vía privada. Quien administra la app puede leerla con
 `heroku config:get CLAVE_API -a grupo05-taller2-seba`.
 
+**Rotar `CLAVE_API` antes de entregar.** La clave usada en las pruebas circuló en el grupo. Antes de
+entregar se genera una nueva, se carga con `heroku config:set CLAVE_API=<la nueva> -a grupo05-taller2-seba`
+(la app se reinicia sola) y se entrega a quien evalúa por una vía privada. Ver «Rotarla antes de entregar»
+en Seguridad.
+
 ## Límites conocidos
 
 - **La memoria de la conversación vive en la RAM del servidor.** Se pierde al reiniciar
