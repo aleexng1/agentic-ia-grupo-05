@@ -1,5 +1,12 @@
 # Pendientes locales de Eduardo · 14-11-2026
 
+**Publicación confirmada el 15-11-2026:** estas evidencias ya están en
+**`2b754e2e2bb8b035888f281ced1b3c36d6b1bab4`, PR #82 ya fusionado en `main`**
+mediante `71df3e8`. No están pendientes de commit/push ni de integrar ese PR.
+La base probada sigue siendo `d8cce13`, con las fechas y resultados de
+abajo intactos. El párrafo siguiente conserva el **corte histórico de ejecución**,
+anterior a esa publicación; no describe el estado documental vigente.
+
 **Base publicada:** `d8cce1337b7caf0bcd63df2d9ce21d9dc96a3f91`, rama
 `c2t2/eduardo-frontend`, **PR #82 abierto**. Esta nueva continuación no tiene commit/push
 ni staging. Solo cambian documentación y evidencias de Eduardo, no producción.

@@ -1,0 +1,109 @@
+{
+  "inicio": "2026-11-15T12:54:18-03:00",
+  "etiqueta": "readme",
+  "python": "3.12.10 (tags/v3.12.10:0cc8128, Apr  8 2025, 12:21:36) [MSC v.1943 64 bit (AMD64)]",
+  "puerto": 58569,
+  "comando": "<VENV_NUEVO>/Scripts/python.exe -B -m uvicorn app:app --host 127.0.0.1 --port 58569",
+  "entorno_no_secreto": {
+    "PORT": "58569",
+    "PUERTO": "58569",
+    "URL_BASE": "http://127.0.0.1:58569",
+    "URLS_AGENTES": "",
+    "PYTHON_DOTENV_DISABLED": "1",
+    "GOOGLE_GENAI_USE_VERTEXAI": "false"
+  },
+  "proveedor": "Sin credenciales; solo GET y POST con texto vacío/espacios. No se consulta Gemini.",
+  "clave": "Temporal aleatoria, solo en memoria y entorno del hijo; no se guarda su valor.",
+  "casos": [
+    {
+      "caso": "salud",
+      "metodo": "GET",
+      "ruta": "/salud",
+      "estado": 200,
+      "cuerpo": {
+        "ok": true
+      },
+      "aprobado": true
+    },
+    {
+      "caso": "panel_http",
+      "metodo": "GET",
+      "ruta": "/",
+      "estado": 200,
+      "tipo": "text/html; charset=utf-8",
+      "titulo": "Planifica tu feria · Grupo 5",
+      "cache_control": "no-store",
+      "html_identico_al_commit": true,
+      "aprobado": true
+    },
+    {
+      "caso": "sin_clave",
+      "metodo": "POST",
+      "ruta": "/panel/consultar",
+      "solicitud": {
+        "texto": "   "
+      },
+      "autorizacion": "sin_clave",
+      "esperado": 401,
+      "estado": 401,
+      "cuerpo": {
+        "detail": "Falta la clave de acceso. Envíala en la cabecera X-API-Key."
+      },
+      "aprobado": true
+    },
+    {
+      "caso": "clave_incorrecta",
+      "metodo": "POST",
+      "ruta": "/panel/consultar",
+      "solicitud": {
+        "texto": "   "
+      },
+      "autorizacion": "clave_incorrecta",
+      "esperado": 401,
+      "estado": 401,
+      "cuerpo": {
+        "detail": "La clave de acceso es incorrecta."
+      },
+      "aprobado": true
+    },
+    {
+      "caso": "vacio_autorizado",
+      "metodo": "POST",
+      "ruta": "/panel/consultar",
+      "solicitud": {
+        "texto": ""
+      },
+      "autorizacion": "vacio_autorizado",
+      "esperado": 400,
+      "estado": 400,
+      "cuerpo": {
+        "detail": "Escribe una pregunta para continuar."
+      },
+      "aprobado": true
+    },
+    {
+      "caso": "espacios_autorizados",
+      "metodo": "POST",
+      "ruta": "/panel/consultar",
+      "solicitud": {
+        "texto": "   "
+      },
+      "autorizacion": "espacios_autorizados",
+      "esperado": 400,
+      "estado": 400,
+      "cuerpo": {
+        "detail": "Escribe una pregunta para continuar."
+      },
+      "aprobado": true
+    }
+  ],
+  "pid_lanzador_propio": 29636,
+  "arranque_completo": true,
+  "cierre_arbol_propio": true,
+  "salida_proceso": 1,
+  "puerto_propio_cerrado": true,
+  "preguntas_coordinador_en_log": 0,
+  "envios_a2a_en_log": 0,
+  "fin": "2026-11-15T12:54:24-03:00",
+  "aprobado": true
+}

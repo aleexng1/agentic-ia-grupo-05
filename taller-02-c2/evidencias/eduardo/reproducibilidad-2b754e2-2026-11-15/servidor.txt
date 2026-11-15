@@ -1,0 +1,12 @@
+INFO:     Started server process [32100]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:58569 (Press CTRL+C to quit)
+INFO:     127.0.0.1:58576 - "GET /salud HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58576 - "GET / HTTP/1.1" 200 OK
+2026-11-15 12:54:21 WARNING [coordinador] acceso rechazado · POST /panel/consultar · sin clave
+INFO:     127.0.0.1:58576 - "POST /panel/consultar HTTP/1.1" 401 Unauthorized
+2026-11-15 12:54:21 WARNING [coordinador] acceso rechazado · POST /panel/consultar · clave incorrecta
+INFO:     127.0.0.1:58576 - "POST /panel/consultar HTTP/1.1" 401 Unauthorized
+INFO:     127.0.0.1:58576 - "POST /panel/consultar HTTP/1.1" 400 Bad Request
+INFO:     127.0.0.1:58576 - "POST /panel/consultar HTTP/1.1" 400 Bad Request

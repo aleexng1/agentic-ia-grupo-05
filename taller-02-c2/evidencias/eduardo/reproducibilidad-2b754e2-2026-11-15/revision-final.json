@@ -1,0 +1,59 @@
+{
+  "fecha": "2026-11-15T13:03:36-03:00",
+  "commit_sin_cambiar": "2b754e2e2bb8b035888f281ced1b3c36d6b1bab4",
+  "archivos_previos_comprobados_sha256": 422,
+  "archivos_previos_identicos": 418,
+  "documentos_modificados_permitidos": [
+    "taller-02-c2/documento-Eduardo.md",
+    "taller-02-c2/evidencias/eduardo/README.md",
+    "taller-02-c2/evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md",
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md"
+  ],
+  "cambios_previos_fuera_de_alcance": [],
+  "env_original_sha256_igual": true,
+  "foto_previa_sha256_igual": true,
+  "instalacion_original": {
+    "archivos": 9191,
+    "rutas_tamanos_mtime_ns_iguales": true,
+    "limite": "Metadatos, no una huella binaria integral de todos los paquetes."
+  },
+  "servidores_python_previos_conservados": [
+    {
+      "direccion": "127.0.0.1",
+      "puerto": 8000,
+      "pid": 3772,
+      "nombre": "python",
+      "inicio": "2026-11-13T13:42:33.3252507Z"
+    }
+  ],
+  "puerto_propio_58569_cerrado": true,
+  "archivos_exportados_del_commit_sin_modificar": 420,
+  "bloques_historicos_conservados": {
+    "taller-02-c2/documento-Eduardo.md": true,
+    "taller-02-c2/evidencias/eduardo/README.md": true,
+    "taller-02-c2/evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md": true,
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md": true
+  },
+  "indice_vacio": true,
+  "git_diff_check_salida": 0,
+  "ejecutor_archivado_sintaxis": "Correcta (ast.parse), sin ejecutar otra vez las comprobaciones.",
+  "ajustes_de_instrumental_al_archivar": "Solo cabecera descriptiva y protección ante log preexistente; casos HTTP sin cambios.",
+  "enlaces_locales_rotos": [],
+  "archivos_de_esta_revision": [
+    "taller-02-c2/documento-Eduardo.md",
+    "taller-02-c2/evidencias/eduardo/README.md",
+    "taller-02-c2/evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md",
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/README.md",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/archivos-modificados.txt",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/comprobar_http.py",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/entorno.json",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/instalacion.txt",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/resultados-http.json",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/revision-final.json",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/servidor.txt"
+  ],
+  "gemini_suites_completas_heroku": "No ejecutados en esta revisión.",
+  "privacidad": "No se incluyen valores de claves, .env, cabeceras de petición ni las huellas privadas de la línea base.",
+  "limite": "Conservación y alcance puntual; no es una auditoría integral de seguridad."
+}
