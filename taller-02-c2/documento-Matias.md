@@ -20,8 +20,9 @@ corrió las pruebas.
 | Archivo | Qué hace |
 | --- | --- |
 | `proyecto/src/comun/seguridad.py` | Middleware que exige la cabecera `X-API-Key` en toda petición que envía datos (POST, PUT, PATCH, DELETE), la compara con `CLAVE_API` usando `secrets.compare_digest` y responde `401` con `{"detail": "mensaje"}`. Deja públicas la página, las fichas y `/salud`. Si `CLAVE_API` está vacía, avisa al arrancar y responde `503` a toda consulta: la app no queda abierta. |
-| `proyecto/src/comun/errores.py` | Traduce las fallas de Gemini, de la red o de un agente a un mensaje de una línea en español, sin traza ni claves. Oculta cualquier clave que aparezca en un mensaje. |
+| `proyecto/src/comun/errores.py` | Traduce las fallas de Gemini, de la red o de un agente a un mensaje de una línea en español, sin traza ni claves. Oculta cualquier clave que aparezca en un mensaje. Alex agregó después dos frases al reconocimiento de «falta la clave de Gemini» (`api key required`, `provide api_key`); es el único cambio ajeno. |
 | `proyecto/tests/test_seguridad.py` | 52 pruebas de acceso y errores, sin llamar a Gemini. |
+| `proyecto/tests/test_tools_matias.py` | 86 pruebas de la herramienta `armar_programa` de mi agente (a pedido de Alex): el programa nunca pasa de la duración pedida, los minutos libres cuadran, las horas son consecutivas, los alias de público, y los datos inválidos devuelven lista vacía con motivo. |
 | `proyecto/tests/conftest.py` | Define una `CLAVE_API` falsa solo para pytest, para que las pruebas no dependan del `.env` de quien las corre. |
 
 ### Cambios mínimos en archivos de otras personas
@@ -194,7 +195,43 @@ aparte, con otro puerto.
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 | --- | --- | --- | --- | --- |
-| LOCAL · 2026-11-13 | `python -m pytest` desde `taller-02-c2/proyecto` | Todas pasan, sin usar la clave de Gemini | `166 passed` (114 existentes + 52 nuevas) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
+| LOCAL · 2026-11-15 | `python -m pytest` desde `taller-02-c2/proyecto` sobre `main` integrado más mis cambios | Todas pasan, sin usar la clave de Gemini | `254 passed` (168 que ya pasaban en `main`, de las cuales 52 son mías de seguridad, más 86 nuevas de `test_tools_matias.py`) | Incluye: sin clave → 401, clave mala → 401, clave correcta con texto vacío → 400, fichas y `/salud` sin clave → 200, la clave no sale hacia otras direcciones, y una falla de Gemini → 502. |
+
+### Prueba 11 · Acceso permitido en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku, `grupo05-taller2-seba-94d12914f3eb.herokuapp.com`) · 2026-11-14 11:43 | `POST /panel/consultar` con `X-API-Key` correcta y «Arma un programa de 3 horas para una feria tecnologica con publico familiar, empezando a las 10:00.» | `200` con `respuesta`, `agente` y `motivo` | `200`. Eligió al Agente de Matias y devolvió un programa de tres actividades desde las 10:00, con 45 minutos libres. | La clave de acceso se pasó en privado y está enmascarada. Antes de que Sebastián cargara la clave de Gemini, la misma consulta dio `502` con «Falta configurar la clave de Gemini…», sin presentarse como éxito. Evidencia: `08-remoto-heroku.txt` (8.5). |
+
+### Prueba 12 · Acceso rechazado en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `POST /panel/consultar` sin clave, y con `X-API-Key` falsa | `401` en ambos | `401` `{"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}` y `401` `{"detail":"La clave de acceso es incorrecta."}` | Mismo comportamiento que en local. Evidencia: `08-remoto-heroku.txt` (8.2 y 8.3). |
+
+### Prueba 13 · Pregunta vacía en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `POST /panel/consultar` con clave correcta y `{"texto": "   "}` | `400` | `400` `{"detail":"Escribe una pregunta para continuar."}` | Evidencia: `08-remoto-heroku.txt` (8.4). |
+
+### Prueba 14 · Rutas públicas en Heroku
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO (Heroku) · 2026-11-14 11:43 | `GET /salud` sin clave (las fichas se revisaron aparte con el mismo resultado) | `200` | `200` `{"ok":true}`; la ficha del coordinador y la de Alex también dieron `200` | La ficha del coordinador trae la URL pública real de Heroku. Evidencia: `08-remoto-heroku.txt` (8.1). |
+
+### Prueba 15 · Capturas del panel con acceso permitido (LOCAL)
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL (`http://127.0.0.1:8000/`) · 2026-11-14 12:47 | En el panel, con una clave de prueba local: «Arma un programa de 6 horas para una feria tecnológica con público de adultos, empezando a las 10:00» | La respuesta del Agente de Matias aparece en el chat | Siete actividades de 10:00 a 15:55 y «hay 5 minutos libres». Debajo se ve `Agente: Agente de Matias`. | Muestra también el catálogo ampliado (antes un evento así dejaba 140 minutos libres). La clave de acceso no se ve. Evidencia: `local-00-pantalla-de-ingreso.png` (clave oculta con puntos) y `local-01-respuesta-con-exito.png`. |
+
+### Prueba 16 · Captura del panel con clave incorrecta (LOCAL)
+
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL (`http://127.0.0.1:8000/`) · 2026-11-14 12:44 | En el panel, entrar con una clave que no es la del servidor (la de Heroku, que no sirve en el servidor local) y enviar una pregunta | El servidor rechaza con `401` y el panel lo dice con claridad | El panel vuelve a la pantalla de ingreso con «Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.» | La pantalla de ingreso acepta cualquier texto: la clave solo se comprueba en el servidor, al enviar la primera pregunta. Evidencia: `local-02-clave-incorrecta.png`. |
 
 ## 6. Evidencias
 
@@ -208,16 +245,26 @@ enmascarada (`********`):
 - `05-falla-del-proveedor.txt`
 - `06-sin-conexion.txt`
 - `07-registro-del-servidor.txt`
+- `08-remoto-heroku.txt` (pruebas 11 a 14, entorno REMOTO)
+- `local-00-pantalla-de-ingreso.png`, `local-01-respuesta-con-exito.png` y
+  `local-02-clave-incorrecta.png` (capturas del panel, pruebas 15 y 16, entorno LOCAL)
 
 Verifiqué que ninguna clave real, ni la de acceso ni la de Gemini, aparece en las
 evidencias, en los registros ni en el código.
 
 ## 7. Límites y pendientes
 
+- Una revisión de Sebastián notó que un programa de 6 horas dejaba 140 minutos libres: el
+  catálogo de mi agente (`agente_matias/tools.py`) era corto. Agregué 3 o 4 actividades
+  ficticias por tipo de evento y ahora un evento de 6 horas deja entre 5 y 90 minutos libres
+  (salvo «infantil» para adultos o estudiantes, que sigue sin actividades por diseño). La
+  herramienta nunca altera la duración pedida y el agente informa los minutos libres.
 - Hay una sola clave para todas las personas, sin límite de intentos ni bloqueo.
 - La conexión en local es HTTP; en Heroku la plataforma entrega HTTPS.
-- **Pendiente para la integración:** el frontend de Eduardo tiene que enviar la clave en la
-  cabecera `X-API-Key` y mostrar el `detail` de los errores 400, 401, 502 y 503. Con la
-  clave mala o ausente hoy recibiría `401`; con el servidor sin `CLAVE_API`, `503`.
-- **Pendiente para Heroku (Sebastián):** definir `CLAVE_API` en las Config Vars. Sin ella, el
-  servidor arranca pero rechaza toda consulta con `503`.
+- **Resuelto en la integración:** el panel de Eduardo envía la clave en la cabecera
+  `X-API-Key` y muestra el `detail` de los errores 400, 401, 502 y 503.
+- **Resuelto en Heroku (Sebastián):** `CLAVE_API` y `GOOGLE_API_KEY` están en las Config
+  Vars y las pruebas 11 a 14 pasan en remoto. La `CLAVE_API` usada en las pruebas se
+  compartió en un chat privado, así que debe rotarse **antes de entregar** y la clave nueva
+  debe pasarse a quien evalúe por un canal privado (si se rotara después de entregar, la
+  persona evaluadora perdería el acceso).
