@@ -2,7 +2,11 @@
 
 Los pedidos LOCAL del 13 al 15-11-2026 se conservan con su alcance histórico.
 Al final se añaden las solicitudes reales de validación REMOTA, seguimiento e
-integración documental del 15-11-2026, sin credenciales ni prompts reconstruidos.
+integración documental del 15-11-2026 y la nueva confirmación del despliegue
+aportada por Eduardo, sin credenciales ni prompts reconstruidos. La consolidación
+documental del 16-11-2026 registra por separado el guion remoto que no se pudo ejecutar.
+Después se incorpora el complemento manual aportado por Eduardo, sin ejecutar ese
+guion ni repetir consultas; su alcance vigente se registra al final.
 
 ## Solicitud real de Eduardo a OpenCode
 
@@ -354,6 +358,11 @@ se conservan íntegros, con su fecha y su alcance propios.
 
 ## Integración documental y capturas manuales · solicitud real del 15-11-2026
 
+**Registro histórico del corte previo a la confirmación de Sebastián.** Se conservan
+sus referencias a v10, al despliegue pendiente y a la selección de entonces; la
+[confirmación posterior para las cuatro consultas del 15/11](#confirmación-del-despliegue-manual)
+se registra más abajo.
+
 ```text
 Continúa en c2t2/eduardo-frontend. Lee las instrucciones del proyecto, revisa git status y trae origin/main. Integra sus cambios conservando mi trabajo; el PR #83 ya está fusionado.
 
@@ -398,3 +407,150 @@ originales del instrumental anterior **sin cambios y sin ejecutarlos**. Excluye
 claves, `.env`, `.venv`, la foto del Taller 1 y aportes de otras personas.
 Se comprueban enlaces, privacidad y el índice con `git diff --cached --check`;
 no se realiza commit ni push.
+
+## Confirmación del despliegue manual
+
+Nueva fuente aportada por Eduardo y solicitud real de actualización documental:
+
+```text
+Actualiza únicamente la documentación de Eduardo en c2t2/eduardo-frontend.
+
+Nueva fuente aportada por Eduardo: Sebastián confirmó que Heroku ejecutaba la release v12, desplegada el 15/11/2026 a las 21:44, con identificador 4593bafb y código equivalente a main 96ebca4. Confirmó expresamente que las consultas manuales de 21:51 a 22:04 corrieron contra esa versión.
+
+Registra estos datos como confirmación del responsable del despliegue, sin afirmar una verificación independiente de Heroku ni que ambos identificadores sean el mismo commit.
+
+Actualiza el estado vigente en:
+- taller-02-c2/documento-Eduardo.md
+- taller-02-c2/evidencias/eduardo/README.md
+- taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/README.md
+- taller-02-c2/evidencias/eduardo/prompts-utilizados.md
+
+Resuelve el pendiente de identificación del despliegue solo para las cuatro consultas manuales. Conserva los demás límites y la observación de Matías.
+
+Las pruebas automáticas de 20:39–21:07 son anteriores a v12: conserva íntegros sus registros, su referencia histórica a v10 y los 0 POST autenticados. Evita reemplazos globales.
+
+Revisa coherencia, enlaces y git diff --check. Prepara únicamente estos cambios documentales e informa las rutas exactas. Sin repetir pruebas, cambiar configuración, hacer commit ni push.
+```
+
+**Confirmación vigente solo para las cuatro consultas del 15/11:** por la nueva
+fuente aportada por Eduardo, Sebastián, responsable
+del despliegue, confirmó **v12**, desplegada el **15/11/2026 a las 21:44**, con
+identificador informado **`4593bafb`** y **código equivalente al de `main` en `96ebca4`**,
+y confirmó expresamente las cuatro consultas manuales de **21:51 a 22:04** contra
+esa versión. Se resuelve **solo su pendiente de identificación**, por confirmación
+del responsable, **sin verificación independiente de Heroku** y **sin afirmar que
+`4593bafb` y `96ebca4` sean el mismo commit**.
+
+Los **28 archivos automáticos de 20:39–21:07**, anteriores a v12, conservan íntegros
+sus registros, **v10 reportada** y **0 POST autenticados**; no se les atribuye v12 ni
+se convierten en aprobaciones. Se mantienen los PNG, los demás límites y la
+observación de contenido de Matías (60/40 minutos), sin completar encuadres ausentes.
+La lista y la revisión documental de la integración anterior quedan como históricas,
+sin regenerarlas. Se preparan **únicamente los cuatro documentos solicitados**, con
+revisión de coherencia, enlaces y `git diff --check`; sin consultas, suites, cambios
+de configuración, commit ni push.
+
+## Consolidación del cierre · solicitud y revisión documental del 16-11-2026
+
+**Registro del corte anterior a recibir el complemento manual.** Se conserva su
+limitación de acceso y su selección de entonces; la integración posterior se
+documenta en el apartado siguiente, sin convertir aquel intento en una ejecución aprobada.
+
+Solicitud real recibida, sin credenciales:
+
+```text
+Continúa en c2t2/eduardo-frontend. Necesito consolidar mi cierre antes de hacer otro commit. Conserva los cuatro documentos preparados y todas las evidencias anteriores.
+
+Revisa README, AGENTS.md y los pendientes de mi documento. Trabaja únicamente en mi zona.
+
+1. Completa una comprobación REMOTA breve en el panel de Heroku, con un máximo de tres consultas normales, sin reintentos automáticos:
+   - Primera: “Estima el presupuesto ficticio en CLP para una feria de 80 personas y 4 horas”. Observa espera, controles bloqueados y cantidad de POST ante un segundo intento de envío desde la interfaz.
+   - Segunda, en la misma conversación: “Para esa misma feria, cambia solo la duración a 3 horas y recalcula el presupuesto, indicando cuántos asistentes consideraste”. Comprueba la continuidad y que se conserva context_id.
+   - Pulsa Nueva conversación y envía: “Estima el presupuesto ficticio en CLP para una feria de 20 personas y 2 horas”. Comprueba limpieza del historial y cambio de context_id. Esto acredita el cambio de conversación del panel, no aislamiento completo del servidor.
+
+2. Comprueba la presentación de una respuesta autenticada a 390 y 320 px, sin volver a consultar al agente. Registra desborde, legibilidad y acceso a controles. Etiqueta correctamente “móvil emulado”, sin afirmar prueba en teléfono físico.
+
+Utiliza una sesión autenticada disponible. Nunca leas, imprimas ni guardes la clave. Si no tienes acceso a mi navegador autenticado, entrega inmediatamente el guion manual mínimo; no inicies otra espera automática prolongada para ingresar la clave.
+
+3. Si siguen disponibles los registros anteriores de Network, recupera únicamente Payload y Response para completar las preguntas que faltan en las capturas históricas. No exportes HAR ni cabeceras de solicitud. Si no están disponibles, conserva esa limitación sin reconstruir preguntas ni repetir las cuatro consultas anteriores.
+
+4. Actualiza mi documento y los índices con resultados realmente observados y las cinco columnas acordadas. Conserva v12 y los identificadores confirmados por Sebastián exclusivamente para las cuatro consultas manuales del 15/11. Las nuevas comprobaciones deben llevar su propia fecha; no supongas que continúa desplegada la misma versión.
+
+No provoques errores en Heroku ni cambies configuración. Mantén las pruebas locales de fallos como evidencia LOCAL. Si una comprobación falla, registra el resultado y su alcance, sin marcarla aprobada.
+
+Prepara una única selección final de archivos de mi zona, revisa privacidad y git diff --cached --check. Evita duplicar evidencias y repetir suites completas si no cambia código. No hagas commit ni push.
+
+Entrega un resumen breve: completado, limitaciones restantes y comandos para publicar todo junto.
+```
+
+Se revisaron el README raíz, el del Taller 2, `proyecto/AGENTS.md`, los pendientes
+de Eduardo y Git. Se conservaron los cuatro documentos preparados en el índice y
+se consolidan en **la misma selección de cuatro rutas**, sin copiar evidencias.
+
+**Alcance real:** no hay acceso al navegador autenticado de Eduardo desde esta
+sesión. Se entregó inmediatamente el guion manual, sin leer la clave, abrir otro
+navegador, esperar autenticación ni enviar solicitudes a Heroku: **0 consultas nuevas**.
+Continuidad, espera/duplicados con acceso aceptado, Nueva conversación autorizada
+y respuesta a 390/320 px quedan **no ejecutados o no inspeccionados**, no aprobados
+ni fallas observadas del servicio. Tampoco se recuperaron Payload/Response históricos;
+no se reconstruyeron preguntas ni se repitieron las cuatro consultas del 15/11.
+
+La fecha **16/11/2026** corresponde a revisión documental. El guion exige fecha/hora
+con zona de una ejecución efectiva, cuya versión **no está identificada**; no se
+extiende a ella la confirmación de Sebastián. Se conservan los registros automáticos,
+los PNG, los límites, la observación de Matías y las fallas **LOCAL** con su alcance.
+Matriz y [guion pendiente](../../documento-Eduardo.md#guion-manual-mínimo--no-ejecutado).
+Sin cambios de código/configuración ni repetición de suites; revisión de privacidad,
+enlaces y `git diff --cached --check`, sin commit ni push.
+
+## Integración del complemento REMOTO MANUAL · 16-11-2026
+
+Solicitud real recibida, sin credenciales:
+
+```text
+Integra la carpeta evidencias/eduardo/complemento-remoto-manual-2026-11-16/ y conserva los cuatro documentos ya preparados.
+
+Actualiza documento-Eduardo.md, el índice de evidencias y prompts-utilizados.md. Lee el README del complemento y respeta su alcance:
+- Continuidad observada: recuperó 80 asistentes y la duración actualizada de 180 minutos; presupuesto de $1.742.400 CLP y HTTP 200.
+- Visualización del presupuesto y controles en móvil emulado.
+- La barra acredita 390 × 844; la captura del paso de 320 está recortada y no confirma independientemente el ancho.
+- La versión desplegada el 16/11 no está confirmada; conserva v12 únicamente para las cuatro consultas del 15/11.
+
+Mantén los históricos y los demás límites. No ejecutes más consultas ni repitas suites; no modifiques código ni Heroku.
+
+Revisa enlaces, privacidad y git diff --cached --check. Prepara exclusivamente los documentos de mi zona y los siete archivos del complemento. Muestra la selección final. Sin commit ni push.
+```
+
+Se leyó el [README del complemento](complemento-remoto-manual-2026-11-16/README.md)
+y se revisaron visualmente sus seis PNG. Se conservan **los siete archivos originales
+sin modificar sus bytes**, los cuatro documentos ya preparados y las evidencias
+anteriores. Esta integración actualiza únicamente `documento-Eduardo.md`, el índice
+de evidencias y este registro de prompts; mantiene sin nuevas ediciones el README
+manual del 15/11 ya preparado.
+
+**Alcance incorporado:** continuidad de contenido con **80 asistentes y 180 minutos**,
+subtotal **$1.584.000 CLP**, contingencia **$158.400** y total **$1.742.400 CLP**;
+la captura 03 muestra **POST 200 OK, application/json**, con `Date` del 16/11/2026,
+**12:47:37 GMT / 09:47:37 UTC−03:00**, no latencia ni hora exacta de captura. Las dos
+primeras respuestas piden el tipo de evento; la tercera pregunta lo completa sin
+repetir asistentes o duración. No equivale al caso previsto de Nueva conversación
+con 20 personas y 2 horas ni acredita la conservación de `context_id`.
+
+La captura 04 acredita **390 × 844**; la 05 muestra presupuesto y controles sin
+barra de dimensiones, asociados por la secuencia. La 06 corresponde al paso
+declarado de 320 px, pero **el recorte no verifica independientemente ese ancho**.
+La observación es visual, en **móvil emulado**, no una medición de `scrollWidth`,
+ausencia de desborde global ni prueba de teléfono físico o teclado virtual.
+
+**Versión del 16/11 no confirmada.** La confirmación de Sebastián sobre v12 y sus
+identificadores se mantiene solo para las cuatro consultas del 15/11, sin equiparar
+commits ni afirmar verificación independiente. Permanecen los demás límites, la
+observación 60/40 de Matías, los 28 registros automáticos con **0 POST autenticados**
+y las fallas **LOCAL**, sin reinterpretarlos como resultados de este complemento.
+
+Se prepara una única selección de **11 rutas: cuatro documentos modificados y los
+siete archivos nuevos del complemento**, enumeradas en
+[`documento-Eduardo.md`](../../documento-Eduardo.md#preparación-documental-de-este-cierre).
+Revisión de enlaces y privacidad de los textos y seis imágenes, sin claves ni
+Request Headers visibles; los Remote Address son del servidor remoto. Sin HAR,
+nuevas consultas, suites, cambios de código/configuración o Heroku, commit ni push.
