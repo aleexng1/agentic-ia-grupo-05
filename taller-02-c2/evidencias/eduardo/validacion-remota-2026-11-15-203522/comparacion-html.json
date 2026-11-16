@@ -1,0 +1,11 @@
+{
+  "fecha": "2026-11-15T20:40:37-03:00",
+  "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "alcance": "GET publico adicional para distinguir diferencias de finales de linea; no identifica el despliegue",
+  "http": 200,
+  "sha256_remoto": "ccc23ab76b0aa22f4e069ff11ce8813625795b729cde509bd1b90403a7a82c7a",
+  "sha256_local": "7121d729f5b5e695a34241f4296cb69ee0eb98c9056f38f001bd8218311572da",
+  "igualdad_bytes": false,
+  "igualdad_normalizando_crlf_a_lf": true,
+  "commit_desplegado": null
+}

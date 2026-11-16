@@ -1,0 +1,26 @@
+{
+  "fecha": "2026-11-15T20:42:11-03:00",
+  "alcance": "Conservacion del estado previo; no depende de que terminen las pruebas autenticadas",
+  "archivos_protegidos": 430,
+  "archivos_previos_alterados": [],
+  "indice_igual_al_inicial": true,
+  "cambios_con_seguimiento": [],
+  "estado_git": [
+    "?? taller-01-c2/evidencias/eduardo/03-ficha-telefono.jpg",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/01-ingreso-escritorio.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/02-clave-ficticia-rechazada.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/03-nueva-conversacion-solo-interfaz.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/04-ingreso-movil-emulado.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/05-chat-movil-emulado-sin-consulta.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/06-chat-320-emulado-sin-consulta.png",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/README.md",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/capturas-publicas.json",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/comparacion-html.json",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/r06-sin-clave.json",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/r07-clave-ficticia.json",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/resultados-publicos.json",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/solicitud-y-alcance.md",
+    "?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/validar_remoto.py"
+  ],
+  "no_publica_huellas_privadas": true
+}

@@ -1,0 +1,109 @@
+{
+  "fecha_cierre": "2026-11-15T21:10:59-03:00",
+  "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "release_reportada": "v10",
+  "fuente_release": "Sebastian, segun la solicitud de Eduardo; no verificada en Heroku CLI",
+  "commit_desplegado": null,
+  "estado_commit_desplegado": "PENDIENTE DE CONFIRMACION",
+  "alcance": "Plan de preguntas NO ENVIADAS. No contiene respuestas ni capturas de agentes inventadas.",
+  "error_observado_original": {
+    "fecha": "2026-11-15T20:54:51-03:00",
+    "tipo": "TimeoutError",
+    "detalle": "Ejecución interrumpida o ventana cerrada; los casos no registrados siguen pendientes. Sin reintentos automáticos."
+  },
+  "decision": "Sin reintento autenticado; usuario indico que no dispone de ventana o clave remota.",
+  "agentes": [
+    {
+      "agente": "matias",
+      "estado": "PENDIENTE / NO EJECUTADO",
+      "pregunta_prevista_no_enviada": "Necesito un programa para una feria cultural familiar de 3 horas, desde las 16:00. Indica actividades, horarios y cualquier tiempo libre, con las condiciones de demostración.",
+      "solicitudes_autenticadas": 0,
+      "http_obtenido": null,
+      "respuesta_obtenida": null,
+      "agente_obtenido": null,
+      "motivo_obtenido": null,
+      "captura_obtenida": null,
+      "criterios_para_aprobar": {
+        "http": 200,
+        "respuesta": "Util para la pregunta, no un error dentro de un 200",
+        "agente": "Agente de Matias",
+        "motivo": "Visible en el panel"
+      },
+      "aprobado": false,
+      "evidencia_bloqueo": [
+        "resultados-autenticados.json",
+        "capturas-autenticadas.json",
+        "seguimiento-autenticado.md"
+      ]
+    },
+    {
+      "agente": "alex",
+      "estado": "PENDIENTE / NO EJECUTADO",
+      "pregunta_prevista_no_enviada": "Necesito un recinto interior para una feria tecnológica de 80 personas. Recomienda opciones con aforo, características, accesibilidad y advertencias de disponibilidad; no reserves nada.",
+      "solicitudes_autenticadas": 0,
+      "http_obtenido": null,
+      "respuesta_obtenida": null,
+      "agente_obtenido": null,
+      "motivo_obtenido": null,
+      "captura_obtenida": null,
+      "criterios_para_aprobar": {
+        "http": 200,
+        "respuesta": "Util para la pregunta, no un error dentro de un 200",
+        "agente": "Agente de Alex",
+        "motivo": "Visible en el panel"
+      },
+      "aprobado": false,
+      "evidencia_bloqueo": [
+        "resultados-autenticados.json",
+        "capturas-autenticadas.json",
+        "seguimiento-autenticado.md"
+      ]
+    },
+    {
+      "agente": "eduardo",
+      "estado": "PENDIENTE / NO EJECUTADO",
+      "pregunta_prevista_no_enviada": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas? Indica partidas, total en CLP, supuestos y advertencias; no realices pagos.",
+      "solicitudes_autenticadas": 0,
+      "http_obtenido": null,
+      "respuesta_obtenida": null,
+      "agente_obtenido": null,
+      "motivo_obtenido": null,
+      "captura_obtenida": null,
+      "criterios_para_aprobar": {
+        "http": 200,
+        "respuesta": "Util para la pregunta, no un error dentro de un 200",
+        "agente": "Agente de Eduardo",
+        "motivo": "Visible en el panel"
+      },
+      "aprobado": false,
+      "evidencia_bloqueo": [
+        "resultados-autenticados.json",
+        "capturas-autenticadas.json",
+        "seguimiento-autenticado.md"
+      ]
+    },
+    {
+      "agente": "sebastian",
+      "estado": "PENDIENTE / NO EJECUTADO",
+      "pregunta_prevista_no_enviada": "Necesito catering para una feria tecnológica de 80 personas, de 10:00 a 14:00 (4 horas), con 10 vegetarianas y 5 sin gluten. Indica servicios, horarios, dietas y litros de agua; datos simulados, sin contratar nada.",
+      "solicitudes_autenticadas": 0,
+      "http_obtenido": null,
+      "respuesta_obtenida": null,
+      "agente_obtenido": null,
+      "motivo_obtenido": null,
+      "captura_obtenida": null,
+      "criterios_para_aprobar": {
+        "http": 200,
+        "respuesta": "Util para la pregunta, no un error dentro de un 200",
+        "agente": "Agente de Sebastian",
+        "motivo": "Visible en el panel"
+      },
+      "aprobado": false,
+      "evidencia_bloqueo": [
+        "resultados-autenticados.json",
+        "capturas-autenticadas.json",
+        "seguimiento-autenticado.md"
+      ]
+    }
+  ]
+}

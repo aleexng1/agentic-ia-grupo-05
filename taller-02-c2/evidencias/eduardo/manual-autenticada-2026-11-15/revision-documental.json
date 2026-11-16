@@ -1,0 +1,155 @@
+{
+  "fecha_revision": "2026-11-15T22:26:27-03:00",
+  "alcance": "Solo integracion Git y revision documental de evidencias aportadas; sin ejecutar consultas, suites, instrumental previo, ni cambios propios de codigo/configuracion.",
+  "url_evidencia_manual": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "git": {
+    "rama": "c2t2/eduardo-frontend",
+    "head_inicial": "8a5bb9babdeddf4df957473806a5213928a18901",
+    "head_tras_fetch_y_fast_forward": "96ebca4391f1591933b39790c985142fe1908128",
+    "pr83": "fusionado, incorporado desde origin/main",
+    "commit_creado_en_esta_revision": false,
+    "no_es_identidad_de_despliegue": true
+  },
+  "release": {
+    "reportada_previamente_por": "Sebastian",
+    "valor_reportado": "v10",
+    "confirmada_para_las_capturas": false,
+    "commit_desplegado": null
+  },
+  "comprobaciones": {
+    "rama_correcta": true,
+    "head_igual_origin_main_tras_ff": true,
+    "solo_tres_documentos_editados_tras_main": true,
+    "28_archivos_automaticos_originales_identicos": true,
+    "cuatro_png_y_readme_manuales_identicos": true,
+    "env_y_foto_intactos": true,
+    "sin_editar_codigo_o_configuracion_tras_main": true,
+    "manifiesto_cerrado_38_rutas_sin_duplicados": true,
+    "sin_archivos_privados_ni_ajenos_en_seleccion": true,
+    "enlaces_locales_existentes": true,
+    "anclas_locales_validas_incluida_compatibilidad_historica": true,
+    "tablas_remotas_de_cinco_columnas": true,
+    "sin_patrones_credenciales_detectados_en_textos_seleccionados": true,
+    "intento_original_sigue_0_post_autenticados": true,
+    "resultados_locales_historicos_sin_reescribir": true,
+    "transcripciones_anteriores_de_prompts_conservadas": true
+  },
+  "archivos_protegidos_despues_de_main": 471,
+  "documentos_actualizados": [
+    "taller-02-c2/documento-Eduardo.md",
+    "taller-02-c2/evidencias/eduardo/README.md",
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md"
+  ],
+  "archivos_preexistentes_alterados_fuera_del_alcance": [],
+  "imagenes_manuales_revisadas_sin_edicion": [
+    {
+      "archivo": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/01-eduardo-remoto-200.png",
+      "sha256": "e45f3779290cd4cba007721d17ca058a21faa7d8c69afaaf4026366fdae653db",
+      "ancho": 1852,
+      "alto": 900,
+      "revision_visual": "POST 200 OK, respuesta, agente y motivo visibles; no se observa CLAVE_API, GOOGLE_API_KEY ni Request Headers desplegados."
+    },
+    {
+      "archivo": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/02-matias-remoto-200.png",
+      "sha256": "20a016d0bab4f20ac0b23ae660fde236d3d330f0da80c13f243a4429418df3eb",
+      "ancho": 1828,
+      "alto": 898,
+      "revision_visual": "POST 200 OK, respuesta, agente y motivo visibles; no se observa CLAVE_API, GOOGLE_API_KEY ni Request Headers desplegados."
+    },
+    {
+      "archivo": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/03-alex-remoto-200.png",
+      "sha256": "7e106340e9207f1b6cf7823ac6c08f9bab1ae8009e76c41ecd70663a28d5f4a3",
+      "ancho": 1890,
+      "alto": 909,
+      "revision_visual": "POST 200 OK, respuesta, agente y motivo visibles; no se observa CLAVE_API, GOOGLE_API_KEY ni Request Headers desplegados."
+    },
+    {
+      "archivo": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/04-sebastian-remoto-200.png",
+      "sha256": "52e21bdda2d0d7ef8a3b4f1c0e13447709a6e6b7723961ed594bc77ba1852eb1",
+      "ancho": 1857,
+      "alto": 907,
+      "revision_visual": "POST 200 OK, respuesta, agente y motivo visibles; no se observa CLAVE_API, GOOGLE_API_KEY ni Request Headers desplegados."
+    }
+  ],
+  "readme_manual_original_conservado": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/README.md",
+  "capturas_iniciales_remotas_no_disponibles": [
+    "Eduardo",
+    "Alex",
+    "Sebastian"
+  ],
+  "fuentes_no_sustituidas": "Las capturas de inicio LOCAL de 2026-11-13 y los prompts previstos del intento automatico no reconstruyen los fragmentos remotos ausentes.",
+  "observacion_matias": "Bloque de 60 minutos con descripcion de unos 40; margen sin aclarar. No se atribuye al frontend ni se corrige el resultado historico.",
+  "ejecuciones_separadas": {
+    "automatico": "0 POST autenticados, TimeoutError esperando ingreso privado; 28 archivos conservados",
+    "manual": "Cuatro POST 200 OK visibles en capturas aportadas por Eduardo, con respuesta/agente/motivo; sin reejecutarlas"
+  },
+  "enlaces_md_revisados": [
+    "taller-02-c2/documento-Eduardo.md",
+    "taller-02-c2/evidencias/eduardo/capturas-manuales-eduardo/INDICE.md",
+    "taller-02-c2/evidencias/eduardo/cierre-integrado-2026-11-14/README.md",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/README.md",
+    "taller-02-c2/evidencias/eduardo/pendientes-locales-2026-11-14-144554/README.md",
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md",
+    "taller-02-c2/evidencias/eduardo/README.md",
+    "taller-02-c2/evidencias/eduardo/reproducibilidad-2b754e2-2026-11-15/README.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/README.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/seguimiento-autenticado.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/solicitud-y-alcance.md"
+  ],
+  "enlaces_rotos": [],
+  "anclas_rotas": [],
+  "tablas_invalidas": [],
+  "alertas_credenciales": [],
+  "pendientes": [
+    "Inicio y pregunta exacta de Eduardo/Alex/Sebastian",
+    "Aclaracion del contenido 60/40 de Matias",
+    "Contexto y aislamiento entre conversaciones autorizadas/respuestas tardias",
+    "Espera y duplicados durante una consulta aceptada",
+    "Respuesta autenticada en movil emulado y dispositivo fisico/teclado virtual/Safari",
+    "R08 remoto y errores/proveedor/router/no JSON no acreditados por estas capturas",
+    "Correlacion de release y commit desplegado para las horas manuales"
+  ],
+  "privacidad": "Revision visual de cuatro PNG y patrones limitados en textos; sin claves privadas, HAR o nuevos logs del navegador. No es auditoria integral; huellas privadas de .env quedan fuera del repositorio.",
+  "manifiesto_para_preparacion": "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/archivos-para-indice.txt",
+  "rutas_exactas_a_preparar": [
+    "taller-02-c2/documento-Eduardo.md",
+    "taller-02-c2/evidencias/eduardo/README.md",
+    "taller-02-c2/evidencias/eduardo/prompts-utilizados.md",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/01-eduardo-remoto-200.png",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/02-matias-remoto-200.png",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/03-alex-remoto-200.png",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/04-sebastian-remoto-200.png",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/README.md",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/archivos-para-indice.txt",
+    "taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/revision-documental.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/01-ingreso-escritorio.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/02-clave-ficticia-rechazada.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/03-nueva-conversacion-solo-interfaz.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/04-ingreso-movil-emulado.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/05-chat-movil-emulado-sin-consulta.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/06-chat-320-emulado-sin-consulta.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/07-espera-panel-rechazo-real.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/08-panel-recuperado-tras-401.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/09-nueva-conversacion-tras-rechazo.png",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/README.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/agentes-pendientes.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/archivos-modificados.txt",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/capturas-autenticadas.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/capturas-panel-pendiente.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/capturas-publicas.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/comparacion-html.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/r06-sin-clave.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/r07-clave-ficticia.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/resultados-autenticados.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/resultados-panel-pendiente.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/resultados-publicos.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/revision-conservacion.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/revision-final.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/revision-publica.json",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/seguimiento-autenticado.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/solicitud-y-alcance.md",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/validar_panel_pendiente.py",
+    "taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/validar_remoto.py"
+  ],
+  "comando_de_comprobacion_del_indice": "git diff --cached --check (se ejecuta despues de preparar la lista)"
+}

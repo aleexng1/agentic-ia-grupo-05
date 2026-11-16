@@ -1,0 +1,25 @@
+{
+  "fecha": "2026-11-15T20:42:49-03:00",
+  "alcance": "Revision dirigida solo de evidencia PUBLICA guardada; no suite local ni resultado autenticado",
+  "comprobaciones": {
+    "panel_200": true,
+    "salud_200_ok": true,
+    "sin_clave_401": true,
+    "ficticia_401_pregunta_conservada": true,
+    "dos_post_negativos_observados": true,
+    "capturas_integras": true,
+    "mismo_hostname_en_evidencias": true,
+    "commit_desplegado_no_inferido": true,
+    "movil_rotulado_emulacion": true,
+    "sin_patron_google_en_evidencias_publicas": true
+  },
+  "seis_capturas_publicas_revisadas_visualmente_por_asistente": [
+    "01-ingreso-escritorio.png",
+    "02-clave-ficticia-rechazada.png",
+    "03-nueva-conversacion-solo-interfaz.png",
+    "04-ingreso-movil-emulado.png",
+    "05-chat-movil-emulado-sin-consulta.png",
+    "06-chat-320-emulado-sin-consulta.png"
+  ],
+  "limites": "Sin acceso a logs remotos ni validacion de dispositivo fisico o commit desplegado; deteccion de patrones no es auditoria integral de secretos."
+}
