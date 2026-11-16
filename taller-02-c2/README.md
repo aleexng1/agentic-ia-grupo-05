@@ -36,7 +36,7 @@ agentes de ejemplo de la clase (viajes y restaurantes).
 | Alex | **Base e integración:** la app única con el coordinador y los cuatro agentes, el registro A2A, los archivos de despliegue de la raíz y la revisión e integración de los demás aportes. | [documento-Alex.md](documento-Alex.md) · [evidencias/alex/](evidencias/alex/) |
 | Matías | **Seguridad y errores:** control de acceso con la clave `CLAVE_API` (cabecera `X-API-Key`) y errores claros del servidor (400, 401, 502 y 503). | [documento-Matias.md](documento-Matias.md) · [evidencias/matias/](evidencias/matias/) |
 | Eduardo | **Frontend del chat:** el panel web con ingreso de clave, el chat y la presentación de errores. | [documento-Eduardo.md](documento-Eduardo.md) · [evidencias/eduardo/](evidencias/eduardo/) |
-| Sebastián | **Heroku y operación:** el despliegue y la sección «Operación en Heroku». **Pendiente:** aún no entrega su aporte. | Pendiente |
+| Sebastián | **Heroku y operación:** desplegó la app en Heroku (release v12, con el mismo código que `main` en `96ebca4`), rotó la `CLAVE_API` antes del despliegue final, escribió la sección «Operación en Heroku» e hizo las pruebas remotas. | [documento-Sebastian.md](documento-Sebastian.md) · [evidencias/sebastian/](evidencias/sebastian/) |
 
 ## Preparación manual
 
@@ -65,8 +65,8 @@ python -c "import secrets; print(secrets.token_urlsafe(32))"
 Pégala en `CLAVE_API=` de `proyecto/.env`, y es la que escribirás en la pantalla de ingreso
 del chat. Cómo funciona, qué protege y qué errores devuelve: sección **Seguridad**, más abajo.
 
-**Heroku:** la cuenta, el CLI y el despliegue los explica la sección «Operación en Heroku».
-Pendiente: Sebastián.
+**Heroku:** la cuenta, el CLI, las Config Vars y el despliegue se explican en la sección
+[«Operación en Heroku»](#operación-en-heroku), más abajo.
 
 ## Instalación
 
@@ -391,6 +391,10 @@ en Seguridad.
 
 ## Límites conocidos
 
+- **Cada pregunta la responde un solo agente.** El coordinador deriva la pregunta a UN agente
+  y entrega su respuesta tal cual, sin reescribirla: no se alteran cifras, unidades ni supuestos.
+  Una pregunta que mezcla dos temas (por ejemplo, presupuesto y comida) la responde solo el
+  agente elegido; el otro tema hay que preguntarlo aparte.
 - **La memoria de la conversación vive en la RAM del servidor.** Se pierde al reiniciar
   la app y también cuando Heroku la duerme por inactividad: después de eso el chat parte
   de cero aunque el navegador conserve su `context_id`.

@@ -45,12 +45,12 @@ Se repitieron las pruebas básicas después de rotar la `CLAVE_API` y desplegar 
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 |---|---|---|---|---|
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | `GET /salud` | 200 | 200 | — |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | Fichas de los cuatro agentes (`/agentes/*/.well-known/agent-card.json`) | 200 | 200 | — |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | `POST /panel/consultar` sin `X-API-Key` | 401 | 401 | — |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | `POST /panel/consultar` con clave falsa | 401 | 401 | — |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | `POST /panel/consultar` con la clave nueva y texto válido | 200 con respuesta de agente | 200 | — |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | `POST /panel/consultar` con la clave nueva y texto vacío | 400 | 400 | — |
+| HEROKU · release v12 · 15/11/2026 | `GET /salud` | 200 | 200 | — |
+| HEROKU · release v12 · 15/11/2026 | Fichas de los cuatro agentes (`/agentes/*/.well-known/agent-card.json`) | 200 | 200 | — |
+| HEROKU · release v12 · 15/11/2026 | `POST /panel/consultar` sin `X-API-Key` | 401 | 401 | — |
+| HEROKU · release v12 · 15/11/2026 | `POST /panel/consultar` con clave falsa | 401 | 401 | — |
+| HEROKU · release v12 · 15/11/2026 | `POST /panel/consultar` con la clave nueva y texto válido | 200 con respuesta de agente | 200 | — |
+| HEROKU · release v12 · 15/11/2026 | `POST /panel/consultar` con la clave nueva y texto vacío | 400 | 400 | — |
 
 Las filas 7 y 8 de la tabla principal (502 por `GOOGLE_API_KEY`) no se repitieron en v12, porque requieren quitar la clave de Gemini en Heroku.
 
@@ -60,8 +60,8 @@ Se probaron en local, sin tocar Heroku, con el código de `main` exportado a una
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 |---|---|---|---|---|
-| LOCAL · código de main `96ebca4` · fecha por confirmar (Sebastián) | `CLAVE_API` vacía: `CLAVE_API` vacía, `GOOGLE_API_KEY` vacía | 503 (el servidor no acepta consultas) | 503 con mensaje "no tiene configurada la clave de acceso (CLAVE_API)" | — |
-| LOCAL · código de main `96ebca4` · fecha por confirmar (Sebastián) | Sin clave de Gemini: `CLAVE_API` con valor de prueba, `GOOGLE_API_KEY` vacía | 502 con mensaje claro | 502 con mensaje "Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars" | — |
+| LOCAL · código de main `96ebca4` · 15/11/2026 | `CLAVE_API` vacía: `CLAVE_API` vacía, `GOOGLE_API_KEY` vacía | 503 (el servidor no acepta consultas) | 503 con mensaje "no tiene configurada la clave de acceso (CLAVE_API)" | — |
+| LOCAL · código de main `96ebca4` · 15/11/2026 | Sin clave de Gemini: `CLAVE_API` con valor de prueba, `GOOGLE_API_KEY` vacía | 502 con mensaje claro | 502 con mensaje "Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars" | — |
 
 El 503 depende de `CLAVE_API` vacía, no de `GOOGLE_API_KEY`. La falta de la clave de Gemini responde 502. Las dos pruebas usan `PORT` igual a `URL_BASE`, porque el coordinador busca a los agentes en esa dirección.
 
@@ -71,11 +71,11 @@ Se probó en remoto la release v12 con una pregunta a cada agente y una pregunta
 
 | Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 |---|---|---|---|---|
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | "¿Qué recinto sirve para una feria de 300 personas en Santiago?" | 200 y el agente que corresponde | 200, Agente de Alex | Pidió el tipo de evento (tecnológico, gastronómico, cultural o infantil) |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | "Presupuesto para una feria gastronómica de 100 personas, 4 horas" | 200 y el agente que corresponde | 200, Agente de Eduardo | Presupuesto simulado en CLP con contingencia |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | "Programa de una feria tecnológica de 4 horas para 80 personas" | 200 y el agente que corresponde | 200, Agente de Matias | Programa de actividades |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | "Coffee break para 30 personas con opción sin gluten" | 200 y el agente que corresponde | 200, Agente de Sebastian | Propuesta de catering |
-| HEROKU · release v12 · fecha por confirmar (Sebastián) | "¿Cuál es la capital de Francia?" (sin agente) | 200 y «ninguno» | 200, ninguno | Sugiere los cuatro agentes |
+| HEROKU · release v12 · 15/11/2026 | "¿Qué recinto sirve para una feria de 300 personas en Santiago?" | 200 y el agente que corresponde | 200, Agente de Alex | Pidió el tipo de evento (tecnológico, gastronómico, cultural o infantil) |
+| HEROKU · release v12 · 15/11/2026 | "Presupuesto para una feria gastronómica de 100 personas, 4 horas" | 200 y el agente que corresponde | 200, Agente de Eduardo | Presupuesto simulado en CLP con contingencia |
+| HEROKU · release v12 · 15/11/2026 | "Programa de una feria tecnológica de 4 horas para 80 personas" | 200 y el agente que corresponde | 200, Agente de Matias | Programa de actividades |
+| HEROKU · release v12 · 15/11/2026 | "Coffee break para 30 personas con opción sin gluten" | 200 y el agente que corresponde | 200, Agente de Sebastian | Propuesta de catering |
+| HEROKU · release v12 · 15/11/2026 | "¿Cuál es la capital de Francia?" (sin agente) | 200 y «ninguno» | 200, ninguno | Sugiere los cuatro agentes |
 
 Extracto del log de Heroku (release v12) con el envío A2A del coordinador a 127.0.0.1. Las IP de clientes están reemplazadas por `<ip-cliente>`:
 

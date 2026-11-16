@@ -423,3 +423,319 @@ README y PR). En el documento, la tabla de cada caso debe decir en Entorno y fec
 "LOCAL · <fecha> · captura automática con Playwright contra la app real". Y en
 "Resultado obtenido" cita la imagen y las líneas del registro que le corresponden.
 ```
+
+---
+
+## 6 · Completar el documento y unir el PR #79
+
+```
+Ya pegué mis instrucciones en taller-02-c2/evidencias/alex/prompts.md. Completa la
+sección 3 de documento-Alex.md citándolas (puedes resumir los prompts largos con
+un enlace al archivo, pero sin cambiar su contenido). Revisa que prompts.md no
+contenga claves ni rutas con mi usuario. Commit en c2t2/alex-integracion, push, y
+une el PR #79 con gh pr merge 79 --merge sin borrar la rama. Actualiza main local
+y confirma que pytest siga en 168.
+```
+
+---
+
+## 7 · Revisión de los PR #80 (Matías), #81 (Sebastián) y #82 (Eduardo)
+
+```
+Pon c2t2/alex-integracion al día con main. Estamos en el repo agentic-ia-grupo-05,
+taller en taller-02-c2. Hay PR de compañeros por revisar: usa gh pr list para
+encontrarlos. Deberían ser: el de Matías (documento final, evidencia 08, capturas
+LOCAL 15 y 16, y un cambio al catálogo de su agente), el #82 de Eduardo (texto del
+503, eliminación de demo.html, evidencias de validación integrada) y el de Sebastián
+(sección "Operación en Heroku" del README; si aún no lo abre, revisa directo la rama
+origin/c2t2/sebastian-heroku y dime que falta el PR). DOS FASES: al terminar la
+fase 1 te detienes hasta que yo escriba "sigue".
+
+REGLAS: no leas ni imprimas mi .env; ninguna clave en archivos, commits ni en lo que
+me muestres. Revisa cada PR en una copia temporal (git worktree en /tmp). Revisa
+contra lo que pide el enunciado del taller, no más.
+
+FASE 1 · INFORME (sin unir ni cambiar nada)
+Para cada PR:
+1) Alcance: solo archivos de su zona. Matías: su documento, sus evidencias y
+   src/agente_matias/ (el catálogo). Eduardo: panel.html, panel.py, sus documentos y
+   la eliminación de src/agente_eduardo/demo.html (verifica que nada lo use).
+   Sebastián: la sección Operación del README y sus evidencias.
+2) Secretos: ninguna clave, token ni .env en archivos ni en el historial de commits
+   del PR. Abre CADA imagen nueva buscando la clave visible, correos, rutas con
+   usuario, IP públicas o notificaciones. OJO con las capturas de Heroku: la
+   CLAVE_API remota no debe verse en ningún lado (ni en curl, ni en el panel, ni en
+   los logs de Heroku). La URL pública de Heroku sí puede aparecer.
+3) Notas de asistente pegadas por error: busca en los documentos y en el README
+   textos que no son parte del contenido y parecen comentarios de edición, por
+   ejemplo "Cambios principales", "Lo que cambié", "Lo que quité", "Mantuve…",
+   "tono de informe". Si aparecen, es un hallazgo ⚠️ (los quitarías tú).
+4) Coherencia de los errores: en todo el README y los documentos, 502 = falla de
+   Gemini, de la red o de un agente; 503 = servidor sin CLAVE_API configurada.
+   Señala cualquier lugar que diga otra cosa.
+5) Pruebas: pytest en cada PR y con los tres juntos (main + Matías + Eduardo +
+   Sebastián, en ese orden). Corre también las comprobaciones del frontend de
+   Eduardo. ¿Hay conflictos? ¿en qué archivos? El cambio de catálogo de Matías debe
+   tener sus pruebas al día.
+6) Evidencias según la pauta: tablas con Entorno y fecha, Solicitud, Resultado
+   esperado, Resultado obtenido y Observaciones; las pruebas de Heroku rotuladas como
+   REMOTO o HEROKU, nunca "producción"; lo inducido o simulado declarado como tal;
+   acceso permitido y rechazado en local y en remoto. La sección Operación del README
+   debe explicar: desplegar de nuevo, ver logs, DETENER la app, costo, por qué
+   WEB_CONCURRENCY=1, y cómo dar acceso al evaluador (URL en el README, CLAVE_API por
+   vía privada). Debe incluir también que la CLAVE_API se rota antes de entregar.
+7) Revisa si la URL real de Heroku
+   (https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com) quedó escrita en el
+   README de forma consistente, y que URL_BASE en la documentación diga que debe
+   coincidir con el hostname real de Heroku.
+Entrega una tabla ✅ / ⚠️ / ❌ por punto y PR, con propuesta concreta y quién la hace
+(arreglo chico mío o de su dueño). Recomienda el orden para unir. DETENTE AQUÍ.
+
+FASE 2 · UNIR (solo cuando yo escriba "sigue")
+8) Si los arreglos son chicos (notas de asistente, textos, coherencia 502/503),
+   hazlos en c2t2/alex-integracion después de unir, y abre un PR aparte con ellos.
+   No modifiques las ramas de los compañeros.
+9) Une los PR en el orden que recomendaste, con gh pr merge <n> --merge, sin borrar
+   ramas. Si GitHub marca alguno como CONFLICTING sin conflictos reales de archivos,
+   avísame antes de hacer nada.
+10) Actualiza main local, corre pytest y las comprobaciones del frontend, y arranca
+    la app igual que Heroku desde la raíz para verificar /salud. Termina con: commit
+    final de main, resultado de pruebas, PR abiertos que queden y la lista de lo que
+    Sebastián debe hacer para redesplegar.
+```
+
+Continuación tras el informe, que encontró IP públicas en los logs de Sebastián y la
+barra de marcadores en capturas de Matías:
+
+```
+sigue, con este plan:
+1) Une ya el #82 de Eduardo con gh pr merge 82 --merge, sin borrar la rama.
+2) NO unas todavía #80 ni #81. Matías y Sebastián van a corregir sus archivos con
+   un commit nuevo (sin reescribir historia). Cuando lo hagan, te aviso y los unes
+   con gh pr merge <n> --squash (no --merge), para que los commits con las IP y
+   los marcadores no entren a main. Antes de unir, verifica que el contenido final
+   del PR ya no tenga las IP ni la barra de marcadores.
+3) Mientras tanto, prepara en c2t2/alex-integracion (al día con main después del
+   #82) todos tus arreglos chicos que no dependen de #80 y #81: notas de proceso
+   falsas de Eduardo, rotar CLAVE_API en Operación del README, hostname de URL_BASE
+   en Configuración y .env.example, el 503 HTML del router en Seguridad, y mi
+   documento (texto nuevo del 503). El "502" de pruebas-remotas.md y la nota del
+   catálogo en mi 04a los haces después, cuando #81 y #80 estén unidos.
+   Commit, push y PR, pero no lo unas hasta que estén #80 y #81.
+4) Dime si el repo aleexng1/agentic-ia-grupo-05 es privado o público (gh repo view).
+```
+
+---
+
+## 8 · Revisión del PR #84 de Eduardo
+
+```
+Revisa el PR #84 de Eduardo (evidencias de instalación limpia y cierre documental)
+en una copia temporal. Sin leer mi .env y sin claves en lo que me muestres. Dos
+fases: informe primero; no unas nada hasta que yo escriba "sigue".
+
+FASE 1 · INFORME
+1) Alcance: confirma que solo toca documentos y evidencias de Eduardo, y que no
+   cambia código de la app ni pruebas del proyecto.
+2) Datos personales y secretos: en los archivos nuevos y en el historial de commits
+   del PR busca claves o tokens, rutas absolutas con nombre de usuario
+   (/home/..., C:\Users\...), nombres de equipo, correos, IP públicas y barras de
+   marcadores o notificaciones en las imágenes. Abre cada imagen. Ojo con los logs
+   de instalación: suelen traer rutas completas. El repo es público, así que
+   cualquier dato personal en un commit queda visible aunque se corrija después.
+3) Notas de asistente o de proceso: frases como "sin commit ni push", "queda local",
+   "Cambios principales" o "Lo que cambié", que no sean contenido real.
+4) Choque con mi PR #83: el #83 ya corrigió frases del documento de Eduardo y de los
+   README de sus evidencias. Dime si #84 y #83 tocan las mismas líneas, si habrá
+   conflicto y si #84 reintroduce alguna nota de proceso que el #83 ya corrigió.
+5) Instalación limpia: resume qué probó (sistema operativo, pasos, comandos,
+   resultados) y si cubre lo que hará el profesor: clonar, seguir el README,
+   instalar, arrancar y hacer una consulta real. Señala lo que NO cubrió, para
+   saber qué me falta en mi prueba de computador limpio. Indica si encontró algún
+   paso del README que no funcionara tal cual.
+6) Evidencias según la pauta: tabla con Entorno y fecha, Solicitud, Resultado
+   esperado, Resultado obtenido y Observaciones; nada rotulado como producción; lo
+   simulado declarado.
+7) pytest en el PR (deberían seguir siendo 168).
+Tabla ✅ / ⚠️ / ❌ por punto, con propuesta y quién la hace. Recomienda el orden de
+unión entre #84 y #83. DETENTE AQUÍ.
+```
+
+Continuación: las correcciones las hice yo en lugar de pedírselas a Eduardo:
+
+```
+Cambio de plan: las correcciones del #84 las hago yo en mi #83, no Eduardo.
+1) Une el #84 tal como está con gh pr merge 84 --merge, sin borrar la rama.
+2) Pon c2t2/alex-integracion al día con main y resuelve los conflictos del #83 en
+   los 3 archivos de Eduardo dejando SU versión (la del #84), como propusiste.
+   Revisa a mano pendientes-locales…/README.md para que no quede contradictorio.
+3) Encima de su versión, en un commit aparte con mensaje claro, corrige:
+   - las 6 frases que dicen "quedan preparadas en el índice, sin commit ni push":
+     que digan "publicado en 8a5bb9b, PR #84";
+   - "carpeta temporal aprobada de OpenCode" → "carpeta temporal";
+   - sus tablas de pruebas a las 5 columnas de la pauta (Entorno y fecha, Solicitud,
+     Resultado esperado, Resultado obtenido, Observaciones), moviendo la fecha y el
+     entorno que hoy están en el texto. No cambies resultados ni agregues datos que
+     no estén ya escritos; si una fila no tiene observación, pon "—";
+   - en su tabla "REMOTA futura", remite a evidencias/sebastian/pruebas-remotas.md
+     en vez de "por confirmar por Sebastián".
+   No toques los bloques "Histórico conservado".
+4) Corre pytest (168), push a c2t2/alex-integracion y actualiza la descripción del
+   PR #83 con lo nuevo. No lo unas: sigue esperando #80 y #81.
+5) Dame la lista exacta de lo que cambié en los archivos de Eduardo, para avisarle.
+```
+
+---
+
+## 9 · Unión de #80 (Matías), #81 (Sebastián) y #83 tras sus correcciones
+
+```
+Pon c2t2/alex-integracion al día con main. Matías y Sebastián subieron correcciones
+a sus PR #80 y #81. Revísalos en copias temporales y, si las correcciones que falten
+son puntuales, hazlas tú en c2t2/alex-integracion (no en las ramas de ellos). No
+leas mi .env ni muestres claves. DOS FASES: informe y te detienes hasta que yo
+escriba "sigue".
+
+FASE 1 · INFORME
+1) #80 Matías:
+   - Abre las capturas local-*.png nuevas: que ya no se vea la barra de marcadores ni
+     ningún otro dato personal; la clave tapada.
+   - tests/test_tools_matias.py: qué prueba, que esté en su zona, y que pytest
+     completo dé 254 (o di cuántas da).
+   - Confirma que el contenido final del PR no tiene datos personales. Las imágenes
+     viejas siguen en el historial de su rama (commit normal, sin force): solo
+     anótalo, ya lo sabemos.
+2) #81 Sebastián:
+   - Contenido final: que logs-heroku.txt y cualquier otro archivo ya no tengan IP
+     públicas, que la frase del 502 esté corregida y que no quede el detalle de la
+     otra app de su cuenta en ningún archivo.
+   - Historial: ¿reescribió el commit 999fc22 (push --force) o hizo un commit nuevo?
+     Dime si las IP o el nombre de la otra app siguen visibles en algún commit de su
+     rama o del PR.
+   - Sigue vigente lo de antes: sección Operación completa, rótulos REMOTO/HEROKU,
+     tablas de 5 columnas. Revisa si su documento menciona la release desplegada
+     (v10) y anota que habrá un despliegue final después de unir #80.
+3) Junta main + #80 + #81 + #83 en una copia temporal: conflictos, pytest y
+   comprobaciones del frontend.
+4) Lista lo que falta en el #83 que ya dejaste anotado (línea de rotar CLAVE_API en
+   Operación, el 502 de pruebas-remotas.md si Seba no lo corrigió del todo, la nota
+   de mi captura 04a por el catálogo nuevo) más cualquier arreglo puntual nuevo.
+Tabla ✅ / ⚠️ / ❌ por punto y PR, con propuesta. DETENTE AQUÍ.
+
+FASE 2 · UNIR (cuando escriba "sigue")
+5) Une #80 con gh pr merge 80 --squash y #81 con gh pr merge 81 --squash, sin
+   borrar las ramas. Si GitHub marca alguno como CONFLICTING sin conflictos reales,
+   avísame antes de hacer nada.
+6) Pon c2t2/alex-integracion al día con main, agrega al #83 los arreglos pendientes
+   y los puntuales, corre pytest y las comprobaciones del frontend, push, y une el
+   #83 con --merge.
+7) Termina con: commit final de main, resultado de pruebas, PR abiertos (deberían ser
+   cero) y un mensaje corto para Sebastián con lo que necesita para el despliegue
+   final (rama main, mismo procedimiento, y qué probar).
+```
+
+---
+
+## 10 · Revisión del PR #85 de Eduardo (validación remota del panel)
+
+```
+Pon c2t2/alex-integracion al día con main. Revisa el PR #85 de Eduardo (validación
+remota del panel en Heroku) en una copia temporal. No leas mi .env ni muestres
+claves. DOS FASES: informe y te detienes hasta que yo escriba "sigue". Si hay
+arreglos puntuales, los hacemos nosotros en c2t2/alex-integracion, no en su rama.
+
+FASE 1 · INFORME
+1) Alcance: solo documento-Eduardo.md y evidencias/eduardo/. Dice que agrega
+   "scripts de validación": dime dónde quedan y confirma que no tocan la app, las
+   pruebas del proyecto ni el README general.
+2) Secretos y datos personales: abre CADA imagen nueva (escritorio y móvil
+   emulado). Que no se vea la CLAVE_API remota (ni en el campo, ni en la URL, ni en
+   un log), correos, rutas con usuario, IP públicas, barras de marcadores,
+   pestañas personales ni notificaciones. Los scripts no deben tener la clave
+   escrita: deben leerla de una variable de entorno. Revisa también el historial
+   de commits del PR (el repo es público).
+3) Notas de proceso o de asistente: frases como "sin commit ni push", "queda
+   local", "carpeta aprobada de OpenCode" o comentarios de edición.
+4) Formato según la pauta: tablas de 5 columnas; entorno rotulado HEROKU (no
+   producción) con fecha y hora; release v12 y su commit; lo no comprobado
+   declarado.
+5) Coherencia con lo que dijo Sebastián: la v12 es el commit 4593bafb de Heroku y
+   él afirma que tiene el mismo código que main (96ebca4). Revisa cómo lo cita
+   Eduardo. Si el commit 4593bafb existe en algún lugar del repo de GitHub, compara
+   su código con 96ebca4 (git diff --stat); si no existe, anótalo como dato que
+   solo puede confirmar Sebastián.
+6) pytest (254) y las comprobaciones del frontend (68) en el PR.
+7) Revisa si hay algún PR mío abierto (la prueba desde cero) o de Sebastián, y si
+   choca con el #85.
+Tabla ✅ / ⚠️ / ❌ por punto con propuesta. DETENTE AQUÍ.
+
+FASE 2 · (cuando escriba "sigue")
+8) Si el contenido final está limpio, une el #85 con gh pr merge 85 --merge sin
+   borrar la rama (si tuviera datos personales en su historial, usa --squash y
+   avísame). Pon c2t2/alex-integracion al día con main y haz ahí los arreglos
+   puntuales, en un PR aparte que no unes. Dame el estado final: commit de main,
+   pruebas y PR abiertos.
+```
+
+---
+
+## 11 · Revisión del PR #87 de Sebastián (release v12 y pruebas remotas)
+
+```
+Pon c2t2/alex-integracion al día con main. Revisa el PR #87 de Sebastián (release
+v12 y pruebas remotas) en una copia temporal. No leas mi .env ni muestres claves.
+DOS FASES: informe y te detienes hasta que yo escriba "sigue". Arreglos puntuales
+los hacemos nosotros en c2t2/alex-integracion, no en su rama.
+
+FASE 1 · INFORME
+1) La resolución de conflictos: Sebastián unió main en su rama. Compara el PR
+   contra main (gh pr diff 87 y git diff main...): confirma que SOLO cambia su
+   documento y evidencias/sebastian/, que no revierte ningún archivo de otros
+   (documentos de Eduardo, Matías o míos, README, código) y que no quedan marcas
+   de conflicto (<<<<<<<, =======, >>>>>>>) en ningún archivo del repo.
+2) Secretos y datos personales en el contenido final y en el historial de sus
+   commits (el repo es público): CLAVE_API o GOOGLE_API_KEY con valor, IP públicas
+   de clientes (Heroku las registra en los logs; las del router de Heroku sí
+   pueden quedar), el nombre de su otra app de Heroku, correos, rutas con
+   usuario. Abre cada imagen nueva.
+3) Lo que le pedimos:
+   - la release v12 y su commit en la línea pendiente de su documento;
+   - la confirmación de que 4593bafb tiene el mismo código que 96ebca4 (resultado
+     de git diff --stat o de heroku releases:info). Si no está, ❌;
+   - si rotó la CLAVE_API: cuándo, y si eso generó una release nueva (v13 o más)
+     con el mismo código; que quede anotado;
+   - pruebas remotas sobre esa versión: una pregunta a cada uno de los 4 agentes,
+     una que va a "ninguno", 401 sin clave y con clave incorrecta, 400 con texto
+     vacío, y en el log el envío A2A a http://127.0.0.1:…;
+   - la pregunta de Matías ("feria infantil de 3 horas desde las 15:00"): ¿trae
+     "Función de títeres" y 0 minutos libres? Si dio otra cosa, anótalo, no lo
+     corrijas.
+4) Formato: tablas de 5 columnas, rótulo HEROKU con fecha y hora, nada como
+   "producción", lo no comprobado declarado. Notas de asistente o de proceso
+   ("Cambios principales", "Lo que quité", "sin commit ni push").
+5) pytest (254) y comprobaciones del frontend (68) en el PR.
+Tabla ✅ / ⚠️ / ❌ por punto con propuesta y quién la hace. Recomienda --merge o
+--squash según su historial. DETENTE AQUÍ.
+
+FASE 2 · (cuando escriba "sigue")
+6) Une el #87 con la opción que recomendaste, sin borrar la rama. Pon
+   c2t2/alex-integracion al día con main, haz los arreglos puntuales, corre las
+   pruebas, abre un PR y únelo con --merge. Dame el commit final de main y
+   confirma que no quedan PR abiertos.
+```
+
+Continuación tras el informe (versión acotada a lo que pide la pauta):
+
+```
+sigue, pero en versión corta:
+1) Une el #87 con --squash, sin borrar la rama.
+2) En c2t2/alex-integracion haz solo: 127.0.0.1 de vuelta en las 6 líneas A2A de
+   logs-heroku.txt; la columna "Entorno y fecha" de vuelta en la tabla principal;
+   las 3 tablas nuevas a 5 columnas con lo que ya está escrito; "en producción" →
+   "en Heroku". Para la fecha de sus pruebas en v12 pon "HEROKU · release v12 ·
+   fecha por confirmar (Sebastián)" y agrega que las pruebas de Eduardo del 15/11
+   son de la misma release. La pregunta de la feria infantil no hace falta: no la
+   agregues.
+3) pytest, PR y únelo con --merge. Dame el commit final de main y confirma que no
+   quedan PR abiertos.
+```
