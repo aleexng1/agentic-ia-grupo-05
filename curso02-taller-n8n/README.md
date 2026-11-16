@@ -14,7 +14,14 @@ Un **agente router** (LangGraph + Gemini) recibe el mensaje de un cliente de una
 | `generica` | nada que ver con la tienda, o saludos sin pedido | `respuesta_generica` |
 
 Si duda entre preventa y postventa, gana postventa cuando el cliente habla de algo que **ya compró**.
-Por ahora los agentes de preventa y postventa son cascarones que solo confirman lo que recibieron.
+`agente_preventa` es un agente ReAct que atiende a quien quiere comprar consultando el catálogo real (ver
+"Agente de preventa y catálogo"). `agente_postventa` también es un agente ReAct: atiende a quien ya compró (ver
+"Agente de postventa").
+El router decide mirando también los últimos 4 mensajes del hilo y la ruta anterior, así que una respuesta corta
+("sí", "Samsung", "hasta 300 mil") sigue en la ruta en que venía la conversación.
+`respuesta_generica` sí usa el modelo (sin herramientas): conversa con el historial del hilo y con la ficha de la
+tienda en `data/tienda.md`, responde en máximo 3 líneas y no se sale de su papel. Si el modelo falla, devuelve una
+frase fija en vez de un error.
 La memoria es por `thread_id` y se guarda en Postgres (o en RAM si no hay base): ver "Memoria en Postgres".
 
 Una **API FastAPI** expone el router en `POST /chat`. Telegram no se conecta directo: entrará por n8n, que llamará a esta API.
@@ -25,9 +32,14 @@ curso02-taller-n8n/
 ├── api/app.py               # API FastAPI
 ├── src/config.py            # .env y creación del modelo
 ├── src/memoria.py           # memoria: Postgres (esquema propio) o RAM
+├── src/router/catalogo.py   # consultas de SOLO LECTURA a catalogo.productos_unicos
+├── src/router/reclamos.py   # reclamos de postventa: Postgres (esquema propio) o memoria
+├── data/                    # tienda.md (ruta genérica), pedidos.json y politicas.md (postventa)
 ├── src/router/              # graph.py · prompts.py · tools.py
 ├── scripts/test_router.py   # tabla de evaluación del router
 ├── scripts/ver_memoria.py   # mira los hilos guardados en Postgres
+├── scripts/ver_catalogo.py  # mira el catálogo (conteo por categoría o búsqueda)
+├── scripts/ver_reclamos.py  # lista los reclamos guardados
 ├── tests/                   # pytest (casos_router.json, test_router.py, test_api.py)
 ├── bruno/                   # colección de Bruno (entornos local y nube)
 └── AGENTS.md                # reglas del proyecto
@@ -49,7 +61,7 @@ cp .env.example .env          # y rellena GOOGLE_API_KEY
 python main.py router "¿tienen la polera azul en talla M?"
 python main.py router "mi pedido 4521 llegó roto" --saltos    # muestra los nodos recorridos
 python main.py router "y en talla L?" --hilo ana               # elige el thread_id (conversación)
-python main.py router --diagrama                               # imprime el Mermaid sin ejecutar
+python main.py router --diagrama                               # imprime el Mermaid (router y agentes de preventa y postventa) sin ejecutar
 ```
 
 ## Levantar la API
@@ -96,6 +108,72 @@ rechaza **todas** las peticiones (no queda abierto) y lo deja anotado en el log.
    despliegues. No va en el código ni en el repo.
 
 Quien llame a `/chat` (n8n, Bruno, curl) debe mandar la cabecera `X-API-Key: <tu-clave>`.
+
+## Agente de preventa y catálogo
+
+`agente_preventa` (`create_agent` de LangChain, ciclo modelo ↔ herramientas) recibe el historial del hilo y consulta
+el catálogo real: la tabla `catalogo.productos_unicos` de la misma base Postgres de la memoria (`DATABASE_URL`).
+Sus tres herramientas están en `src/router/tools.py` y su prompt en `src/router/prompts.py`:
+
+| Herramienta | Qué hace |
+|---|---|
+| `buscar_productos(consulta, categoria?, marca?, precio_max?)` | cada palabra de la consulta debe estar en el nombre; hasta 5, de mejor rating |
+| `ver_producto(sku_id)` | todo el detalle de un producto, con su link |
+| `mejores_ofertas(categoria?, limite=5)` | los de mayor `descuento_pct` |
+
+El nombre, el precio, el descuento y el rating salen siempre de una herramienta. El catálogo no trae stock, colores
+ni costo de envío, y el agente lo dice. Si la base no responde, la herramienta devuelve "catálogo no disponible" y el
+agente lo informa: la API no se cae. En la memoria del hilo solo quedan el mensaje del cliente y la respuesta final
+(no las llamadas a herramientas).
+
+**El catálogo se consulta solo en lectura**, porque el usuario de la base puede escribir en `catalogo`:
+
+- `catalogo.consultar()` rechaza todo lo que no sea un `SELECT` simple sobre `catalogo.productos_unicos` (una sola
+  sentencia, sin comentarios, sin literales de texto, sin funciones fuera de una lista corta).
+- Siempre con parámetros (`%s`): lo que escribe el cliente o el modelo nunca entra al SQL.
+- La conexión es de solo lectura (`BEGIN READ ONLY`), se abre para cada consulta y se cierra al terminar.
+- Como máximo 1 conexión a la vez; con el pool de la memoria (hasta 2) nunca pasa de 3.
+
+`python main.py router "..." --saltos` muestra el recorrido, por ejemplo
+`router → agente_preventa → buscar_productos → ver_producto`.
+
+Ver el catálogo (una conexión corta, solo lectura):
+
+```bash
+python scripts/ver_catalogo.py              # cuántos productos hay por categoría
+python scripts/ver_catalogo.py "samsung 55"  # hasta 10 productos cuyo nombre contiene el texto
+```
+
+## Agente de postventa
+
+`agente_postventa` (también `create_agent`, ciclo modelo ↔ herramientas) recibe el historial del hilo y atiende a quien
+ya compró. Sus tres herramientas están en `src/router/tools.py` y su prompt en `src/router/prompts.py`:
+
+| Herramienta | Qué hace |
+|---|---|
+| `estado_pedido(numero)` | el pedido de `data/pedidos.json` (estado, fechas, seguimiento) o `"no existe"` |
+| `politica(tema)` | la sección de `data/politicas.md`: `devoluciones`, `cambios` o `garantia` |
+| `crear_reclamo(numero_pedido, motivo, detalle)` | guarda el reclamo y devuelve su ticket (`R-0001`, `R-0002`...) |
+
+Los 8 pedidos de `data/pedidos.json` son inventados (por ejemplo, el 4521 está despachado y el 4530 entregado; el 9999
+no existe). `estado_pedido` agrega `dias_desde_la_entrega` a los pedidos entregados, porque el agente no sabe qué día
+es hoy y lo necesita para aplicar el plazo de 30 días.
+
+El agente pide el número de pedido si no lo tiene, saca estados, fechas y políticas siempre de una herramienta, y antes de
+crear un reclamo confirma el motivo con el cliente. Si el cliente pide hablar con una persona, o su caso no cabe en las
+políticas, crea el reclamo con motivo `derivar a persona`. El `thread_id` del reclamo lo toma de la configuración del
+grafo: el modelo no lo ve ni lo puede fijar.
+
+**Dónde se guardan los reclamos:** en la tabla `reclamos` de Postgres, en el esquema propio (`DB_SCHEMA`, por defecto
+`alex_nail`; nunca `public`, `catalogo` ni `alumnoNN`). Se crea al arrancar si no existe, usa el pool de la memoria (no abre
+conexiones nuevas: con el catálogo, nunca más de 3 en total) y el número de ticket lo genera la base (`serial`). Las
+consultas llevan siempre parámetros. Sin Postgres, los reclamos se guardan en memoria (se pierden al reiniciar) y se
+avisa en el log, sin la URL. Si la base falla justo al crear uno, el agente lo dice y no inventa un ticket.
+
+```bash
+python scripts/ver_reclamos.py        # los últimos 20 reclamos (una conexión corta, solo lectura)
+python scripts/ver_reclamos.py 50
+```
 
 ## Memoria en Postgres
 
@@ -169,10 +247,13 @@ Ten en cuenta:
 ```bash
 python scripts/test_router.py   # tabla: mensaje, esperado, obtenido, ✔/✘, motivo y resumen
 pytest                          # router (máximo 2 fallos, llama al modelo) + API y memoria (sin modelo ni base)
-pytest tests/test_api.py tests/test_memoria.py   # solo API y memoria: rápido, sin cuota y sin tocar la base
+pytest tests/test_api.py tests/test_memoria.py tests/test_generica.py tests/test_catalogo.py tests/test_preventa.py tests/test_postventa.py
+                                # todo lo que no usa el modelo real ni la base (modelo y catálogo falsos)
 ```
 
 ## Avance
 
 - **Sesión 2 · router + API:** entorno Python 3.12, agente router con salida estructurada y memoria por hilo, 15 casos de prueba (15/15), API FastAPI con Swagger, colección de Bruno.
 - **Memoria persistente:** el checkpointer pasó de RAM a Postgres (esquema propio `alex_nail`), con caída automática a RAM si la base no responde, `--hilo` en `main.py` y `scripts/ver_memoria.py`.
+- **Preventa con catálogo:** `agente_preventa` pasó de cascarón a agente ReAct con tres herramientas sobre `catalogo.productos_unicos` (solo lectura), el router usa el historial reciente y la ruta anterior, y `scripts/ver_catalogo.py` permite mirar el catálogo.
+- **Postventa:** `agente_postventa` pasó de cascarón a agente ReAct con `estado_pedido`, `politica` y `crear_reclamo`; los reclamos se guardan en Postgres (tabla `reclamos` del esquema propio) y `scripts/ver_reclamos.py` los lista.

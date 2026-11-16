@@ -16,6 +16,7 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from src.config import MODELO
 from src.memoria import abrir_memoria
+from src.router import reclamos
 from src.router.graph import construir_grafo
 
 log = logging.getLogger("uvicorn.error")
@@ -71,6 +72,8 @@ async def lifespan(app: FastAPI):
     # abrir_memoria() nunca lanza: si la base falla, la API sigue arriba con memoria en RAM.
     memoria = await asyncio.to_thread(abrir_memoria)
     app.state.memoria = memoria
+    # La tabla de reclamos se crea (si no existe) en el esquema propio, con el pool de la memoria.
+    await asyncio.to_thread(reclamos.configurar, memoria)
     app.state.grafo = construir_grafo(memoria.checkpointer)
     if memoria.tipo == "postgres":
         log.info("Memoria en Postgres (esquema %s).", memoria.esquema)
@@ -82,6 +85,7 @@ async def lifespan(app: FastAPI):
     try:
         yield
     finally:
+        reclamos.detener()
         memoria.cerrar()  # cierra el pool de conexiones
 
 

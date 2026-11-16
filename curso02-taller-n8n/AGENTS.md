@@ -50,3 +50,10 @@ La documentación interactiva queda en http://localhost:8000/docs.
 - `Procfile`: `web: uvicorn api.app:app --host 0.0.0.0 --port $PORT`
 - `.python-version`: `3.12`
 - `requirements.txt` al día (regenerar con `pip freeze > requirements.txt` cuando se agregue una dependencia).
+
+## Base de datos
+
+- La base Postgres es compartida por todo el curso y el usuario de `DATABASE_URL` puede escribir en todo. Nunca se imprime, registra ni copia la URL, su clave ni el servidor.
+- Las tablas propias (memoria) van solo en el esquema de `DB_SCHEMA` (por defecto `alex_nail`). No se crea, modifica ni borra nada en `public`, `catalogo` ni `alumnoNN`.
+- `catalogo.productos_unicos` se consulta **solo** con `src/router/catalogo.py` (`consultar`): solo SELECT, con parámetros, en conexión de solo lectura y como máximo 1 conexión a la vez.
+- Los reclamos de postventa van en la tabla `reclamos` del esquema propio (`src/router/reclamos.py`), con el pool de la memoria: entre memoria, catálogo y reclamos nunca más de 3 conexiones a la vez.

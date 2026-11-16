@@ -13,7 +13,10 @@ import argparse
 import importlib
 import sys
 
+from langgraph.pregel import Pregel
+
 from src.memoria import abrir_memoria
+from src.router import reclamos
 
 
 def importar_agente(nombre_agente: str):
@@ -21,6 +24,23 @@ def importar_agente(nombre_agente: str):
         return importlib.import_module(f"src.{nombre_agente}.graph")
     except ModuleNotFoundError:
         sys.exit(f"No existe el agente '{nombre_agente}' (se esperaba src/{nombre_agente}/graph.py).")
+
+
+def correr(grafo, mensaje: str, config: dict) -> list[str]:
+    """Ejecuta el grafo con un mensaje y devuelve los saltos: los nodos recorridos y, tras el nodo de un
+    agente, las herramientas que usó (p. ej. router, agente_preventa, buscar_productos, ver_producto)."""
+    saltos: list[str] = []
+    herramientas: dict[str, list[str]] = {}  # nodo del grafo -> herramientas que usó
+    for ruta_sub, paso in grafo.stream({"mensaje": mensaje}, config, stream_mode="updates", subgraphs=True):
+        if ruta_sub:  # paso interno de un agente: interesa qué herramientas usó
+            nodo = ruta_sub[0].split(":")[0]
+            for resultado in (paso.get("tools") or {}).get("messages", []):
+                herramientas.setdefault(nodo, []).append(getattr(resultado, "name", None) or "herramienta")
+        else:
+            for nodo in paso:  # el agente termina después de sus herramientas: se listan tras su nodo
+                saltos.append(nodo)
+                saltos.extend(herramientas.pop(nodo, []))
+    return saltos
 
 
 def main() -> None:
@@ -36,7 +56,13 @@ def main() -> None:
     agente = importar_agente(args.agente)
 
     if args.diagrama:  # no necesita memoria ni base de datos
-        print(agente.construir_grafo().get_graph().draw_mermaid())
+        grafo = agente.construir_grafo()
+        print(grafo.get_graph().draw_mermaid())
+        # Los agentes internos (p. ej. agente_preventa, con su ciclo modelo <-> herramientas) se dibujan aparte.
+        for nombre, nodo in grafo.nodes.items():
+            if isinstance(nodo.bound, Pregel):
+                print(f"\n%% Agente interno: {nombre}")
+                print(nodo.bound.get_graph().draw_mermaid())
         return
 
     if not args.mensaje:
@@ -46,14 +72,14 @@ def main() -> None:
     try:
         if memoria.tipo == "ram":
             print(f"⚠ memoria en RAM (no se guarda): {memoria.motivo}", file=sys.stderr)
+        reclamos.configurar(memoria)  # tabla de reclamos (si el agente los usa) con el pool de la memoria
         grafo = agente.construir_grafo(memoria.checkpointer)
 
         config = {"configurable": {"thread_id": args.hilo}}
-        saltos = []
-        for paso in grafo.stream({"mensaje": args.mensaje}, config, stream_mode="updates"):
-            saltos.extend(paso.keys())
+        saltos = correr(grafo, args.mensaje, config)
         estado = grafo.get_state(config).values
     finally:
+        reclamos.detener()
         memoria.cerrar()
 
     destino = f"postgres (esquema {memoria.esquema})" if memoria.tipo == "postgres" else "ram"

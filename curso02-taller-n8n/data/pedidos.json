@@ -1,0 +1,82 @@
+[
+  {
+    "numero": 4512,
+    "cliente": "Sebastián Núñez",
+    "productos": ["Samsung Galaxy S24 256GB", "Xiaomi Smart TV A 32\""],
+    "fecha_compra": "2026-10-05",
+    "estado": "entregado",
+    "fecha_estimada_entrega": "2026-10-11",
+    "fecha_entrega": "2026-10-11",
+    "codigo_seguimiento": "EA-CL-512077"
+  },
+  {
+    "numero": 4518,
+    "cliente": "Camila Rojas",
+    "productos": ["Smart TV LED 43\" Full HD"],
+    "fecha_compra": "2026-11-14",
+    "estado": "preparando",
+    "fecha_estimada_entrega": "2026-11-20",
+    "fecha_entrega": null,
+    "codigo_seguimiento": null
+  },
+  {
+    "numero": 4521,
+    "cliente": "Matías Fuentes",
+    "productos": ["Samsung Galaxy A55 128GB"],
+    "fecha_compra": "2026-11-10",
+    "estado": "despachado",
+    "fecha_estimada_entrega": "2026-11-17",
+    "fecha_entrega": null,
+    "codigo_seguimiento": "EA-CL-884201"
+  },
+  {
+    "numero": 4524,
+    "cliente": "Daniela Pizarro",
+    "productos": ["Smart TV QLED 55\" 4K"],
+    "fecha_compra": "2026-09-18",
+    "estado": "entregado",
+    "fecha_estimada_entrega": "2026-09-24",
+    "fecha_entrega": "2026-09-24",
+    "codigo_seguimiento": "EA-CL-771903"
+  },
+  {
+    "numero": 4527,
+    "cliente": "Joaquín Vera",
+    "productos": ["Xiaomi Redmi Note 13 256GB"],
+    "fecha_compra": "2026-10-12",
+    "estado": "devuelto",
+    "fecha_estimada_entrega": "2026-10-16",
+    "fecha_entrega": "2026-10-16",
+    "codigo_seguimiento": "EA-CL-640318"
+  },
+  {
+    "numero": 4530,
+    "cliente": "Francisca Soto",
+    "productos": ["Smart TV Google TV 50\" 4K"],
+    "fecha_compra": "2026-11-03",
+    "estado": "entregado",
+    "fecha_estimada_entrega": "2026-11-08",
+    "fecha_entrega": "2026-11-07",
+    "codigo_seguimiento": "EA-CL-905562"
+  },
+  {
+    "numero": 4533,
+    "cliente": "Andrés Molina",
+    "productos": ["iPhone 15 128GB"],
+    "fecha_compra": "2026-11-12",
+    "estado": "despachado",
+    "fecha_estimada_entrega": "2026-11-18",
+    "fecha_entrega": null,
+    "codigo_seguimiento": "EA-CL-337740"
+  },
+  {
+    "numero": 4536,
+    "cliente": "Valentina Araya",
+    "productos": ["Smart TV OLED 65\" 4K"],
+    "fecha_compra": "2026-11-15",
+    "estado": "preparando",
+    "fecha_estimada_entrega": "2026-11-23",
+    "fecha_entrega": null,
+    "codigo_seguimiento": null
+  }
+]
