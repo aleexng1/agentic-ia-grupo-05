@@ -52,3 +52,14 @@ Se repitieron las pruebas básicas después de rotar la `CLAVE_API` y desplegar 
 | `POST /panel/consultar` con la clave nueva y texto vacío | 400 | 400 |
 
 Las filas 7 y 8 de la tabla principal (502 por `GOOGLE_API_KEY`) no se repitieron en v12, porque requieren quitar la clave de Gemini en producción.
+
+## Pruebas locales de los dos casos de error (código de main 96ebca4)
+
+Se probaron en local, sin tocar Heroku, con el código de `main` exportado a una carpeta temporal y sin `.env`.
+
+| Caso | Configuración local | Resultado esperado | Resultado obtenido |
+|---|---|---|---|
+| `CLAVE_API` vacía | `CLAVE_API` vacía, `GOOGLE_API_KEY` vacía | 503 (el servidor no acepta consultas) | 503 con mensaje "no tiene configurada la clave de acceso (CLAVE_API)" |
+| Sin clave de Gemini | `CLAVE_API` con valor de prueba, `GOOGLE_API_KEY` vacía | 502 con mensaje claro | 502 con mensaje "Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars" |
+
+El 503 depende de `CLAVE_API` vacía, no de `GOOGLE_API_KEY`. La falta de la clave de Gemini responde 502. Las dos pruebas usan `PORT` igual a `URL_BASE`, porque el coordinador busca a los agentes en esa dirección.
