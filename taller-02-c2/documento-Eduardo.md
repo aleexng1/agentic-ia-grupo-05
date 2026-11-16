@@ -1,9 +1,244 @@
 # Eduardo Basaure · Frontend · Taller 2 del Curso 2 · Grupo 5
 
-**Estado vigente: LOCAL · 2026-11-15 · Rama `c2t2/eduardo-frontend` ·
+**Estado vigente: complemento REMOTO MANUAL aportado · 2026-11-16 · Rama `c2t2/eduardo-frontend`.**
+Se incorporan las capturas manuales del **16/11/2026**, separadas de las cuatro
+consultas del día 15. Esta integración documental **no ejecuta nuevas consultas**.
+
+**Base Git: `main` en `96ebca4391f1591933b39790c985142fe1908128`
+([PR #83 fusionado](https://github.com/aleexng1/agentic-ia-grupo-05/pull/83)).
+Publicado en el [PR #85](https://github.com/aleexng1/agentic-ia-grupo-05/pull/85),
+unido a `main` en `dbd28cb`.** Los cambios de Alex y del equipo que llegaron por `main` se mantienen; no se
+reeditaron código ni configuración y no se repitieron consultas o suites.
+
+## Complemento REMOTO MANUAL · 2026-11-16 · vigente
+
+**Fuente:** [README del complemento](evidencias/eduardo/complemento-remoto-manual-2026-11-16/README.md)
+y seis PNG aportados por Eduardo desde su navegador, revisados visualmente y
+conservados **sin modificar sus bytes**, al igual que el README aportado. Son
+evidencias de su sesión manual, no resultados de una ejecución automática nueva.
+
+**URL:** https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/
+
+**Fecha de la sesión:** 16/11/2026, America/Santiago. La captura 03 muestra
+`Date: Mon, 16 Nov 2026 12:47:37 GMT`, equivalente a **09:47:37 UTC−03:00**;
+es la fecha HTTP de esa respuesta, no su latencia ni la hora exacta de captura.
+**Release y commit del 16/11: no confirmados.** La confirmación de Sebastián sobre
+v12 y sus identificadores corresponde **solo a las cuatro consultas del 15/11**;
+no se extiende al complemento ni se deduce la versión desde Git.
+
+La secuencia efectiva fue presupuesto para **80 personas y 4 horas**, cambio a
+**3 horas** y, después de dos respuestas que pedían el tipo de evento, la aclaración
+«Es una feria tecnológica. Calcula el presupuesto e indica cuántos asistentes y qué
+duración estás considerando.». Este último mensaje no repite asistentes ni duración.
+Las aclaraciones no se cuentan como presupuestos calculados ni como errores HTTP.
+La tercera pregunta **no es** el caso previsto de Nueva conversación con 20 personas
+y 2 horas: ese caso y su cambio de `context_id` siguen sin acreditarse.
+
+| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO MANUAL · Heroku · Chrome · 16/11/2026 · respuesta HTTP 09:47:37 UTC−03:00 | Secuencia anterior: 80 personas y 4 horas, cambio a 3 horas y aclaración de feria tecnológica sin repetir esos parámetros | Recuperar 80 asistentes, aplicar la última duración y calcular al completar el tipo | **CONTINUIDAD DE CONTENIDO OBSERVADA:** 80 asistentes, **180 minutos (3 horas)**, evento tecnológico; subtotal **$1.584.000 CLP**, contingencia **$158.400**, total **$1.742.400 CLP**; captura 03 con **POST /panel/consultar, 200 OK y application/json** | [01: aclaraciones](evidencias/eduardo/complemento-remoto-manual-2026-11-16/01-tipo-de-evento-pendiente.png), [02: secuencia](evidencias/eduardo/complemento-remoto-manual-2026-11-16/02-secuencia-aclaracion.png), [03: presupuesto y 200](evidencias/eduardo/complemento-remoto-manual-2026-11-16/03-continuidad-presupuesto-200.png). La solicitud seleccionada en 02 es anterior; no se usa para atribuir el 200 final. **No se compararon `context_id` ni se verificó aislamiento.** |
+| REMOTO MANUAL · Heroku · móvil emulado · 16/11/2026 · paso de 390 px | Mostrar la conversación existente y su presupuesto | Mensajes legibles y campo de texto y Enviar visibles | **OBSERVACIÓN VISUAL:** la captura 04 acredita **390 × 844** y parte de la conversación; la 05 muestra presupuesto y controles, sin recorte lateral apreciable en las zonas visibles | [04: dimensiones](evidencias/eduardo/complemento-remoto-manual-2026-11-16/04-movil-390-dimensiones.png), [05: presupuesto y controles](evidencias/eduardo/complemento-remoto-manual-2026-11-16/05-movil-390-presupuesto-controles.png). La 05 no incluye la barra: se asocia al paso por la secuencia, no mide por sí sola el viewport. Sin medición de `scrollWidth` ni prueba de teléfono físico. |
+| REMOTO MANUAL · Heroku · móvil emulado · 16/11/2026 · paso declarado de 320 px | Reducir a 320 × 844 según el guion, conservando la respuesta | Presupuesto y controles legibles en la vista estrecha | **OBSERVADO EN EL RECORTE:** presupuesto, texto ajustado, campo de entrada y Enviar dentro de la zona visible | [06: paso de 320 declarado](evidencias/eduardo/complemento-remoto-manual-2026-11-16/06-movil-320-declarado-presupuesto-controles.png). La barra quedó fuera: **ancho exacto no verificado independientemente**. No acredita una medición de 320 × 844 ni ausencia de desborde fuera de lo visible. |
+
+Las listas acumuladas o vacías de Network no permiten deducir el número de POST ni
+duplicados. El complemento no acredita espera y bloqueo durante una consulta
+autorizada, Nueva conversación, cambio de `context_id`, aislamiento, respuestas
+tardías, trazas internas A2A/proveedor, móvil físico o teclado virtual. Tampoco
+recupera Payload/Response ni los inicios ausentes de las consultas del 15/11.
+Se conserva la observación 60/40 de Matías y la evidencia de fallos **LOCAL**, con
+su fecha y alcance. La revisión visual no muestra claves ni Request Headers;
+los Remote Address visibles son del servidor remoto. No se generaron HAR ni
+se modificaron código, configuración o Heroku.
+
+## Consolidación del cierre · 2026-11-16
+
+**Registro histórico del corte previo a recibir el complemento.** Conserva la
+limitación de acceso de aquella revisión y su guion, no el estado vigente de las
+capturas aportadas después. No se ejecuta el guion ni se repiten consultas en esta integración.
+
+<details>
+<summary>Abrir revisión documental y guion previos al complemento, conservados</summary>
+
+**Resultado de esta continuación:** no se dispone de acceso al navegador autenticado
+de Eduardo desde esta sesión. Se entregó inmediatamente el guion manual, sin abrir
+otro navegador, esperar el ingreso de una clave ni enviar solicitudes a Heroku:
+**0 consultas nuevas enviadas por esta sesión**. Es una limitación de acceso del
+instrumental, no una falla observada del panel o de Heroku.
+
+El **16/11/2026 es la fecha de esta revisión documental**, no de una ejecución remota.
+Al ejecutar el guion habrá que registrar fecha, hora y zona reales. La versión de
+una nueva ejecución **no está identificada**: la confirmación de Sebastián se
+mantiene exclusivamente para las cuatro consultas del día 15 descritas más abajo.
+
+| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO previsto · Heroku · revisión documental 16/11/2026 | **Consulta 1, no enviada:** «Estima el presupuesto ficticio en CLP para una feria de 80 personas y 4 horas»; un segundo intento desde la interfaz mientras espera | 200, respuesta útil, Eduardo y motivo; indicador, controles bloqueados y un solo POST para ambos intentos | **NO EJECUTADA:** sin acceso al navegador autenticado; no hay HTTP, respuesta ni conteo observado | No se reutiliza como aprobación el caso anterior de espera durante un 401. |
+| REMOTO previsto · Heroku · revisión documental 16/11/2026 | **Consulta 2, no enviada**, en la misma conversación: «Para esa misma feria, cambia solo la duración a 3 horas y recalcula el presupuesto, indicando cuántos asistentes consideraste» | 200, conserva `context_id`, considera 80 asistentes y cambia a 3 horas | **NO EJECUTADA:** continuidad y `context_id` sin observar | No se inventan valores de contexto ni importes esperados. |
+| REMOTO previsto · Heroku · revisión documental 16/11/2026 | **Consulta 3, no enviada**, tras Nueva conversación: «Estima el presupuesto ficticio en CLP para una feria de 20 personas y 2 horas» | Historial anterior limpio, `context_id` diferente y respuesta para 20 asistentes y 2 horas | **NO EJECUTADA:** limpieza y cambio de contexto sin observar | Solo acreditaría el cambio de conversación del panel, no aislamiento completo del servidor. |
+| REMOTO previsto · Heroku · móvil emulado, 390 px · revisión documental 16/11/2026 | Mostrar una respuesta autenticada ya recibida, sin consultar otra vez | Sin desborde horizontal; respuesta legible y controles accesibles | **NO INSPECCIONADA:** sin acceso a esa respuesta en el navegador | No es teléfono físico; no se sustituye por una respuesta simulada o una captura de escritorio. |
+| REMOTO previsto · Heroku · móvil emulado, 320 px · revisión documental 16/11/2026 | Redimensionar la misma respuesta, sin consultar otra vez | Sin desborde horizontal; respuesta legible y controles accesibles | **NO INSPECCIONADA:** sin acceso a esa respuesta en el navegador | Siguen sin acreditarse teléfono físico, teclado virtual y Safari. |
+| Network histórico del 15/11 · revisión documental 16/11/2026 | Recuperar solo Payload y Response de Eduardo, Alex y Sebastián para completar los inicios ausentes | Preguntas exactas y respuestas originales inequívocamente correlacionadas | **NO RECUPERADO:** sin acceso a Network del navegador de Eduardo | No se afirma que los registros hayan desaparecido de su navegador. No se reconstruyen preguntas ni se repiten las cuatro consultas. |
+
+### Guion manual mínimo · no ejecutado
+
+1. Usar la pestaña **ya autenticada**, sin leer la clave. Antes de recargar, limpiar
+   Network o iniciar otra conversación, revisar si conserva las solicitudes históricas.
+   Abrir **solo Payload y Response**: petición `texto/context_id` y respuesta
+   `respuesta/context_id/agente/motivo`. Asociarlas por evidencia inequívoca a las
+   capturas originales; sin ella, mantener la limitación. No abrir cabeceras de
+   solicitud ni usar HAR, «Copy as cURL/fetch», trazas o perfiles del navegador.
+2. Anotar URL, fecha/hora con zona y el conteo inicial de POST a `/panel/consultar`,
+   **sin borrar los registros históricos**. Enviar la consulta 1 de la tabla. Mientras
+   siga pendiente, hacer **un solo intento adicional de envío con texto no vacío**
+   desde la interfaz, sin forzar controles ni enviar HTTP por fuera del panel.
+   Registrar espera, bloqueo y diferencia de POST. Si ya terminó, no reenviar:
+   esa observación queda sin acreditar.
+3. Enviar la consulta 2 **en la misma conversación** y contrastar los `context_id`
+   de ambos Payload/Response; conservar la respuesta tal como llega y comprobar los
+   80 asistentes y las 3 horas, además de agente y motivo.
+4. Tras terminar la segunda, pulsar **Nueva conversación**. Registrar que desaparecen
+   los mensajes anteriores; enviar la consulta 3 y comparar su `context_id` con el
+   anterior. Comprobar 20 asistentes y 2 horas, sin inferir aislamiento del servidor.
+5. Mantener esa respuesta cargada y redimensionar, **sin recargar ni enviar consultas**,
+   a **390 y 320 px**. Registrar por ancho desborde de página y respuesta, legibilidad
+   y acceso a entrada, Enviar, Nueva conversación y Cambiar clave. Etiquetar toda
+   captura como **móvil emulado**, con fecha y ancho, sin incluir secretos.
+
+**Límite:** máximo tres consultas que puedan ejecutar agentes, sin reintentos
+automáticos ni repetición de las cuatro históricas. Un POST adicional inesperado
+consume ese límite: detener la secuencia y registrar el resultado. Ante una falla,
+conservar el estado observado y los casos no ejecutados; no provocar errores,
+cambiar configuración ni marcar aprobaciones sin evidencia. No se han generado
+capturas, Payload/Response ni mediciones nuevas en esta revisión.
+
+</details>
+
+## Validación REMOTA MANUAL · cuatro capturas aportadas por Eduardo · 15/11/2026
+
+**URL:** https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/
+
+**Identificación del despliegue: confirmada por Sebastián, responsable del
+despliegue, según la [nueva fuente aportada por Eduardo](evidencias/eduardo/prompts-utilizados.md#confirmación-del-despliegue-manual).**
+Sebastián confirmó que Heroku ejecutaba la **release v12**, desplegada el
+**15/11/2026 a las 21:44**, con identificador informado **`4593bafb`** y **código
+equivalente al de `main` en `96ebca4`**. Confirmó expresamente que las cuatro consultas
+manuales de **21:51 a 22:04** corrieron contra esa versión.
+
+Se resuelve **solo el pendiente de identificación de estas cuatro consultas**, por
+confirmación del responsable, **sin verificación independiente de Heroku**. La
+equivalencia de código comunicada **no afirma que `4593bafb` y `96ebca4` sean el
+mismo commit**. Ni el SHA de `main`, ni el merge del PR #83, ni las capturas
+identifican por sí solos el despliegue. El
+[informe de Sebastián del 14-11-2026](evidencias/sebastian/pruebas-remotas.md)
+corresponde a **otra ejecución**; no se copian su release o commit a estas pruebas.
+
+Fuente: [README manual](evidencias/eduardo/manual-autenticada-2026-11-15/README.md)
+y cuatro PNG revisados visualmente, conservados **sin modificar sus bytes**.
+Cada uno muestra un `POST /panel/consultar` seleccionado con **200 OK** en DevTools,
+una respuesta útil en el alcance visible, el agente y el motivo en el panel.
+Se registran como **pruebas REMOTAS MANUALES**, no como resultados del ejecutor
+automático. Las horas proceden de la cabecera HTTP `Date`, convertida de UTC a
+UTC−03:00 (America/Santiago); no son duraciones ni fechas de creación de los PNG.
+
+| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| **REMOTO MANUAL · Heroku · Eduardo · 2026-11-15 · 21:51:58 UTC−03:00** (`Date`: 16-11, 00:51:58 GMT) | Presupuesto de feria; **pregunta exacta fuera del encuadre**, no reconstruida | HTTP 200, respuesta de presupuesto útil, agente correcto y motivo visible | **APROBADA en el alcance visible:** POST **200 OK**; subtotal **$1.976.000**, contingencia **$197.600**, total **$2.173.600**, supuestos y advertencias de simulación; `Agente de Eduardo`. Motivo: «El usuario solicita calcular un presupuesto simulado para una feria, tarea que corresponde exclusivamente a este agente.» | [Captura 01](evidencias/eduardo/manual-autenticada-2026-11-15/01-eduardo-remoto-200.png). Se conserva el final de la respuesta; **falta el inicio con la pregunta y las primeras partidas**. No se atribuye a esta imagen una transcripción íntegra ni se deducen los parámetros de la pregunta desde otras ejecuciones. |
+| **REMOTO MANUAL · Heroku · Matías · 2026-11-15 · 21:59:03 UTC−03:00** (`Date`: 16-11, 00:59:03 GMT) | «Propón un programa para una feria cultural familiar de 3 horas, comenzando a las 16:00. Indica los horarios y los minutos libres.» | HTTP 200, programa útil, agente correcto y motivo visible | **APROBADA con observación de contenido:** POST **200 OK**; bloques **16:00–17:00, 17:00–17:30, 17:30–18:00 y 18:00–19:00**; informa **cero minutos libres**; `Agente de Matias`. Motivo: «El usuario solicita un programa de actividades y horarios para una feria cultural.» | [Captura 02](evidencias/eduardo/manual-autenticada-2026-11-15/02-matias-remoto-200.png), con pregunta y respuesta visibles. **La visita ocupa un bloque de 60 minutos, pero su descripción indica unos 40; el margen no se explica.** Se conserva la observación, sin corregir el texto ni atribuirla al frontend. No sustituye el resultado LOCAL del día 14. |
+| **REMOTO MANUAL · Heroku · Alex · 2026-11-15 · 22:01:15 UTC−03:00** (`Date`: 16-11, 01:01:15 GMT) | Recomendaciones de recintos para feria; **pregunta exacta fuera del encuadre**, no reconstruida | HTTP 200, recomendaciones útiles, agente correcto y motivo visible | **APROBADA en el alcance visible:** POST **200 OK**; recintos con capacidad, accesibilidad, permiso de comida y advertencias; se ven, entre otros, Salón Cumbre del Hotel Alto Quillay (**180**) y Galpón Cultural Rinconada Azul (**250**); `Agente de Alex`. Motivo: «El usuario solicita recomendaciones de recintos con capacidad y accesibilidad para una feria.» | [Captura 03](evidencias/eduardo/manual-autenticada-2026-11-15/03-alex-remoto-200.png). **Falta el inicio con la pregunta y el primer recinto completo**. Se conserva la advertencia de confirmar disponibilidad y aforo legal con una persona del recinto; no es una reserva. |
+| **REMOTO MANUAL · Heroku · Sebastián · 2026-11-15 · 22:03:25 UTC−03:00** (`Date`: 16-11, 01:03:25 GMT) | Catering y menús especiales; **pregunta exacta fuera del encuadre**, no reconstruida | HTTP 200, propuesta útil, agente correcto y motivo visible | **APROBADA en el alcance visible:** POST **200 OK**; box lunch de **13:30**, menús general/vegetariano/sin gluten para **65/10/5** personas y **88 litros de agua** con **10 % de margen**, supuestos y advertencias; `Agente de Sebastian`. Motivo: «El usuario solicita una propuesta de catering y menús específicos para una feria, lo cual corresponde al área de especialización de este agente.» | [Captura 04](evidencias/eduardo/manual-autenticada-2026-11-15/04-sebastian-remoto-200.png). **Falta el inicio con la pregunta y los servicios anteriores**; no se reconstruyen. Se conserva la advertencia de datos ficticios y confirmación humana de alergias graves. |
+
+El acceso permitido a esas cuatro solicitudes queda acreditado por sus **200 OK**,
+no por el mero ingreso de una clave. No se publica ni se relee la clave utilizada.
+Las imágenes muestran `General` y cabeceras de **respuesta**, no el valor de
+`X-API-Key` ni credenciales de Google. No hay HAR ni trazas internas nuevas.
+La salida visible y el estado HTTP no demuestran por sí solos los saltos A2A,
+la llamada a Gemini ni la identidad del despliegue.
+
+### Ejecución automática anterior · conservada, no aprobada retrospectivamente
+
+Las pruebas de **20:39–21:07 del 15/11/2026** son **anteriores a v12 (21:44)**.
+Conservan su referencia histórica a **v10 reportada por Sebastián**, sin verificarla
+ni atribuirles retrospectivamente v12 o la equivalencia de código comunicada.
+
+Los **28 archivos originales** de
+[`validacion-remota-2026-11-15-203522/`](evidencias/eduardo/validacion-remota-2026-11-15-203522/README.md)
+se conservan sin reescribir sus resultados. Su fase autenticada fue de
+**20:39:49 a 20:54:51, UTC−03:00**, terminó con `TimeoutError` esperando la
+habilitación del chat tras el ingreso privado y registró **0 POST autenticados,
+0 casos de agentes y 0 capturas autenticadas**. No fue un timeout de una consulta
+ni una falla demostrada de Heroku. Los cuatro 200 manuales posteriores **no
+pertenecen a ese ejecutor** y no convierten sus pendientes en aprobaciones automáticas.
+
+En aquella validación pública sí se obtuvieron panel/salud 200 y rechazos 401 sin
+clave/con clave ficticia. El caso independiente de cliente de **21:07:59** mostró
+espera, bloqueo y **1 POST pese a cuatro intentos adicionales**, recuperación y
+limpieza con Nueva conversación, pero durante un **401**, no una consulta aceptada.
+La vista móvil de aquella fase fue **emulada** (412 y 320 px), no un teléfono físico.
+
+### Pendientes vigentes tras el complemento
+
+- **Inicio de Eduardo, Alex y Sebastián del 15/11:** el complemento del día 16 es
+  otra ejecución y no recupera sus Payload/Response ni los inicios ausentes. Las
+  vistas de «inicio» del histórico LOCAL del 13-11 tampoco sirven como sustituto.
+  Quedan sin documentar las tres preguntas exactas y los fragmentos iniciales; no se reconstruyen.
+- **Contenido de Matías:** aclarar el bloque de 60 minutos frente a la descripción
+  de unos 40, sin dar por validado ese margen.
+- **Identidad del contexto:** la continuidad de contenido con 80 asistentes y 180
+  minutos sí se observa en el complemento; **la conservación de `context_id` no se comparó**.
+- **Nueva conversación autorizada:** limpieza y caso de 20 personas y 2 horas,
+  UUID/contexto nuevo enviado, aislamiento de memoria del servidor y descarte de
+  respuestas tardías. El botón visible o una indicación del procedimiento no prueba esos resultados.
+- **Espera y duplicados con una consulta aceptada:** las imágenes finales no miden
+  el estado pendiente ni el número de envíos durante el procesamiento. La lista
+  acumulada de Network no permite inferir duplicados o su ausencia.
+- **Móvil:** ya hay observación visual del presupuesto y controles en emulación,
+  pero faltan confirmación independiente del ancho de 320 px, medición del desborde
+  de toda la página y pruebas interactivas. Teléfono físico, teclado virtual y Safari
+  siguen sin acreditarse; el recorte 05 tampoco mide por sí solo su viewport.
+- **Versión del 16/11:** release y commit no confirmados; no se extiende la
+  confirmación de v12 para las cuatro consultas del día 15.
+- **R08 remoto vacío autorizado, errores del proveedor/router, desconexión, timeout
+  de consulta, respuesta no JSON y logs internos:** no se
+  amplían con estas capturas. La cobertura LOCAL y el informe de Sebastián
+  conservan su fecha y su alcance propios; no se inducen fallas para cerrar casos.
+
+### Preparación documental de este cierre
+
+La selección final mantiene **los cuatro documentos ya preparados**:
+
+- [`taller-02-c2/documento-Eduardo.md`](documento-Eduardo.md).
+- [`taller-02-c2/evidencias/eduardo/README.md`](evidencias/eduardo/README.md).
+- [`taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/README.md`](evidencias/eduardo/manual-autenticada-2026-11-15/README.md).
+- [`taller-02-c2/evidencias/eduardo/prompts-utilizados.md`](evidencias/eduardo/prompts-utilizados.md).
+
+Se añaden **solo los siete archivos originales del complemento**:
+
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/README.md`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/README.md).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/01-tipo-de-evento-pendiente.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/01-tipo-de-evento-pendiente.png).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/02-secuencia-aclaracion.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/02-secuencia-aclaracion.png).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/03-continuidad-presupuesto-200.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/03-continuidad-presupuesto-200.png).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/04-movil-390-dimensiones.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/04-movil-390-dimensiones.png).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/05-movil-390-presupuesto-controles.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/05-movil-390-presupuesto-controles.png).
+- [`taller-02-c2/evidencias/eduardo/complemento-remoto-manual-2026-11-16/06-movil-320-declarado-presupuesto-controles.png`](evidencias/eduardo/complemento-remoto-manual-2026-11-16/06-movil-320-declarado-presupuesto-controles.png).
+
+**Total: 11 rutas, cuatro documentos modificados y siete archivos nuevos.** Esta
+integración actualiza tres documentos; el README manual del 15/11 conserva sin
+nuevas ediciones sus cambios ya preparados. No se duplican evidencias ni se añade instrumental.
+
+La [lista de preparación anterior](evidencias/eduardo/manual-autenticada-2026-11-15/archivos-para-indice.txt)
+y la [revisión documental anterior](evidencias/eduardo/manual-autenticada-2026-11-15/revision-documental.json)
+se conservan como **registros históricos del corte previo a esta confirmación**;
+no son la selección ni la revisión de esta actualización y no se regeneran.
+Se mantienen intactos los 28 registros automáticos y los PNG manuales. No se
+seleccionan `.env`, `.venv`, la foto previa del Taller 1 ni aportes ajenos. Sin
+nuevas consultas o suites ni cambios de código/configuración.
+
+## Registro LOCAL previo · resultados y fechas conservados
+
+**Corte LOCAL del 2026-11-15 · Rama `c2t2/eduardo-frontend` ·
 [PR #82 fusionado](https://github.com/aleexng1/agentic-ia-grupo-05/pull/82).**
 
-**Base vigente tras el avance de `origin/main`: `71df3e80adea7ec675db73eefe884cb82eeffc9a`.
+**Base de aquel cierre tras el avance de `origin/main`: `71df3e80adea7ec675db73eefe884cb82eeffc9a`.
 Versión utilizada en la instalación limpia: `2b754e2e2bb8b035888f281ced1b3c36d6b1bab4`.**
 
 ## Reproducibilidad · comprobación nueva del 15-11-2026
@@ -13,24 +248,24 @@ en **`2b754e2`**. Las evidencias del 14-11-2026 se publicaron en ese commit dent
 **PR #82, ya fusionado en `main`**. Para preparar este cierre se ejecutaron después
 `git fetch origin` y `git merge --ff-only origin/main`: avance **`2b754e2` → `71df3e8`**,
 sin diferencias de contenido entre esos commits y conservando las 12 rutas locales.
-Estas 12 rutas quedan preparadas en el índice, exclusivamente según el manifiesto,
-**sin commit ni push**. No se repitieron pruebas ni se cambió código; la versión y las
+Estas 12 rutas, exclusivamente según el manifiesto, se **publicaron en `8a5bb9b`,
+PR #84**. No se repitieron pruebas ni se cambió código; la versión y las
 fechas de la instalación limpia se mantienen, sin atribuir pruebas nuevas a `71df3e8`.
 
 Se exportó ese commit con `git archive` a una carpeta temporal fuera del repositorio.
 Desde su `taller-02-c2/proyecto` se siguió la instalación Windows del README con
 **Python 3.12.10** y una `.venv` nueva: inicialmente solo tenía **pip 25.0.1** y
 `include-system-site-packages = false`. No se reutilizaron paquetes de la instalación
-actual. Instalación: **12:52:59–12:53:46, UTC−03:00**; HTTP: **12:54:18–12:54:24**.
+actual.
 
-| Comprobación LOCAL nueva | Resultado medido |
-| --- | --- |
-| `pip install -r requirements.txt` (sin caché) | Salida **0**, sin añadir dependencias fuera del README. |
-| `pip check` | Salida **0**, `No broken requirements found.` |
-| Arranque `app:app` en loopback | Completado, puerto libre **58569**; `PORT = PUERTO = 58569`, `URL_BASE = http://127.0.0.1:58569`, `URLS_AGENTES` vacía. |
-| Panel `GET /` y `GET /salud` | **200** ambos; HTML idéntico al del commit, `Cache-Control: no-store`; salud `{"ok":true}`. |
-| POST sin clave / clave incorrecta | **401 / 401**, con los detalles de acceso correspondientes. |
-| POST vacío / espacios, con clave temporal válida | **400 / 400**, `Escribe una pregunta para continuar.` |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | `pip install -r requirements.txt` (sin caché) | Salida 0 | Salida **0**, sin añadir dependencias fuera del README. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:52:59–12:53:46 (UTC−03:00) | `pip check` | Sin incompatibilidades declaradas | Salida **0**, `No broken requirements found.` | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | Arranque `app:app` en loopback | `Application startup complete.` | Completado, puerto libre **58569**. | `PORT = PUERTO = 58569`, `URL_BASE = http://127.0.0.1:58569`, `URLS_AGENTES` vacía. |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | Panel `GET /` y `GET /salud` | 200; panel del commit y `{"ok":true}` | **200** ambos; HTML idéntico al del commit, `Cache-Control: no-store`; salud `{"ok":true}`. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST sin clave / clave incorrecta | 401 / 401 | **401 / 401**, con los detalles de acceso correspondientes. | — |
+| LOCAL · Windows, Python 3.12.10, `.venv` nueva · 15-11-2026, 12:54:18–12:54:24 (UTC−03:00) | POST vacío / espacios, con clave temporal válida | 400 / 400 | **400 / 400**, `Escribe una pregunta para continuar.` | — |
 
 No se detectó una dependencia o instrucción faltante que bloquee **este alcance**.
 No se editaron requirements, README grupales ni archivos de otras personas. Las versiones
@@ -47,21 +282,26 @@ se consultó Gemini**. No acredita respuestas funcionales nuevas, Heroku ni HTTP
 Se cerró únicamente el árbol del proceso propio; el código de salida 1 tras `taskkill`
 es ese cierre deliberado, no un fallo de arranque. El puerto propio quedó cerrado.
 
-### Validación REMOTA futura · todavía no ejecutada
+<a id="validación-remota-futura--todavía-no-ejecutada"></a>
 
-**URL, fecha y versión realmente desplegada: por confirmar por Sebastián, coordinando
-con Alex.** No se supone que Heroku ejecute `2b754e2` por estar publicado en Git.
+### Plan REMOTO del cierre LOCAL · histórico
+
+La tabla siguiente conserva los pendientes de aquel corte LOCAL, **no el estado
+vigente tras las capturas manuales descritas arriba**. El informe de
+[`evidencias/sebastian/pruebas-remotas.md`](evidencias/sebastian/pruebas-remotas.md)
+es del **14-11-2026**, otra ejecución: su versión no identifica el despliegue de
+las pruebas manuales del día 15. No se supone que Heroku ejecute `2b754e2` por estar publicado en Git.
 Conservar evidencia sanitizada por caso, sin claves, y contrastar la versión antes
 de atribuirle resultados. No se accedió ni se cambió Heroku en esta comprobación.
 
-| Caso REMOTO / responsable | Esperado | Obtenido / evidencia |
-| --- | --- | --- |
-| Identidad del despliegue y HTTPS · Sebastián / Alex | URL, TLS, release y commit desplegado identificados. | **Pendiente; versión por confirmar.** |
-| Panel y `/salud` · Sebastián / Eduardo | 200; panel vigente y `{"ok":true}`. | **Pendiente.** |
-| R06/R07: sin clave e incorrecta · Matías / Eduardo | 401 antes del coordinador; aviso seguro. | **Pendiente.** |
-| R08: vacío autorizado · Matías / Eduardo | 400; sin ejecutar agentes. | **Pendiente.** |
-| R01/R02/R04/R05: un agente por conversación · Eduardo / equipo | Con autorización y cuota acordadas: 200, respuesta íntegra, agente, motivo y contexto. | **Pendiente; no se consultó al proveedor aquí.** |
-| Errores y límite del router · Sebastián / Matías / Eduardo | Error entendible, sin secretos; diferenciar router y timeout del panel. Fallas inducidas solo en entorno/ventana autorizados. | **Pendiente; no equivale a los ensayos LOCAL.** |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO · Heroku · todavía no ejecutada | Identidad del despliegue y HTTPS | URL, TLS, release y commit desplegado identificados. | **Pendiente.** | Responsables: Sebastián / Alex. Versión desplegada: ver [`pruebas-remotas.md`](evidencias/sebastian/pruebas-remotas.md). |
+| REMOTO · Heroku · todavía no ejecutada | Panel y `/salud` | 200; panel vigente y `{"ok":true}`. | **Pendiente.** | Responsables: Sebastián / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R06/R07: sin clave e incorrecta | 401 antes del coordinador; aviso seguro. | **Pendiente.** | Responsables: Matías / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R08: vacío autorizado | 400; sin ejecutar agentes. | **Pendiente.** | Responsables: Matías / Eduardo. |
+| REMOTO · Heroku · todavía no ejecutada | R01/R02/R04/R05: un agente por conversación | Con autorización y cuota acordadas: 200, respuesta íntegra, agente, motivo y contexto. | **Pendiente.** | Responsables: Eduardo / equipo. No se consultó al proveedor aquí. |
+| REMOTO · Heroku · todavía no ejecutada | Errores y límite del router | Error entendible, sin secretos; diferenciar router y timeout del panel. Fallas inducidas solo en entorno/ventana autorizados. | **Pendiente.** | Responsables: Sebastián / Matías / Eduardo. No equivale a los ensayos LOCAL. |
 
 ## 1. Pendientes locales completados · ejecución del 14-11-2026
 
@@ -187,7 +427,7 @@ y **no se repitió** en esta continuación.
 - El cierre integrado se publicó en **`d8cce13`** y la continuación de evidencias en
   **`2b754e2`, dentro del PR #82, ya fusionado** en `main` mediante **`71df3e8`**.
   No está pendiente integrar ese PR. Las 12 rutas del cierre documental y la instalación
-  limpia quedan preparadas en el índice; su commit y push no se han realizado.
+  limpia se publicaron en `8a5bb9b`, PR #84.
 - R08/R10/R11/R12 y las tres consultas con formato actual **ya no están pendientes**.
   R11/R12 solo acreditan manejo del frontend ante fallas **inducidas y controladas**.
 - Heroku/HTTPS, su router y el despliegue público siguen fuera del alcance de esta

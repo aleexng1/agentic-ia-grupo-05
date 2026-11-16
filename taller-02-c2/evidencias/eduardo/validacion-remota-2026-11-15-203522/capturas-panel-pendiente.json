@@ -1,0 +1,35 @@
+[
+  {
+    "archivo": "07-espera-panel-rechazo-real.png",
+    "fecha": "2026-11-15T21:07:59-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "REMOTO; espera natural de una solicitud con clave ficticia, sin retener ni modificar respuestas. No consulta autorizada ni respuesta de agente.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "3339257d5a3f324bc4d430879814cced720e3277b3f2933103db8fc6c046eaa5"
+  },
+  {
+    "archivo": "08-panel-recuperado-tras-401.png",
+    "fecha": "2026-11-15T21:07:59-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "REMOTO; rechazo 401 esperado tras la prueba de guardia; pregunta conservada y clave vacía. No error inducido de Heroku/Gemini.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "cefdda344fff2589f0e90a2d5e66e3c02cbdcd5d49ef21dd60ac6429860f2914"
+  },
+  {
+    "archivo": "09-nueva-conversacion-tras-rechazo.png",
+    "fecha": "2026-11-15T21:07:59-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "REMOTO; Nueva conversación elimina la pregunta real rechazada, su borrador y el historial; solo saludo. No consulta autorizada ni prueba de memoria del servidor.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "f8cecc64a66e0e1e2d9ad1a5734f947cdcbb9234226c468006f0b9ca278e0002"
+  }
+]

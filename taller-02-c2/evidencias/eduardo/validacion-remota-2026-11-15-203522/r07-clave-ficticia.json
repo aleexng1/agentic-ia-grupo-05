@@ -1,0 +1,11 @@
+{
+  "fecha": "2026-11-15T20:39:13-03:00",
+  "http": 401,
+  "cuerpo": {
+    "detail": "La clave de acceso es incorrecta."
+  },
+  "aviso": "Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.",
+  "pregunta_conservada": true,
+  "campo_clave_vacio": true,
+  "panel_oculto": true
+}

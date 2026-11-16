@@ -1,0 +1,68 @@
+[
+  {
+    "archivo": "01-ingreso-escritorio.png",
+    "fecha": "2026-11-15T20:39:12-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "Panel REMOTO real; Chrome escritorio 1280×960; sin clave ni autenticación.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "66d0d6c2ed586ff23625c4dd42cac3885e5a3dd8311634ea91f53f21ee14b56e"
+  },
+  {
+    "archivo": "02-clave-ficticia-rechazada.png",
+    "fecha": "2026-11-15T20:39:13-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "401 real de Heroku con clave ficticia; aviso nativo; sin acceso autorizado.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "cefdda344fff2589f0e90a2d5e66e3c02cbdcd5d49ef21dd60ac6429860f2914"
+  },
+  {
+    "archivo": "03-nueva-conversacion-solo-interfaz.png",
+    "fecha": "2026-11-15T20:39:14-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "Panel REMOTO; limpieza de interfaz con clave ficticia cargada, sin enviar consulta; escritorio.",
+    "viewport_configurado": {
+      "width": 1280,
+      "height": 960
+    },
+    "sha256": "f8cecc64a66e0e1e2d9ad1a5734f947cdcbb9234226c468006f0b9ca278e0002"
+  },
+  {
+    "archivo": "04-ingreso-movil-emulado.png",
+    "fecha": "2026-11-15T20:39:15-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "Panel REMOTO; emulación Pixel 7 en Chrome sin ventana, no teléfono físico; sin clave.",
+    "viewport_configurado": {
+      "width": 412,
+      "height": 839
+    },
+    "sha256": "74040352b000ec9b8bb8d8286d21c16a7fc4c49f8076534ba89a76550e51ef16"
+  },
+  {
+    "archivo": "05-chat-movil-emulado-sin-consulta.png",
+    "fecha": "2026-11-15T20:39:15-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "Panel REMOTO; emulación Pixel 7; clave ficticia cargada, sin consulta; solo saludo inicial.",
+    "viewport_configurado": {
+      "width": 412,
+      "height": 839
+    },
+    "sha256": "1a38380e07b12d536273e9b0d4075d415e29777fca06244289abb94320a11c41"
+  },
+  {
+    "archivo": "06-chat-320-emulado-sin-consulta.png",
+    "fecha": "2026-11-15T20:39:15-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "alcance": "Panel REMOTO; ancho emulado 320 px en contexto móvil Chrome; sin consulta autorizada; no dispositivo real.",
+    "viewport_configurado": {
+      "width": 320,
+      "height": 800
+    },
+    "sha256": "8672aa235dc8d4b92b268cb6447fd8715518f8fd692df6add1f94dc1e185bba3"
+  }
+]

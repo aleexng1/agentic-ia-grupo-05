@@ -1,0 +1,7 @@
+{
+  "fecha": "2026-11-15T23:39:13.452Z",
+  "http": 401,
+  "content_type": "application/json",
+  "detail": "Falta la clave de acceso. Envíala en la cabecera X-API-Key.",
+  "segundos": 0.413
+}
