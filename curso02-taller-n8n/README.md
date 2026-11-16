@@ -37,11 +37,15 @@ curso02-taller-n8n/
 ├── data/                    # tienda.md (ruta genérica), pedidos.json y politicas.md (postventa)
 ├── src/router/              # graph.py · prompts.py · tools.py
 ├── scripts/test_router.py   # tabla de evaluación del router
+├── scripts/tunel.sh         # levanta la API y el túnel de Cloudflare
+├── scripts/probar_tunel.py  # prueba la API a través del túnel
+├── scripts/webhook_info.py  # estado del webhook del bot de Telegram
 ├── scripts/ver_memoria.py   # mira los hilos guardados en Postgres
 ├── scripts/ver_catalogo.py  # mira el catálogo (conteo por categoría o búsqueda)
 ├── scripts/ver_reclamos.py  # lista los reclamos guardados
 ├── tests/                   # pytest (casos_router.json, test_router.py, test_api.py)
 ├── bruno/                   # colección de Bruno (entornos local y nube)
+├── n8n/                     # flujo de n8n exportado y limpio (sin credenciales)
 └── AGENTS.md                # reglas del proyecto
 ```
 
@@ -242,6 +246,144 @@ Ten en cuenta:
   Ctrl+C, n8n deja de poder llamar a `/chat`.
 - El túnel es público: cualquiera con la URL puede llegar a la API. Por eso `/chat` exige la `X-API-Key`.
 
+## n8n: la puerta de entrada
+
+### 1. El recorrido
+
+Telegram no habla directo con la API: entra por **n8n**, que decide qué hacer con cada mensaje y llama a `POST /chat`.
+La API corre en mi PC y se expone a internet con el túnel de `cloudflared`.
+
+```mermaid
+flowchart TD
+    cliente(["Cliente en Telegram"]) --> trigger
+
+    subgraph n8n ["n8n · flujo Telegram (texto y voz) → n8n → Agente"]
+        trigger["Telegram Trigger"] --> texto{"¿Trae texto?"}
+        texto -- "sí" --> normalizar["Normalizar"]
+        texto -- "no" --> voz{"¿Trae voz?"}
+        voz -- "sí" --> descargar["Descargar audio"]
+        descargar --> transcribir["Transcribir (Gemini)"]
+        transcribir --> textoaudio["Texto del audio"]
+        voz -- "no (foto, sticker...)" --> solo["Solo texto o voz"]
+        normalizar --> endpoint["Endpoint Agente"]
+        textoaudio --> endpoint
+        endpoint -- "ok" --> respuesta["Respuesta al cliente"]
+        endpoint -- "error" --> falla["Avisar la falla"]
+        descargar -- "error" --> noentendido["Audio no entendido"]
+        transcribir -- "error" --> noentendido
+    end
+
+    endpoint -- "POST /chat + X-API-Key" --> tunel["Túnel de cloudflared"]
+    tunel --> api["API FastAPI en mi PC"]
+
+    subgraph agente ["Agente (LangGraph)"]
+        api --> router{"router"}
+        router -- "preventa" --> preventa["agente_preventa"]
+        router -- "postventa" --> postventa["agente_postventa"]
+        router -- "generica" --> generica["respuesta_generica"]
+    end
+
+    preventa --> catalogo[("catálogo · solo lectura")]
+    postventa --> datos[("pedidos.json · politicas.md")]
+    postventa --> reclamos[("reclamos")]
+    api <--> memoria[("Postgres · memoria por conversación")]
+    reclamos --- memoria
+```
+
+En palabras:
+
+1. El cliente escribe (o manda un audio) a mi bot de Telegram.
+2. **Telegram Trigger** recibe el mensaje. **¿Trae texto?** lo manda a **Normalizar**, que arma `{"user_id", "texto"}` con el
+   id del chat como `user_id`.
+3. Si no trae texto, **¿Trae voz?** manda el audio a **Descargar audio** → **Transcribir** (Gemini) → **Texto del audio**,
+   que arma el mismo `{"user_id", "texto"}`. Desde ahí, voz y texto siguen el mismo camino.
+4. **Endpoint Agente** hace `POST /chat` con la cabecera `X-API-Key` (tiempo máximo: 30 s) a la URL del túnel.
+5. La API clasifica el mensaje con el **router** y lo lleva a **preventa**, **postventa** o **genérica**. La conversación
+   queda guardada en Postgres con el `user_id` como `thread_id`.
+6. **Respuesta al cliente** le devuelve por Telegram el campo `respuesta` del JSON.
+
+### 2. Cómo reproducirlo
+
+1. **Levantar la API y el túnel** (desde `curso02-taller-n8n/`):
+
+   ```bash
+   ./scripts/tunel.sh
+   ```
+
+   Copia la URL que imprime junto a "Para n8n" (termina en `/chat`).
+
+2. **Importar el flujo** `n8n/flujo_telegram_agente.json` en un n8n propio (autoalojado o cloud): *Workflows → ⋯ →
+   Import from file*. Si es autoalojado, debe ser accesible por HTTPS desde internet para que Telegram le entregue los
+   mensajes.
+
+3. **Crear las tres credenciales** y elegirlas en los nodos (el export no las trae):
+
+   | Credencial en n8n | Qué lleva | Dónde se usa |
+   |---|---|---|
+   | **Telegram API** | el token de un **bot propio** (@BotFather) | Telegram Trigger y los nodos de Telegram (Respuesta al cliente, Avisar la falla, Solo texto o voz, Descargar audio, Audio no entendido) |
+   | **Header Auth** | Name: `X-API-Key`; Value: la `API_KEY` de la API | Endpoint Agente |
+   | **Google Gemini (PaLM) API** | la clave del modelo | Transcribir |
+
+4. **Poner la URL en Endpoint Agente:** el archivo trae `https://TU-API/chat`; reemplázala por la URL del túnel terminada
+   en `/chat`.
+
+5. **Publicar el flujo.** Al activarlo, el Telegram Trigger registra el webhook del bot; se comprueba con
+   `python scripts/webhook_info.py`.
+
+> **La URL del túnel cambia cada vez que se reinicia `./scripts/tunel.sh`.** Hay que copiar la nueva en Endpoint Agente
+> (y volver a publicar el flujo) o n8n llamará a una dirección que ya no existe.
+
+### 3. Qué no está en el repositorio
+
+- Las **credenciales de n8n** (Telegram, Header Auth, Gemini): se crean en cada n8n.
+- La **clave de la API** (`API_KEY`), el **token del bot** (`TELEGRAM_TOKEN`), la **clave del modelo**
+  (`GOOGLE_API_KEY`) y la **`DATABASE_URL`**: viven solo en `.env`, que Git ignora. `.env.example` trae valores ficticios.
+- El flujo exportado se limpió antes de subirlo: sin `webhookId`, sin ids de instancia ni de credencial, y con la URL
+  del Endpoint Agente en `https://TU-API/chat`.
+
+### 4. Qué pasa cuando falla
+
+| Situación | Qué pasa |
+|---|---|
+| Llega un **audio de voz** | n8n lo descarga, lo transcribe con Gemini y entra a la API **como texto** |
+| El audio **no se puede descargar ni transcribir** | nodo **Audio no entendido**: "No pude escuchar tu audio. ¿Me lo escribes?" |
+| Llega una **foto, sticker u otro tipo** de mensaje | nodo **Solo texto o voz**: "Por ahora solo leo mensajes de texto y audios de voz." |
+| **API caída, túnel apagado, clave mala (401) o más de 30 s sin respuesta** | Endpoint Agente sale por su rama de error → nodo **Avisar la falla**: "Tuve un problema para responderte. Intenta de nuevo en un minuto." |
+| El audio se transcribe a **texto vacío** | la API responde 422 y se cae en **Avisar la falla** |
+| **Postgres no responde al arrancar la API** | la API arranca igual con la memoria y los reclamos **en RAM**, anota el motivo en el log (sin la URL) y `GET /health` devuelve `"memoria": "ram"` |
+| Postgres se cae **con la API ya en marcha** | `/chat` responde 502 (→ **Avisar la falla**) hasta que la base vuelva (el pool se reconecta); no hay cambio automático a RAM |
+| **El catálogo no responde** | la herramienta devuelve "catálogo no disponible" y el agente lo dice al cliente |
+
+### 5. La memoria y los datos
+
+- **Postgres guarda** las conversaciones (tablas `checkpoints`, `checkpoint_blobs`, `checkpoint_writes` y
+  `checkpoint_migrations`) y los **reclamos** (tabla `reclamos`), todo en el esquema `DB_SCHEMA` (por defecto
+  `alex_nail`), nunca en `public`, `catalogo` ni `alumnoNN`.
+- El **catálogo** (`catalogo.productos_unicos`) solo se **lee**, en una conexión de solo lectura.
+- El `thread_id` de cada conversación es el `user_id` que manda n8n: el id del chat de Telegram.
+- **Verlo:**
+
+  ```bash
+  python scripts/ver_memoria.py                 # hilos guardados, con cuántos checkpoints y la fecha del último
+  python scripts/ver_memoria.py ID_DEL_CHAT     # los mensajes de esa conversación
+  python scripts/ver_reclamos.py                # los últimos reclamos, con su ticket (R-0001...)
+  ```
+
+- La `DATABASE_URL` **se pide por vía privada** (no se publica ni se sube): cada quien la pone en su `.env`.
+
+### 6. Límites conocidos
+
+- **La API corre en mi PC**, expuesta con un túnel, no en la nube: si el PC o el script se apagan, el agente deja de
+  responder, y la URL cambia en cada reinicio. El `Procfile` y el `.python-version` ya están listos para desplegarla.
+- **La `DATABASE_URL` del curso entra con un usuario con más permisos de lo debido** (puede escribir en todo). Por eso
+  las tablas propias van en un esquema propio y el catálogo se consulta solo en lectura: solo se aceptan `SELECT`
+  simples, con parámetros, en una conexión de solo lectura y con una conexión a la vez.
+- **Cualquiera que conozca un número de pedido ve sus datos** (nombre, productos, estado, seguimiento): no hay
+  verificación de identidad.
+- El túnel es público: lo único que protege a `/chat` es la `X-API-Key`.
+- Los **pedidos y las políticas son inventados** (`data/pedidos.json`, `data/politicas.md`), y el agente de postventa
+  no ejecuta devoluciones ni cambios: solo informa y deriva con un reclamo.
+
 ## Correr las pruebas
 
 ```bash
@@ -253,7 +395,30 @@ pytest tests/test_api.py tests/test_memoria.py tests/test_generica.py tests/test
 
 ## Avance
 
-- **Sesión 2 · router + API:** entorno Python 3.12, agente router con salida estructurada y memoria por hilo, 15 casos de prueba (15/15), API FastAPI con Swagger, colección de Bruno.
-- **Memoria persistente:** el checkpointer pasó de RAM a Postgres (esquema propio `alex_nail`), con caída automática a RAM si la base no responde, `--hilo` en `main.py` y `scripts/ver_memoria.py`.
-- **Preventa con catálogo:** `agente_preventa` pasó de cascarón a agente ReAct con tres herramientas sobre `catalogo.productos_unicos` (solo lectura), el router usa el historial reciente y la ruta anterior, y `scripts/ver_catalogo.py` permite mirar el catálogo.
-- **Postventa:** `agente_postventa` pasó de cascarón a agente ReAct con `estado_pedido`, `politica` y `crear_reclamo`; los reclamos se guardan en Postgres (tabla `reclamos` del esquema propio) y `scripts/ver_reclamos.py` los lista.
+Pasos del taller (la numeración sigue el orden en que se fue trabajando):
+
+1. **Carpeta y rama propias:** `curso02-taller-n8n/` en la rama `alex/curso02-taller-n8n`, sin PR ni merge.
+2. **Entorno:** Python 3.12, `.venv`, dependencias, `.env`/`.env.example` y `AGENTS.md`.
+3. **Agente router:** salida estructurada (preventa, postventa o genérica), memoria por `thread_id`, y 16 casos de
+   prueba (`scripts/test_router.py`).
+4. **API FastAPI:** `/health` y `/chat`, Swagger completo y colección de Bruno.
+5. **Clave de la API:** `/chat` exige `X-API-Key`.
+6. **Túnel:** `scripts/tunel.sh` (API + cloudflared) y `scripts/probar_tunel.py`.
+7. **Telegram:** bot propio y `scripts/webhook_info.py`; Telegram entra por n8n, no directo a la API.
+8. **Postgres:** `scripts/probar_db.py` y memoria persistente (checkpointer) en un esquema propio, con caída a RAM.
+9. **Ruta genérica:** conversa con el modelo y la ficha de la tienda (`data/tienda.md`), sin salirse de su papel.
+10. **Preventa con catálogo real:** agente ReAct con `buscar_productos`, `ver_producto` y `mejores_ofertas`
+    (`catalogo.productos_unicos`, solo lectura); el router mira el historial y la ruta anterior.
+11. **Postventa con pedidos y reclamos:** agente ReAct con `estado_pedido`, `politica` y `crear_reclamo`; los reclamos
+    se guardan en Postgres.
+12. **Flujo de n8n:** Telegram (texto y voz) → n8n → Agente, con transcripción de audio y avisos de falla.
+13. **Cierre:** flujo exportado y limpio en `n8n/`, revisión de secretos y este README.
+
+**Lo que se hizo distinto a la clase**
+
+- **n8n autoalojado.**
+- **Túnel de Cloudflare en vez de Heroku:** la API corre en mi PC (`./scripts/tunel.sh`); el `Procfile` y el
+  `.python-version` quedaron listos por si se despliega.
+- **Esquema propio (`alex_nail`)** en la base compartida, porque la `DATABASE_URL` entra con un usuario con más permisos
+  de los debidos; el catálogo se lee en solo lectura.
+- **La voz se transcribe en n8n** (nodo de Gemini): a la API siempre llega texto.
