@@ -47,7 +47,7 @@ Sebastián; sus preguntas exactas y los inicios de respuesta siguen sin document
 Esto no demuestra que los registros hayan desaparecido del navegador de Eduardo.
 No se reconstruyeron preguntas, repitieron consultas ni modificaron los PNG.
 
-La [consolidación y el guion pendiente](../../../documento-Eduardo.md#consolidación-del-cierre--2026-11-16)
+La [consolidación y el guion pendiente](../../../anexo-Eduardo-historico.md#consolidación-del-cierre--2026-11-16)
 registran por separado las nuevas comprobaciones **no ejecutadas**. La fecha de
 este seguimiento es documental: no añade resultados remotos ni extiende v12 o sus
 identificadores a una ejecución posterior. Permanecen los demás límites y la

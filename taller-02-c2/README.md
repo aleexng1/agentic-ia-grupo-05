@@ -274,8 +274,11 @@ Invoke-RestMethod -Method Post -Uri http://127.0.0.1:8000/panel/consultar `
 
 ### Respuestas y errores
 
-Todo error tiene la forma `{"detail": "mensaje en español, en una sola línea"}`, sin trazas
-de Python ni claves. Un error nunca se presenta como una respuesta exitosa.
+Los errores controlados por la aplicación (400, 401, 502 y 503) tienen la forma
+`{"detail": "mensaje en español, en una sola línea"}`, sin trazas de Python ni claves.
+Los errores de validación de la solicitud, como JSON malformado o ausencia de `texto`,
+conservan la respuesta **422 estándar de FastAPI**: `detail` es una lista de errores y
+sus mensajes pueden estar en inglés. Un error nunca se presenta como una respuesta exitosa.
 
 | Código | Cuándo | Ejemplo de `detail` |
 | --- | --- | --- |

@@ -499,7 +499,7 @@ La fecha **16/11/2026** corresponde a revisión documental. El guion exige fecha
 con zona de una ejecución efectiva, cuya versión **no está identificada**; no se
 extiende a ella la confirmación de Sebastián. Se conservan los registros automáticos,
 los PNG, los límites, la observación de Matías y las fallas **LOCAL** con su alcance.
-Matriz y [guion pendiente](../../documento-Eduardo.md#guion-manual-mínimo--no-ejecutado).
+Matriz y [guion pendiente](../../anexo-Eduardo-historico.md#guion-manual-mínimo--no-ejecutado).
 Sin cambios de código/configuración ni repetición de suites; revisión de privacidad,
 enlaces y `git diff --cached --check`, sin commit ni push.
 
@@ -550,7 +550,19 @@ y las fallas **LOCAL**, sin reinterpretarlos como resultados de este complemento
 
 Se prepara una única selección de **11 rutas: cuatro documentos modificados y los
 siete archivos nuevos del complemento**, enumeradas en
-[`documento-Eduardo.md`](../../documento-Eduardo.md#preparación-documental-de-este-cierre).
+[`documento-Eduardo.md`](../../anexo-Eduardo-historico.md#preparación-documental-de-este-cierre).
 Revisión de enlaces y privacidad de los textos y seis imágenes, sin claves ni
 Request Headers visibles; los Remote Address son del servidor remoto. Sin HAR,
 nuevas consultas, suites, cambios de código/configuración o Heroku, commit ni push.
+
+## Reorganización de la entrega · 16/11/2026
+
+Solicitud de Eduardo, acompañada de la revisión de sus compañeros:
+
+> esto enviaron mis compañeros, analizalo para entregar lo que falta y terminar mi parte al 100%
+
+La revisión pedía un resumen corto del aporte, pruebas y resultados, dejando el histórico en anexo. También señalaba el formato estándar del 422 y la diferencia entre el timeout del navegador y el router de Heroku.
+
+Se reorganizó el [informe individual](../../documento-Eduardo.md) y su [guía de evidencias](README.md). Se conservó el documento anterior en el [anexo histórico](../../anexo-Eduardo-historico.md) y el índice anterior en [INDICE-HISTORICO.md](INDICE-HISTORICO.md); se ajustaron los enlaces a secciones trasladadas. Se precisó en el README grupal que los errores controlados de la aplicación tienen un detalle de texto en español, mientras el 422 de validación mantiene el formato estándar de FastAPI.
+
+Esta intervención es editorial: reutiliza resultados fechados y no ejecuta consultas, suites ni cambios en código, configuración o Heroku. No declara una nota ni cumplimiento absoluto: mantiene los límites de las capturas, la versión no confirmada del 16/11 y las comprobaciones remotas no acreditadas. La entrega privada de la clave vigente y la disponibilidad de la app siguen a cargo del cierre grupal.

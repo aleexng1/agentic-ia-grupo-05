@@ -135,7 +135,7 @@ Esas 12 rutas del manifiesto se publicaron en `8a5bb9b`, PR #84.
 No se modificaron código, resultados primarios ni fechas de pruebas. No se consultó
 Gemini, se repitieron pruebas ni se modificó Heroku durante esta preparación.
 
-La [tabla REMOTA futura](../../../documento-Eduardo.md#validación-remota-futura--todavía-no-ejecutada)
+La [tabla REMOTA futura](../../../anexo-Eduardo-historico.md#plan-remoto-del-cierre-local--histórico)
 queda enteramente **pendiente**, con URL y versión desplegada en
 [`pruebas-remotas.md`](../../sebastian/pruebas-remotas.md). No se
 heredan resultados LOCAL ni se asume que publicar Git equivale a desplegar Heroku.
