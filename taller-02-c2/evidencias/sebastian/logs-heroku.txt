@@ -1,7 +1,7 @@
 2026-11-14T14:34:40.421460+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:41:39.544334+00:00 app[web.1]: 2026-11-14 14:41:39 INFO    [coordinador] pregunta recibida · context_id=01d30e14-38ad-4ae3-a6e5-0e3e7d9367d6 · «Arma un programa de 3 horas para una feria tecnologica con publico familiar, em…»
 2026-11-14T14:41:40.425003+00:00 app[web.1]: 2026-11-14 14:41:40 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita armar un programa de actividades y horario para una feria tecnológica.
-2026-11-14T14:41:40.427175+00:00 app[web.1]: 2026-11-14 14:41:40 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/matias · enviando
+2026-11-14T14:41:40.427175+00:00 app[web.1]: 2026-11-14 14:41:40 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/matias · enviando
 2026-11-14T14:41:42.912833+00:00 app[web.1]: 2026-11-14 14:41:42 INFO    [coordinador] A2A ← Agente de Matias · respuesta recibida en 2,5 s
 2026-11-14T14:41:42.913553+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:43:59.314907+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "GET /salud HTTP/1.1" 200 OK
@@ -12,7 +12,7 @@
 2026-11-14T14:44:00.858287+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 400 Bad Request
 2026-11-14T14:44:01.428876+00:00 app[web.1]: 2026-11-14 14:44:01 INFO    [coordinador] pregunta recibida · context_id=40ae65e2-d3da-4a9c-b82f-efed67143855 · «Arma un programa de 3 horas para una feria tecnologica con publico familiar, em…»
 2026-11-14T14:44:02.244871+00:00 app[web.1]: 2026-11-14 14:44:02 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita la creación de un programa de actividades para una feria tecnológica.
-2026-11-14T14:44:02.246952+00:00 app[web.1]: 2026-11-14 14:44:02 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/matias · enviando
+2026-11-14T14:44:02.246952+00:00 app[web.1]: 2026-11-14 14:44:02 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/matias · enviando
 2026-11-14T14:44:03.832170+00:00 app[web.1]: 2026-11-14 14:44:03 INFO    [coordinador] A2A ← Agente de Matias · respuesta recibida en 1,6 s
 2026-11-14T14:44:03.832905+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:46:51.632646+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "GET /agentes/matias/.well-known/agent-card.json HTTP/1.1" 200 OK
@@ -20,21 +20,21 @@
 2026-11-14T14:46:52.578155+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "GET /agentes/sebastian/.well-known/agent-card.json HTTP/1.1" 200 OK
 2026-11-14T14:47:01.707012+00:00 app[web.1]: 2026-11-14 14:47:01 INFO    [coordinador] pregunta recibida · context_id=33eedb53-2ad9-4bd3-bee0-6a5817c834ef · «Quiero un programa de actividades para una feria tecnológica de 6 horas para es…»
 2026-11-14T14:47:02.669847+00:00 app[web.1]: 2026-11-14 14:47:02 INFO    [coordinador] supervisor eligió Agente de Matias · motivo: El usuario solicita un programa de actividades para una feria, lo cual corresponde directamente a las funciones de este agente.
-2026-11-14T14:47:02.672945+00:00 app[web.1]: 2026-11-14 14:47:02 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/matias · enviando
+2026-11-14T14:47:02.672945+00:00 app[web.1]: 2026-11-14 14:47:02 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/matias · enviando
 2026-11-14T14:47:04.599144+00:00 app[web.1]: 2026-11-14 14:47:04 INFO    [coordinador] A2A ← Agente de Matias · respuesta recibida en 1,9 s
 2026-11-14T14:47:04.599886+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:47:05.094594+00:00 app[web.1]: 2026-11-14 14:47:05 INFO    [coordinador] pregunta recibida · context_id=bda8007f-682c-48e6-af7a-5f47b5a697d2 · «¿Cuánto costaría el presupuesto de una feria de 200 personas?»
 2026-11-14T14:47:06.395965+00:00 app[web.1]: 2026-11-14 14:47:06 INFO    [coordinador] supervisor eligió Agente de Eduardo · motivo: La pregunta solicita la estimación de un presupuesto para una feria.
-2026-11-14T14:47:06.398009+00:00 app[web.1]: 2026-11-14 14:47:06 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/eduardo · enviando
+2026-11-14T14:47:06.398009+00:00 app[web.1]: 2026-11-14 14:47:06 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/eduardo · enviando
 2026-11-14T14:47:06.402971+00:00 app[web.1]: 2026-11-14 14:47:06 INFO    [coordinador] A2A ← Agente de Eduardo · respuesta recibida en 0,0 s
 2026-11-14T14:47:06.403647+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:47:06.845003+00:00 app[web.1]: 2026-11-14 14:47:06 INFO    [coordinador] pregunta recibida · context_id=620955e7-49ec-4388-a583-8e79964419e9 · «Necesito una propuesta de menú vegetariano para un coffee break de 50 personas…»
 2026-11-14T14:47:07.646719+00:00 app[web.1]: 2026-11-14 14:47:07 INFO    [coordinador] supervisor eligió Agente de Sebastian · motivo: El usuario solicita una propuesta de menú para un coffee break.
-2026-11-14T14:47:07.648799+00:00 app[web.1]: 2026-11-14 14:47:07 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/sebastian · enviando
+2026-11-14T14:47:07.648799+00:00 app[web.1]: 2026-11-14 14:47:07 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/sebastian · enviando
 2026-11-14T14:47:10.101632+00:00 app[web.1]: 2026-11-14 14:47:10 INFO    [coordinador] A2A ← Agente de Sebastian · respuesta recibida en 2,5 s
 2026-11-14T14:47:10.102344+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK
 2026-11-14T14:47:19.513806+00:00 app[web.1]: 2026-11-14 14:47:19 INFO    [coordinador] pregunta recibida · context_id=250a7bcd-66dc-468c-8a73-d41d5d1266bd · «Estima el presupuesto de una feria gastronómica de 200 personas durante 6 horas»
 2026-11-14T14:47:20.721111+00:00 app[web.1]: 2026-11-14 14:47:20 INFO    [coordinador] supervisor eligió Agente de Eduardo · motivo: El usuario solicita la estimación de un presupuesto para una feria.
-2026-11-14T14:47:20.723185+00:00 app[web.1]: 2026-11-14 14:47:20 INFO    [coordinador] A2A → http://127.0.0.1:13639/agentes/eduardo · enviando
+2026-11-14T14:47:20.723185+00:00 app[web.1]: 2026-11-14 14:47:20 INFO    [coordinador] A2A → http://<ip-cliente>:13639/agentes/eduardo · enviando
 2026-11-14T14:47:23.475255+00:00 app[web.1]: 2026-11-14 14:47:23 INFO    [coordinador] A2A ← Agente de Eduardo · respuesta recibida en 2,8 s
 2026-11-14T14:47:23.475994+00:00 app[web.1]: INFO:     <ip-cliente>:0 - "POST /panel/consultar HTTP/1.1" 200 OK

@@ -66,6 +66,7 @@ Las pruebas corrieron el 14/11/2026 contra la URL pública. Las respuestas compl
 - **`GOOGLE_API_KEY`:** la primera carga quedó con un valor de prueba o incompleto, y Google la rechazó (prueba 8). Después también quedó vacía una vez, porque el comando usaba `grep` en PowerShell, que no existe. Lo corregí cargando la clave desde el `.env` local con la sintaxis de PowerShell. Al final, la prueba con preguntas reales dio 200.
 - **Peticiones con acentos:** las pruebas con `curl` y el JSON inline en Git Bash dieron 400 ("There was an error parsing the body"). Enviar el JSON desde un archivo UTF-8 lo resolvió. No era un error de la app.
 - **Código:** no modifiqué código del proyecto. Solo cambié configuración de Heroku y el README.
+- **Redespliegue final:** después de que se unió #81 a main, roté la `CLAVE_API` y desplegué `main` (commit `96ebca4`) en la release v12. El historial de main reescribió #81, así que el despliegue se hizo con un commit de Heroku que tiene el mismo árbol que main. Las pruebas básicas en remoto de esa versión están en `evidencias/sebastian/pruebas-remotas.md`.
 
 ## 5. Incidente de exposición de claves
 
@@ -75,12 +76,11 @@ Durante una sesión de diagnóstico se mostraron por error variables de otra apl
 
 - `CLAVE_API` y `GOOGLE_API_KEY` solo viven en las Config Vars de Heroku y en el `.env` local, que está en `.gitignore`.
 - Ninguna clave aparece en el repositorio, en el README ni en las evidencias.
-- Matías usó `CLAVE_API` para sus pruebas. Está pendiente rotarla al cerrar la entrega, y la nueva clave se pasará por un canal privado.
+- Matías usó la `CLAVE_API` anterior para sus pruebas. Se rotó en la release v11, y la nueva clave se entregó por un canal privado a Matías, Eduardo y Alex.
 
 ## 7. Límites y pendientes
 
 - La memoria de la conversación vive en la RAM del dyno. Si Heroku lo duerme o se reinicia, el chat parte de cero.
 - El dyno Eco se duerme tras 30 minutos sin visitas; la primera respuesta puede tardar varios segundos.
-- Rotar `CLAVE_API` al cerrar la entrega.
-- Despliegue final de `main` después de unir #80 (cambia el catálogo del agente de Matías) y #81. Al hacerlo,
-  anotar aquí la release y el commit desplegados: lo de arriba corresponde al commit `741305b`.
+- `CLAVE_API` ya fue rotada: la nueva se cargó en la release v11, antes de desplegar `main` en la release v12.
+- Release actual: v12, commit de Heroku `4593bafb`, con el mismo árbol que `main` (`96ebca4`). `git diff --stat 4593bafb 96ebca4` no muestra diferencias.
