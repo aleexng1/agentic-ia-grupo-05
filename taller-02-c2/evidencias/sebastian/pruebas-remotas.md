@@ -63,3 +63,47 @@ Se probaron en local, sin tocar Heroku, con el código de `main` exportado a una
 | Sin clave de Gemini | `CLAVE_API` con valor de prueba, `GOOGLE_API_KEY` vacía | 502 con mensaje claro | 502 con mensaje "Falta configurar la clave de Gemini (GOOGLE_API_KEY) en el .env o en las Config Vars" |
 
 El 503 depende de `CLAVE_API` vacía, no de `GOOGLE_API_KEY`. La falta de la clave de Gemini responde 502. Las dos pruebas usan `PORT` igual a `URL_BASE`, porque el coordinador busca a los agentes en esa dirección.
+
+## Preguntas a cada agente en la release v12 (main 96ebca4)
+
+Se probó en remoto la release v12 con una pregunta a cada agente y una pregunta sin agente. Las respuestas son del modelo y pueden variar entre ejecuciones; lo que se verifica es el código de respuesta y qué agente atendió.
+
+| Pregunta | Agente elegido | HTTP | Resultado |
+|---|---|---|---|
+| "¿Qué recinto sirve para una feria de 300 personas en Santiago?" | Agente de Alex | 200 | Pidió el tipo de evento (tecnológico, gastronómico, cultural o infantil) |
+| "Presupuesto para una feria gastronómica de 100 personas, 4 horas" | Agente de Eduardo | 200 | Presupuesto simulado en CLP con contingencia |
+| "Programa de una feria tecnológica de 4 horas para 80 personas" | Agente de Matias | 200 | Programa de actividades |
+| "Coffee break para 30 personas con opción sin gluten" | Agente de Sebastian | 200 | Propuesta de catering |
+| "¿Cuál es la capital de Francia?" (sin agente) | ninguno | 200 | Sugiere los cuatro agentes |
+
+Extracto del log de Heroku (release v12) con el envío A2A del coordinador a 127.0.0.1. Las IP de clientes están reemplazadas por `<ip-cliente>`:
+
+```
+[coordinador] pregunta recibida · «¿Qué recinto sirve para una feria de 300 personas en Santiago?»
+[coordinador] supervisor eligió Agente de Alex
+[coordinador] A2A → http://127.0.0.1:24918/agentes/alex · enviando
+INFO: 127.0.0.1:44052 - "POST /agentes/alex HTTP/1.1" 200 OK
+[coordinador] A2A ← Agente de Alex · respuesta recibida en 1,9 s
+INFO: <ip-cliente> - "POST /panel/consultar HTTP/1.1" 200 OK
+[coordinador] pregunta recibida · «Presupuesto para una feria gastronómica de 100 personas, 4 horas»
+[coordinador] supervisor eligió Agente de Eduardo
+[coordinador] A2A → http://127.0.0.1:24918/agentes/eduardo · enviando
+INFO: 127.0.0.1:54918 - "POST /agentes/eduardo HTTP/1.1" 200 OK
+[coordinador] A2A ← Agente de Eduardo · respuesta recibida en 7,5 s
+INFO: <ip-cliente> - "POST /panel/consultar HTTP/1.1" 200 OK
+[coordinador] pregunta recibida · «Programa de una feria tecnológica de 4 horas para 80 personas»
+[coordinador] supervisor eligió Agente de Matias
+[coordinador] A2A → http://127.0.0.1:24918/agentes/matias · enviando
+INFO: 127.0.0.1:54918 - "POST /agentes/matias HTTP/1.1" 200 OK
+[coordinador] A2A ← Agente de Matias · respuesta recibida en 2,6 s
+INFO: <ip-cliente> - "POST /panel/consultar HTTP/1.1" 200 OK
+[coordinador] pregunta recibida · «Coffee break para 30 personas con opción sin gluten»
+[coordinador] supervisor eligió Agente de Sebastian
+[coordinador] A2A → http://127.0.0.1:24918/agentes/sebastian · enviando
+INFO: 127.0.0.1:54918 - "POST /agentes/sebastian HTTP/1.1" 200 OK
+[coordinador] A2A ← Agente de Sebastian · respuesta recibida en 9,1 s
+INFO: <ip-cliente> - "POST /panel/consultar HTTP/1.1" 200 OK
+[coordinador] pregunta recibida · «¿Cuál es la capital de Francia?»
+[coordinador] supervisor eligió ninguno
+INFO: <ip-cliente> - "POST /panel/consultar HTTP/1.1" 200 OK
+```

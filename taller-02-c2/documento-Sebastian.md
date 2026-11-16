@@ -76,10 +76,11 @@ Durante una sesión de diagnóstico se mostraron por error variables de otra apl
 
 - `CLAVE_API` y `GOOGLE_API_KEY` solo viven en las Config Vars de Heroku y en el `.env` local, que está en `.gitignore`.
 - Ninguna clave aparece en el repositorio, en el README ni en las evidencias.
-- Matías usó `CLAVE_API` para sus pruebas. Está pendiente rotarla al cerrar la entrega, y la nueva clave se pasará por un canal privado.
+- Matías usó la `CLAVE_API` anterior para sus pruebas. Se rotó en la release v11, y la nueva clave se entregó por un canal privado a Matías, Eduardo y Alex.
 
 ## 7. Límites y pendientes
 
 - La memoria de la conversación vive en la RAM del dyno. Si Heroku lo duerme o se reinicia, el chat parte de cero.
 - El dyno Eco se duerme tras 30 minutos sin visitas; la primera respuesta puede tardar varios segundos.
-- Rotar `CLAVE_API` al cerrar la entrega.
+- `CLAVE_API` ya fue rotada: la nueva se cargó en la release v11, antes de desplegar `main` en la release v12.
+- Release actual: v12, commit de Heroku `4593bafb`, con el mismo árbol que `main` (`96ebca4`). `git diff --stat 4593bafb 96ebca4` no muestra diferencias.
