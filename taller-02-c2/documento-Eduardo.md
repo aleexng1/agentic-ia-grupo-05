@@ -21,19 +21,19 @@ Reutilicé FastAPI, el coordinador y los cuatro agentes A2A del equipo. Mi zona 
 
 Fechas de 2026 en America/Santiago. Las consultas funcionales usaron A2A/Gemini reales con datos ficticios de ferias. Los fallos inducidos se identifican expresamente.
 
-| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 | --- | --- | --- | --- | --- |
-| LOCAL real · 14/11 | R05: presupuesto tecnológico, 80 personas, 4 horas; clave válida | 200, presupuesto, Eduardo y motivo | **200; $2.173.600 CLP** | [Captura][r05] y [log A2A][a2a-eduardo]. |
-| LOCAL real · 14/11 | R01: programa cultural familiar, 3 horas desde las 16:00 | 200, programa, Matías y motivo | **200**; 60 minutos libres | [Intercambio íntegro][r01-json], [captura][r01]. Anterior al catálogo ampliado. |
-| LOCAL real · 14/11 | R02: recinto interior, feria tecnológica de 80 personas | 200, recintos, Alex y motivo | **200**; tres opciones y advertencias | [Intercambio íntegro][r02-json], [captura][r02]. |
-| LOCAL real · 14/11 | R04: catering para 80 personas/4 horas; 10 vegetarianas y 5 sin gluten | 200, servicios, dietas, Sebastián y motivo | **200**; servicios 11:00/13:30 y **88 L** | [Intercambio íntegro][r04-json], [captura][r04]. |
-| LOCAL real · 14/11 | R06: consultar sin clave | Rechazar antes del coordinador | **401** | [Captura][r06]; sin envío A2A. |
-| LOCAL real · 14/11 | R07: clave incorrecta en el panel | Rechazar y conservar pregunta | **401**, retorno al ingreso | [Captura][r07]; sin envío A2A. |
-| LOCAL real · 14/11 | R08: espacios / falta de `texto`, con autorización | Validar antes del coordinador | **400 / 422** | [Evidencia HTTP][r08]. El 422 mantiene el formato estándar de FastAPI. |
-| LOCAL aislado · 14/11 | R09: proveedor sin configuración válida | Error claro, sin falso éxito | **502**, pregunta conservada | [Captura][r09]. No prueba una caída remota de Gemini. |
-| LOCAL de ensayo · 14/11 | R10: detener/restaurar servidor propio | Aviso de conexión y recuperación | Conexión rechazada; servidor restaurado | [Resultado][r10]. Heroku no intervenido. |
-| LOCAL controlado · 14/11 | R11: inducir 70 segundos de demora | Timeout y descarte de respuesta antigua | Aviso a los **65,472 s**; conversación nueva sin respuesta vieja | [Medición][r11]. No es latencia de Gemini/Heroku. |
-| LOCAL controlado · 14/11 | R12: devolver HTTP 200 con HTML deliberado | Rechazo sin ejecutar HTML | Aviso seguro; HTML no insertado ni ejecutado | [Resultado][r12]. Respuesta inducida. |
+| LOCAL real · 14/11, 13:55:32 | R05: presupuesto tecnológico, 80 personas, 4 horas; clave válida | 200, presupuesto, Eduardo y motivo | **200; $2.173.600 CLP** | [Captura][r05] y [log A2A][a2a-eduardo]. |
+| LOCAL real · 14/11, 14:50:56 | R01: programa cultural familiar, 3 horas desde las 16:00 | 200, programa, Matías y motivo | **200**; 60 minutos libres | [Intercambio íntegro][r01-json], [captura][r01]. Anterior al catálogo ampliado. |
+| LOCAL real · 14/11, 14:51:04 | R02: recinto interior, feria tecnológica de 80 personas | 200, recintos, Alex y motivo | **200**; tres opciones y advertencias | [Intercambio íntegro][r02-json], [captura][r02]. |
+| LOCAL real · 14/11, 14:51:13 | R04: catering para 80 personas/4 horas; 10 vegetarianas y 5 sin gluten | 200, servicios, dietas, Sebastián y motivo | **200**; servicios 11:00/13:30 y **88 L** | [Intercambio íntegro][r04-json], [captura][r04]. |
+| LOCAL real · 14/11, 13:55:29 | R06: consultar sin clave | Rechazar antes del coordinador | **401** | [Captura][r06]; sin envío A2A. |
+| LOCAL real · 14/11, 13:55:31 | R07: clave incorrecta en el panel | Rechazar y conservar pregunta | **401**, retorno al ingreso | [Captura][r07]; sin envío A2A. |
+| LOCAL real · 14/11, 14:50:56 | R08: espacios / falta de `texto`, con autorización | Validar antes del coordinador | **400 / 422** | [Evidencia HTTP][r08]. El 422 mantiene el formato estándar de FastAPI. |
+| LOCAL aislado · 14/11, 13:55:42 | R09: proveedor sin configuración válida | Error claro, sin falso éxito | **502**, pregunta conservada | [Captura][r09]. No prueba una caída remota de Gemini. |
+| LOCAL de ensayo · 14/11, 15:05:17–15:05:33 | R10: detener/restaurar servidor propio | Aviso de conexión y recuperación | Conexión rechazada; servidor restaurado | [Resultado][r10]. Heroku no intervenido. |
+| LOCAL controlado · 14/11, 15:00:08–15:01:18 | R11: inducir 70 segundos de demora | Timeout y descarte de respuesta antigua | Aviso a los **65,472 s**; conversación nueva sin respuesta vieja | [Medición][r11]. No es latencia de Gemini/Heroku. |
+| LOCAL controlado · 14/11, 15:05:35–15:05:37 | R12: devolver HTTP 200 con HTML deliberado | Rechazo sin ejecutar HTML | Aviso seguro; HTML no insertado ni ejecutado | [Resultado][r12]. Respuesta inducida. |
 
 El [log de los otros tres agentes][a2a-otros] registra envíos/recepciones A2A y HTTP 200. Las preguntas y respuestas íntegras están enlazadas por caso.
 
@@ -47,15 +47,15 @@ El [log de los otros tres agentes][a2a-otros] registra envíos/recepciones A2A y
 
 Las cuatro consultas del **15/11** corresponden a **v12**, según Sebastián: despliegue a las 21:44, identificador Heroku `4593bafb`, código equivalente a `main` en `96ebca4`. Es confirmación del responsable, no verificación independiente ni identidad entre commits. **No identifica la versión del 16/11.**
 
-| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| Entorno y fecha | Solicitud | Resultado esperado | Resultado obtenido | Observaciones |
 | --- | --- | --- | --- | --- |
-| REMOTO manual · 15/11, 21:51 | Presupuesto; pregunta exacta fuera del encuadre | 200, respuesta, Eduardo y motivo | **200; $2.173.600 CLP** | [Captura][rem-eduardo]. Inicio no disponible; no reconstruido. |
-| REMOTO manual · 15/11, 21:59 | Programa cultural familiar, 3 horas desde las 16:00 | 200, programa, Matías y motivo | **200**, 16:00–19:00, cero minutos libres | [Captura][rem-matias]. Bloque de 60 minutos con descripción de unos 40; margen sin explicar. |
-| REMOTO manual · 15/11, 22:01 | Recintos; pregunta exacta fuera del encuadre | 200, recomendaciones, Alex y motivo | **200**, capacidad, accesibilidad y advertencias | [Captura][rem-alex]. Inicio no disponible; no reconstruido. |
-| REMOTO manual · 15/11, 22:03 | Catering; pregunta exacta fuera del encuadre | 200, propuesta, Sebastián y motivo | **200**, menús diferenciados y **88 L** | [Captura][rem-seba]. Inicio no disponible; no reconstruido. |
-| REMOTO manual · 16/11, 09:47 | 80 personas/4 h; cambiar a 3 h; completar tipo tecnológico | Pedir dato faltante y usar parámetros actualizados | **200; 80 asistentes, 180 min, $1.742.400 CLP** | [Secuencia][continuidad]. Continuidad de contenido; sin comparar `context_id`. |
-| REMOTO · móvil emulado · 16/11 | Mostrar conversación a 390 × 844 | Lectura y controles accesibles | Dimensiones acreditadas; presupuesto/entrada/Enviar visibles | [Dimensiones][movil-dimensiones] y [controles][movil-controles]. Sin medición global de desborde. |
-| REMOTO · vista estrecha · 16/11 | Paso declarado de 320 × 844 | Lectura y controles accesibles | Texto ajustado y controles dentro del recorte | [Captura][movil-320]. **Ancho exacto no verificado**: barra fuera del encuadre. |
+| HEROKU · REMOTO manual · 15/11, 21:51 | Presupuesto; pregunta exacta fuera del encuadre | 200, respuesta, Eduardo y motivo | **200; $2.173.600 CLP** | [Captura][rem-eduardo]. Inicio no disponible; no reconstruido. |
+| HEROKU · REMOTO manual · 15/11, 21:59 | Programa cultural familiar, 3 horas desde las 16:00 | 200, programa, Matías y motivo | **200**, 16:00–19:00, cero minutos libres | [Captura][rem-matias]. Bloque de 60 minutos con descripción de unos 40; margen sin explicar. |
+| HEROKU · REMOTO manual · 15/11, 22:01 | Recintos; pregunta exacta fuera del encuadre | 200, recomendaciones, Alex y motivo | **200**, capacidad, accesibilidad y advertencias | [Captura][rem-alex]. Inicio no disponible; no reconstruido. |
+| HEROKU · REMOTO manual · 15/11, 22:03 | Catering; pregunta exacta fuera del encuadre | 200, propuesta, Sebastián y motivo | **200**, menús diferenciados y **88 L** | [Captura][rem-seba]. Inicio no disponible; no reconstruido. |
+| HEROKU · REMOTO manual · 16/11, 09:47 | 80 personas/4 h; cambiar a 3 h; completar tipo tecnológico | Pedir dato faltante y usar parámetros actualizados | **200; 80 asistentes, 180 min, $1.742.400 CLP** | [Secuencia][continuidad]. Continuidad de contenido; sin comparar `context_id`. |
+| HEROKU · REMOTO · móvil emulado · 16/11 | Mostrar conversación a 390 × 844 | Lectura y controles accesibles | Dimensiones acreditadas; presupuesto/entrada/Enviar visibles | [Dimensiones][movil-dimensiones] y [controles][movil-controles]. Sin medición global de desborde. |
+| HEROKU · REMOTO · vista estrecha · 16/11 | Paso declarado de 320 × 844 | Lectura y controles accesibles | Texto ajustado y controles dentro del recorte | [Captura][movil-320]. **Ancho exacto no verificado**: barra fuera del encuadre. |
 
 Las horas proceden de cabeceras HTTP convertidas a UTC−03; no miden latencia. [Detalle del 15/11][manual-15] y [complemento del 16/11][manual-16].
 

@@ -284,6 +284,7 @@ sus mensajes pueden estar en inglés. Un error nunca se presenta como una respue
 | --- | --- | --- |
 | 200 | La consulta se respondió. | (el JSON con `respuesta`, `agente` y `motivo`) |
 | 400 | La pregunta está vacía. | `Escribe una pregunta para continuar.` |
+| 422 | Falta `texto`, el JSON está mal formado o `texto` no es texto. Es la validación estándar de FastAPI: solo aparece con la clave correcta, porque sin clave (o con una incorrecta) la app responde 401 antes de validar el cuerpo. | Una **lista** de errores, en inglés: `[{"type": "missing", "loc": ["body", "texto"], "msg": "Field required", …}]` |
 | 401 | Falta la clave o es incorrecta. | `Falta la clave de acceso. Envíala en la cabecera X-API-Key.` / `La clave de acceso es incorrecta.` |
 | 502 | Falló Gemini, la conexión o un agente. | `No se pudo consultar al agente: La clave de Gemini (GOOGLE_API_KEY) no es válida. Revísala en el .env o en las Config Vars de Heroku.` |
 | 503 | El servidor no tiene `CLAVE_API`. | `El servidor no tiene configurada la clave de acceso (CLAVE_API), así que no acepta consultas. Avisa a quien lo administra.` |
