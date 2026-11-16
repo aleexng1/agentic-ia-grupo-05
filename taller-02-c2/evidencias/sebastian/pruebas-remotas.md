@@ -3,8 +3,9 @@
 **Entorno:** HEROKU
 **Fecha:** 14/11/2026
 **URL:** https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/
-**App:** grupo05-taller2-seba (stack heroku-24, release v8, dyno web Eco)
-**Versión desplegada:** `origin/main` (commit 741305b)
+**App:** grupo05-taller2-seba (stack heroku-24, dyno web Eco)
+**Versión desplegada en las 15 pruebas de la tabla:** `origin/main` (commit 741305b), release v8
+**Versión desplegada en la repetición final:** `main` (commit 96ebca4), release v12
 
 Las claves no aparecen en este archivo. La `CLAVE_API` y la `GOOGLE_API_KEY` viven solo en las Config Vars de Heroku.
 
@@ -36,3 +37,18 @@ Extracto de `logs-heroku.txt`: líneas de `[coordinador]` y de las rutas `/panel
 
 - La primera prueba con `GOOGLE_API_KEY` vacía dio 502. Después de cargar la clave, Google la rechazó porque el valor estaba mal copiado. Se corrigió con una carga nueva desde el `.env`.
 - Los caracteres acentuados en peticiones enviadas desde Git Bash en Windows fallaban con 400 ("There was an error parsing the body"). Se resolvió enviando el JSON desde un archivo UTF-8. No es un error de la app.
+
+## Repetición en la release v12 (main 96ebca4)
+
+Se repitieron las pruebas básicas después de rotar la `CLAVE_API` y desplegar `main`. La `CLAVE_API` no aparece en este archivo.
+
+| Prueba | Resultado esperado | Resultado obtenido |
+|---|---|---|
+| `GET /salud` | 200 | 200 |
+| Fichas de los cuatro agentes (`/agentes/*/.well-known/agent-card.json`) | 200 | 200 |
+| `POST /panel/consultar` sin `X-API-Key` | 401 | 401 |
+| `POST /panel/consultar` con clave falsa | 401 | 401 |
+| `POST /panel/consultar` con la clave nueva y texto válido | 200 con respuesta de agente | 200 |
+| `POST /panel/consultar` con la clave nueva y texto vacío | 400 | 400 |
+
+Las filas 7 y 8 de la tabla principal (502 por `GOOGLE_API_KEY`) no se repitieron en v12, porque requieren quitar la clave de Gemini en producción.
