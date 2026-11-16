@@ -1,0 +1,310 @@
+{
+  "fecha_inicio": "2026-11-15T20:39:08-03:00",
+  "entorno": "REMOTO · Heroku · HTTPS",
+  "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "fase": "publica",
+  "release_reportada": "v10",
+  "fuente_release": "Sebastián, comunicado por Eduardo en la solicitud; no verificada en Heroku CLI",
+  "commit_desplegado": null,
+  "estado_commit_desplegado": "POR CONFIRMAR",
+  "rama_local": "c2t2/eduardo-frontend",
+  "head_local": "8a5bb9babdeddf4df957473806a5213928a18901",
+  "origin_main_referencia_local_no_despliegue": "71df3e80adea7ec675db73eefe884cb82eeffc9a",
+  "versiones": {
+    "python": "3.12.10",
+    "playwright": "1.65.1",
+    "httpx": "0.28.1"
+  },
+  "restricciones": "Sin .env, claves locales, configuración/despliegues/reinicios remotos, fallas inducidas, mocks, interceptación HTTP, reloj virtual ni suites locales.",
+  "estado_git_inicial": "?? taller-01-c2/evidencias/eduardo/03-ficha-telefono.jpg\n?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/solicitud-y-alcance.md\n?? taller-02-c2/evidencias/eduardo/validacion-remota-2026-11-15-203522/validar_remoto.py",
+  "salud": {
+    "fecha": "2026-11-15T20:39:10-03:00",
+    "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/salud",
+    "http": 200,
+    "segundos": 0.679,
+    "cuerpo": {
+      "ok": true
+    }
+  },
+  "pr83": {
+    "fecha": "2026-11-15T20:39:10-03:00",
+    "url": "https://api.github.com/repos/aleexng1/agentic-ia-grupo-05/pulls/83",
+    "http": 200,
+    "segundos": 0.571,
+    "cuerpo": {
+      "number": 83,
+      "state": "open",
+      "merged": false,
+      "merged_at": null,
+      "updated_at": "2026-11-15T18:42:35Z",
+      "html_url": "https://github.com/aleexng1/agentic-ia-grupo-05/pull/83"
+    }
+  },
+  "navegador": {
+    "canal": "chrome",
+    "version": "157.0.8103.78",
+    "sin_ventana": true
+  },
+  "panel": {
+    "fecha": "2026-11-15T20:39:12-03:00",
+    "url_final": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+    "http": 200,
+    "titulo": "Planifica tu feria · Grupo 5",
+    "tls": {
+      "issuer": "ESET SSL Filter CA",
+      "protocol": "TLS 1.3",
+      "subjectName": "*.herokuapp.com",
+      "validFrom": 1792972800,
+      "validTo": 1810079999
+    },
+    "cabeceras_respuesta_publicas": {
+      "cache-control": "no-store",
+      "content-type": "text/html; charset=utf-8",
+      "date": "Sun, 15 Nov 2026 23:39:12 GMT",
+      "referrer-policy": "no-referrer",
+      "x-content-type-options": "nosniff"
+    },
+    "sha256_html_remoto": "ccc23ab76b0aa22f4e069ff11ce8813625795b729cde509bd1b90403a7a82c7a",
+    "html_identico_archivo_local": false,
+    "limite_identidad": "La coincidencia de un HTML no identifica el commit ni verifica la release."
+  },
+  "ingreso_vacio_interfaz": {
+    "fecha": "2026-11-15T20:39:13-03:00",
+    "campo_requerido_invalido": true,
+    "panel_oculto": true,
+    "post_panel": 0,
+    "limite": "Validación de formulario; no sustituye el rechazo HTTP sin cabecera."
+  },
+  "sin_clave_http": {
+    "fecha": "2026-11-15T23:39:13.452Z",
+    "http": 401,
+    "content_type": "application/json",
+    "detail": "Falta la clave de acceso. Envíala en la cabecera X-API-Key.",
+    "segundos": 0.413
+  },
+  "clave_ficticia_panel": {
+    "fecha": "2026-11-15T20:39:13-03:00",
+    "http": 401,
+    "cuerpo": {
+      "detail": "La clave de acceso es incorrecta."
+    },
+    "aviso": "Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.",
+    "pregunta_conservada": true,
+    "campo_clave_vacio": true,
+    "panel_oculto": true
+  },
+  "nueva_conversacion_solo_interfaz": {
+    "fecha": "2026-11-15T20:39:13-03:00",
+    "mensajes_usuario": 0,
+    "mensajes_total": 1,
+    "borrador_vacio": true,
+    "post_adicionales": 0,
+    "geometria_escritorio": {
+      "ancho_interior": 1280,
+      "ancho_pagina": 1280,
+      "desborde_horizontal": false,
+      "chat": {
+        "x": 352,
+        "y": 257,
+        "ancho": 878,
+        "alto": 665.375,
+        "scrollWidth": 876,
+        "clientWidth": 876
+      },
+      "agentes": {
+        "x": 50,
+        "y": 257,
+        "ancho": 280,
+        "alto": 564.375,
+        "scrollWidth": 280,
+        "clientWidth": 280
+      },
+      "entrada": {
+        "x": 381,
+        "y": 755,
+        "ancho": 728.578125,
+        "alto": 64,
+        "scrollWidth": 729,
+        "clientWidth": 729
+      },
+      "botones": [
+        {
+          "texto": "Nueva conversación",
+          "alto": 44
+        },
+        {
+          "texto": "Cambiar clave",
+          "alto": 44
+        },
+        {
+          "texto": "◷ Programa",
+          "alto": 44
+        },
+        {
+          "texto": "⌂ Lugar",
+          "alto": 44
+        },
+        {
+          "texto": "$ Presupuesto",
+          "alto": 44
+        },
+        {
+          "texto": "☕ Comida",
+          "alto": 44
+        },
+        {
+          "texto": "Enviar ↑",
+          "alto": 44
+        }
+      ],
+      "fuente_entrada": "16px"
+    },
+    "limite": "Sin consulta autorizada; no acredita todavía el cambio de context_id enviado al servidor."
+  },
+  "movil_emulado": {
+    "dispositivo_emulado": "Pixel 7",
+    "fisico": false,
+    "consulta_autorizada": false,
+    "geometria": {
+      "ancho_interior": 412,
+      "ancho_pagina": 412,
+      "desborde_horizontal": false,
+      "chat": {
+        "x": 12,
+        "y": 237,
+        "ancho": 388,
+        "alto": 716.9375,
+        "scrollWidth": 386,
+        "clientWidth": 386
+      },
+      "agentes": {
+        "x": 12,
+        "y": 975.9375,
+        "ancho": 388,
+        "alto": 273,
+        "scrollWidth": 388,
+        "clientWidth": 388
+      },
+      "entrada": {
+        "x": 35,
+        "y": 734,
+        "ancho": 260.578125,
+        "alto": 64,
+        "scrollWidth": 261,
+        "clientWidth": 261
+      },
+      "botones": [
+        {
+          "texto": "Nueva conversación",
+          "alto": 44
+        },
+        {
+          "texto": "Cambiar clave",
+          "alto": 44
+        },
+        {
+          "texto": "◷ Programa",
+          "alto": 44
+        },
+        {
+          "texto": "⌂ Lugar",
+          "alto": 44
+        },
+        {
+          "texto": "$ Presupuesto",
+          "alto": 44
+        },
+        {
+          "texto": "☕ Comida",
+          "alto": 44
+        },
+        {
+          "texto": "Enviar ↑",
+          "alto": 48
+        }
+      ],
+      "fuente_entrada": "16px"
+    }
+  },
+  "movil_320_emulado": {
+    "ancho_interior": 320,
+    "ancho_pagina": 320,
+    "desborde_horizontal": false,
+    "chat": {
+      "x": 12,
+      "y": 237,
+      "ancho": 296,
+      "alto": 796.125,
+      "scrollWidth": 294,
+      "clientWidth": 294
+    },
+    "agentes": {
+      "x": 12,
+      "y": 1055.125,
+      "ancho": 296,
+      "alto": 386,
+      "scrollWidth": 296,
+      "clientWidth": 296
+    },
+    "entrada": {
+      "x": 35,
+      "y": 794,
+      "ancho": 168.578125,
+      "alto": 64,
+      "scrollWidth": 169,
+      "clientWidth": 169
+    },
+    "botones": [
+      {
+        "texto": "Nueva conversación",
+        "alto": 52
+      },
+      {
+        "texto": "Cambiar clave",
+        "alto": 52
+      },
+      {
+        "texto": "◷ Programa",
+        "alto": 44
+      },
+      {
+        "texto": "⌂ Lugar",
+        "alto": 44
+      },
+      {
+        "texto": "$ Presupuesto",
+        "alto": 44
+      },
+      {
+        "texto": "☕ Comida",
+        "alto": 44
+      },
+      {
+        "texto": "Enviar ↑",
+        "alto": 48
+      }
+    ],
+    "fuente_entrada": "16px"
+  },
+  "solicitudes_panel_observadas": [
+    {
+      "fecha": "2026-11-15T20:39:13-03:00",
+      "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar",
+      "metodo": "POST",
+      "cuerpo": {
+        "texto": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?",
+        "context_id": "eduardo-remoto-sin-clave-20261115"
+      }
+    },
+    {
+      "fecha": "2026-11-15T20:39:13-03:00",
+      "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar",
+      "metodo": "POST",
+      "cuerpo": {
+        "texto": "¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas? Indica partidas, total en CLP, supuestos y advertencias; no realices pagos.",
+        "context_id": "b2ebcd74-80f3-4252-8514-863e38d8bbad"
+      }
+    }
+  ],
+  "fecha_fin": "2026-11-15T20:39:16-03:00"
+}

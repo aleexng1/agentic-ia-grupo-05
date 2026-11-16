@@ -1,6 +1,54 @@
-# Evidencias de Eduardo · LOCAL
+# Evidencias de Eduardo · REMOTO y LOCAL
 
-## Vigente · 2026-11-15 · reproducibilidad de 2b754e2
+## Vigente · REMOTO MANUAL · 2026-11-15
+
+**URL:** https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/
+
+Cuatro capturas manuales aportadas por Eduardo, revisadas sin modificar sus bytes:
+**POST 200 OK, respuesta, agente correcto y motivo visibles**. Fuente e imágenes:
+[`manual-autenticada-2026-11-15/README.md`](manual-autenticada-2026-11-15/README.md).
+Se aprueba el alcance visible, no una transcripción íntegra de los tres casos sin
+inicio. **Matías conserva una observación de contenido:** bloque de 60 minutos con
+descripción de unos 40, sin explicación del margen.
+
+| Entorno y fecha | Solicitud | Esperado | Obtenido | Observaciones |
+| --- | --- | --- | --- | --- |
+| REMOTO MANUAL · 2026-11-15 · 21:51:58 UTC−03:00 | Presupuesto; pregunta exacta fuera del encuadre | 200, respuesta útil, Eduardo y motivo visibles | **200 OK**, presupuesto con total **$2.173.600**, `Agente de Eduardo` y motivo | [01](manual-autenticada-2026-11-15/01-eduardo-remoto-200.png). Falta el inicio y la pregunta; no reconstruidos. |
+| REMOTO MANUAL · 2026-11-15 · 21:59:03 UTC−03:00 | Programa cultural familiar de 3 horas desde las 16:00 | 200, programa útil, Matías y motivo visibles | **200 OK**, programa **16:00–19:00**, informa cero minutos libres, `Agente de Matias` y motivo | [02](manual-autenticada-2026-11-15/02-matias-remoto-200.png). Pregunta y respuesta visibles; **observación 60/40 minutos pendiente**. |
+| REMOTO MANUAL · 2026-11-15 · 22:01:15 UTC−03:00 | Recintos; pregunta exacta fuera del encuadre | 200, recomendaciones útiles, Alex y motivo visibles | **200 OK**, recintos con capacidad/accesibilidad y advertencias, `Agente de Alex` y motivo | [03](manual-autenticada-2026-11-15/03-alex-remoto-200.png). Falta el inicio y la pregunta; no reconstruidos. |
+| REMOTO MANUAL · 2026-11-15 · 22:03:25 UTC−03:00 | Catering; pregunta exacta fuera del encuadre | 200, propuesta útil, Sebastián y motivo visibles | **200 OK**, menús diferenciados, box lunch **13:30** y **88 L**, `Agente de Sebastian` y motivo | [04](manual-autenticada-2026-11-15/04-sebastian-remoto-200.png). Falta el inicio y la pregunta; no reconstruidos. |
+
+Las horas son las cabeceras HTTP `Date` visibles convertidas desde UTC, no duraciones.
+**v10 fue reportada previamente por Sebastián; release y commit durante estas capturas
+siguen por confirmar.** La base Git documental es `96ebca4`, integrada por fast-forward
+desde `origin/main` con el PR #83 fusionado; no demuestra el commit de Heroku.
+El informe remoto de Sebastián del día 14 es otra ejecución.
+
+### Automático anterior y comprobaciones del cliente · conservados
+
+[`validacion-remota-2026-11-15-203522/README.md`](validacion-remota-2026-11-15-203522/README.md)
+conserva sus **28 archivos originales**. La fase autenticada terminó esperando el
+ingreso privado (`TimeoutError`, 20:54:51) y registró **0 POST autenticados**. Los
+cuatro 200 manuales posteriores no son resultados de ese ejecutor ni convierten su
+intento fallido en una aprobación automática.
+
+Panel/salud, 401 sin clave/ficticia y visualización móvil **emulada** corresponden a
+aquella fase. Espera, guardia de **1 POST pese a cuatro intentos extra** y Nueva
+conversación se comprobaron durante un rechazo 401, no una consulta autorizada.
+
+**Pendientes:** capturas iniciales remotas de Eduardo/Alex/Sebastián (no disponibles),
+observación de contenido de Matías, contexto/aislamiento/respuestas tardías, espera
+y duplicados con acceso aceptado, respuesta móvil autenticada y teléfono físico,
+R08 remoto vacío autorizado, errores/router y versión desplegada. Las capturas de
+«inicio» del histórico LOCAL no se reutilizan para completar huecos remotos.
+Detalle vigente y límites: [`documento-Eduardo.md`](../../documento-Eduardo.md).
+
+**Preparación de entrega:** [lista exacta](manual-autenticada-2026-11-15/archivos-para-indice.txt)
+y [revisión documental](manual-autenticada-2026-11-15/revision-documental.json).
+Solo aporte documental/evidencias de Eduardo; sin nuevas consultas, suites, cambios
+propios en código/configuración, commit o push. Se conserva la foto ajena al alcance.
+
+## Registro LOCAL · 2026-11-15 · reproducibilidad de 2b754e2
 
 **`2b754e2e2bb8b035888f281ced1b3c36d6b1bab4` publicado**, tanto en
 `c2t2/eduardo-frontend` como en `refs/pull/82/head`. Las evidencias de la continuación
@@ -18,10 +66,11 @@ autorizados **400/400**. No se detectaron dependencias faltantes para este alcan
 incluida la igualdad de su HTML con el commit, no mediante una regresión visual nueva.
 
 [`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md):
-comandos, versiones, resultados primarios y conservación. La tabla para la futura
-validación **REMOTA**, toda pendiente (versión desplegada: ver
-[`pruebas-remotas.md`](../sebastian/pruebas-remotas.md)), está en
-[`documento-Eduardo.md`](../../documento-Eduardo.md#validación-remota-futura--todavía-no-ejecutada).
+comandos, versiones, resultados primarios y conservación. La tabla de planificación
+**REMOTA de aquel corte LOCAL**, todavía pendiente entonces, se conserva como
+[registro histórico](../../documento-Eduardo.md#plan-remoto-del-cierre-local--histórico).
+Los resultados manuales posteriores y la versión por confirmar se describen arriba;
+el [informe de Sebastián](../sebastian/pruebas-remotas.md) es otra ejecución del día 14.
 Solo las 12 rutas del manifiesto de este cierre se publicaron en `8a5bb9b`, PR #84. No cambió código de producción ni se repitieron pruebas.
 
 ## Pendientes locales completados · 2026-11-14 · publicados en 2b754e2

@@ -1,0 +1,87 @@
+{
+  "fecha_inicio": "2026-11-15T21:07:57-03:00",
+  "entorno": "REMOTO · Heroku · HTTPS",
+  "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "fase": "panel pendiente; rechazo real con clave ficticia",
+  "release_reportada": "v10",
+  "fuente_release": "Sebastián, comunicado por Eduardo en la solicitud; no verificada en Heroku CLI",
+  "commit_desplegado": null,
+  "estado_commit_desplegado": "POR CONFIRMAR",
+  "rama_local": "c2t2/eduardo-frontend",
+  "head_local": "8a5bb9babdeddf4df957473806a5213928a18901",
+  "origin_main_referencia_local_no_despliegue": "71df3e80adea7ec675db73eefe884cb82eeffc9a",
+  "versiones": {
+    "python": "3.12.10",
+    "playwright": "1.65.1",
+    "httpx": "0.28.1"
+  },
+  "restricciones": "Sin .env, claves locales, configuración/despliegues/reinicios remotos, fallas inducidas, mocks, interceptación HTTP, reloj virtual ni suites locales.",
+  "alcance": "Espera y guardia del cliente durante un único rechazo 401; no autenticación válida ni respuesta de agente.",
+  "sin_reintento_autenticado": true,
+  "sha256_ejecutor": "9494d21dd83c248a1b20760b1bd14cd14bb49e31993e721c6e4cbc0c9b7e6fee",
+  "pregunta": "Validación del panel: necesito el programa de una feria infantil de 3 horas desde las 15:00, con datos de demostración.",
+  "navegador": {
+    "canal": "chrome",
+    "version": "157.0.8103.78",
+    "sin_ventana": true
+  },
+  "post_antes_de_enviar": 0,
+  "espera_inmediata": {
+    "fecha": "2026-11-16T00:07:59.089Z",
+    "enviar_bloqueado": true,
+    "sugerencias_bloqueadas": true,
+    "aria_busy": "true",
+    "indicador": true,
+    "estado": "Consultando al coordinador… Puedes iniciar una conversación nueva para dejar de esperar.",
+    "intentos_extra": [
+      "Enter con texto no vacío",
+      "submit programático con texto no vacío",
+      "click sobre Enviar deshabilitado",
+      "click sobre sugerencia deshabilitada"
+    ]
+  },
+  "aria_busy_antes_captura": "true",
+  "aria_busy_despues_captura": "true",
+  "http": 401,
+  "cuerpo": {
+    "detail": "La clave de acceso es incorrecta."
+  },
+  "segundos_hasta_cuerpo": 0.447,
+  "rechazo": {
+    "fecha": "2026-11-15T21:07:59-03:00",
+    "aviso": "Acceso rechazado (401). La clave de acceso es incorrecta. Ingresa una clave válida. Tu pregunta se conserva para reintentar.",
+    "pregunta_conservada": true,
+    "campo_clave_vacio": true,
+    "aria_busy": "false",
+    "enviar_habilitado": true,
+    "sugerencias_habilitadas": true,
+    "indicadores_restantes": 0
+  },
+  "numero_post_tras_rechazo": 1,
+  "antes_nueva_conversacion": {
+    "mensajes_usuario": 1,
+    "pregunta": "Validación del panel: necesito el programa de una feria infantil de 3 horas desde las 15:00, con datos de demostración."
+  },
+  "nueva_conversacion": {
+    "fecha": "2026-11-15T21:07:59-03:00",
+    "mensajes_total": 1,
+    "mensajes_usuario": 0,
+    "entrada_vacia": true,
+    "indicadores_restantes": 0,
+    "historial": "¡Hola! Te ayudo a planificar una feria: programa, lugar, presupuesto y comida. ¿Qué necesitas?\nCoordinador",
+    "post_adicionales": 0
+  },
+  "solicitudes_panel_observadas": [
+    {
+      "fecha": "2026-11-15T21:07:59-03:00",
+      "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/panel/consultar",
+      "metodo": "POST",
+      "cuerpo": {
+        "texto": "Validación del panel: necesito el programa de una feria infantil de 3 horas desde las 15:00, con datos de demostración.",
+        "context_id": "595f7caf-34a4-4e01-a7d7-b5ab7eb7d987"
+      }
+    }
+  ],
+  "numero_post_total": 1,
+  "fecha_fin": "2026-11-15T21:07:59-03:00"
+}

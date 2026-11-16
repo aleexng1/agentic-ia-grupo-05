@@ -1,4 +1,8 @@
-# Prompts utilizados · Eduardo · LOCAL · 2026-11-13
+# Prompts utilizados · Eduardo · registros LOCAL y REMOTO
+
+Los pedidos LOCAL del 13 al 15-11-2026 se conservan con su alcance histórico.
+Al final se añaden las solicitudes reales de validación REMOTA, seguimiento e
+integración documental del 15-11-2026, sin credenciales ni prompts reconstruidos.
 
 ## Solicitud real de Eduardo a OpenCode
 
@@ -274,10 +278,123 @@ reescribir los registros históricos; se añadió una tabla REMOTA enteramente p
 Comandos, versiones, resultados y alcance:
 [`reproducibilidad-2b754e2-2026-11-15/README.md`](reproducibilidad-2b754e2-2026-11-15/README.md).
 
-**Estado vigente de preparación:** el PR #82 está **fusionado en `main`** mediante
+**Estado de preparación al cierre LOCAL (histórico):** el PR #82 está **fusionado en `main`** mediante
 `71df3e8`. Se ejecutaron `git fetch origin` y `git merge --ff-only origin/main` en
 `c2t2/eduardo-frontend`, conservando las 12 rutas, publicadas en `8a5bb9b`, PR #84.
 La instalación limpia sigue referida a **`2b754e2`**, con sus fechas y resultados
 originales. No se repitieron pruebas ni se modificó código.
-La validación REMOTA permanece pendiente; versión desplegada: ver
-[`pruebas-remotas.md`](../sebastian/pruebas-remotas.md).
+En ese corte la validación REMOTA permanecía pendiente; el
+[informe de Sebastián](../sebastian/pruebas-remotas.md) corresponde al día 14 y no
+identifica la versión desplegada durante las capturas manuales posteriores del día 15.
+
+## Validación REMOTA · solicitud real del 15-11-2026
+
+Pedido recibido, sin credenciales:
+
+```text
+Continúa mi validación REMOTA del Taller 2 en c2t2/eduardo-frontend.
+
+URL: https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/
+
+Lee README.md, AGENTS.md y documento-Eduardo.md del taller. Revisa el estado de Git y conserva los cambios existentes.
+
+Sebastián informó release v10. Regístrala como versión reportada; el commit desplegado sigue por confirmar. No equipares automáticamente origin/main con lo desplegado.
+
+Prueba el panel real:
+- Acceso rechazado sin clave y con una clave ficticia.
+- Acceso permitido con la CLAVE_API vigente de Heroku.
+- Una consulta a cada agente, comprobando respuesta, agente y motivo.
+- Nueva conversación, estado de espera y ausencia de envíos duplicados.
+- Visualización en escritorio y móvil; distingue emulación de dispositivo real.
+
+La clave de Google nunca se ingresa en el panel. No asumas que la CLAVE_API local coincide con Heroku. Si falta la remota, detén únicamente las pruebas autenticadas y permite que yo la ingrese privadamente en el navegador, sin mostrarla en conversación, logs ni capturas.
+
+Guarda evidencias nuevas en mi carpeta, con fecha, URL y alcance. Usa las cinco columnas: Entorno y fecha, Solicitud, Esperado, Obtenido y Observaciones. No marques pruebas pendientes como aprobadas.
+
+Mientras el PR #83 siga pendiente, conserva el informe remoto en una carpeta nueva para evitar conflictos con los ajustes documentales de Alex.
+
+No provoques fallas en Heroku ni cambies configuración. No repitas suites locales completas. Al terminar, informa resultados y archivos modificados, sin commit ni push.
+```
+
+Se conservaron los registros en
+[`validacion-remota-2026-11-15-203522/`](validacion-remota-2026-11-15-203522/README.md).
+Hubo panel/salud 200 y rechazos 401 reales. El ingreso privado no se completó:
+la ejecución autenticada original terminó por `TimeoutError` y registró **0 POST
+autenticados**, sin respuestas o capturas de agentes. No se reemplazó la clave
+remota por la local ni se consultó Config Vars para obtenerla.
+
+## Seguimiento REMOTO · solicitud real del 15-11-2026
+
+```text
+Continúa siguiendo las consultas autenticadas ya iniciadas, sin duplicarlas.
+
+Para aprobar cada agente, comprueba: HTTP 200, respuesta útil, agente correcto y motivo visible. Conserva pregunta, respuesta y captura sin credenciales.
+
+Completa únicamente lo pendiente del panel: Nueva conversación, estado de espera y ausencia de envíos duplicados. Mantén “móvil emulado” como tal.
+
+Cierra el informe de validacion-remota-2026-11-15-203522/ con:
+- Pruebas aprobadas, fallidas y pendientes.
+- Evidencia correspondiente a cada resultado.
+- Fecha y URL.
+- Release v10 reportada por Sebastián; commit desplegado pendiente de confirmación.
+
+Si alguna consulta falla o queda detenida, registra el error observado antes de decidir un reintento. No provoques fallas en Heroku.
+
+Entrega el resumen final y la lista exacta de archivos modificados o nuevos. Conserva los archivos anteriores y las claves privadas. Sin commit ni push.
+```
+
+Se inspeccionó la misma ejecución, sin iniciar otra ni reenviar consultas. Tras la
+aclaración de Eduardo («No hay ventana o clave») y el `TimeoutError` registrado,
+no se reintentó la autenticación. Se hizo solo un caso independiente del cliente
+con clave ficticia y **401 esperado**: espera visible, cuatro intentos extra pero
+**1 POST total**, recuperación y limpieza con Nueva conversación. No acredita
+espera/duplicados durante una consulta aceptada ni una respuesta útil de agente.
+El [cierre original](validacion-remota-2026-11-15-203522/README.md) y sus pendientes
+se conservan íntegros, con su fecha y su alcance propios.
+
+## Integración documental y capturas manuales · solicitud real del 15-11-2026
+
+```text
+Continúa en c2t2/eduardo-frontend. Lee las instrucciones del proyecto, revisa git status y trae origin/main. Integra sus cambios conservando mi trabajo; el PR #83 ya está fusionado.
+
+Incorpora las cuatro capturas y el README de:
+taller-02-c2/evidencias/eduardo/manual-autenticada-2026-11-15/
+
+Actualiza documento-Eduardo.md, el índice de mis evidencias y mis prompts utilizados:
+
+- Registra las cuatro consultas como pruebas REMOTAS MANUALES, con HTTP 200, respuesta, agente y motivo.
+- Conserva el intento automático anterior: terminó esperando el ingreso privado y registró 0 POST autenticados. Es otra ejecución.
+- Usa las cinco columnas de la pauta y conserva los resultados históricos.
+- Mantén la observación de contenido de Matías: bloque de 60 minutos con descripción de unos 40.
+- Incorpora las capturas del inicio de Eduardo, Alex y Sebastián si están disponibles. Si faltan, documenta esa limitación sin reconstruirlas.
+- Mantén la versión desplegada por confirmar: v10 fue reportada previamente; el SHA de main no demuestra qué commit ejecutaba Heroku.
+- Conserva pendientes los casos que estas capturas no acreditan.
+
+Revisa enlaces y privacidad. No repitas consultas ni suites, ni cambies código o configuración.
+
+Prepara en el índice únicamente mi aporte documental y sus evidencias, mediante una lista exacta. Ejecuta git diff --cached --check y entrega las rutas preparadas y los pendientes restantes. Sin commit ni push.
+```
+
+Se leyeron las instrucciones y se verificó Git. `git fetch origin` y
+`git merge --ff-only origin/main` incorporaron el PR #83 mediante avance
+**`8a5bb9b` → `96ebca4`**, sin conflictos ni commit nuevo y conservando los
+archivos locales. No se reeditaron código/configuración ni se ejecutaron consultas
+o suites. Los cambios de código/configuración que ya contenía `main` pertenecen
+a esa integración, no a esta selección documental.
+
+Se revisaron las cuatro capturas y su
+[README original](manual-autenticada-2026-11-15/README.md): **cuatro pruebas REMOTAS
+MANUALES con POST 200, respuesta, agente y motivo visibles**. Se preservan los PNG,
+el README aportado y los 28 archivos del intento automático. El margen de Matías
+(60 minutos frente a unos 40) sigue observado. No se localizaron los inicios
+remotos de Eduardo/Alex/Sebastián; no se reconstruyeron preguntas o respuestas.
+v10 sigue como reportada y el despliegue por confirmar. Los casos no acreditados
+no se aprueban; el móvil anterior sigue rotulado como emulado.
+
+La lista cerrada para `git add` está en
+[`manual-autenticada-2026-11-15/archivos-para-indice.txt`](manual-autenticada-2026-11-15/archivos-para-indice.txt).
+Solo contiene documentos y evidencias de Eduardo, incluidos los dos scripts
+originales del instrumental anterior **sin cambios y sin ejecutarlos**. Excluye
+claves, `.env`, `.venv`, la foto del Taller 1 y aportes de otras personas.
+Se comprueban enlaces, privacidad y el índice con `git diff --cached --check`;
+no se realiza commit ni push.

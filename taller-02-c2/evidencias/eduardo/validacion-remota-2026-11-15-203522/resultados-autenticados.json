@@ -1,0 +1,38 @@
+{
+  "fecha_inicio": "2026-11-15T20:39:49-03:00",
+  "entorno": "REMOTO · Heroku · HTTPS",
+  "url": "https://grupo05-taller2-seba-94d12914f3eb.herokuapp.com/",
+  "fase": "autenticada con ingreso privado en navegador",
+  "release_reportada": "v10",
+  "fuente_release": "Sebastián, comunicado por Eduardo en la solicitud; no verificada en Heroku CLI",
+  "commit_desplegado": null,
+  "estado_commit_desplegado": "POR CONFIRMAR",
+  "rama_local": "c2t2/eduardo-frontend",
+  "head_local": "8a5bb9babdeddf4df957473806a5213928a18901",
+  "origin_main_referencia_local_no_despliegue": "71df3e80adea7ec675db73eefe884cb82eeffc9a",
+  "versiones": {
+    "python": "3.12.10",
+    "playwright": "1.65.1",
+    "httpx": "0.28.1"
+  },
+  "restricciones": "Sin .env, claves locales, configuración/despliegues/reinicios remotos, fallas inducidas, mocks, interceptación HTTP, reloj virtual ni suites locales.",
+  "casos": [],
+  "navegador": {
+    "canal": "chrome",
+    "version": "157.0.8103.78",
+    "sin_ventana": false
+  },
+  "interrupcion_instrumental": {
+    "fecha": "2026-11-15T20:54:51-03:00",
+    "tipo": "TimeoutError",
+    "detalle": "Ejecución interrumpida o ventana cerrada; los casos no registrados siguen pendientes. Sin reintentos automáticos."
+  },
+  "solicitudes_panel_observadas": [],
+  "agentes_no_ejecutados": [
+    "matias",
+    "alex",
+    "eduardo",
+    "sebastian"
+  ],
+  "fecha_fin": "2026-11-15T20:54:51-03:00"
+}
