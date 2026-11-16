@@ -1,21 +1,26 @@
-"""Ejecuta un agente desde la terminal.
+"""Ejecuta un agente desde la terminal, con la misma memoria que la API.
 
     python main.py {nombre_agente} "mensaje"
+    python main.py {nombre_agente} "mensaje" --hilo NOMBRE
     python main.py {nombre_agente} "mensaje" --saltos
     python main.py {nombre_agente} --diagrama
+
+La memoria va a Postgres si hay DATABASE_URL (esquema DB_SCHEMA) y, si no, a RAM.
+Cada ejecución abre su conexión y la cierra al terminar.
 """
 
 import argparse
 import importlib
 import sys
 
+from src.memoria import abrir_memoria
 
-def cargar_grafo(nombre_agente: str):
+
+def importar_agente(nombre_agente: str):
     try:
-        modulo = importlib.import_module(f"src.{nombre_agente}.graph")
+        return importlib.import_module(f"src.{nombre_agente}.graph")
     except ModuleNotFoundError:
         sys.exit(f"No existe el agente '{nombre_agente}' (se esperaba src/{nombre_agente}/graph.py).")
-    return modulo.construir_grafo()
 
 
 def main() -> None:
@@ -24,24 +29,36 @@ def main() -> None:
     p.add_argument("mensaje", nargs="?", help="mensaje del cliente")
     p.add_argument("--saltos", action="store_true", help="imprime los nodos recorridos")
     p.add_argument("--diagrama", action="store_true", help="imprime el diagrama Mermaid sin ejecutar")
-    p.add_argument("--thread", default="cli", help="thread_id para la memoria (por defecto: cli)")
+    p.add_argument("--hilo", "--thread", dest="hilo", default="cli", metavar="NOMBRE",
+                   help="thread_id de la conversación (por defecto: cli)")
     args = p.parse_args()
 
-    grafo = cargar_grafo(args.agente)
+    agente = importar_agente(args.agente)
 
-    if args.diagrama:
-        print(grafo.get_graph().draw_mermaid())
+    if args.diagrama:  # no necesita memoria ni base de datos
+        print(agente.construir_grafo().get_graph().draw_mermaid())
         return
 
     if not args.mensaje:
         p.error("falta el mensaje (o usa --diagrama)")
 
-    config = {"configurable": {"thread_id": args.thread}}
-    saltos = []
-    for paso in grafo.stream({"mensaje": args.mensaje}, config, stream_mode="updates"):
-        saltos.extend(paso.keys())
+    memoria = abrir_memoria()
+    try:
+        if memoria.tipo == "ram":
+            print(f"⚠ memoria en RAM (no se guarda): {memoria.motivo}", file=sys.stderr)
+        grafo = agente.construir_grafo(memoria.checkpointer)
 
-    estado = grafo.get_state(config).values
+        config = {"configurable": {"thread_id": args.hilo}}
+        saltos = []
+        for paso in grafo.stream({"mensaje": args.mensaje}, config, stream_mode="updates"):
+            saltos.extend(paso.keys())
+        estado = grafo.get_state(config).values
+    finally:
+        memoria.cerrar()
+
+    destino = f"postgres (esquema {memoria.esquema})" if memoria.tipo == "postgres" else "ram"
+    print("hilo:     ", args.hilo)
+    print("memoria:  ", destino)
     if args.saltos:
         print("saltos:   ", " → ".join(saltos))
     print("ruta:     ", estado.get("ruta"))

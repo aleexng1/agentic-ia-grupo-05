@@ -3,6 +3,7 @@
     uvicorn api.app:app --reload --port 8000
 """
 
+import asyncio
 import logging
 import os
 import secrets
@@ -14,6 +15,7 @@ from fastapi.security import APIKeyHeader
 from pydantic import BaseModel, ConfigDict, Field
 
 from src.config import MODELO
+from src.memoria import abrir_memoria
 from src.router.graph import construir_grafo
 
 log = logging.getLogger("uvicorn.error")
@@ -65,12 +67,22 @@ def exigir_api_key(clave: str | None = Security(api_key_header)) -> None:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # El grafo se compila una sola vez, al arrancar.
-    app.state.grafo = construir_grafo()
+    # La memoria (Postgres o, si no se puede, RAM) y el grafo se crean una sola vez, al arrancar.
+    # abrir_memoria() nunca lanza: si la base falla, la API sigue arriba con memoria en RAM.
+    memoria = await asyncio.to_thread(abrir_memoria)
+    app.state.memoria = memoria
+    app.state.grafo = construir_grafo(memoria.checkpointer)
+    if memoria.tipo == "postgres":
+        log.info("Memoria en Postgres (esquema %s).", memoria.esquema)
+    else:
+        log.warning("Memoria en RAM (se pierde al reiniciar la API). Motivo: %s", memoria.motivo)
     log.info("Grafo del router compilado (modelo: %s)", MODELO)
     if not api_key_configurada():
         log.error("API_KEY no está configurada: POST /chat rechazará todas las peticiones con 401.")
-    yield
+    try:
+        yield
+    finally:
+        memoria.cerrar()  # cierra el pool de conexiones
 
 
 app = FastAPI(
@@ -124,6 +136,10 @@ class ChatResponse(BaseModel):
 class HealthResponse(BaseModel):
     ok: bool = Field(description="true si el servicio está arriba.", examples=[True])
     modelo: str = Field(description="Modelo configurado en MODELO.", examples=[MODELO])
+    memoria: Literal["ram", "postgres"] = Field(
+        description="Dónde se guarda la conversación: `postgres` sobrevive a un reinicio; `ram` no.",
+        examples=["postgres"],
+    )
 
 
 class ErrorResponse(BaseModel):
@@ -136,8 +152,8 @@ class ErrorResponse(BaseModel):
 # ── Rutas ────────────────────────────────────────────────────────────────────
 
 @app.get("/health", tags=["salud"], response_model=HealthResponse, summary="Estado del servicio")
-def health() -> HealthResponse:
-    return HealthResponse(ok=True, modelo=MODELO)
+def health(request: Request) -> HealthResponse:
+    return HealthResponse(ok=True, modelo=MODELO, memoria=request.app.state.memoria.tipo)
 
 
 @app.post(

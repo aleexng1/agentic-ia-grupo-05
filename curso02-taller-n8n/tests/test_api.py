@@ -40,6 +40,7 @@ def test_health_sin_clave(cliente):
     assert r.status_code == 200
     assert r.json()["ok"] is True
     assert r.json()["modelo"]
+    assert r.json()["memoria"] == "ram"  # las pruebas no usan Postgres (ver conftest.py)
 
 
 # ── /chat: autenticación ─────────────────────────────────────────────────────

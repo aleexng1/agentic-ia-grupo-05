@@ -15,7 +15,7 @@ Un **agente router** (LangGraph + Gemini) recibe el mensaje de un cliente de una
 
 Si duda entre preventa y postventa, gana postventa cuando el cliente habla de algo que **ya compró**.
 Por ahora los agentes de preventa y postventa son cascarones que solo confirman lo que recibieron.
-La memoria es por `thread_id` (`MemorySaver`, en memoria del proceso).
+La memoria es por `thread_id` y se guarda en Postgres (o en RAM si no hay base): ver "Memoria en Postgres".
 
 Una **API FastAPI** expone el router en `POST /chat`. Telegram no se conecta directo: entrará por n8n, que llamará a esta API.
 
@@ -24,8 +24,10 @@ curso02-taller-n8n/
 ├── main.py                  # CLI
 ├── api/app.py               # API FastAPI
 ├── src/config.py            # .env y creación del modelo
+├── src/memoria.py           # memoria: Postgres (esquema propio) o RAM
 ├── src/router/              # graph.py · prompts.py · tools.py
 ├── scripts/test_router.py   # tabla de evaluación del router
+├── scripts/ver_memoria.py   # mira los hilos guardados en Postgres
 ├── tests/                   # pytest (casos_router.json, test_router.py, test_api.py)
 ├── bruno/                   # colección de Bruno (entornos local y nube)
 └── AGENTS.md                # reglas del proyecto
@@ -46,6 +48,7 @@ cp .env.example .env          # y rellena GOOGLE_API_KEY
 ```bash
 python main.py router "¿tienen la polera azul en talla M?"
 python main.py router "mi pedido 4521 llegó roto" --saltos    # muestra los nodos recorridos
+python main.py router "y en talla L?" --hilo ana               # elige el thread_id (conversación)
 python main.py router --diagrama                               # imprime el Mermaid sin ejecutar
 ```
 
@@ -56,7 +59,7 @@ uvicorn api.app:app --reload --port 8000
 ```
 
 - Swagger: http://localhost:8000/docs (usa el botón **Authorize** 🔒 para poner la clave y probar `/chat`)
-- `GET /health` → `{"ok": true, "modelo": "..."}` (abierto)
+- `GET /health` → `{"ok": true, "modelo": "...", "memoria": "ram" | "postgres"}` (abierto)
 - `POST /chat` con la cabecera `X-API-Key` y `{"user_id", "texto"}` → `{"ruta", "motivo", "respuesta"}`
   (401 sin clave o con clave incorrecta, 422 si el body es inválido, 502 si falla el modelo)
 
@@ -93,6 +96,33 @@ rechaza **todas** las peticiones (no queda abierto) y lo deja anotado en el log.
    despliegues. No va en el código ni en el repo.
 
 Quien llame a `/chat` (n8n, Bruno, curl) debe mandar la cabecera `X-API-Key: <tu-clave>`.
+
+## Memoria en Postgres
+
+El agente recuerda la conversación por `thread_id` (en la API, el `user_id`). Con `DATABASE_URL` en `.env`, esa
+memoria se guarda en **Postgres** (checkpointer `PostgresSaver` de LangGraph) y **sobrevive a un reinicio**.
+La API y `main.py` usan la misma memoria, así que una conversación empezada en la terminal sigue en la API.
+
+- **Esquema propio:** la base es compartida por todo el curso, así que las tablas (`checkpoints`,
+  `checkpoint_blobs`, `checkpoint_writes`, `checkpoint_migrations`) se crean solo en el esquema de `DB_SCHEMA`
+  (por defecto `alex_nail`). Se crea con `CREATE SCHEMA IF NOT EXISTS` al arrancar y cada conexión se fija a
+  ese esquema con `search_path`. Se rechazan `public`, `catalogo`, `alumnoNN` y `pg_*`.
+- **Pocas conexiones:** un pool de 1 a 2 conexiones, abierto una vez al arrancar la API y cerrado al apagarla, que
+  comprueba cada conexión antes de usarla. `main.py` abre su conexión y la cierra al terminar.
+- **Sin base, sigue funcionando:** si falta `DATABASE_URL`, o Postgres no responde al arrancar (incluido
+  "remaining connection slots are reserved"), se usa **RAM** (`MemorySaver`), se anota el motivo en el log y la API
+  no se cae. La memoria en RAM se pierde al reiniciar. `GET /health` dice cuál se está usando.
+- **Secretos:** la URL, la clave y la dirección del servidor no se imprimen ni se registran: los errores y los
+  logs de la conexión se limpian antes de mostrarse.
+
+Ver qué hay guardado:
+
+```bash
+python scripts/ver_memoria.py              # hilos guardados: cuántos checkpoints tiene cada uno y el último
+python scripts/ver_memoria.py prueba1      # los mensajes de ese hilo, en orden
+```
+
+Una sola conexión corta y en solo lectura.
 
 ## Túnel para n8n
 
@@ -138,10 +168,11 @@ Ten en cuenta:
 
 ```bash
 python scripts/test_router.py   # tabla: mensaje, esperado, obtenido, ✔/✘, motivo y resumen
-pytest                          # router (máximo 2 fallos, llama al modelo) + API (sin modelo)
-pytest tests/test_api.py        # solo la API, rápido y sin gastar cuota
+pytest                          # router (máximo 2 fallos, llama al modelo) + API y memoria (sin modelo ni base)
+pytest tests/test_api.py tests/test_memoria.py   # solo API y memoria: rápido, sin cuota y sin tocar la base
 ```
 
 ## Avance
 
 - **Sesión 2 · router + API:** entorno Python 3.12, agente router con salida estructurada y memoria por hilo, 15 casos de prueba (15/15), API FastAPI con Swagger, colección de Bruno.
+- **Memoria persistente:** el checkpointer pasó de RAM a Postgres (esquema propio `alex_nail`), con caída automática a RAM si la base no responde, `--hilo` en `main.py` y `scripts/ver_memoria.py`.
