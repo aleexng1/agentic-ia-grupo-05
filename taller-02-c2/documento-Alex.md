@@ -32,7 +32,7 @@ automática.
 ## 3. Prompts que usé
 
 Mis instrucciones a Claude Code están **completas y textuales** en
-[`evidencias/alex/prompts.md`](evidencias/alex/prompts.md): son cinco instrucciones
+[`evidencias/alex/prompts.md`](evidencias/alex/prompts.md): son once instrucciones
 principales, cada una con sus continuaciones. Ese archivo explica cómo se hicieron
 (cita textual de su encabezado):
 
@@ -51,6 +51,12 @@ archivo, sin cambios); las cortas las **cito tal cual**.
 | 3 | **Registro A2A y README**: el registro con `logging` (cuatro tipos de línea, pregunta de máximo 80 caracteres, sin claves ni cabeceras, formato con hora) y su prueba; y las secciones del README que no dependen de otros (instalación, configuración, iniciar/probar/detener, cómo funciona, dependencias externas), dejando las de otros como «pendiente» y sin rutas absolutas. | [prompts.md · 3](evidencias/alex/prompts.md#3--registro-a2a-y-readme) |
 | 4 | **Revisión de los PR #76 y #77**, en dos fases. Fase 1, un informe sin cambiar nada: alcance, seguridad (secretos, imágenes, `compare_digest`, a qué direcciones se envía la cabecera `X-API-Key`, la clave en el frontend), contrato frontend ↔ servidor, los dos `xfail`, la unión de ambos, las evidencias y el estado de #75, en una tabla con ✅ / ⚠️ / ❌. Fase 2 (tras mi «sigue»): integrar en mi rama, aplicar solo los arreglos chicos, probar el arranque como Heroku (hasta 4 preguntas reales) y abrir un PR sin unirlo. | [prompts.md · 4](evidencias/alex/prompts.md#4--revisión-de-los-pr-de-matías-76-y-eduardo-77) |
 | 5 | **Unir los PR, evidencias y documento**, en tres fases: unir #76, #77 y #78 comprobando antes que no hubiera conflictos; el guion de capturas (con recomendaciones para mi Linux Mint y un máximo de 6 preguntas reales) y `prompts.md`; revisar las capturas; y escribir este documento, completar «Preparación manual» del README y abrir el PR «Taller 2 C2: documento y evidencias de Alex» sin unirlo. | [prompts.md · 5](evidencias/alex/prompts.md#5--unir-los-pr-evidencias-y-documento-de-alex) |
+| 6 | **Completar este documento y unir el PR #79**: completar esta sección citando `prompts.md`, revisar que no tenga claves ni rutas con mi usuario, y unir el #79 con `--merge`. | [prompts.md · 6](evidencias/alex/prompts.md#6--completar-el-documento-y-unir-el-pr-79) |
+| 7 | **Revisión de los PR #80 (Matías), #81 (Sebastián) y #82 (Eduardo)**, en dos fases y en copias temporales. Continuación: unir solo el #82, que #80 y #81 se corrijan con un commit nuevo y se unan con `--squash` (por las IP y la barra de marcadores), y preparar mis arreglos en un PR aparte. | [prompts.md · 7](evidencias/alex/prompts.md#7--revisión-de-los-pr-80-matías-81-sebastián-y-82-eduardo) |
+| 8 | **Revisión del PR #84 de Eduardo** (instalación limpia). Continuaciones: hacer yo sus correcciones en mi #83, pasar sus tablas a las 5 columnas de la pauta, incluidas las del 14-11. | [prompts.md · 8](evidencias/alex/prompts.md#8--revisión-del-pr-84-de-eduardo) |
+| 9 | **Unión de #80, #81 y #83** tras las correcciones de Matías y Sebastián: revisarlos, unirlos con `--squash`, agregar al #83 los arreglos que dependían de ellos y dejar el mensaje para el despliegue final. | [prompts.md · 9](evidencias/alex/prompts.md#9--unión-de-80-matías-81-sebastián-y-83-tras-sus-correcciones) |
+| 10 | **Revisión del PR #85 de Eduardo** (validación remota del panel en Heroku): imágenes, scripts, release v12 y el commit `4593bafb`; después, unirlo y hacer los arreglos puntuales en un PR aparte. | [prompts.md · 10](evidencias/alex/prompts.md#10--revisión-del-pr-85-de-eduardo-validación-remota-del-panel) |
+| 11 | **Revisión del PR #87 de Sebastián** (release v12 y pruebas remotas): resolución de conflictos, secretos, lo que le pedimos y formato. Continuación en versión corta: unirlo con `--squash` y hacer solo los arreglos de formato. | [prompts.md · 11](evidencias/alex/prompts.md#11--revisión-del-pr-87-de-sebastián-release-v12-y-pruebas-remotas) |
 
 ### Continuaciones cortas, citadas tal cual
 
@@ -101,9 +107,6 @@ más larga: pedí tomar las capturas de forma automática con un script de Playw
 sin ventana, contra la app real y con una `CLAVE_API` temporal solo en el entorno, con una
 franja de fecha y hora en cada imagen, y revisar después el registro. Está completa en
 [prompts.md · «Cambio de plan para las capturas»](evidencias/alex/prompts.md#5--unir-los-pr-evidencias-y-documento-de-alex).
-
-**Límite de esta sección:** `prompts.md` llega hasta ese «Cambio de plan». La instrucción que
-pidió completar esta sección y unir el PR #79 todavía no está en el archivo.
 
 ## 4. Decisiones de la base y por qué
 
@@ -259,20 +262,15 @@ públicas ni notificaciones.
 
 **Dicho tal cual:**
 
-- **Todo es LOCAL.** No se probó ni se desplegó nada en Heroku; **la sección «Operación en
-  Heroku» del README y el despliegue siguen pendientes (Sebastián).** Que la app arranque con
-  el comando del `Procfile` en mi computador no demuestra que funcione en Heroku.
+- **Mis pruebas y capturas son LOCAL.** La app está desplegada en Heroku por Sebastián
+  (release v12, con el mismo código que `main` en `96ebca4`), con sus pruebas remotas en
+  [`evidencias/sebastian/pruebas-remotas.md`](evidencias/sebastian/pruebas-remotas.md), y
+  Eduardo validó el panel en remoto ([`evidencias/eduardo/`](evidencias/eduardo/)). Yo no
+  probé en Heroku: mis evidencias muestran la app en mi computador, no el despliegue.
 - **Las capturas son automáticas**, no las tomó una persona. Llevan la franja y el área de
   conversación expandida que agrega el script. El script solo funciona en Linux y macOS.
-- **`prompts.md` no incluye las últimas instrucciones**: llega hasta el «Cambio de plan para
-  las capturas» (ver el límite al final de la sección 3).
 - **Las respuestas de Gemini varían** entre corridas, y los datos de los agentes son ficticios.
-- **Eduardo tiene pendientes suyos:** ejecutar de verdad el acceso permitido y rechazado desde
-  su frontend contra la app integrada (R05–R07 y R09 de su documento), actualizar sus
-  secciones 3 y 5 (aún describen la protección de Matías como no integrada) y decidir qué hacer
-  con `src/agente_eduardo/demo.html`, que ya no se sirve. Mis capturas 02 y 03 muestran el
-  ingreso y el rechazo con la app real, pero no reemplazan su validación.
 - **Límites de la base:** la memoria del chat vive en la RAM del servidor (se pierde al
   reiniciar o cuando Heroku duerme la app y obliga a `WEB_CONCURRENCY=1`); hay una sola clave
-  de acceso para todas las personas; el modo distribuido no funciona con agentes remotos que
+  de acceso para todas las personas; cada pregunta la responde un solo agente; el modo distribuido no funciona con agentes remotos que
   exijan su propia clave. Están anotados en «Límites conocidos» del README.

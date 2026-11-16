@@ -66,7 +66,7 @@ Las pruebas corrieron el 14/11/2026 contra la URL pública. Las respuestas compl
 - **`GOOGLE_API_KEY`:** la primera carga quedó con un valor de prueba o incompleto, y Google la rechazó (prueba 8). Después también quedó vacía una vez, porque el comando usaba `grep` en PowerShell, que no existe. Lo corregí cargando la clave desde el `.env` local con la sintaxis de PowerShell. Al final, la prueba con preguntas reales dio 200.
 - **Peticiones con acentos:** las pruebas con `curl` y el JSON inline en Git Bash dieron 400 ("There was an error parsing the body"). Enviar el JSON desde un archivo UTF-8 lo resolvió. No era un error de la app.
 - **Código:** no modifiqué código del proyecto. Solo cambié configuración de Heroku y el README.
-- **Redespliegue final:** después de que se unió #81 a main, roté la `CLAVE_API` y desplegué `main` (commit `96ebca4`) en la release v12. El historial de main reescribió #81, así que el despliegue se hizo con un commit de Heroku que tiene el mismo árbol que main. Las pruebas básicas en remoto de esa versión están en `evidencias/sebastian/pruebas-remotas.md`.
+- **Redespliegue final:** después de que se unió #81 a main, roté la `CLAVE_API` y desplegué `main` (commit `96ebca4`) en la release v12. El historial de main reescribió #81, así que el despliegue se hizo con un commit de Heroku que tiene el mismo árbol que main. Las pruebas básicas en remoto de esa versión, del 15/11/2026, están en `evidencias/sebastian/pruebas-remotas.md`.
 
 ## 5. Incidente de exposición de claves
 
