@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Revisar fichas</title>
+<title>Grafo de productos</title>
 <style>
   /* ===== Colores (claro / oscuro) ===== */
   :root {
@@ -93,7 +93,7 @@
   }
 
   /* ===== Dibujo ===== */
-  #lienzo { display: block; width: 100%; height: auto; }
+  #lienzo, #lienzo-neo4j { display: block; width: 100%; height: auto; }
   .arista { fill: none; stroke: var(--texto-suave); stroke-width: 1.6; }
   .arista.roja { stroke: var(--rojo); stroke-width: 2.2; }
   .punta { fill: var(--texto-suave); }
@@ -136,15 +136,78 @@
   .nulo { color: var(--texto-suave); font-style: italic; }
   .si-replica { color: var(--rojo); font-weight: 700; }
 
+  /* ===== Pestañas ===== */
+  .pestanas { display: flex; gap: 4px; margin-top: 12px; border-bottom: 1px solid var(--borde); }
+  .pestana {
+    font: inherit; font-weight: 600; padding: 9px 16px; margin-bottom: -1px; cursor: pointer;
+    color: var(--texto-suave); background: transparent;
+    border: 1px solid transparent; border-bottom: 0; border-radius: 8px 8px 0 0;
+  }
+  .pestana.activa { color: var(--texto); background: var(--panel); border-color: var(--borde); }
+  .pestana:focus-visible { outline: 2px solid var(--acento); outline-offset: -2px; }
+
+  /* ===== Preguntar al grafo ===== */
+  button.boton { border: 0; font: inherit; font-weight: 600; }
+  button.boton:disabled { opacity: .5; cursor: not-allowed; }
+  button.boton:focus-visible { outline: 2px solid var(--texto); outline-offset: 2px; }
+  button.boton.secundario { background: transparent; color: var(--acento); border: 1px solid var(--acento); }
+  .fila-pregunta { flex-wrap: nowrap; }
+  #pregunta {
+    flex: 1; min-width: 0; padding: 9px 12px; font: inherit; color: var(--texto);
+    background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px;
+  }
+  #pregunta:disabled { opacity: .5; cursor: not-allowed; }
+  .ejemplos { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .ejemplo {
+    font: inherit; font-size: .82rem; padding: 3px 10px; border-radius: 99px; cursor: pointer;
+    color: var(--texto-suave); background: transparent; border: 1px solid var(--borde);
+  }
+  .ejemplo:hover:not(:disabled) { color: var(--texto); border-color: var(--acento); }
+  .error-caja {
+    margin: 12px 0 0; padding: 8px 12px; border-radius: 6px; font-weight: 600; white-space: pre-line;
+    color: var(--rojo); background: var(--rojo-fondo); border-left: 4px solid var(--rojo);
+  }
+  .comparacion { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 12px; }
+  .respuesta { min-width: 0; padding: 12px 14px; background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px; }
+  .texto-respuesta { white-space: pre-wrap; overflow-wrap: anywhere; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; color: var(--texto-suave); font-size: .88rem; }
+  pre {
+    margin: 8px 0 0; padding: 10px; max-height: 320px; overflow: auto; font-size: .8rem;
+    white-space: pre-wrap; overflow-wrap: anywhere;
+    background: var(--panel); border: 1px solid var(--borde); border-radius: 6px;
+  }
+  .tarjetas { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+  .tarjeta {
+    display: flex; flex-direction: column; gap: 4px; width: 100%; height: 100%; padding: 10px 12px;
+    text-align: left; font: inherit; color: var(--texto); cursor: pointer;
+    background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px;
+  }
+  .tarjeta:hover, .tarjeta:focus-visible { border-color: var(--acento); }
+  .tarjeta.activa { border-color: var(--acento); background: var(--marca-fondo); }
+  .tarjeta.replica { border-left: 4px solid var(--rojo); }
+  .tarjeta .cabecera { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .tarjeta .nombre-prod { font-weight: 600; overflow-wrap: anywhere; }
+  .tarjeta .precio { font-weight: 700; }
+  .tarjeta .meta { color: var(--texto-suave); font-size: .82rem; }
+
   @media (max-width: 560px) { th { width: 120px; } }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>Revisar fichas de Gemini</h1>
-    <p>Elige <code>data/fichas.jsonl</code>, busca un producto y compara su dibujo con el nombre original.</p>
+    <h1>Grafo de productos</h1>
+    <p>Revisa lo que extrajo Gemini y hazle preguntas al grafo de Neo4j.</p>
   </header>
+
+  <div class="pestanas" role="tablist" aria-label="Secciones">
+    <button class="pestana activa" id="pestana-revisar" role="tab" type="button" aria-selected="true" aria-controls="panel-revisar">Revisar relaciones</button>
+    <button class="pestana" id="pestana-preguntar" role="tab" type="button" aria-selected="false" aria-controls="panel-preguntar" tabindex="-1">Preguntar al grafo</button>
+  </div>
+
+  <!-- ================= PESTAÑA 1: Revisar relaciones ================= -->
+  <div id="panel-revisar" role="tabpanel" aria-labelledby="pestana-revisar">
 
   <!-- 1. Cargar archivo -->
   <section id="seccion-carga" aria-label="Cargar archivo">
@@ -185,9 +248,80 @@
     <table id="tabla-ficha"></table>
   </section>
 
-  <!-- 5. PASO 7: aquí irá la sección "Preguntarle al grafo" (GraphRAG).
-       Agregar un <section id="seccion-preguntas"> aquí y su código en el bloque
-       "PASO 7" del <script>. -->
+  </div><!-- /panel-revisar -->
+
+  <!-- ================= PESTAÑA 2: Preguntar al grafo (paso 7) =================
+       Necesita servidor.py: las claves de Gemini y Neo4j viven en el servidor, no en esta página. -->
+  <div id="panel-preguntar" role="tabpanel" aria-labelledby="pestana-preguntar" hidden>
+
+    <section id="seccion-pregunta" aria-label="Hacer una pregunta">
+      <p id="aviso-servidor" class="aviso" hidden>
+        Abriste esta página como archivo, y esta pestaña necesita el servidor. En una terminal, desde
+        <code>curso02-taller-graphrag/</code>, corre <code>python servidor.py</code> y abre
+        <code>http://127.0.0.1:8000</code>.
+      </p>
+      <form id="form-pregunta">
+        <label class="campo" for="pregunta">Pregunta para el grafo</label>
+        <div class="fila fila-pregunta">
+          <input id="pregunta" type="text" maxlength="500" autocomplete="off"
+                 placeholder="Ej.: ¿Tienen un Samsung Galaxy S25 Ultra original?">
+          <button id="btn-preguntar" class="boton" type="submit">Preguntar</button>
+        </div>
+      </form>
+      <div class="ejemplos" id="ejemplos" aria-label="Preguntas de ejemplo">
+        <button type="button" class="ejemplo">¿Tienen un Samsung Galaxy S25 Ultra original?</button>
+        <button type="button" class="ejemplo">Quiero un celular barato con buena pantalla</button>
+        <button type="button" class="ejemplo">¿Qué televisores tienen?</button>
+      </div>
+      <p id="estado-pregunta" class="suave" role="status"></p>
+      <p id="error-pregunta" class="error-caja" role="alert" hidden></p>
+    </section>
+
+    <section id="seccion-respuestas" aria-label="Respuestas" hidden>
+      <div class="comparacion">
+        <article class="respuesta">
+          <h2>Respuesta con grafo</h2>
+          <div id="respuesta-con" class="texto-respuesta"></div>
+          <details>
+            <summary>Contexto que recibió Gemini (con grafo)</summary>
+            <pre id="contexto-con"></pre>
+          </details>
+        </article>
+        <article class="respuesta" id="caja-sin" hidden>
+          <h2>Respuesta sin grafo</h2>
+          <div id="respuesta-sin" class="texto-respuesta"></div>
+          <details>
+            <summary>Contexto que recibió Gemini (sin grafo: solo la fila del Excel)</summary>
+            <pre id="contexto-sin"></pre>
+          </details>
+        </article>
+      </div>
+      <div class="fila">
+        <button id="btn-comparar" class="boton secundario" type="button">Comparar con la respuesta sin grafo</button>
+        <span id="estado-comparar" class="suave" role="status"></span>
+      </div>
+      <p id="error-comparar" class="error-caja" role="alert" hidden></p>
+    </section>
+
+    <section id="seccion-productos" aria-label="Productos encontrados" hidden>
+      <h2>Productos encontrados</h2>
+      <p class="suave" style="margin:0">Haz clic en uno para ver sus relaciones en Neo4j.</p>
+      <ul id="tarjetas" class="tarjetas"></ul>
+    </section>
+
+    <section id="seccion-grafo-neo4j" aria-label="Relaciones en Neo4j" hidden>
+      <h2 id="titulo-grafo-neo4j">Relaciones en Neo4j</h2>
+      <p id="error-relaciones" class="error-caja" role="alert" hidden></p>
+      <svg id="lienzo-neo4j" viewBox="0 0 960 580" role="img" aria-label="Producto y sus relaciones en Neo4j"></svg>
+      <div class="leyenda">
+        <span><i style="background:var(--marca)"></i>marca</span>
+        <span><i style="background:var(--categoria)"></i>categoría</span>
+        <span><i style="background:var(--linea)"></i>línea</span>
+        <span><i style="background:var(--caracteristica)"></i>características</span>
+        <span><i style="background:var(--rojo)"></i>lo que copia (réplica)</span>
+      </div>
+    </section>
+  </div><!-- /panel-preguntar -->
 </main>
 
 <script>
@@ -298,7 +432,6 @@ async function cargarArchivo(archivo) {
     buscador.value = "";
     buscador.focus();
     actualizarBusqueda();
-    alCargarFichas(); // gancho para el paso 7
   } catch (e) {
     estadoCarga.textContent = `No pude leer ${archivo.name}: ${e.message}.`;
     estadoCarga.classList.add("error");
@@ -355,12 +488,11 @@ function seleccionarProducto(sku) {
   const ficha = estado.fichas.find((f) => f.sku === sku);
   if (!ficha) return;
   estado.seleccionada = ficha;
-  dibujarGrafo(ficha);
+  dibujarGrafo($("lienzo"), ficha, fichaARelaciones(ficha));
   mostrarDetalle(ficha);
   $("seccion-grafo").hidden = false;
   $("seccion-detalle").hidden = false;
   $("seccion-grafo").scrollIntoView({ behavior: "smooth", block: "nearest" });
-  alSeleccionarProducto(ficha); // gancho para el paso 7
 }
 
 /* =====================================================================
@@ -457,15 +589,18 @@ function crearNodo({ x, y, tipoEtiqueta, lineasValor, clase, ancho }) {
   return { g, x, y, ancho, alto };
 }
 
-function dibujarGrafo(f) {
-  const lienzo = $("lienzo");
+// Dibuja un producto y sus relaciones en el <svg> `lienzo`.
+//   f: { sku, nombre, es_replica }    relaciones: { nodos, aristas } (de fichaARelaciones o del servidor)
+function dibujarGrafo(lienzo, f, { nodos, aristas }) {
   lienzo.replaceChildren();
+  // Los ids de las puntas de flecha llevan el id del lienzo: hay dos dibujos en la misma página.
+  const idFlecha = (roja) => `${lienzo.id}-${roja ? "flecha-roja" : "flecha"}`;
 
   // Puntas de flecha (gris y roja)
   const defs = svg("defs");
   for (const roja of [false, true]) {
     const marcador = svg("marker", {
-      id: roja ? "flecha-roja" : "flecha", viewBox: "0 0 10 10", refX: 9, refY: 5,
+      id: idFlecha(roja), viewBox: "0 0 10 10", refX: 9, refY: 5,
       markerWidth: 8, markerHeight: 8, orient: "auto",
     });
     marcador.append(svg("path", { d: "M0 0 L10 5 L0 10 z", class: roja ? "punta roja" : "punta" }));
@@ -475,7 +610,6 @@ function dibujarGrafo(f) {
 
   const cx = LIENZO.ancho / 2;
   const cy = LIENZO.alto / 2;
-  const { nodos, aristas } = fichaARelaciones(f);
 
   // Nodo central: el producto
   const cajas = new Map();
@@ -506,7 +640,7 @@ function dibujarGrafo(f) {
     capaAristas.append(svg("line", {
       class: a.roja ? "arista roja" : "arista",
       x1: ini.x, y1: ini.y, x2: fin.x, y2: fin.y,
-      "marker-end": `url(#${a.roja ? "flecha-roja" : "flecha"})`,
+      "marker-end": `url(#${idFlecha(a.roja)})`,
     }));
     capaEtiquetas.append(svg("text", {
       class: a.roja ? "etiqueta-arista roja" : "etiqueta-arista",
@@ -565,13 +699,195 @@ function mostrarDetalle(f) {
 }
 
 /* =====================================================================
-   8. PASO 7 (pendiente): PREGUNTARLE AL GRAFO (GraphRAG)
-   Los ganchos de abajo ya se llaman desde la carga y la selección.
-   Aquí se puede leer `estado.fichas` / `estado.seleccionada`, y reutilizar
-   `fichaARelaciones(ficha)` para armar nodos y relaciones.
+   8. PREGUNTAR AL GRAFO (paso 7)
+   Habla con servidor.py, que es quien tiene las claves de Gemini y Neo4j.
+   Esta pestaña no usa las fichas cargadas en "Revisar relaciones".
    ===================================================================== */
-function alCargarFichas() { /* paso 7: preparar la sección de preguntas */ }
-function alSeleccionarProducto(ficha) { /* paso 7: dar contexto a las preguntas */ }
+const API = {
+  conGrafo: "/api/preguntar-con-grafo",
+  sinGrafo: "/api/preguntar-sin-grafo",
+  relaciones: (sku) => `/api/producto/${encodeURIComponent(sku)}/relaciones`,
+};
+const HAY_SERVIDOR = location.protocol === "http:" || location.protocol === "https:";
+
+const consulta = {
+  pregunta: "",        // última pregunta respondida con el grafo
+  productos: [],       // los productos que encontró
+  ocupado: false,
+  skuAbierto: null,    // tarjeta cuyo dibujo se está mostrando
+};
+
+// --- Comunicación con el servidor ---------------------------------------
+async function llamarApi(url, opciones) {
+  let respuesta;
+  try {
+    respuesta = await fetch(url, opciones);
+  } catch {
+    throw new Error("No pude comunicarme con el servidor. ¿Sigue corriendo `python servidor.py`?");
+  }
+  let cuerpo = null;
+  try { cuerpo = await respuesta.json(); } catch { /* la respuesta no era JSON */ }
+  if (!respuesta.ok) {
+    let detalle = cuerpo && cuerpo.detail;
+    if (typeof detalle !== "string") detalle = null; // p. ej. errores de formato de FastAPI (lista)
+    throw new Error(detalle || `El servidor respondió con el error ${respuesta.status}.`);
+  }
+  return cuerpo;
+}
+
+const enviarJson = (url, datos) => llamarApi(url, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(datos),
+});
+
+// --- Mensajes -----------------------------------------------------------
+function mostrarError(id, mensaje) {
+  const caja = $(id);
+  caja.textContent = mensaje;
+  caja.hidden = !mensaje;
+}
+
+function ocupado(si, mensaje = "") {
+  consulta.ocupado = si;
+  $("btn-preguntar").disabled = si;
+  $("btn-comparar").disabled = si;
+  $("estado-pregunta").textContent = si ? mensaje : "";
+}
+
+// --- Respuestas y tarjetas ----------------------------------------------
+function pintarRespuesta(clave, resultado) {
+  $(`respuesta-${clave}`).textContent = resultado.respuesta;
+  $(`contexto-${clave}`).textContent = resultado.contexto;
+}
+
+function pintarTarjetas(productos) {
+  const lista = $("tarjetas");
+  lista.replaceChildren();
+  const el = (etiqueta, clase, texto) =>
+    Object.assign(document.createElement(etiqueta), { className: clase, textContent: texto });
+
+  for (const p of productos) {
+    const li = document.createElement("li");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    boton.className = "tarjeta" + (p.es_replica ? " replica" : "");
+    boton.dataset.sku = p.sku;
+
+    const cabecera = el("div", "cabecera", "");
+    cabecera.append(el("span", "sku", p.sku));
+    if (p.es_replica) cabecera.append(el("span", "insignia", "RÉPLICA"));
+
+    boton.append(
+      cabecera,
+      el("span", "nombre-prod", p.nombre ?? ""),
+      el("span", "precio", vacio(p.precio) ? "Precio no disponible" : formatoPrecio(p.precio)),
+      el("span", "meta", `${p.marca ?? "Sin marca"} · ${p.categoria ?? "sin categoría"} · parecido ${Number(p.score).toFixed(2)}`),
+    );
+    if (p.es_replica && p.copia_linea) {
+      boton.append(el("span", "meta", `Imita: ${p.copia_linea}${p.copia_marca ? ` (${p.copia_marca})` : ""}`));
+    }
+    boton.addEventListener("click", () => abrirRelaciones(p.sku));
+    li.append(boton);
+    lista.append(li);
+  }
+}
+
+// --- Acciones -----------------------------------------------------------
+async function preguntar(texto) {
+  texto = texto.trim();
+  mostrarError("error-pregunta", "");
+  if (!texto) {
+    mostrarError("error-pregunta", "Escribe una pregunta antes de enviar.");
+    return;
+  }
+  if (consulta.ocupado) return;
+
+  // Nueva pregunta: se esconde lo anterior para no mezclar resultados de preguntas distintas.
+  for (const id of ["seccion-respuestas", "seccion-productos", "seccion-grafo-neo4j", "caja-sin"]) $(id).hidden = true;
+  mostrarError("error-comparar", "");
+  $("estado-comparar").textContent = "";
+  consulta.skuAbierto = null;
+
+  ocupado(true, "Buscando productos parecidos en el grafo y consultando a Gemini…");
+  try {
+    const r = await enviarJson(API.conGrafo, { pregunta: texto });
+    consulta.pregunta = texto;
+    consulta.productos = r.productos;
+    pintarRespuesta("con", r);
+    pintarTarjetas(r.productos);
+    $("seccion-respuestas").hidden = false;
+    $("seccion-productos").hidden = false;
+  } catch (e) {
+    mostrarError("error-pregunta", e.message);
+  } finally {
+    ocupado(false);
+  }
+}
+
+async function compararSinGrafo() {
+  if (consulta.ocupado || !consulta.pregunta) return;
+  mostrarError("error-comparar", "");
+  ocupado(true);
+  $("estado-comparar").textContent = "Preguntándole a Gemini sin el grafo…";
+  try {
+    // Se le pasan los mismos productos que encontró la consulta con grafo, para comparar en igualdad.
+    const r = await enviarJson(API.sinGrafo, {
+      pregunta: consulta.pregunta,
+      skus: consulta.productos.map((p) => p.sku),
+    });
+    pintarRespuesta("sin", r);
+    $("caja-sin").hidden = false;
+    $("caja-sin").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } catch (e) {
+    mostrarError("error-comparar", e.message);
+  } finally {
+    ocupado(false);
+    $("estado-comparar").textContent = "";
+  }
+}
+
+async function abrirRelaciones(sku) {
+  consulta.skuAbierto = sku;
+  document.querySelectorAll(".tarjeta").forEach((t) => t.classList.toggle("activa", t.dataset.sku === sku));
+  $("seccion-grafo-neo4j").hidden = false;
+  $("titulo-grafo-neo4j").textContent = `Relaciones en Neo4j: ${sku}`;
+  mostrarError("error-relaciones", "");
+  try {
+    const r = await llamarApi(API.relaciones(sku));
+    if (consulta.skuAbierto !== sku) return; // el usuario ya hizo clic en otra tarjeta
+    dibujarGrafo($("lienzo-neo4j"), r.producto, r);
+    $("seccion-grafo-neo4j").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  } catch (e) {
+    if (consulta.skuAbierto !== sku) return;
+    $("lienzo-neo4j").replaceChildren();
+    mostrarError("error-relaciones", e.message);
+  }
+}
+
+// --- Pestañas -----------------------------------------------------------
+const PESTANAS = ["revisar", "preguntar"];
+
+function mostrarPestana(nombre, enfocar = false) {
+  for (const n of PESTANAS) {
+    const activa = n === nombre;
+    $(`panel-${n}`).hidden = !activa;
+    const boton = $(`pestana-${n}`);
+    boton.classList.toggle("activa", activa);
+    boton.setAttribute("aria-selected", String(activa));
+    boton.tabIndex = activa ? 0 : -1;
+    if (activa && enfocar) boton.focus();
+  }
+  if (nombre === "preguntar" && HAY_SERVIDOR) $("pregunta").focus();
+}
+
+function prepararPestanaPreguntar() {
+  if (HAY_SERVIDOR) return;
+  // Abierta con doble clic (file://): no hay servidor al que preguntarle.
+  $("aviso-servidor").hidden = false;
+  for (const e of [$("pregunta"), $("btn-preguntar"), ...document.querySelectorAll(".ejemplo")]) e.disabled = true;
+  $("btn-comparar").disabled = true;
+}
 
 /* =====================================================================
    9. EVENTOS
@@ -597,6 +913,29 @@ $("buscador").addEventListener("keydown", (e) => {
     seleccionarProducto(estado.coincidencias[estado.activo].sku);
   }
 });
+
+// Pestañas (con flechas izquierda/derecha del teclado)
+PESTANAS.forEach((nombre, i) => {
+  const boton = $(`pestana-${nombre}`);
+  boton.addEventListener("click", () => mostrarPestana(nombre));
+  boton.addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+    const paso = e.key === "ArrowRight" ? 1 : -1;
+    mostrarPestana(PESTANAS[(i + paso + PESTANAS.length) % PESTANAS.length], true);
+  });
+});
+
+// Preguntar al grafo
+$("form-pregunta").addEventListener("submit", (e) => {
+  e.preventDefault();
+  preguntar($("pregunta").value);
+});
+document.querySelectorAll(".ejemplo").forEach((b) => b.addEventListener("click", () => {
+  $("pregunta").value = b.textContent;
+  preguntar(b.textContent);
+}));
+$("btn-comparar").addEventListener("click", compararSinGrafo);
+prepararPestanaPreguntar();
 </script>
 </body>
 </html>

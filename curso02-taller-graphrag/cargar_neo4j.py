@@ -24,45 +24,19 @@ Uso (desde curso02-taller-graphrag/, con el .venv activado):
 
 import argparse
 import json
-import os
 import sys
-import time
-from pathlib import Path
 from typing import Optional
 
-import certifi
-from dotenv import load_dotenv
 from google import genai
-from google.genai import errors, types
-from neo4j import GraphDatabase, TrustCustomCAs
-from neo4j.exceptions import AuthError, ServiceUnavailable
+from neo4j.exceptions import ServiceUnavailable
 
-BASE = Path(__file__).resolve().parent
+from comun import (AYUDA_CONEXION, BASE, DIMENSIONES, NOMBRE_INDICE, RELACIONES, ErrorConexion,
+                   ErrorConfiguracion, cargar_env, conectar, formato_precio, pedir_embedding)
+
 FICHAS = BASE / "data" / "fichas.jsonl"
 PENDIENTES = BASE / "data" / "pendientes_neo4j.json"
 
-DIMENSIONES = 768
-NOMBRE_INDICE = "producto_embedding"
-
-INTENTOS = 4  # intentos por producto para el embedding
-ESPERA_BASE = 5  # segundos; se duplica en cada reintento (5, 10, 20)
 FALLOS_SEGUIDOS_MAX = 5  # si fallan tantos productos seguidos, se corta la corrida
-CODIGOS_REINTENTABLES = {408, 429, 500, 502, 503, 504}
-
-RELACIONES = "DE_MARCA|EN_CATEGORIA|DE_LINEA|IMITA|TIENE"
-
-# Esquemas "seguros" de Neo4j -> esquema equivalente sin verificación incluida en la URI.
-# Con certifi hay que pasar los certificados por separado, y eso solo se permite con estos.
-ESQUEMAS_SEGUROS = {"neo4j+s": "neo4j", "bolt+s": "bolt"}
-
-AYUDA_CONEXION = """\
-No pude conectarme a Neo4j. Causas posibles:
-  1. Python sin certificados raíz (pasa con el Python de python.org en Mac): el driver falla con
-     «Unable to retrieve routing information». Este programa ya usa los certificados de certifi;
-     si ves este mensaje, confirma que certifi está instalado (pip install -r requirements.txt).
-  2. La instancia de Aura gratis está pausada (se pausa por inactividad): reanúdala en la consola de Aura.
-  3. NEO4J_URI mal copiado (debe verse como neo4j+s://xxxxxxxx.databases.neo4j.io) o sin internet.
-Detalle técnico: {detalle}"""
 
 
 # ---------------------------------------------------------------------------
@@ -95,10 +69,6 @@ def precio_de(f: dict) -> Optional[int]:
     if precio is None:
         precio = f.get("precio_normal")
     return None if precio is None else int(precio)
-
-
-def formato_precio(n: int) -> str:
-    return "$" + f"{n:,}".replace(",", ".")
 
 
 def construir_texto(f: dict) -> str:
@@ -134,29 +104,6 @@ def leer_fichas() -> list[dict]:
                 ficha = json.loads(linea)
                 por_sku[ficha["sku"]] = ficha  # si un SKU se repite, gana el último
     return list(por_sku.values())
-
-
-# ---------------------------------------------------------------------------
-# Conexión a Neo4j
-# ---------------------------------------------------------------------------
-def conectar(uri: str, usuario: str, clave: str):
-    """Abre el driver usando los certificados raíz de certifi para neo4j+s:// / bolt+s://."""
-    esquema, _, resto = uri.partition("://")
-    opciones: dict = {}
-    if esquema in ESQUEMAS_SEGUROS:
-        uri = f"{ESQUEMAS_SEGUROS[esquema]}://{resto}"
-        opciones = {"encrypted": True, "trusted_certificates": TrustCustomCAs(certifi.where())}
-    driver = GraphDatabase.driver(uri, auth=(usuario, clave), **opciones)
-    try:
-        driver.verify_connectivity()
-    except AuthError:
-        driver.close()
-        sys.exit("Neo4j rechazó el usuario o la contraseña. En instancias nuevas de Aura el usuario "
-                 "NO es «neo4j»: es el ID de la instancia (revisa el .txt que descargaste).")
-    except Exception as e:  # ServiceUnavailable, errores de SSL, DNS, etc.
-        driver.close()
-        sys.exit(AYUDA_CONEXION.format(detalle=f"{type(e).__name__}: {str(e)[:300]}"))
-    return driver
 
 
 # ---------------------------------------------------------------------------
@@ -218,43 +165,6 @@ def preparar_esquema(driver) -> None:
             sesion.run(sentencia).consume()
         preparar_indice(sesion)
         sesion.run("CALL db.awaitIndexes(120)").consume()
-
-
-# ---------------------------------------------------------------------------
-# Embeddings con Gemini
-# ---------------------------------------------------------------------------
-def pedir_embedding(cliente: genai.Client, modelo: str, texto: str) -> list[float]:
-    """Calcula el embedding con reintentos ante límite de uso o errores del servidor."""
-    ultimo_error: Exception | None = None
-    for intento in range(1, INTENTOS + 1):
-        try:
-            respuesta = cliente.models.embed_content(
-                model=modelo,
-                contents=texto,
-                config=types.EmbedContentConfig(
-                    task_type="RETRIEVAL_DOCUMENT",
-                    output_dimensionality=DIMENSIONES,
-                ),
-            )
-            vector = list(respuesta.embeddings[0].values)
-            break
-        except errors.APIError as e:
-            ultimo_error = e
-            if e.code not in CODIGOS_REINTENTABLES:
-                raise  # clave, modelo o petición mal: reintentar no ayuda
-        except Exception as e:  # red caída, respuesta vacía, etc.
-            ultimo_error = e
-        if intento == INTENTOS:
-            raise ultimo_error  # type: ignore[misc]
-        espera = ESPERA_BASE * 2 ** (intento - 1)
-        print(f"    embedding: intento {intento}/{INTENTOS} falló ({type(ultimo_error).__name__}); "
-              f"espero {espera}s…")
-        time.sleep(espera)
-
-    if len(vector) != DIMENSIONES:
-        sys.exit(f"El modelo de embeddings devolvió {len(vector)} dimensiones y el índice es de "
-                 f"{DIMENSIONES}. Revisa MODELO_EMBEDDINGS en el .env.")
-    return vector
 
 
 # ---------------------------------------------------------------------------
@@ -382,19 +292,22 @@ def main() -> None:
     parser.add_argument("--recalcular", action="store_true", help="recalcular todos los embeddings")
     args = parser.parse_args()
 
-    load_dotenv(BASE / ".env")
-    faltan = [v for v in ["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "GOOGLE_API_KEY",
-                          "MODELO_EMBEDDINGS"] if not os.getenv(v)]
-    if faltan:
-        sys.exit(f"Faltan variables en el .env: {', '.join(faltan)} (ver .env.example).")
-    modelo_emb = os.environ["MODELO_EMBEDDINGS"]
+    try:
+        config = cargar_env(["NEO4J_URI", "NEO4J_USERNAME", "NEO4J_PASSWORD", "GOOGLE_API_KEY",
+                             "MODELO_EMBEDDINGS"])
+    except ErrorConfiguracion as e:
+        sys.exit(str(e))
+    modelo_emb = config["MODELO_EMBEDDINGS"]
 
     fichas = leer_fichas()
     if args.limit is not None:
         fichas = fichas[: args.limit]
 
-    driver = conectar(os.environ["NEO4J_URI"], os.environ["NEO4J_USERNAME"], os.environ["NEO4J_PASSWORD"])
-    cliente = genai.Client(api_key=os.environ["GOOGLE_API_KEY"])
+    try:
+        driver = conectar(config["NEO4J_URI"], config["NEO4J_USERNAME"], config["NEO4J_PASSWORD"])
+    except ErrorConexion as e:
+        sys.exit(str(e))
+    cliente = genai.Client(api_key=config["GOOGLE_API_KEY"])
 
     pendientes: list[dict] = []
     calculados = reutilizados = 0
@@ -414,6 +327,8 @@ def main() -> None:
                     embedding = pedir_embedding(cliente, modelo_emb, texto)
                 with driver.session() as sesion:
                     sesion.execute_write(subir_producto, ficha, texto, embedding)
+            except ErrorConfiguracion as e:  # p. ej. dimensiones distintas al índice: no tiene sentido seguir
+                raise SystemExit(str(e))
             except ServiceUnavailable as e:
                 raise SystemExit(AYUDA_CONEXION.format(detalle=f"{type(e).__name__}: {str(e)[:300]}"))
             except Exception as e:  # límite de uso agotado tras reintentos, error de Neo4j, etc.
