@@ -1,0 +1,556 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Revisar fichas</title>
+<style>
+  /* ===== Colores (claro / oscuro) ===== */
+  :root {
+    --fondo: #f6f7f9;
+    --panel: #ffffff;
+    --texto: #1c2430;
+    --texto-suave: #5b6675;
+    --borde: #d5dae1;
+    --acento: #2a5bd7;
+    --rojo: #c62828;
+    --rojo-fondo: #fdecec;
+    --marca: #2a5bd7;      --marca-fondo: #e8eefc;
+    --categoria: #1b7f5c;  --categoria-fondo: #e3f4ed;
+    --linea: #7a3fb5;      --linea-fondo: #f0e8f8;
+    --caracteristica: #9a6400; --caracteristica-fondo: #fbf1de;
+    --producto: #1c2430;   --producto-fondo: #eef0f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #12161c;
+      --panel: #1b212a;
+      --texto: #e6e9ee;
+      --texto-suave: #98a3b3;
+      --borde: #34404f;
+      --acento: #7ea2ff;
+      --rojo: #ff6b6b;
+      --rojo-fondo: #3a1f22;
+      --marca: #7ea2ff;      --marca-fondo: #1f2c4d;
+      --categoria: #52c79d;  --categoria-fondo: #17352b;
+      --linea: #c39bf0;      --linea-fondo: #2f2140;
+      --caracteristica: #f0b84d; --caracteristica-fondo: #3a2e16;
+      --producto: #e6e9ee;   --producto-fondo: #252d38;
+    }
+  }
+
+  /* ===== Base ===== */
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; padding: 0 16px 48px;
+    background: var(--fondo); color: var(--texto);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 1040px; margin: 0 auto; }
+  header { padding: 24px 0 8px; }
+  h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  h2 { margin: 0 0 8px; font-size: 1rem; }
+  header p { margin: 0; color: var(--texto-suave); }
+  section {
+    background: var(--panel); border: 1px solid var(--borde);
+    border-radius: 10px; padding: 16px; margin-top: 16px;
+  }
+  [hidden] { display: none !important; }
+
+  /* ===== Carga y buscador ===== */
+  .fila { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+  .boton {
+    display: inline-block; padding: 8px 14px; border-radius: 8px;
+    background: var(--acento); color: #fff; font-weight: 600; cursor: pointer;
+  }
+  .boton:focus-within { outline: 2px solid var(--texto); outline-offset: 2px; }
+  #archivo { position: absolute; width: 1px; height: 1px; opacity: 0; }
+  .suave { color: var(--texto-suave); }
+  .error { color: var(--rojo); }
+  label.campo { display: block; font-weight: 600; margin-bottom: 6px; }
+  #buscador {
+    width: 100%; padding: 9px 12px; font: inherit; color: var(--texto);
+    background: var(--fondo); border: 1px solid var(--borde); border-radius: 8px;
+  }
+  #buscador:disabled { opacity: .5; cursor: not-allowed; }
+  #resultados {
+    list-style: none; margin: 8px 0 0; padding: 0;
+    max-height: 240px; overflow-y: auto; border-radius: 8px;
+  }
+  #resultados li + li { border-top: 1px solid var(--borde); }
+  #resultados button {
+    display: flex; align-items: baseline; gap: 10px; width: 100%;
+    padding: 7px 10px; text-align: left; font: inherit; color: var(--texto);
+    background: transparent; border: 0; cursor: pointer;
+  }
+  #resultados button:hover, #resultados button:focus-visible { background: var(--producto-fondo); }
+  #resultados li.activo button { background: var(--marca-fondo); }
+  .sku { font-family: ui-monospace, monospace; font-size: .85rem; color: var(--texto-suave); flex: none; }
+  .nombre-res { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .insignia {
+    flex: none; font-size: .7rem; font-weight: 700; padding: 1px 6px; border-radius: 99px;
+    color: var(--rojo); background: var(--rojo-fondo);
+  }
+
+  /* ===== Dibujo ===== */
+  #lienzo { display: block; width: 100%; height: auto; }
+  .arista { fill: none; stroke: var(--texto-suave); stroke-width: 1.6; }
+  .arista.roja { stroke: var(--rojo); stroke-width: 2.2; }
+  .punta { fill: var(--texto-suave); }
+  .punta.roja { fill: var(--rojo); }
+  .etiqueta-arista {
+    font-size: 10.5px; fill: var(--texto-suave); text-anchor: middle;
+    paint-order: stroke; stroke: var(--panel); stroke-width: 4px; stroke-linejoin: round;
+  }
+  .etiqueta-arista.roja { fill: var(--rojo); font-weight: 700; }
+  .nodo rect { stroke-width: 1.6; }
+  .nodo .tipo { font-size: 9.5px; font-weight: 700; letter-spacing: .06em; opacity: .85; }
+  .nodo .valor { font-size: 13px; font-weight: 600; }
+  .nodo.producto rect { fill: var(--producto-fondo); stroke: var(--producto); stroke-width: 2.4; }
+  .nodo.producto text { fill: var(--producto); }
+  .nodo.marca rect { fill: var(--marca-fondo); stroke: var(--marca); }
+  .nodo.marca text { fill: var(--marca); }
+  .nodo.categoria rect { fill: var(--categoria-fondo); stroke: var(--categoria); }
+  .nodo.categoria text { fill: var(--categoria); }
+  .nodo.linea rect { fill: var(--linea-fondo); stroke: var(--linea); }
+  .nodo.linea text { fill: var(--linea); }
+  .nodo.caracteristica rect { fill: var(--caracteristica-fondo); stroke: var(--caracteristica); }
+  .nodo.caracteristica text { fill: var(--caracteristica); }
+  .nodo.copia rect { fill: var(--rojo-fondo); stroke: var(--rojo); stroke-width: 2.2; }
+  .nodo.copia text { fill: var(--rojo); }
+  .nodo.producto.replica rect { stroke: var(--rojo); }
+  .sello { font-size: 10px; font-weight: 800; fill: var(--rojo); letter-spacing: .08em; }
+  .leyenda { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-top: 8px; font-size: .8rem; color: var(--texto-suave); }
+  .leyenda i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+
+  /* ===== Detalle ===== */
+  .nombre-original {
+    margin: 0 0 12px; padding: 12px 14px; font-size: 1.1rem; font-weight: 600;
+    background: var(--producto-fondo); border-left: 4px solid var(--acento); border-radius: 6px;
+    overflow-wrap: anywhere;
+  }
+  .aviso { margin: 0 0 12px; padding: 8px 12px; border-radius: 6px; background: var(--rojo-fondo); color: var(--rojo); font-weight: 600; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { width: 200px; font-weight: 600; color: var(--texto-suave); font-family: ui-monospace, monospace; font-size: .85rem; }
+  .nulo { color: var(--texto-suave); font-style: italic; }
+  .si-replica { color: var(--rojo); font-weight: 700; }
+
+  @media (max-width: 560px) { th { width: 120px; } }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Revisar fichas de Gemini</h1>
+    <p>Elige <code>data/fichas.jsonl</code>, busca un producto y compara su dibujo con el nombre original.</p>
+  </header>
+
+  <!-- 1. Cargar archivo -->
+  <section id="seccion-carga" aria-label="Cargar archivo">
+    <div class="fila">
+      <label class="boton" for="archivo">Elegir fichas.jsonl</label>
+      <input type="file" id="archivo" accept=".jsonl,.json,.txt">
+      <span id="estado-carga" class="suave" role="status">Ningún archivo cargado.</span>
+    </div>
+  </section>
+
+  <!-- 2. Buscador -->
+  <section id="seccion-busqueda" aria-label="Buscar producto">
+    <label class="campo" for="buscador">Buscar producto por nombre o SKU</label>
+    <input id="buscador" type="search" placeholder="Primero elige el archivo…" autocomplete="off" disabled>
+    <div id="conteo" class="suave" role="status"></div>
+    <ul id="resultados" aria-label="Resultados"></ul>
+  </section>
+
+  <!-- 3. Dibujo de relaciones -->
+  <section id="seccion-grafo" aria-label="Relaciones del producto" hidden>
+    <h2>Relaciones extraídas</h2>
+    <svg id="lienzo" viewBox="0 0 960 580" role="img" aria-label="Producto y sus relaciones"></svg>
+    <div class="leyenda">
+      <span><i style="background:var(--marca)"></i>marca</span>
+      <span><i style="background:var(--categoria)"></i>categoría</span>
+      <span><i style="background:var(--linea)"></i>línea</span>
+      <span><i style="background:var(--caracteristica)"></i>características</span>
+      <span><i style="background:var(--rojo)"></i>lo que copia (réplica)</span>
+    </div>
+  </section>
+
+  <!-- 4. Nombre original y ficha completa -->
+  <section id="seccion-detalle" aria-label="Nombre original y ficha" hidden>
+    <h2>Nombre original (tal como venía en el Excel)</h2>
+    <p id="nombre-original" class="nombre-original"></p>
+    <p id="aviso" class="aviso" hidden></p>
+    <h2>Ficha completa</h2>
+    <table id="tabla-ficha"></table>
+  </section>
+
+  <!-- 5. PASO 7: aquí irá la sección "Preguntarle al grafo" (GraphRAG).
+       Agregar un <section id="seccion-preguntas"> aquí y su código en el bloque
+       "PASO 7" del <script>. -->
+</main>
+
+<script>
+"use strict";
+
+/* =====================================================================
+   1. ESTADO
+   ===================================================================== */
+const estado = {
+  fichas: [],          // todas las fichas cargadas desde el .jsonl
+  seleccionada: null,  // ficha que se está mirando
+  coincidencias: [],   // resultado actual del buscador
+  activo: 0,           // posición resaltada en la lista de resultados
+};
+
+const MAX_RESULTADOS = 50;
+
+// Campos de la ficha, en el orden en que se muestran en la tabla de detalle.
+const CAMPOS_FICHA = [
+  "sku", "nombre", "categoria", "precio_normal", "precio_oferta",
+  "marca", "linea", "es_replica", "copia_marca", "copia_linea",
+  "almacenamiento_gb", "ram_gb", "pantalla_pulgadas", "sistema",
+];
+
+/* =====================================================================
+   2. UTILIDADES
+   ===================================================================== */
+const $ = (id) => document.getElementById(id);
+const NS_SVG = "http://www.w3.org/2000/svg";
+
+const vacio = (v) => v === null || v === undefined || v === "";
+
+// Minúsculas y sin tildes, para que "camara" encuentre "Cámara".
+const normalizar = (s) =>
+  String(s ?? "").normalize("NFD").replace(/\p{M}/gu, "").toLowerCase();
+
+// Crea un elemento SVG con atributos y texto opcional (textContent: nunca inyecta HTML).
+function svg(etiqueta, atributos = {}, texto = null) {
+  const e = document.createElementNS(NS_SVG, etiqueta);
+  for (const [k, v] of Object.entries(atributos)) e.setAttribute(k, v);
+  if (texto !== null) e.textContent = texto;
+  return e;
+}
+
+// Parte un texto en hasta `maxLineas` líneas de ~`ancho` caracteres (con "…" si sobra).
+function envolver(texto, ancho = 26, maxLineas = 2) {
+  const palabras = String(texto).split(/\s+/).filter(Boolean);
+  const lineas = [];
+  let actual = "";
+  for (const p of palabras) {
+    if (actual && (actual + " " + p).length > ancho) {
+      lineas.push(actual);
+      actual = p;
+    } else {
+      actual = actual ? actual + " " + p : p;
+    }
+  }
+  if (actual) lineas.push(actual);
+  if (lineas.length > maxLineas) {
+    lineas.length = maxLineas;
+    lineas[maxLineas - 1] = lineas[maxLineas - 1].slice(0, ancho - 1).replace(/\s+$/, "") + "…";
+  }
+  return lineas.map((l) => (l.length > ancho + 4 ? l.slice(0, ancho + 3) + "…" : l));
+}
+
+const formatoPrecio = (n) =>
+  vacio(n) ? null : "$" + Number(n).toLocaleString("es-CL");
+
+/* =====================================================================
+   3. CARGA DEL ARCHIVO (.jsonl: una ficha JSON por línea)
+   ===================================================================== */
+function parsearJsonl(texto) {
+  const fichas = [];
+  const errores = [];
+  texto.split(/\r?\n/).forEach((linea, i) => {
+    if (!linea.trim()) return;
+    try {
+      const f = JSON.parse(linea);
+      if (f && typeof f === "object" && !vacio(f.sku)) fichas.push(f);
+      else errores.push(i + 1);
+    } catch {
+      errores.push(i + 1);
+    }
+  });
+  return { fichas, errores };
+}
+
+async function cargarArchivo(archivo) {
+  const estadoCarga = $("estado-carga");
+  estadoCarga.classList.remove("error");
+  try {
+    const { fichas, errores } = parsearJsonl(await archivo.text());
+    if (!fichas.length) throw new Error("no encontré fichas válidas");
+    estado.fichas = fichas;
+    estado.seleccionada = null;
+    $("seccion-grafo").hidden = true;
+    $("seccion-detalle").hidden = true;
+
+    let msg = `${archivo.name}: ${fichas.length} fichas cargadas.`;
+    if (errores.length) {
+      msg += ` Ignoré ${errores.length} línea(s) inválida(s) (ej. línea ${errores[0]}).`;
+    }
+    estadoCarga.textContent = msg;
+
+    const buscador = $("buscador");
+    buscador.disabled = false;
+    buscador.placeholder = "Escribe un nombre o un SKU (ej. P0005)…";
+    buscador.value = "";
+    buscador.focus();
+    actualizarBusqueda();
+    alCargarFichas(); // gancho para el paso 7
+  } catch (e) {
+    estadoCarga.textContent = `No pude leer ${archivo.name}: ${e.message}.`;
+    estadoCarga.classList.add("error");
+  }
+}
+
+/* =====================================================================
+   4. BUSCADOR
+   ===================================================================== */
+function buscar(consulta) {
+  const q = normalizar(consulta).trim();
+  if (!q) return estado.fichas;
+  return estado.fichas.filter(
+    (f) => normalizar(f.sku).includes(q) || normalizar(f.nombre).includes(q)
+  );
+}
+
+function actualizarBusqueda() {
+  estado.coincidencias = buscar($("buscador").value);
+  estado.activo = 0;
+  pintarResultados();
+}
+
+function pintarResultados() {
+  const lista = $("resultados");
+  lista.replaceChildren();
+  const total = estado.coincidencias.length;
+  const mostrados = estado.coincidencias.slice(0, MAX_RESULTADOS);
+
+  $("conteo").textContent = estado.fichas.length
+    ? total > MAX_RESULTADOS
+      ? `${total} coincidencias (muestro las primeras ${MAX_RESULTADOS}; escribe más para afinar).`
+      : `${total} coincidencia(s).`
+    : "";
+
+  mostrados.forEach((f, i) => {
+    const li = document.createElement("li");
+    if (i === estado.activo) li.classList.add("activo");
+    const boton = document.createElement("button");
+    boton.type = "button";
+    const sku = Object.assign(document.createElement("span"), { className: "sku", textContent: f.sku });
+    const nombre = Object.assign(document.createElement("span"), { className: "nombre-res", textContent: f.nombre ?? "" });
+    boton.append(sku, nombre);
+    if (f.es_replica) {
+      boton.append(Object.assign(document.createElement("span"), { className: "insignia", textContent: "RÉPLICA" }));
+    }
+    boton.addEventListener("click", () => seleccionarProducto(f.sku));
+    li.append(boton);
+    lista.append(li);
+  });
+}
+
+function seleccionarProducto(sku) {
+  const ficha = estado.fichas.find((f) => f.sku === sku);
+  if (!ficha) return;
+  estado.seleccionada = ficha;
+  dibujarGrafo(ficha);
+  mostrarDetalle(ficha);
+  $("seccion-grafo").hidden = false;
+  $("seccion-detalle").hidden = false;
+  $("seccion-grafo").scrollIntoView({ behavior: "smooth", block: "nearest" });
+  alSeleccionarProducto(ficha); // gancho para el paso 7
+}
+
+/* =====================================================================
+   5. RELACIONES DE UNA FICHA
+   Función pura: convierte una ficha en la lista de nodos que se dibujan.
+   Los campos en null no generan relación. En el paso 7 se puede reutilizar
+   para construir el grafo completo.
+   ===================================================================== */
+function fichaARelaciones(f) {
+  const rels = [];
+  const agregar = (tipo, etiqueta, valor, relacion, roja = false) => {
+    if (!vacio(valor)) rels.push({ tipo, etiqueta, valor: String(valor), relacion, roja });
+  };
+
+  agregar("marca", "MARCA", f.marca, "TIENE_MARCA");
+  agregar("categoria", "CATEGORÍA", f.categoria, "ES_DE_CATEGORIA");
+  agregar("linea", "LÍNEA", f.linea, "PERTENECE_A_LINEA");
+  agregar("caracteristica", "ALMACENAMIENTO", vacio(f.almacenamiento_gb) ? null : `${f.almacenamiento_gb} GB`, "TIENE_ALMACENAMIENTO");
+  agregar("caracteristica", "RAM", vacio(f.ram_gb) ? null : `${f.ram_gb} GB`, "TIENE_RAM");
+  agregar("caracteristica", "PANTALLA", vacio(f.pantalla_pulgadas) ? null : `${f.pantalla_pulgadas} pulgadas`, "TIENE_PANTALLA");
+  agregar("caracteristica", "SISTEMA", f.sistema, "USA_SISTEMA");
+  agregar("copia", "COPIA LA MARCA", f.copia_marca, "IMITA_MARCA", true);
+  agregar("copia", "COPIA LA LÍNEA", f.copia_linea, "IMITA_LINEA", true);
+  return rels;
+}
+
+/* =====================================================================
+   6. DIBUJO (SVG propio, sin librerías ni internet)
+   ===================================================================== */
+const LIENZO = { ancho: 960, alto: 580, radioX: 350, radioY: 205 };
+
+// Punto donde un rayo que sale del centro de un rectángulo hacia (haciaX, haciaY) cruza su borde.
+function puntoEnBorde(cx, cy, semiAncho, semiAlto, haciaX, haciaY, holgura = 3) {
+  const dx = haciaX - cx;
+  const dy = haciaY - cy;
+  const t = Math.min(
+    dx === 0 ? Infinity : semiAncho / Math.abs(dx),
+    dy === 0 ? Infinity : semiAlto / Math.abs(dy)
+  );
+  const largo = Math.hypot(dx, dy) || 1;
+  return { x: cx + dx * t + (dx / largo) * holgura, y: cy + dy * t + (dy / largo) * holgura };
+}
+
+// Dibuja un nodo (caja con etiqueta y valor) centrado en (x, y).
+function crearNodo({ x, y, tipoEtiqueta, lineasValor, clase, ancho }) {
+  const alto = 16 + 18 * lineasValor.length + 10;
+  const g = svg("g", { class: `nodo ${clase}` });
+  g.append(svg("rect", { x: x - ancho / 2, y: y - alto / 2, width: ancho, height: alto, rx: 10 }));
+  const yTexto = y - alto / 2 + 16;
+  g.append(svg("text", { class: "tipo", x, y: yTexto, "text-anchor": "middle" }, tipoEtiqueta));
+  lineasValor.forEach((linea, i) => {
+    g.append(svg("text", { class: "valor", x, y: yTexto + 18 * (i + 1), "text-anchor": "middle" }, linea));
+  });
+  return { g, ancho, alto };
+}
+
+function dibujarGrafo(f) {
+  const lienzo = $("lienzo");
+  lienzo.replaceChildren();
+
+  // Puntas de flecha (gris y roja)
+  const defs = svg("defs");
+  for (const roja of [false, true]) {
+    const marcador = svg("marker", {
+      id: roja ? "flecha-roja" : "flecha", viewBox: "0 0 10 10", refX: 9, refY: 5,
+      markerWidth: 8, markerHeight: 8, orient: "auto",
+    });
+    marcador.append(svg("path", { d: "M0 0 L10 5 L0 10 z", class: roja ? "punta roja" : "punta" }));
+    defs.append(marcador);
+  }
+  lienzo.append(defs);
+
+  const cx = LIENZO.ancho / 2;
+  const cy = LIENZO.alto / 2;
+
+  // Nodo central: el producto
+  const centro = crearNodo({
+    x: cx, y: cy, tipoEtiqueta: `PRODUCTO · ${f.sku}`,
+    lineasValor: envolver(f.nombre ?? "(sin nombre)", 30, 2), ancho: 270,
+    clase: "producto" + (f.es_replica ? " replica" : ""),
+  });
+
+  // Nodos de alrededor, repartidos en una elipse empezando por arriba
+  const rels = fichaARelaciones(f);
+  const nodos = rels.map((r, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / rels.length;
+    const x = cx + LIENZO.radioX * Math.cos(ang);
+    const y = cy + LIENZO.radioY * Math.sin(ang);
+    const lineas = envolver(r.valor, 24, 2);
+    const ancho = Math.max(120, Math.max(r.etiqueta.length * 6.8, ...lineas.map((l) => l.length * 7.6)) + 28);
+    return { r, x, y, ...crearNodo({ x, y, tipoEtiqueta: r.etiqueta, lineasValor: lineas, clase: r.tipo, ancho }) };
+  });
+
+  // Flechas primero (quedan debajo de las cajas), luego etiquetas, luego cajas
+  const capaAristas = svg("g");
+  const capaEtiquetas = svg("g");
+  for (const n of nodos) {
+    const ini = puntoEnBorde(cx, cy, 135, centro.alto / 2, n.x, n.y, 2);
+    const fin = puntoEnBorde(n.x, n.y, n.ancho / 2, n.alto / 2, cx, cy, 4);
+    const roja = n.r.roja;
+    capaAristas.append(svg("line", {
+      class: roja ? "arista roja" : "arista",
+      x1: ini.x, y1: ini.y, x2: fin.x, y2: fin.y,
+      "marker-end": `url(#${roja ? "flecha-roja" : "flecha"})`,
+    }));
+    capaEtiquetas.append(svg("text", {
+      class: roja ? "etiqueta-arista roja" : "etiqueta-arista",
+      x: (ini.x + fin.x) / 2, y: (ini.y + fin.y) / 2 + 3,
+    }, n.r.relacion));
+  }
+  lienzo.append(capaAristas, capaEtiquetas, ...nodos.map((n) => n.g), centro.g);
+
+  if (f.es_replica) {
+    lienzo.append(svg("text", { class: "sello", x: cx, y: cy - centro.alto / 2 - 8, "text-anchor": "middle" }, "RÉPLICA"));
+  }
+  if (!nodos.length) {
+    lienzo.append(svg("text", { class: "etiqueta-arista", x: cx, y: cy + 70 }, "Esta ficha no trae ninguna relación (todo en null)."));
+  }
+}
+
+/* =====================================================================
+   7. DETALLE: nombre original y ficha completa
+   ===================================================================== */
+function celdaValor(campo, valor) {
+  const td = document.createElement("td");
+  if (vacio(valor)) {
+    td.className = "nulo";
+    td.textContent = "null";
+  } else if (campo === "es_replica") {
+    td.textContent = valor ? "sí" : "no";
+    if (valor) td.className = "si-replica";
+  } else if (campo === "precio_normal" || campo === "precio_oferta") {
+    td.textContent = formatoPrecio(valor);
+  } else {
+    td.textContent = String(valor);
+  }
+  return td;
+}
+
+function mostrarDetalle(f) {
+  $("nombre-original").textContent = f.nombre ?? "(sin nombre)";
+
+  const aviso = $("aviso");
+  const incoherente = f.es_replica && vacio(f.copia_marca) && vacio(f.copia_linea);
+  aviso.hidden = !incoherente;
+  aviso.textContent = incoherente ? "Marcada como réplica, pero sin dato de qué marca ni línea copia." : "";
+
+  const tabla = $("tabla-ficha");
+  tabla.replaceChildren();
+  for (const campo of CAMPOS_FICHA) {
+    if (!(campo in f) && campo === "categoria") continue; // fichas viejas sin categoría
+    const tr = document.createElement("tr");
+    tr.append(Object.assign(document.createElement("th"), { textContent: campo }), celdaValor(campo, f[campo]));
+    tabla.append(tr);
+  }
+}
+
+/* =====================================================================
+   8. PASO 7 (pendiente): PREGUNTARLE AL GRAFO (GraphRAG)
+   Los ganchos de abajo ya se llaman desde la carga y la selección.
+   Aquí se puede leer `estado.fichas` / `estado.seleccionada`, y reutilizar
+   `fichaARelaciones(ficha)` para armar nodos y relaciones.
+   ===================================================================== */
+function alCargarFichas() { /* paso 7: preparar la sección de preguntas */ }
+function alSeleccionarProducto(ficha) { /* paso 7: dar contexto a las preguntas */ }
+
+/* =====================================================================
+   9. EVENTOS
+   ===================================================================== */
+$("archivo").addEventListener("change", (e) => {
+  const archivo = e.target.files[0];
+  if (archivo) cargarArchivo(archivo);
+  e.target.value = ""; // permite volver a elegir el mismo archivo tras regenerarlo
+});
+
+$("buscador").addEventListener("input", actualizarBusqueda);
+
+$("buscador").addEventListener("keydown", (e) => {
+  const n = Math.min(estado.coincidencias.length, MAX_RESULTADOS);
+  if (!n) return;
+  if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+    e.preventDefault();
+    estado.activo = (estado.activo + (e.key === "ArrowDown" ? 1 : -1) + n) % n;
+    pintarResultados();
+    $("resultados").children[estado.activo]?.scrollIntoView({ block: "nearest" });
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    seleccionarProducto(estado.coincidencias[estado.activo].sku);
+  }
+});
+</script>
+</body>
+</html>
