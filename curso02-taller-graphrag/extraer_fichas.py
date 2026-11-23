@@ -38,6 +38,8 @@ ESPERA_BASE = 5  # segundos; se duplica en cada reintento (5, 10, 20)
 FALLOS_SEGUIDOS_MAX = 5  # si fallan tantas filas seguidas, se corta la corrida
 CODIGOS_REINTENTABLES = {408, 429, 500, 502, 503, 504}
 
+CATEGORIAS = {"Celulares", "Televisores"}  # únicos valores válidos de la ficha
+
 COLUMNAS_EXCEL = ["SKU", "Nombre", "Marca", "Categoría", "Precio normal", "Precio oferta"]
 
 INSTRUCCIONES = """\
@@ -106,6 +108,11 @@ def cargar_excel() -> pd.DataFrame:
     faltan = [c for c in COLUMNAS_EXCEL if c not in df.columns]
     if faltan:
         sys.exit(f"Al Excel le faltan columnas: {faltan}. Tiene: {list(df.columns)}")
+    # La categoría de la ficha sale del Excel (no se le pide a Gemini): solo dos valores válidos.
+    invalidas = df.loc[~df["Categoría"].isin(CATEGORIAS), ["SKU", "Categoría"]]
+    if not invalidas.empty:
+        sys.exit(f"Categorías fuera de {sorted(CATEGORIAS)} en el Excel:\n"
+                 f"{invalidas.head(10).to_string(index=False)}")
     return df
 
 
@@ -182,6 +189,7 @@ def armar_ficha(fila: dict, g: Ficha) -> dict:
         "nombre": fila["nombre"],
         "precio_normal": fila["precio_normal"],
         "precio_oferta": fila["precio_oferta"],
+        "categoria": fila["categoria"],  # viene del Excel, no de Gemini
         "marca": marca,
         "linea": g.linea,
         "es_replica": g.es_replica,
