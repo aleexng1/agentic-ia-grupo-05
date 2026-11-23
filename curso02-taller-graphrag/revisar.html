@@ -365,26 +365,66 @@ function seleccionarProducto(sku) {
 
 /* =====================================================================
    5. RELACIONES DE UNA FICHA
-   Función pura: convierte una ficha en la lista de nodos que se dibujan.
-   Los campos en null no generan relación. En el paso 7 se puede reutilizar
-   para construir el grafo completo.
+   Función pura: convierte una ficha en el mismo grafo que sube cargar_neo4j.py:
+     (Producto)-[:DE_MARCA]->(Marca)        (Producto)-[:EN_CATEGORIA]->(Categoria)
+     (Producto)-[:DE_LINEA]->(Linea)        (Linea)-[:DE_MARCA]->(Marca)
+     (Producto)-[:TIENE]->(Caracteristica)
+     (Producto)-[:IMITA]->(Linea copiada)   (Linea copiada)-[:DE_MARCA]->(Marca copiada)
+   Los campos en null no generan nodo ni flecha. Devuelve:
+     nodos:   todos menos el producto (que tiene el id "producto")
+     aristas: { desde, hasta, relacion, roja }
+   Se puede reutilizar en el paso 7.
    ===================================================================== */
-function fichaARelaciones(f) {
-  const rels = [];
-  const agregar = (tipo, etiqueta, valor, relacion, roja = false) => {
-    if (!vacio(valor)) rels.push({ tipo, etiqueta, valor: String(valor), relacion, roja });
-  };
+const CARACTERISTICAS = [
+  // Mismos valores de texto que cargar_neo4j.py, para que un nodo compartido se vea igual aquí.
+  { tipo: "almacenamiento", campo: "almacenamiento_gb", formato: (v) => `${Number(v)} GB` },
+  { tipo: "ram", campo: "ram_gb", formato: (v) => `${Number(v)} GB` },
+  { tipo: "pantalla", campo: "pantalla_pulgadas", formato: (v) => `${Number.isInteger(Number(v)) ? Number(v).toFixed(1) : Number(v)}"` },
+  { tipo: "sistema", campo: "sistema", formato: (v) => String(v).trim() },
+];
 
-  agregar("marca", "MARCA", f.marca, "TIENE_MARCA");
-  agregar("categoria", "CATEGORÍA", f.categoria, "ES_DE_CATEGORIA");
-  agregar("linea", "LÍNEA", f.linea, "PERTENECE_A_LINEA");
-  agregar("caracteristica", "ALMACENAMIENTO", vacio(f.almacenamiento_gb) ? null : `${f.almacenamiento_gb} GB`, "TIENE_ALMACENAMIENTO");
-  agregar("caracteristica", "RAM", vacio(f.ram_gb) ? null : `${f.ram_gb} GB`, "TIENE_RAM");
-  agregar("caracteristica", "PANTALLA", vacio(f.pantalla_pulgadas) ? null : `${f.pantalla_pulgadas} pulgadas`, "TIENE_PANTALLA");
-  agregar("caracteristica", "SISTEMA", f.sistema, "USA_SISTEMA");
-  agregar("copia", "COPIA LA MARCA", f.copia_marca, "IMITA_MARCA", true);
-  agregar("copia", "COPIA LA LÍNEA", f.copia_linea, "IMITA_LINEA", true);
-  return rels;
+function fichaARelaciones(f) {
+  const nodos = [];
+  const aristas = [];
+  const conocidos = new Set();
+
+  // Un nodo por (tipo, nombre): igual que MERGE en Neo4j, el mismo nombre es el mismo nodo.
+  const nodo = (id, tipo, etiqueta, valor, roja = false) => {
+    if (!conocidos.has(id)) {
+      conocidos.add(id);
+      nodos.push({ id, tipo, etiqueta, valor: String(valor), roja });
+    }
+    return id;
+  };
+  const arista = (desde, hasta, relacion, roja = false) =>
+    aristas.push({ desde, hasta, relacion, roja });
+
+  const marca = vacio(f.marca) ? "Sin marca" : String(f.marca).trim();
+  const copiaLinea = f.es_replica && !vacio(f.copia_linea) ? String(f.copia_linea).trim() : null;
+  const copiaMarca = f.es_replica && !vacio(f.copia_marca) ? String(f.copia_marca).trim() : null;
+
+  // Nodos, en el orden en que se reparten alrededor del producto
+  const idCategoria = vacio(f.categoria) ? null : nodo(`categoria:${f.categoria}`, "categoria", "CATEGORÍA", f.categoria);
+  const idsCaracteristicas = CARACTERISTICAS
+    .filter((c) => !vacio(f[c.campo]))
+    .map((c) => ({ c, id: nodo(`carac:${c.tipo}:${c.formato(f[c.campo])}`, "caracteristica", c.tipo.toUpperCase(), c.formato(f[c.campo])) }));
+  const idMarca = nodo(`marca:${marca}`, "marca", "MARCA", marca);
+  const idLinea = vacio(f.linea) ? null : nodo(`linea:${f.linea}`, "linea", "LÍNEA", f.linea);
+  const idCopiaLinea = copiaLinea ? nodo(`linea:${copiaLinea}`, "copia", "LÍNEA COPIADA", copiaLinea, true) : null;
+  const idCopiaMarca = copiaLinea && copiaMarca ? nodo(`marca:${copiaMarca}`, "copia", "MARCA COPIADA", copiaMarca, true) : null;
+
+  // Flechas
+  arista("producto", idMarca, "DE_MARCA");
+  if (idCategoria) arista("producto", idCategoria, "EN_CATEGORIA");
+  if (idLinea) {
+    arista("producto", idLinea, "DE_LINEA");
+    arista(idLinea, idMarca, "DE_MARCA");
+  }
+  idsCaracteristicas.forEach(({ id }) => arista("producto", id, "TIENE"));
+  if (idCopiaLinea) arista("producto", idCopiaLinea, "IMITA", true);
+  if (idCopiaLinea && idCopiaMarca) arista(idCopiaLinea, idCopiaMarca, "DE_MARCA", true);
+
+  return { nodos, aristas };
 }
 
 /* =====================================================================
@@ -414,7 +454,7 @@ function crearNodo({ x, y, tipoEtiqueta, lineasValor, clase, ancho }) {
   lineasValor.forEach((linea, i) => {
     g.append(svg("text", { class: "valor", x, y: yTexto + 18 * (i + 1), "text-anchor": "middle" }, linea));
   });
-  return { g, ancho, alto };
+  return { g, x, y, ancho, alto };
 }
 
 function dibujarGrafo(f) {
@@ -435,49 +475,50 @@ function dibujarGrafo(f) {
 
   const cx = LIENZO.ancho / 2;
   const cy = LIENZO.alto / 2;
+  const { nodos, aristas } = fichaARelaciones(f);
 
   // Nodo central: el producto
-  const centro = crearNodo({
+  const cajas = new Map();
+  cajas.set("producto", crearNodo({
     x: cx, y: cy, tipoEtiqueta: `PRODUCTO · ${f.sku}`,
     lineasValor: envolver(f.nombre ?? "(sin nombre)", 30, 2), ancho: 270,
     clase: "producto" + (f.es_replica ? " replica" : ""),
-  });
+  }));
 
-  // Nodos de alrededor, repartidos en una elipse empezando por arriba
-  const rels = fichaARelaciones(f);
-  const nodos = rels.map((r, i) => {
-    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / rels.length;
+  // Los demás nodos, repartidos en una elipse empezando por arriba
+  nodos.forEach((n, i) => {
+    const ang = -Math.PI / 2 + (i * 2 * Math.PI) / nodos.length;
     const x = cx + LIENZO.radioX * Math.cos(ang);
     const y = cy + LIENZO.radioY * Math.sin(ang);
-    const lineas = envolver(r.valor, 24, 2);
-    const ancho = Math.max(120, Math.max(r.etiqueta.length * 6.8, ...lineas.map((l) => l.length * 7.6)) + 28);
-    return { r, x, y, ...crearNodo({ x, y, tipoEtiqueta: r.etiqueta, lineasValor: lineas, clase: r.tipo, ancho }) };
+    const lineas = envolver(n.valor, 24, 2);
+    const ancho = Math.max(120, Math.max(n.etiqueta.length * 6.8, ...lineas.map((l) => l.length * 7.6)) + 28);
+    cajas.set(n.id, crearNodo({ x, y, tipoEtiqueta: n.etiqueta, lineasValor: lineas, clase: n.tipo, ancho }));
   });
 
-  // Flechas primero (quedan debajo de las cajas), luego etiquetas, luego cajas
+  // Flechas primero (quedan debajo de las cajas), luego sus etiquetas, luego las cajas
   const capaAristas = svg("g");
   const capaEtiquetas = svg("g");
-  for (const n of nodos) {
-    const ini = puntoEnBorde(cx, cy, 135, centro.alto / 2, n.x, n.y, 2);
-    const fin = puntoEnBorde(n.x, n.y, n.ancho / 2, n.alto / 2, cx, cy, 4);
-    const roja = n.r.roja;
+  for (const a of aristas) {
+    const A = cajas.get(a.desde);
+    const B = cajas.get(a.hasta);
+    const ini = puntoEnBorde(A.x, A.y, A.ancho / 2, A.alto / 2, B.x, B.y, 2);
+    const fin = puntoEnBorde(B.x, B.y, B.ancho / 2, B.alto / 2, A.x, A.y, 4);
     capaAristas.append(svg("line", {
-      class: roja ? "arista roja" : "arista",
+      class: a.roja ? "arista roja" : "arista",
       x1: ini.x, y1: ini.y, x2: fin.x, y2: fin.y,
-      "marker-end": `url(#${roja ? "flecha-roja" : "flecha"})`,
+      "marker-end": `url(#${a.roja ? "flecha-roja" : "flecha"})`,
     }));
     capaEtiquetas.append(svg("text", {
-      class: roja ? "etiqueta-arista roja" : "etiqueta-arista",
+      class: a.roja ? "etiqueta-arista roja" : "etiqueta-arista",
       x: (ini.x + fin.x) / 2, y: (ini.y + fin.y) / 2 + 3,
-    }, n.r.relacion));
+    }, a.relacion));
   }
-  lienzo.append(capaAristas, capaEtiquetas, ...nodos.map((n) => n.g), centro.g);
+  const centro = cajas.get("producto");
+  const otras = nodos.map((n) => cajas.get(n.id).g);
+  lienzo.append(capaAristas, capaEtiquetas, ...otras, centro.g);
 
   if (f.es_replica) {
     lienzo.append(svg("text", { class: "sello", x: cx, y: cy - centro.alto / 2 - 8, "text-anchor": "middle" }, "RÉPLICA"));
-  }
-  if (!nodos.length) {
-    lienzo.append(svg("text", { class: "etiqueta-arista", x: cx, y: cy + 70 }, "Esta ficha no trae ninguna relación (todo en null)."));
   }
 }
 
@@ -504,9 +545,14 @@ function mostrarDetalle(f) {
   $("nombre-original").textContent = f.nombre ?? "(sin nombre)";
 
   const aviso = $("aviso");
-  const incoherente = f.es_replica && vacio(f.copia_marca) && vacio(f.copia_linea);
-  aviso.hidden = !incoherente;
-  aviso.textContent = incoherente ? "Marcada como réplica, pero sin dato de qué marca ni línea copia." : "";
+  let mensaje = "";
+  if (f.es_replica && vacio(f.copia_marca) && vacio(f.copia_linea)) {
+    mensaje = "Marcada como réplica, pero sin dato de qué marca ni línea copia.";
+  } else if (f.es_replica && vacio(f.copia_linea) && !vacio(f.copia_marca)) {
+    mensaje = "Réplica con marca copiada pero sin línea copiada: en Neo4j no se crea la flecha IMITA.";
+  }
+  aviso.hidden = !mensaje;
+  aviso.textContent = mensaje;
 
   const tabla = $("tabla-ficha");
   tabla.replaceChildren();
