@@ -41,3 +41,27 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
 13. **Sin `.env` no hay Gemini:** no copié claves de otras carpetas. Lo que necesita LLM quedó
     marcado `necesita_llm` (se salta sin clave) y las evidencias que lo necesitan, pendientes,
     con un script para generarlas.
+
+## Etapa 2: verificador A2A + delegar_verificador
+
+14. **Al modelo de visión no se le muestran monto, fecha, RUT ni folio declarados**: solo la imagen
+    y la categoría declarada. Así no puede «leer» lo que espera ver. Esos cuatro campos los compara
+    el código (normalizando RUT, fecha y folio); la categoría la juzga el modelo, porque es semántica.
+15. **«Nunca adivinar» se aplica en dos capas:** el verificador pone `null` y «no» en lo que no
+    lee (y si la imagen es ilegible, descarta todo lo que el modelo haya devuelto), y
+    `delegar_verificador` rechaza como `respuesta_invalida` una respuesta que diga «sí» en un campo
+    no leído.
+16. **La respuesta del verificador va como DataPart (JSON), no como texto.** Por eso `executor.py`
+    ganó `responder_partes` (recibe todas las partes del mensaje), compatible con los agentes de texto.
+17. **`cliente_a2a.enviar_partes` crea un cliente por llamada** (sin la caché global): usa
+    `TIMEOUT_A2A_SEG` y las cabeceras del canal, y no depende del bucle de eventos de otra llamada
+    (el grafo corre en un hilo con su propio `asyncio.run`).
+18. **Las dos cabeceras a la vez** (X-API-Key provisoria + Bearer de `TOKEN_A2A` si existe): el
+    cambio a `proteger_con_token_a2a` en el verificador queda en una línea, sin tocar el cliente.
+19. **`tipo_fallo` en el error estructurado**, para que la resiliencia (Sebastián) y las evidencias
+    distingan un timeout de un rechazo o de un verificador apagado.
+20. **Pillow no va a `requirements.txt`**: solo sirve para regenerar las boletas, que ya están en el
+    repo; el servicio desplegado no lo necesita.
+21. **Evidencia `00-canal-sin-gemini`**: es una corrida real (dos servicios, log de ambos lados),
+    pero sin Gemini el verificador no puede leer; se deja marcada como evidencia del canal y de la
+    salida segura, no del 0,5. La de las 4 boletas queda pendiente, con su script.

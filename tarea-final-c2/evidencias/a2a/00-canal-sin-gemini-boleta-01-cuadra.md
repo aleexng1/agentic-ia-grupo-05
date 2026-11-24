@@ -1,0 +1,52 @@
+# A2A · boleta-01-cuadra.png (cuadra)
+
+Capturado el 2026-11-24T19:46:06-03:00 · verificador en `http://127.0.0.1:8766` · tiempo límite 20 s · duración 1165 ms.
+
+## Encargo (principal → verificador)
+Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (lo declarado):
+```json
+{
+  "imagen": {
+    "archivo": "boleta-01-cuadra.png",
+    "mime_type": "image/png",
+    "bytes": 42579,
+    "sha256_inicio": "dbd473e801de6cdc"
+  },
+  "datos": {
+    "tarea": "verificar_boleta",
+    "declarado": {
+      "monto": 45000,
+      "fecha": "2026-10-02",
+      "rut_emisor": "11.111.111-1",
+      "folio": "000123",
+      "categoria": "Gasolina (vehículo propio)"
+    }
+  }
+}
+```
+
+## Respuesta del verificador (lo que recibe el principal)
+```json
+{
+  "disponible": false,
+  "tipo_fallo": "error_verificador",
+  "motivo": "el verificador respondió con un error: No se pudo completar la consulta: Falta GOOGLE_API_KEY en .env: pega tu clave de Google AI Studio."
+}
+```
+
+Esperado según `datos/boletas/declarado.json`: `{"monto": "sí", "fecha": "sí", "rut_emisor": "sí", "folio": "sí", "categoria": "sí"}`
+
+## Dónde se usa
+En el nodo `revisar_gasto` del grafo principal: el resultado se pasa al ReAct como dato y, si algún campo no cuadra o el verificador no respondió, un «aprobar» baja a «observar» (`aplicar_verificacion`).
+
+## Log del principal (este proceso)
+```text
+2026-11-24 19:46:05 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8766 · imagen image/png 42579 bytes · tiempo límite 20 s
+2026-11-24 19:46:06 WARNING [tarea_final] a2a · verificador no disponible · error_verificador · el verificador respondió con un error: No se pudo completar la consulta: Falta GOOGLE_API_KEY en .env: pega tu clave de Google AI Studio.
+```
+
+## Log del verificador
+```text
+2026-11-24 19:46:05 INFO    [tarea_final] verificador · encargo 9e51d9f1 · imagen image/png 42579 bytes sha256:dbd473e801de6cdc · declarado monto=45000 fecha=2026-10-02 folio=000123
+2026-11-24 19:46:06 ERROR   [tarea_final] verificador · encargo 9e51d9f1 falló sin respuesta: No se pudo completar la consulta: Falta GOOGLE_API_KEY en .env: pega tu clave de Google AI Studio.
+```

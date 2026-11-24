@@ -1,0 +1,81 @@
+{
+  "descripcion": "Boletas FICTICIAS para el verificador A2A. Todo es inventado.",
+  "boletas": [
+    {
+      "archivo": "boleta-01-cuadra.png",
+      "mime_type": "image/png",
+      "caso": "cuadra",
+      "declarado": {
+        "monto": 45000,
+        "fecha": "2026-10-02",
+        "rut_emisor": "11.111.111-1",
+        "folio": "000123",
+        "categoria": "Gasolina (vehículo propio)"
+      },
+      "esperado_cuadra": {
+        "monto": "sí",
+        "fecha": "sí",
+        "rut_emisor": "sí",
+        "folio": "sí",
+        "categoria": "sí"
+      }
+    },
+    {
+      "archivo": "boleta-02-monto-distinto.png",
+      "mime_type": "image/png",
+      "caso": "monto distinto",
+      "declarado": {
+        "monto": 52000,
+        "fecha": "2026-10-14",
+        "rut_emisor": "22.222.222-2",
+        "folio": "004512",
+        "categoria": "Hotel"
+      },
+      "esperado_cuadra": {
+        "monto": "no",
+        "fecha": "sí",
+        "rut_emisor": "sí",
+        "folio": "sí",
+        "categoria": "sí"
+      }
+    },
+    {
+      "archivo": "boleta-03-fecha-distinta.png",
+      "mime_type": "image/png",
+      "caso": "fecha distinta",
+      "declarado": {
+        "monto": 9800,
+        "fecha": "2026-10-12",
+        "rut_emisor": "33.333.333-3",
+        "folio": "078901",
+        "categoria": "Peajes"
+      },
+      "esperado_cuadra": {
+        "monto": "sí",
+        "fecha": "no",
+        "rut_emisor": "sí",
+        "folio": "sí",
+        "categoria": "sí"
+      }
+    },
+    {
+      "archivo": "boleta-04-ilegible.png",
+      "mime_type": "image/png",
+      "caso": "ilegible",
+      "declarado": {
+        "monto": 15990,
+        "fecha": "2026-10-20",
+        "rut_emisor": "11.111.111-1",
+        "folio": "000456",
+        "categoria": "Materiales de mantención"
+      },
+      "esperado_cuadra": {
+        "monto": "no",
+        "fecha": "no",
+        "rut_emisor": "no",
+        "folio": "no",
+        "categoria": "no"
+      }
+    }
+  ]
+}

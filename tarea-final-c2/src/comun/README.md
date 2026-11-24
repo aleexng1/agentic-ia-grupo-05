@@ -10,5 +10,5 @@ Piezas compartidas por el principal y el verificador.
 | `seguridad.py` | taller-02-c2 (`CLAVE_API` → `API_KEY_SERVICIO`) | Matías | falta `exigir_accion_permitida` y `revisar_token_a2a` |
 | `registro.py` | logging de taller-02-c2 | Sebastián | falta la tabla `ejecuciones` (Postgres) |
 | `errores.py` | taller-02-c2 | compartido | listo |
-| `servidor.py`, `executor.py`, `tarjeta.py` | taller-02-c2 (sin el panel antiguo) | Alex | listo; `executor` necesita FilePart/DataPart |
-| `cliente_a2a.py` | `taller-02-c2/.../coordinador/cliente.py` | Alex | listo; usar `TIMEOUT_A2A_SEG` y `TOKEN_A2A` |
+| `servidor.py`, `executor.py`, `tarjeta.py` | taller-02-c2 (sin el panel antiguo) | Alex | listo; `executor` acepta `responder_partes` (FilePart/DataPart) y `tarjeta` los modos de entrada/salida |
+| `cliente_a2a.py` | `taller-02-c2/.../coordinador/cliente.py` | Alex | listo; `enviar_partes` (cliente propio por llamada, con tiempo límite y cabeceras) |

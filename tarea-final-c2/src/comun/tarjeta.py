@@ -10,8 +10,15 @@ def crear_tarjeta(
     descripcion: str,
     url: str,
     skills: Iterable[tuple[str, str, str, str]],
+    modos_entrada: list[str] | None = None,
+    modos_salida: list[str] | None = None,
 ) -> AgentCard:
-    """Construye la ficha del agente con capacidades y ejemplos de texto."""
+    """Construye la ficha del agente con capacidades y ejemplos.
+
+    modos_entrada / modos_salida: tipos MIME que acepta y entrega (por defecto, solo texto).
+    """
+    entrada = modos_entrada or ["text/plain"]
+    salida = modos_salida or ["text/plain"]
     habilidades = [
         AgentSkill(
             id=identificador,
@@ -19,8 +26,8 @@ def crear_tarjeta(
             description=descripcion_habilidad,
             tags=[identificador],
             examples=[ejemplo],
-            input_modes=["text/plain"],
-            output_modes=["text/plain"],
+            input_modes=entrada,
+            output_modes=salida,
         )
         for identificador, nombre_habilidad, descripcion_habilidad, ejemplo in skills
     ]
@@ -37,7 +44,7 @@ def crear_tarjeta(
         ],
         version="1.0.0",
         capabilities=AgentCapabilities(streaming=False),
-        default_input_modes=["text/plain"],
-        default_output_modes=["text/plain"],
+        default_input_modes=entrada,
+        default_output_modes=salida,
         skills=habilidades,
     )

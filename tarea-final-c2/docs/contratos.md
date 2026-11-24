@@ -240,3 +240,18 @@ nuevos; no cambia ni borra nada de las secciones 1 a 10.
   «Flujo <nombre> todavía no implementado.».
 - Si el router respondió con el modelo de respaldo, la ejecución queda `estado_final = "fallback"`.
 - Orden cuando dos piezas terminan distinto: `bloqueado` > `error` > `fallback` > `ok`.
+
+### 11.2 Delegación A2A al verificador (etapa 2)
+- Encargo: igual que §5. La parte de archivo es `Part(raw, media_type, filename)` y la de datos,
+  `Part(data, media_type="application/json")`. Imagen ≤ 5 MB, `image/jpeg|png|webp`.
+- Cabeceras del canal: `X-API-Key` (protección provisoria del verificador) y, si `TOKEN_A2A` tiene
+  valor, `Authorization: Bearer <TOKEN_A2A>`. Solo se mandan a `URL_VERIFICADOR`.
+- `delegar_verificador` devuelve, si todo sale bien, `{"disponible": true, "leido", "cuadra",
+  "confianza", "observaciones"}` (`disponible` es el agregado).
+- Si falla: `{"disponible": false, "tipo_fallo", "motivo"}` (`tipo_fallo` es el agregado), con
+  `tipo_fallo` ∈ `forzado` (FORZAR_FALLO_A2A=1), `encargo_invalido`, `timeout`, `sin_conexion`,
+  `rechazado` (401/403/503 del canal), `respuesta_invalida`, `error_verificador`. Nunca trae campos leídos.
+- Una respuesta del verificador que diga `cuadra = "sí"` en un campo con `leido = null` se trata
+  como `respuesta_invalida`.
+- Ficha del verificador: skill `verificar_boleta`; modos de entrada `image/png, image/jpeg,
+  image/webp, application/json` y de salida `application/json`.
