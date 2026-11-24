@@ -1,27 +1,20 @@
-"""Registro de veredictos en SQLite (la "acción" del agente).
+"""Registro de veredictos en Postgres (la "acción" del agente).
 
-Dueño: rol Herramientas y estado.
-La base es un archivo local que Git ignora (*.db): cada persona tiene la suya.
+Dueño: Sebastián (c2tf/sebastian-despliegue). Antes era SQLite; en Heroku el disco se borra
+al reiniciar, así que va en Postgres (DATABASE_URL), igual que la tabla `ejecuciones`.
 
 Decisiones de diseño:
-- NO es una herramienta del LLM. La llama el grafo (Núcleo) en un nodo determinista,
+- NO es una herramienta del LLM. La llama el grafo en un nodo determinista,
   solo después de que el juez valida el veredicto. Así un jailbreak en la glosa o en el
   mensaje (GS-27, GS-30) no puede escribir ni borrar el registro.
 - Se puede repetir con seguridad: hay una fila por gasto (id_gasto es único). Registrar
   dos veces lo mismo no duplica; registrar una decisión distinta actualiza la fila.
 - Cada escritura devuelve el estado antes y después (evidencia para la sección 8).
-- reiniciar_registro solo vacía la tabla: no borra el archivo ni toca otros datos.
+- reiniciar_registro solo vacía la tabla: no toca otros datos. Es para pruebas.
 """
 
-import sqlite3
-from contextlib import closing
-from datetime import datetime
-
-from src.comun.config import CARPETA_PROYECTO
 from src.comun.contrato import DECISIONES, Gasto, Veredicto
-
-# Archivo de la base de datos de prueba.
-RUTA_REGISTRO = CARPETA_PROYECTO / "registro_veredictos.db"
+from src.comun.registro import conectar_postgres
 
 _ESQUEMA = """
 CREATE TABLE IF NOT EXISTS veredictos (
@@ -33,7 +26,7 @@ CREATE TABLE IF NOT EXISTS veredictos (
     politica_sugerida   TEXT NOT NULL,
     categoria_sugerida  TEXT NOT NULL,
     cuenta_sugerida     TEXT NOT NULL,
-    registrado_en       TEXT NOT NULL
+    registrado_en       TIMESTAMPTZ NOT NULL DEFAULT now()
 )
 """
 
@@ -43,23 +36,22 @@ _COLUMNAS_CONTENIDO = (
 )
 
 
-def _conectar() -> sqlite3.Connection:
-    """Abre la base (la crea si no existe) y asegura que la tabla exista."""
-    conexion = sqlite3.connect(RUTA_REGISTRO)
-    conexion.row_factory = sqlite3.Row
-    conexion.execute(_ESQUEMA)
-    return conexion
-
-
-def _foto(conexion: sqlite3.Connection, id_gasto: str) -> dict:
+def _foto(conexion, id_gasto: str) -> dict:
     """Estado del registro: cantidad de filas, filas por decisión y la fila de este gasto."""
-    total = conexion.execute("SELECT COUNT(*) FROM veredictos").fetchone()[0]
-    por_decision = {
-        fila["decision"]: fila["n"]
-        for fila in conexion.execute("SELECT decision, COUNT(*) AS n FROM veredictos GROUP BY decision")
-    }
-    fila = conexion.execute("SELECT * FROM veredictos WHERE id_gasto = ?", (id_gasto,)).fetchone()
-    return {"registros": total, "por_decision": por_decision, "gasto": dict(fila) if fila else None}
+    cursor = conexion.cursor()
+    cursor.execute("SELECT COUNT(*) FROM veredictos")
+    total = cursor.fetchone()[0]
+    cursor.execute("SELECT decision, COUNT(*) AS n FROM veredictos GROUP BY decision")
+    por_decision = {decision: n for decision, n in cursor.fetchall()}
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM veredictos WHERE id_gasto = %s", (id_gasto,))
+    fila = cursor.fetchone()
+    gasto = None
+    if fila is not None:
+        columnas = [descripcion.name for descripcion in cursor.description]
+        gasto = dict(zip(columnas, fila))
+        gasto["registrado_en"] = gasto["registrado_en"].isoformat()
+    return {"registros": total, "por_decision": por_decision, "gasto": gasto}
 
 
 def registrar_veredicto(gasto: Gasto, veredicto: Veredicto) -> dict:
@@ -81,9 +73,10 @@ def registrar_veredicto(gasto: Gasto, veredicto: Veredicto) -> dict:
         "politica_sugerida": veredicto["politica_sugerida"],
         "categoria_sugerida": veredicto["categoria_sugerida"],
         "cuenta_sugerida": veredicto["cuenta_sugerida"],
-        "registrado_en": datetime.now().isoformat(timespec="seconds"),
     }
-    with closing(_conectar()) as conexion, conexion:  # el segundo "with" confirma o deshace la transacción
+    # La transacción se confirma al salir del primer "with" (o se deshace si hay error).
+    with conectar_postgres() as conexion:
+        conexion.execute(_ESQUEMA)
         antes = _foto(conexion, gasto["id"])
         previa = antes["gasto"]
         if previa and all(previa[c] == nueva[c] for c in _COLUMNAS_CONTENIDO):
@@ -94,13 +87,13 @@ def registrar_veredicto(gasto: Gasto, veredicto: Veredicto) -> dict:
                 """
                 INSERT INTO veredictos (id_gasto, id_fondo, monto, decision, motivo, politica_sugerida,
                                         categoria_sugerida, cuenta_sugerida, registrado_en)
-                VALUES (:id_gasto, :id_fondo, :monto, :decision, :motivo, :politica_sugerida,
-                        :categoria_sugerida, :cuenta_sugerida, :registrado_en)
-                ON CONFLICT(id_gasto) DO UPDATE SET
-                    id_fondo = excluded.id_fondo, monto = excluded.monto, decision = excluded.decision,
-                    motivo = excluded.motivo, politica_sugerida = excluded.politica_sugerida,
-                    categoria_sugerida = excluded.categoria_sugerida,
-                    cuenta_sugerida = excluded.cuenta_sugerida, registrado_en = excluded.registrado_en
+                VALUES (%(id_gasto)s, %(id_fondo)s, %(monto)s, %(decision)s, %(motivo)s,
+                        %(politica_sugerida)s, %(categoria_sugerida)s, %(cuenta_sugerida)s, now())
+                ON CONFLICT (id_gasto) DO UPDATE SET
+                    id_fondo = EXCLUDED.id_fondo, monto = EXCLUDED.monto, decision = EXCLUDED.decision,
+                    motivo = EXCLUDED.motivo, politica_sugerida = EXCLUDED.politica_sugerida,
+                    categoria_sugerida = EXCLUDED.categoria_sugerida,
+                    cuenta_sugerida = EXCLUDED.cuenta_sugerida, registrado_en = EXCLUDED.registrado_en
                 """,
                 nueva,
             )
@@ -116,12 +109,22 @@ def registrar_veredicto(gasto: Gasto, veredicto: Veredicto) -> dict:
 
 def leer_registro() -> list[dict]:
     """Devuelve todas las filas del registro (para mostrarlas en el notebook)."""
-    with closing(_conectar()) as conexion:
-        return [dict(fila) for fila in conexion.execute("SELECT * FROM veredictos ORDER BY registrado_en, id_gasto")]
+    with conectar_postgres() as conexion:
+        conexion.execute(_ESQUEMA)
+        cursor = conexion.cursor()
+        cursor.execute("SELECT * FROM veredictos ORDER BY registrado_en, id_gasto")
+        columnas = [descripcion.name for descripcion in cursor.description]
+        filas = []
+        for fila in cursor.fetchall():
+            registro = dict(zip(columnas, fila))
+            registro["registrado_en"] = registro["registrado_en"].isoformat()
+            filas.append(registro)
+        return filas
 
 
 def reiniciar_registro() -> None:
-    """Deja la base de prueba como al inicio (vacía), sin tocar nada más."""
-    with closing(_conectar()) as conexion, conexion:
+    """Deja la tabla de veredictos vacía, sin tocar nada más. Solo para pruebas."""
+    with conectar_postgres() as conexion:
+        conexion.execute(_ESQUEMA)
         conexion.execute("DELETE FROM veredictos")
     return None

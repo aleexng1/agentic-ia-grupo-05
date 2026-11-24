@@ -33,13 +33,27 @@ def obtener_llm():
     return ChatGoogleGenerativeAI(model=modelo, temperature=TEMPERATURA)
 
 
-def obtener_llm_con_respaldo():
-    """Devuelve un modelo que, si el principal falla, reintenta con MODELO_RESPALDO.
+def obtener_llm_con_respaldo(herramientas: list | None = None):
+    """Devuelve el modelo principal con MODELO_RESPALDO como respaldo ante una falla.
 
-    Debe usar obtener_llm() para el principal y otro ChatGoogleGenerativeAI con
-    MODELO_RESPALDO (mismo GOOGLE_API_KEY, temperatura 0) unidos con `.with_fallbacks(...)`.
-    Solo se cambia de modelo ante fallas del proveedor (cuota, 503, timeout): nunca se
-    inventa una respuesta. Quien lo use marca la ejecución como estado_final = "fallback"
-    cuando respondió el respaldo. Si MODELO_RESPALDO está vacío, devuelve solo el principal.
+    Usa obtener_llm() para el principal y un ChatGoogleGenerativeAI con MODELO_RESPALDO
+    (mismo GOOGLE_API_KEY, temperatura 0), unidos con `.with_fallbacks(...)`.
+    Si `herramientas` viene, se hace bind_tools en ambos modelos antes de unirlos: un
+    RunnableWithFallbacks no admite bind_tools después.
+    Solo se cambia de modelo ante una excepción del proveedor (cuota, 503, timeout); nunca se
+    inventa una respuesta. Si MODELO_RESPALDO está vacío, devuelve solo el principal.
+    Quien responde con el respaldo debe marcar la ejecución como estado_final = "fallback";
+    esa señal todavía no la emite este módulo.
     """
-    raise NotImplementedError("obtener_llm_con_respaldo: pendiente (Sebastián, c2tf/sebastian-despliegue).")
+    from langchain_google_genai import ChatGoogleGenerativeAI
+
+    principal = obtener_llm()
+    modelo_respaldo = os.getenv("MODELO_RESPALDO", "").strip()
+    if not modelo_respaldo:
+        return principal.bind_tools(herramientas) if herramientas else principal
+    respaldo = ChatGoogleGenerativeAI(model=modelo_respaldo, temperature=TEMPERATURA)
+    if herramientas:
+        return principal.bind_tools(herramientas).with_fallbacks(
+            [respaldo.bind_tools(herramientas)]
+        )
+    return principal.with_fallbacks([respaldo])
