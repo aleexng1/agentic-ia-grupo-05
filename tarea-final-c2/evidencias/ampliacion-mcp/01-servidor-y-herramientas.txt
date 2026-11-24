@@ -1,0 +1,11 @@
+﻿{
+  "servidor": "fondos-los-alerces",
+  "herramientas": [
+    {
+      "nombre": "consultar_fondo",
+      "descripcion": "Devuelve el EstadoFondo del fondo pedido: id_fondo, responsable, saldo_inicial, saldo_actual y gastos_aprobados (contratos.md §3 y §4). Es de solo lectura. Si el fondo no existe responde un error MCP con mensaje claro (nunca un saldo en cero ni un fondo inventado)."
+    }
+  ]
+}
+{"id_fondo": "FR-020", "responsable": "Jefatura de Tiendas (ficticia)", "saldo_inicial": 20000, "saldo_actual": 20000, "gastos_aprobados": []}
+ToolException: consultar_fondo (MCP): El fondo 'FR-999' no existe. Fondos ficticios disponibles: FR-001, FR-020, FR-050.

@@ -1,0 +1,56 @@
+﻿Caso GS-01: Chofer del CD: peaje entre CD y tienda en camión de la empresa
+Mensaje: Revisa este gasto rendido.
+MAX_PASOS: 2
+
+── [llm] ──
+{
+  "paso": 1,
+  "pide_herramientas": [
+    {
+      "name": "buscar_politica",
+      "args": {
+        "consulta": "peajes vehiculos empresa flota P04 Viajes Internos"
+      },
+      "id": "call_14586400586657111844",
+      "type": "tool_call"
+    }
+  ],
+  "texto": ""
+}
+── [observacion] ──
+{
+  "herramienta": "buscar_politica",
+  "resultado": "Error: ToolException('Falló la búsqueda de políticas (RuntimeError). Comprueba Redis, memoria disponible y cuotas de embeddings.')\n Please fix your mistakes."
+}
+── [llm] ──
+{
+  "paso": 2,
+  "pide_herramientas": [
+    {
+      "name": "buscar_politica",
+      "args": {
+        "consulta": "peaje camion flota P04 Viajes Internos"
+      },
+      "id": "call_1496063419556031136",
+      "type": "tool_call"
+    }
+  ],
+  "texto": ""
+}
+── [parada] ──
+{
+  "motivo": "MAX_PASOS",
+  "pasos": 2
+}
+
+══ Resumen ══
+{
+  "respuesta": "Me detuve: alcancé el máximo de 2 pasos sin una decisión final.",
+  "pasos": 2,
+  "herramientas_usadas": [
+    "buscar_politica"
+  ],
+  "estado_final": "error",
+  "veredicto": null,
+  "esperado": "aprobar"
+}

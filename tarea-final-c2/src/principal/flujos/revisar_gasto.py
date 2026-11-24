@@ -108,6 +108,9 @@ class EstadoRevision(EstadoAgente):
     estado_final: NotRequired[str | None]  # "bloqueado" si se impidió una acción; None mientras corre
 
 
+# Separador con que el gasto viaja dentro del mensaje (mismo texto que en tarea-final-c1).
+MARCA_GASTO = "\n\nGasto rendido (JSON):\n"
+
 MENSAJE_BLOQUEO = (
     "Bloqueé la solicitud: el agente intentó una acción no autorizada ({acciones}). "
     "No se ejecutó ninguna herramienta de ese paso y el registro no cambió."
@@ -714,7 +717,13 @@ def revisar_caso(
     - "bloqueado": el modelo pidió una acción fuera de ACCIONES_PERMITIDAS; no se ejecutó nada.
     - "error": se detuvo por MAX_PASOS_REACT sin veredicto.
     "fallback" lo agrega quien integra (modelo de respaldo o A2A caído), no este flujo.
+
+    El LLM solo lee mensajes: si `mensaje` no trae ya el gasto, se le agrega como JSON
+    (igual que tarea-final-c1/pruebas/evaluar.py). El grafo igual valida y registra el
+    gasto original del estado, no lo que diga el texto.
     """
+    if MARCA_GASTO not in mensaje:
+        mensaje = mensaje + MARCA_GASTO + json.dumps(gasto, ensure_ascii=False)
     respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo)
     estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
     return {
@@ -724,6 +733,39 @@ def revisar_caso(
         "estado_final": estado.get("estado_final") or "ok",
         "veredicto": estado.get("veredicto"),
     }
+
+
+def _principal() -> None:
+    """Corre un caso del golden set de c1 desde la terminal, sin servidor (para evidencias).
+
+    Uso (desde tarea-final-c2/):  python -m src.principal.flujos.revisar_gasto GS-01
+    Con MOSTRAR_TRAZAS=1 (por defecto) se ve cada paso: llm → herramienta → observación.
+    Al final imprime el resumen de revisar_caso. Usa Gemini de verdad (GOOGLE_API_KEY).
+    """
+    import argparse
+    import sys
+    from uuid import uuid4
+
+    from src.comun.config import CARPETA_PROYECTO
+    from src.comun.errores import traducir_error
+
+    parser = argparse.ArgumentParser(description="Revisa un gasto del golden set de c1 con el ReAct.")
+    parser.add_argument("caso", help="id del caso, por ejemplo GS-01")
+    argumentos = parser.parse_args()
+
+    golden = json.loads((CARPETA_PROYECTO / "evaluacion" / "golden_set_c1.json").read_text(encoding="utf-8"))
+    caso = next((c for c in golden["casos"] if c["id"] == argumentos.caso), None)
+    if caso is None or "gasto" not in caso["turnos"][0]:
+        sys.exit(f"El caso {argumentos.caso} no existe o no trae un gasto.")
+    turno = caso["turnos"][0]
+    hilo = f"cli-{argumentos.caso}-{uuid4().hex[:8]}"
+    print(f"Caso {caso['id']}: {caso['descripcion']}\nMensaje: {turno['mensaje']}\nMAX_PASOS: {MAX_PASOS}\n")
+    try:
+        resultado = revisar_caso(construir_agente(), turno["mensaje"], hilo, turno["gasto"])
+    except Exception as error:
+        sys.exit(f"No se pudo revisar el gasto: {traducir_error(error)}")
+    print("\n══ Resumen ══")
+    print(json.dumps({**resultado, "esperado": turno["esperado"].get("decision")}, ensure_ascii=False, indent=2))
 
 
 def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict) -> str:
@@ -747,3 +789,7 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
         entrada["veredicto"] = None
     resultado = agente.invoke(entrada, configuracion)
     return resultado["messages"][-1].text
+
+
+if __name__ == "__main__":
+    _principal()
