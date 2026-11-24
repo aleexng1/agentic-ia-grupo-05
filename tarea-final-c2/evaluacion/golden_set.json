@@ -1,0 +1,18 @@
+{
+  "version": "0.1",
+  "fecha": "2026-11-23",
+  "descripcion": "Golden set de la tarea final C2 (Comercial Los Alerces SpA, ficticia). Sin casos todavía.",
+  "formato_caso": {
+    "id": "C2-01",
+    "ruta_esperada": "consulta_politica | revisar_gasto | fuera_de_alcance",
+    "mensaje": "texto que se envía a /chat",
+    "imagen": "ruta a datos/boletas/... o null",
+    "esperado": {
+      "decision": "aprobar | observar | rechazar | null",
+      "estado_final": "ok | bloqueado | fallback | error",
+      "hubo_a2a": "true | false",
+      "debe_contener": []
+    }
+  },
+  "casos": []
+}

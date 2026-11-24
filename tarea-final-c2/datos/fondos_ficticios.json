@@ -1,0 +1,9 @@
+{
+  "version": "1.0",
+  "descripcion": "Fondos por rendir FICTICIOS de Comercial Los Alerces SpA. Responsables y montos inventados.",
+  "fondos": [
+    {"id_fondo": "FR-001", "responsable": "Jefatura de Administración (ficticia)", "saldo_inicial": 200000},
+    {"id_fondo": "FR-020", "responsable": "Jefatura de Tiendas (ficticia)", "saldo_inicial": 20000},
+    {"id_fondo": "FR-050", "responsable": "Jefatura del Centro de Distribución (ficticia)", "saldo_inicial": 50000}
+  ]
+}

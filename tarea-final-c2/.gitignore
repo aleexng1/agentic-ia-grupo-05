@@ -1,0 +1,8 @@
+# Reglas propias de tarea-final-c2 (el .gitignore de la raíz no se toca).
+.env
+.venv/
+__pycache__/
+*.pyc
+*.db
+.pytest_cache/
+node_modules/
