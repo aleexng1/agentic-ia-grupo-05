@@ -1,5 +1,7 @@
 # Reglas para programar con agentes (Claude Code, OpenCode u otro)
 
+**Antes de trabajar, lee `docs/pauta.md`, `docs/reparto.md` (tu sección) y `docs/contratos.md`.**
+
 Estas reglas valen para cualquier persona del grupo y para el asistente que use.
 
 1. **No salir de `tarea-final-c2/`.** No crear, cambiar ni borrar nada fuera de esta carpeta.

@@ -143,7 +143,8 @@ El principal manda un `Message` A2A (rol usuario) a `URL_VERIFICADOR`, con
 Timeout, error, token rechazado o `FORZAR_FALLO_A2A=1` → `delegar_verificador` devuelve
 `{"disponible": false, "motivo": "..."}`. El flujo no inventa la lectura: deja el gasto en
 `observar` («no se pudo verificar la boleta») y la ejecución con `estado_final = "fallback"`.
-El respaldo con n8n (`N8N_WEBHOOK_URL`) recibe el mismo encargo y responde el mismo formato.
+n8n **no** reemplaza esta delegación ni la repite: la ampliación n8n A2A es un **caso adicional**
+(ver `pauta.md`), con su propio encargo, que se define antes de implementarlo.
 
 ---
 
