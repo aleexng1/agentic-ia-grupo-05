@@ -81,6 +81,31 @@ def test_la_version_async_funciona_dentro_de_un_event_loop():
     assert asyncio.run(dentro_del_loop())["saldo_inicial"] == 20000
 
 
+def test_la_version_sincronica_funciona_dentro_de_un_event_loop():
+    """El grafo es síncrono; si alguien lo llama desde un endpoint async, invoke no debe romperse."""
+
+    async def dentro_del_loop():
+        return modulo_consultar.consultar_fondo.invoke({"id_fondo": "FR-050"})
+
+    assert asyncio.run(dentro_del_loop())["saldo_inicial"] == 50000
+
+
+def test_el_modo_listar_muestra_el_servidor_y_su_herramienta():
+    resultado = asyncio.run(servidor.listar_por_mcp())
+    assert resultado["servidor"] == servidor.NOMBRE_SERVIDOR
+    assert [h["nombre"] for h in resultado["herramientas"]] == ["consultar_fondo"]
+
+
+def test_construir_agente_acepta_otro_checkpointer(monkeypatch):
+    from langgraph.checkpoint.memory import InMemorySaver
+
+    from src.principal.flujos import revisar_gasto
+
+    monkeypatch.setattr(revisar_gasto, "obtener_llm", lambda: LLMFalso([]))
+    propio = InMemorySaver()
+    assert revisar_gasto.construir_agente(checkpointer=propio).checkpointer is propio
+
+
 # ---------------------------------------------------------------------------
 # ReAct: parada por veredicto (con MCP) y parada por MAX_PASOS
 # ---------------------------------------------------------------------------

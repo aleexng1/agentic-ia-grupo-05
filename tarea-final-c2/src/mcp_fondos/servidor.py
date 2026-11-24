@@ -36,8 +36,43 @@ def consultar_fondo(id_fondo: str) -> dict:
     return fondo_inicial(str(id_fondo).strip())
 
 
+async def listar_por_mcp() -> dict:
+    """Arranca el servidor como lo hace el agente (proceso hijo, stdio) y le pide su lista de herramientas.
+
+    Es la evidencia de "servidor MCP levantado con su lista de herramientas". Tiempo máximo explícito.
+    """
+    import anyio
+    from mcp import ClientSession
+    from mcp.client.stdio import stdio_client
+
+    from src.principal.herramientas.consultar_fondo import TIEMPO_MAXIMO_MCP_SEG, _parametros_servidor
+
+    with anyio.fail_after(TIEMPO_MAXIMO_MCP_SEG):
+        async with stdio_client(_parametros_servidor()) as (lectura, escritura):
+            async with ClientSession(lectura, escritura) as sesion:
+                inicio = await sesion.initialize()
+                herramientas = (await sesion.list_tools()).tools
+    return {
+        "servidor": inicio.serverInfo.name,
+        "herramientas": [{"nombre": h.name, "descripcion": " ".join((h.description or "").split())} for h in herramientas],
+    }
+
+
 def main() -> None:
-    """Levanta el servidor MCP por stdio."""
+    """Sin argumentos levanta el servidor MCP por stdio. Con --listar muestra sus herramientas."""
+    import sys
+
+    if "--listar" in sys.argv[1:]:
+        import asyncio
+        import json
+
+        try:
+            print(json.dumps(asyncio.run(listar_por_mcp()), ensure_ascii=False, indent=2))
+        except Exception as error:
+            detalle = str(error).replace("\n", " ").strip() or error.__class__.__name__
+            print(f"No se pudo levantar el servidor MCP de fondos: {detalle}", file=sys.stderr)
+            raise SystemExit(1) from None
+        return
     servidor.run()
 
 

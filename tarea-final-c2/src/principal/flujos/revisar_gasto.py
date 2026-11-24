@@ -357,8 +357,13 @@ def _trazar_observaciones(mensajes: list) -> None:
         registrar_traza("observacion", {"herramienta": mensaje.name, "resultado": mensaje.content})
 
 
-def construir_agente():
-    """Arma y devuelve el grafo compilado, con memoria de conversación por hilo."""
+def construir_agente(checkpointer=None):
+    """Arma y devuelve el grafo compilado, con memoria de conversación por hilo.
+
+    `checkpointer`: dónde se guarda la memoria por thread_id. Por defecto en memoria
+    (InMemorySaver, se pierde al reiniciar); en el servicio se pasa el de Postgres
+    (crear_checkpointer() de Sebastián) para que la memoria persista.
+    """
     llm = obtener_llm().bind_tools(HERRAMIENTAS)
     nodo_herramientas = ToolNode(HERRAMIENTAS, handle_tool_errors=(ToolException,))
 
@@ -655,7 +660,7 @@ def construir_agente():
     grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm", END])
     grafo.add_edge("cerrar", END)
     grafo.add_edge("parada", END)
-    return grafo.compile(checkpointer=InMemorySaver())
+    return grafo.compile(checkpointer=checkpointer if checkpointer is not None else InMemorySaver())
 
 
 def conversar(agente, mensaje: str, hilo: str) -> str:

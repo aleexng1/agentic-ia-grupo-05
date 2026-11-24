@@ -14,5 +14,11 @@ Servidor MCP con la herramienta `consultar_fondo`, que reutiliza `src/principal/
 Probarlo a mano (desde `tarea-final-c2/`, con el `.venv` activado):
 
 ```
+python -m src.mcp_fondos.servidor --listar
+```
+Levanta el servidor igual que el agente y muestra su nombre y sus herramientas (evidencia de
+`evidencias/ampliacion-mcp/`). Para pedir un fondo:
+
+```
 python -c "from src.principal.herramientas.consultar_fondo import consultar_fondo; print(consultar_fondo.invoke({'id_fondo': 'FR-001'}))"
 ```
