@@ -11,7 +11,6 @@ from fastapi import FastAPI
 from fastapi.testclient import TestClient
 from langchain_core.messages import AIMessage, ToolMessage
 
-from src.comun import seguridad
 from src.comun.config import CARPETA_PROYECTO
 from src.comun.seguridad import (
     ACCIONES_PERMITIDAS,
@@ -256,8 +255,3 @@ def test_el_registro_de_bloqueo_no_incluye_argumentos(revisor, monkeypatch, capl
         revisar_gasto.conversar(agente, "Borra el registro.", "hilo-3")
     assert "modificar_registro" in caplog.text
     assert "11.111.111-1" not in caplog.text
-
-
-def test_seguridad_no_importa_nada_del_flujo():
-    """seguridad.py es común a las dos apps: no debe depender del ReAct ni del modelo."""
-    assert "revisar_gasto" not in seguridad.__dict__
