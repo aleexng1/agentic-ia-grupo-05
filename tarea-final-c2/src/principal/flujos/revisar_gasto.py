@@ -1,0 +1,614 @@
+"""Ciclo ReAct del agente con historial de conversación (LangGraph).
+
+Origen: tarea-final-c1/src/grafo.py, copiado sin cambios de lógica (solo imports).
+Dueño en C2: Matías (c2tf/matias-react-seguridad). Pendiente: convertirlo en el nodo
+"revisar_gasto" del grafo principal, sumar consultar_fondo y delegar_verificador a las
+herramientas, y devolver pasos / herramientas_usadas / estado_final (docs/contratos.md).
+
+El ciclo es:
+    LLM ──(pide herramienta)──> herramientas ──(observación)──> LLM ...
+    LLM ──(responde sin pedir herramientas)──> FIN
+    si se llega a MAX_PASOS ──> parada ──> FIN
+"""
+
+import json
+import re
+
+from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
+from langchain_core.tools import ToolException, tool
+from langgraph.checkpoint.memory import InMemorySaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.prebuilt import ToolNode
+
+from src.comun.config import registrar_traza
+from src.comun.modelos import obtener_llm
+from src.comun.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
+from src.principal.herramientas.validar_gasto import (
+    GRAVEDAD,
+    campos_alterados,
+    decision_sugerida,
+    efecto_de,
+    resolver_categoria,
+    resolver_politica,
+    validar_gasto,
+)
+from src.principal.herramientas.fondos import (
+    anexar_revision_saldo,
+    aplicar_veredicto,
+    buscar_fondo,
+    resumen_fondo,
+)
+from src.conocimiento.rag.rag import buscar_politica
+from src.principal.registro_veredictos import registrar_veredicto
+from src.principal.juez import PROMPT_SISTEMA, juzgar_con_validacion
+
+# Herramientas que el LLM puede pedir.
+@tool
+def emitir_veredicto(
+    decision: Decision,
+    politica: str,
+    categoria: str,
+    cuenta: str,
+    motivo: str,
+) -> Veredicto:
+    """Cierra la revisión después de validar; entrega la decisión como datos estructurados.
+
+    politica debe ser el código Pxx. El grafo verifica luego que la decisión no sea
+    más permisiva que las reglas, el juez y el saldo del fondo.
+    """
+    try:
+        if decision not in DECISIONES:
+            raise ValueError(f"Decisión no permitida: {decision}.")
+        datos_politica = resolver_politica(politica)
+        categoria_exacta = resolver_categoria(datos_politica, categoria)
+        cuenta = cuenta.strip()
+        motivo = motivo.strip()
+        if not cuenta or not motivo:
+            raise ValueError("se requieren cuenta y motivo no vacíos.")
+        cuenta_correcta = datos_politica["categorias"][categoria_exacta]["cuenta"]
+        if cuenta != cuenta_correcta:
+            raise ValueError(
+                f"La cuenta para {datos_politica['codigo']} / {categoria_exacta} "
+                f"debe ser {cuenta_correcta}, no {cuenta}."
+            )
+        return {
+            "decision": decision,
+            "motivo": motivo,
+            "politica_sugerida": datos_politica["codigo"],
+            "categoria_sugerida": categoria_exacta,
+            "cuenta_sugerida": cuenta_correcta,
+        }
+    except (ValueError, KeyError, TypeError) as error:
+        raise ToolException(f"Veredicto inválido; corrige los campos: {error}") from error
+
+
+emitir_veredicto.handle_tool_error = True
+
+
+HERRAMIENTAS = [buscar_politica, validar_gasto, emitir_veredicto]
+
+
+def _leer_resultado_herramienta(mensaje: ToolMessage):
+    """Convierte el contenido JSON de una herramienta a datos de Python."""
+    contenido = mensaje.content
+    if isinstance(contenido, dict):
+        return contenido
+    if isinstance(contenido, list):
+        bloques_texto = [
+            parte for parte in contenido
+            if isinstance(parte, dict) and isinstance(parte.get("text"), str)
+        ]
+        if bloques_texto and len(bloques_texto) == len(contenido):
+            contenido = "".join(parte["text"] for parte in bloques_texto)
+        else:
+            return contenido
+    if not isinstance(contenido, str):
+        return None
+    try:
+        return json.loads(contenido)
+    except json.JSONDecodeError:
+        return None
+
+
+def _inicio_turno_actual(mensajes: list) -> int:
+    """Devuelve la posición del último mensaje del usuario."""
+    for indice in range(len(mensajes) - 1, -1, -1):
+        if isinstance(mensajes[indice], HumanMessage):
+            return indice
+    return 0
+
+
+def _fragmentos_en_historial(mensajes: list) -> list[dict]:
+    """Recupera solo los fragmentos RAG del gasto consultado en este turno."""
+    fragmentos = []
+    inicio = _inicio_turno_actual(mensajes)
+    for mensaje in mensajes[inicio + 1 :]:
+        if isinstance(mensaje, ToolMessage) and mensaje.name == "buscar_politica":
+            resultado = _leer_resultado_herramienta(mensaje)
+            if isinstance(resultado, list):
+                fragmentos.extend(item for item in resultado if isinstance(item, dict))
+    return fragmentos
+
+
+def _hay_validacion_exitosa_en_turno(mensajes: list) -> bool:
+    """Evita reutilizar la validación de un gasto anterior en un turno nuevo."""
+    inicio = _inicio_turno_actual(mensajes)
+    for mensaje in mensajes[inicio + 1 :]:
+        if not isinstance(mensaje, ToolMessage) or mensaje.name != "validar_gasto":
+            continue
+        resultado = _leer_resultado_herramienta(mensaje)
+        if isinstance(resultado, dict) and {"cumple", "incumplimientos", "cuenta"} <= resultado.keys():
+            return True
+    return False
+
+
+def _emitio_veredicto_en_turno(mensajes: list) -> bool:
+    """Detecta el cierre estructurado del caso actual, no el de un hilo anterior."""
+    inicio = _inicio_turno_actual(mensajes)
+    return any(
+        isinstance(mensaje, ToolMessage) and mensaje.name == "emitir_veredicto"
+        for mensaje in mensajes[inicio + 1 :]
+    )
+
+
+def _emitio_veredicto_valido_en_turno(mensajes: list) -> bool:
+    """Solo cierra si emitir_veredicto devolvió el Veredicto completo."""
+    inicio = _inicio_turno_actual(mensajes)
+    campos = {
+        "decision",
+        "motivo",
+        "politica_sugerida",
+        "categoria_sugerida",
+        "cuenta_sugerida",
+    }
+    for mensaje in mensajes[inicio + 1 :]:
+        if not isinstance(mensaje, ToolMessage) or mensaje.name != "emitir_veredicto":
+            continue
+        resultado = _leer_resultado_herramienta(mensaje)
+        if isinstance(resultado, dict) and campos <= resultado.keys():
+            return True
+    return False
+
+
+def _estado_con_gasto_original(estado: EstadoAgente) -> tuple[EstadoAgente, AIMessage | None]:
+    """Sustituye los argumentos del LLM por el gasto original recibido en el estado."""
+    gasto_original = estado.get("gasto")
+    mensajes = estado.get("messages", [])
+    if not gasto_original or not mensajes or not isinstance(mensajes[-1], AIMessage):
+        return estado, None
+
+    respuesta = mensajes[-1]
+    llamadas_actualizadas = []
+    cambio = False
+    for llamada in getattr(respuesta, "tool_calls", []):
+        llamada = dict(llamada)
+        argumentos = llamada.get("args", {})
+        if llamada.get("name") == "validar_gasto" and isinstance(argumentos, dict):
+            campos = campos_alterados(gasto_original, argumentos.get("gasto"))
+            if campos:
+                registrar_traza(
+                    "campos_alterados",
+                    {"gasto": gasto_original.get("id"), "campos": campos},
+                )
+            if argumentos.get("gasto") != gasto_original:
+                llamada["args"] = {**argumentos, "gasto": gasto_original}
+                cambio = True
+        llamadas_actualizadas.append(llamada)
+
+    if not cambio:
+        return estado, None
+
+    respuesta_corregida = respuesta.model_copy(update={"tool_calls": llamadas_actualizadas})
+    mensajes_corregidos = [*mensajes[:-1], respuesta_corregida]
+    registrar_traza(
+        "gasto_original_restaurado",
+        {"gasto": gasto_original.get("id"), "motivo": "se ignoraron cambios propuestos por el LLM"},
+    )
+    return {**estado, "messages": mensajes_corregidos}, respuesta_corregida
+
+
+def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dict:
+    """Guarda los datos estructurados que devolvieron las herramientas."""
+    if not mensajes or not estado.get("messages"):
+        return {}
+
+    ultima_respuesta = estado["messages"][-1]
+    llamadas = {
+        llamada.get("id"): llamada
+        for llamada in getattr(ultima_respuesta, "tool_calls", [])
+    }
+    mensajes_actualizados = list(mensajes)
+    fragmentos = _fragmentos_en_historial(estado["messages"])
+    for mensaje in mensajes_actualizados:
+        if isinstance(mensaje, ToolMessage) and mensaje.name == "buscar_politica":
+            resultado = _leer_resultado_herramienta(mensaje)
+            if isinstance(resultado, list):
+                fragmentos.extend(item for item in resultado if isinstance(item, dict))
+    actualizaciones = {}
+
+    for indice, mensaje in enumerate(mensajes_actualizados):
+        if not isinstance(mensaje, ToolMessage):
+            continue
+        llamada = llamadas.get(mensaje.tool_call_id, {})
+        argumentos = llamada.get("args", {})
+        resultado = _leer_resultado_herramienta(mensaje)
+
+        if mensaje.name != "validar_gasto" or not isinstance(resultado, dict):
+            continue
+
+        gasto = argumentos.get("gasto")
+        if not isinstance(gasto, dict):
+            continue
+
+        fondo = estado.get("fondo")
+        if not fondo or fondo["id_fondo"] != gasto.get("id_fondo"):
+            fondo = buscar_fondo(gasto.get("id_fondo"))
+        validacion = anexar_revision_saldo(resultado, fondo, gasto)
+        mensajes_actualizados[indice] = ToolMessage(
+            content=json.dumps(validacion, ensure_ascii=False),
+            tool_call_id=mensaje.tool_call_id,
+            name=mensaje.name,
+            status=mensaje.status,
+        )
+        politica = resolver_politica(str(argumentos.get("politica", "")))
+        codigo_politica = politica["codigo"]
+        categoria = resolver_categoria(politica, str(argumentos.get("categoria", "")))
+        try:
+            codigo_declarado = resolver_politica(str(gasto.get("politica_declarada", "")))["codigo"]
+        except ValueError:
+            codigo_declarado = ""
+        categoria_declarada = str(gasto.get("categoria_declarada", "")).strip().casefold()
+
+        actualizaciones["gasto"] = gasto
+        actualizaciones["fondo"] = fondo
+        actualizaciones["validacion"] = validacion
+        # Un gasto nuevo invalida el veredicto anterior mientras se decide este.
+        actualizaciones["veredicto"] = None
+        actualizaciones["clasificacion"] = {
+            "politica": codigo_politica,
+            "categoria": categoria,
+            "cuenta": str(validacion.get("cuenta", "")),
+            "coincide_con_declarada": (
+                codigo_declarado == codigo_politica
+                and categoria_declarada == categoria.strip().casefold()
+            ),
+            "razon": "Clasificación y validación solicitadas por el agente.",
+            "fragmentos": fragmentos,
+        }
+
+    mensajes_del_turno = [*estado["messages"], *mensajes_actualizados]
+    if _hay_validacion_exitosa_en_turno(mensajes_del_turno):
+        for mensaje in mensajes_actualizados:
+            if not isinstance(mensaje, ToolMessage) or mensaje.name != "emitir_veredicto":
+                continue
+            resultado = _leer_resultado_herramienta(mensaje)
+            if isinstance(resultado, dict) and {
+                "decision",
+                "motivo",
+                "politica_sugerida",
+                "categoria_sugerida",
+                "cuenta_sugerida",
+            } <= resultado.keys():
+                actualizaciones["veredicto"] = resultado
+
+    actualizaciones["messages"] = mensajes_actualizados
+    return actualizaciones
+
+
+def _trazar_observaciones(mensajes: list) -> None:
+    """Muestra los resultados de herramientas que llegaron desde la última respuesta del LLM."""
+    for mensaje in reversed(mensajes):
+        if not isinstance(mensaje, ToolMessage):
+            break
+        registrar_traza("observacion", {"herramienta": mensaje.name, "resultado": mensaje.content})
+
+
+def construir_agente():
+    """Arma y devuelve el grafo compilado, con memoria de conversación por hilo."""
+    llm = obtener_llm().bind_tools(HERRAMIENTAS)
+    nodo_herramientas = ToolNode(HERRAMIENTAS, handle_tool_errors=(ToolException,))
+
+    def nodo_llm(estado: EstadoAgente) -> dict:
+        # Una vuelta del ciclo: el LLM lee el historial y decide (pensar → actuar).
+        _trazar_observaciones(estado["messages"])
+        pasos = estado.get("pasos", 0) + 1
+        respuesta = llm.invoke([SystemMessage(PROMPT_SISTEMA), *estado["messages"]])
+        texto_respuesta = respuesta.text or ""
+        sin_veredicto_del_turno = not _emitio_veredicto_valido_en_turno(estado["messages"])
+        respuesta_final_insegura = (
+            not respuesta.tool_calls
+            and (
+                (estado.get("gasto") and sin_veredicto_del_turno)
+                or re.search(r"\bdecisi[oó]n\s*:\s*aprobar\b", texto_respuesta, re.IGNORECASE)
+            )
+        )
+        if respuesta_final_insegura:
+            registrar_traza(
+                "respuesta_sin_veredicto_bloqueada",
+                {
+                    "gasto": (estado.get("gasto") or {}).get("id"),
+                    "motivo": "el turno no contiene un emitir_veredicto válido",
+                },
+            )
+            respuesta = AIMessage(
+                "No puedo cerrar esta revisión: no se emitió un veredicto estructurado válido para el gasto."
+            )
+        registrar_traza(
+            "llm",
+            {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
+        )
+        return {"messages": [respuesta], "pasos": pasos}
+
+    def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
+        estado_para_herramientas, respuesta_corregida = _estado_con_gasto_original(estado)
+        respuesta = estado_para_herramientas["messages"][-1]
+        llamadas = getattr(respuesta, "tool_calls", [])
+        nombres_bloqueados = {"validar_gasto", "emitir_veredicto"}
+        llamadas_bloqueadas = []
+        if not estado_para_herramientas.get("gasto"):
+            llamadas_bloqueadas = [
+                llamada for llamada in llamadas if llamada.get("name") in nombres_bloqueados
+            ]
+
+        if llamadas_bloqueadas:
+            llamadas_permitidas = [
+                llamada for llamada in llamadas if llamada.get("name") not in nombres_bloqueados
+            ]
+            mensajes_por_id = {}
+            if llamadas_permitidas:
+                nombres_permitidos = {llamada["name"] for llamada in llamadas_permitidas}
+                herramientas_permitidas = [
+                    herramienta for herramienta in HERRAMIENTAS
+                    if herramienta.name in nombres_permitidos
+                ]
+                respuesta_segura = respuesta.model_copy(update={"tool_calls": llamadas_permitidas})
+                estado_seguro = {
+                    **estado_para_herramientas,
+                    "messages": [*estado_para_herramientas["messages"][:-1], respuesta_segura],
+                }
+                resultado = ToolNode(
+                    herramientas_permitidas, handle_tool_errors=(ToolException,)
+                ).invoke(estado_seguro)
+                mensajes_por_id.update({m.tool_call_id: m for m in resultado.get("messages", [])})
+            for llamada in llamadas_bloqueadas:
+                mensajes_por_id[llamada["id"]] = ToolMessage(
+                    "No ejecutada: carga el Gasto original con conversar_con_caso antes de validar o emitir el veredicto.",
+                    tool_call_id=llamada["id"],
+                    name=llamada["name"],
+                    status="error",
+                )
+            mensajes = [mensajes_por_id[llamada["id"]] for llamada in llamadas if llamada["id"] in mensajes_por_id]
+            for llamada in llamadas_bloqueadas:
+                registrar_traza(
+                    "herramienta_bloqueada",
+                    {"herramienta": llamada["name"], "motivo": "falta el Gasto original en el estado"},
+                )
+        else:
+            resultado = nodo_herramientas.invoke(estado_para_herramientas)
+            mensajes = resultado.get("messages", [])
+        if respuesta_corregida is not None:
+            mensajes = [respuesta_corregida, *mensajes]
+        actualizaciones = {"messages": mensajes}
+        actualizaciones.update(_actualizar_estado_herramientas(estado_para_herramientas, mensajes))
+        return actualizaciones
+
+    def nodo_cerrar(estado: EstadoAgente) -> dict:
+        """Aplica el piso de reglas, el juez, el fondo y el registro al veredicto final."""
+        if not _hay_validacion_exitosa_en_turno(estado["messages"]):
+            registrar_traza("cerrar", {"registrado": False, "motivo": "sin validar_gasto en este turno"})
+            if _emitio_veredicto_en_turno(estado["messages"]):
+                return {
+                    "messages": [
+                        AIMessage(
+                            "Decisión: OBSERVAR\n\n"
+                            "No puedo registrar ni decidir un gasto que no se validó en este turno."
+                        )
+                    ]
+                }
+            return {}
+
+        veredicto = estado.get("veredicto")
+        gasto = estado.get("gasto")
+        validacion = estado.get("validacion")
+        clasificacion = estado.get("clasificacion")
+        if not veredicto or not gasto or not validacion or not clasificacion:
+            registrar_traza("cerrar", {"registrado": False, "motivo": "falta emitir_veredicto estructurado"})
+            return {
+                "messages": [
+                    AIMessage(
+                        "No recibí un veredicto estructurado válido; no apliqué el fondo ni registré el gasto."
+                    )
+                ]
+            }
+
+        veredicto = dict(veredicto)
+        propuesta = veredicto["decision"]
+        ajustes = []
+        sugerencias_correctas = {
+            "politica_sugerida": clasificacion["politica"],
+            "categoria_sugerida": clasificacion["categoria"],
+            "cuenta_sugerida": validacion["cuenta"],
+        }
+        for campo, valor_correcto in sugerencias_correctas.items():
+            if veredicto.get(campo) != valor_correcto:
+                ajustes.append(f"se corrigió {campo} según clasificación y validación")
+                veredicto[campo] = valor_correcto
+
+        piso = decision_sugerida(validacion)
+        incumplimientos = validacion.get("incumplimientos", [])
+        if (incumplimientos or not validacion.get("cumple", True)) and veredicto["decision"] == "aprobar":
+            decision_segura = piso if piso != "aprobar" else "observar"
+            veredicto["decision"] = decision_segura
+            reglas = ", ".join(item.get("regla", "regla sin código") for item in incumplimientos)
+            registrar_traza(
+                "aprobacion_bloqueada",
+                {"decision_sugerida": decision_segura, "reglas": reglas},
+            )
+            ajustes.append(
+                "validar_gasto encontró incumplimientos"
+                + (f" ({reglas})" if reglas else "")
+            )
+        if GRAVEDAD[veredicto["decision"]] < GRAVEDAD[piso]:
+            registrar_traza("piso_reglas", {"llm": veredicto["decision"], "reglas": piso})
+            veredicto["decision"] = piso
+            reglas = ", ".join(
+                incumplimiento["regla"]
+                for incumplimiento in validacion["incumplimientos"]
+                if efecto_de(incumplimiento) == piso
+            )
+            ajustes.append(f"las reglas exactas exigen {piso.upper()} ({reglas})")
+
+        juicio = juzgar_con_validacion(gasto, clasificacion, validacion, veredicto)
+        registrar_traza("juez", juicio)
+        if not juicio.get("evaluado", False):
+            if veredicto["decision"] == "aprobar":
+                veredicto["decision"] = "observar"
+            ajustes.append(f"falta de respuesta confiable del juez: {juicio['razon']}")
+        elif not juicio["valido"] and veredicto["decision"] == "aprobar":
+            veredicto["decision"] = "observar"
+            ajustes.append(f"el juez no validó la aprobación: {juicio['razon']}")
+
+        fondo = estado.get("fondo") or buscar_fondo(gasto.get("id_fondo"))
+        try:
+            nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
+        except ValueError as error:
+            registrar_traza("fondo_error", {"error": str(error)})
+            veredicto["decision"] = "observar"
+            ajustes.append(f"el fondo no permite aprobar ({error})")
+            nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
+
+        respuesta_ajustada = None
+        if ajustes:
+            veredicto["motivo"] += (
+                f" [Ajustado de {propuesta.upper()} a {veredicto['decision'].upper()}: "
+                f"{'; '.join(ajustes)}.]"
+            )
+            respuesta_ajustada = (
+                f"Decisión: {veredicto['decision'].upper()}\n\n"
+                f"Ajusté la propuesta del agente ({propuesta.upper()}): {'; '.join(ajustes)}."
+            )
+
+        registro = registrar_veredicto(gasto, veredicto)
+        registrar_traza(
+            "fondo",
+            {"antes": resumen_fondo(fondo), "despues": resumen_fondo(nuevo_fondo)},
+        )
+        registrar_traza(
+            "registro",
+            {
+                "antes": registro["antes"],
+                "despues": registro["despues"],
+                "id_gasto": registro["id_gasto"],
+                "decision": registro["decision"],
+                "operacion": registro["operacion"],
+            },
+        )
+        respuesta_final = (
+            f"Decisión: {veredicto['decision'].upper()}\n"
+            f"Política: {veredicto['politica_sugerida']}\n"
+            f"Categoría: {veredicto['categoria_sugerida']}\n"
+            f"Cuenta: {veredicto['cuenta_sugerida']}\n"
+            f"Motivo: {veredicto['motivo']}"
+        )
+        actualizaciones = {
+            "veredicto": veredicto,
+            "fondo": nuevo_fondo,
+            "clasificacion": {**clasificacion, "razon": veredicto["motivo"]},
+            "messages": [AIMessage(respuesta_ajustada or respuesta_final)],
+        }
+        return actualizaciones
+
+    def nodo_parada(estado: EstadoAgente) -> dict:
+        # Se llegó al máximo de pasos: se cierran las llamadas pendientes y se avisa.
+        pendientes = estado["messages"][-1].tool_calls
+        cierres = [
+            ToolMessage("No ejecutada: se alcanzó el máximo de pasos.", tool_call_id=llamada["id"])
+            for llamada in pendientes
+        ]
+        aviso = AIMessage(f"Me detuve: alcancé el máximo de {MAX_PASOS} pasos sin una decisión final.")
+        registrar_traza("parada", {"motivo": "MAX_PASOS", "pasos": estado.get("pasos", 0)})
+        return {"messages": [*cierres, aviso]}
+
+    def elegir_siguiente(estado: EstadoAgente) -> str:
+        if not estado["messages"][-1].tool_calls:
+            # Si el agente termina sin emitir estructura tras validar, se cierra de forma segura.
+            if _hay_validacion_exitosa_en_turno(estado["messages"]):
+                return "cerrar"
+            return END
+        if estado.get("pasos", 0) >= MAX_PASOS:
+            return "parada"
+        return "herramientas"
+
+    def elegir_despues_herramientas(estado: EstadoAgente) -> str:
+        if not estado.get("gasto") and _emitio_veredicto_en_turno(estado["messages"]):
+            return "cerrar"
+        if _emitio_veredicto_valido_en_turno(estado["messages"]):
+            return "cerrar"
+        return "llm"
+
+    grafo = StateGraph(EstadoAgente)
+    grafo.add_node("llm", nodo_llm)
+    grafo.add_node("herramientas", nodo_ejecutar_herramientas)
+    grafo.add_node("cerrar", nodo_cerrar)
+    grafo.add_node("parada", nodo_parada)
+    grafo.add_edge(START, "llm")
+    grafo.add_conditional_edges("llm", elegir_siguiente, ["herramientas", "cerrar", "parada", END])
+    grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm"])
+    grafo.add_edge("cerrar", END)
+    grafo.add_edge("parada", END)
+    return grafo.compile(checkpointer=InMemorySaver())
+
+
+def conversar(agente, mensaje: str, hilo: str) -> str:
+    """Envía un mensaje al agente y devuelve su respuesta en texto.
+
+    Úsala para turnos conversacionales sin un gasto estructurado. El mismo `hilo`
+    mantiene mensajes y fondo, pero no reutiliza el gasto de un turno anterior.
+    Para revisar un gasto usa `conversar_con_caso` con el objeto original.
+    """
+    return _conversar_con_estado(agente, mensaje, hilo, {})
+
+
+def conversar_con_fondo(
+    agente, mensaje: str, hilo: str, fondo: EstadoFondo
+) -> str:
+    """Inicia un turno cargando el fondo en el estado antes de llamar al LLM.
+
+    Úsala solo para turnos sin gasto. Si el turno incluye un gasto, usa
+    `conversar_con_caso` para cargar también el gasto original.
+    """
+    return _conversar_con_estado(agente, mensaje, hilo, {"fondo": fondo})
+
+
+def conversar_con_caso(
+    agente,
+    mensaje: str,
+    hilo: str,
+    gasto: Gasto,
+    fondo: EstadoFondo | None = None,
+) -> str:
+    """Inicia un turno con el gasto original y, opcionalmente, el fondo inicial."""
+    estado_inicial = {"gasto": gasto}
+    if fondo is not None:
+        estado_inicial["fondo"] = fondo
+    return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
+
+
+def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict) -> str:
+    """Ejecuta un turno y conserva los campos existentes del hilo."""
+    # recursion_limit es un freno de respaldo de LangGraph, por si falla la parada propia.
+    configuracion = {"configurable": {"thread_id": hilo}, "recursion_limit": 3 * MAX_PASOS}
+    # pasos vuelve a 0 en cada turno: el límite es por turno, no por conversación.
+    entrada = {
+        "messages": [HumanMessage(mensaje)],
+        "pasos": 0,
+        "gasto": None,
+        "clasificacion": None,
+        "validacion": None,
+        **estado_inicial,
+    }
+    if estado_inicial.get("gasto") is not None:
+        # Un gasto nuevo nunca hereda el veredicto del gasto anterior.
+        entrada["veredicto"] = None
+    resultado = agente.invoke(entrada, configuracion)
+    return resultado["messages"][-1].text
