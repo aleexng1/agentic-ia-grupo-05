@@ -215,3 +215,28 @@ Una fila por cada llamada a `/chat` (`src/comun/registro.py`). Va en **Postgres*
 Nombres y para qué sirven: ver `.env.example`. Las lee `src/comun/config.py` (y `modelos.py`,
 `seguridad.py`, `rag.py`). Además de la lista acordada se usan `EMBEDDING_MODEL` y `REDIS_PREFIJO`
 (las pide el RAG de c1) y `MOSTRAR_TRAZAS` (trazas del ReAct).
+
+---
+
+## 11. Agregados por Alex (revisar)
+
+Todo lo de esta sección es **agregado por Alex, revisar**. Solo suma campos opcionales o valores
+nuevos; no cambia ni borra nada de las secciones 1 a 10.
+
+### 11.1 `POST /chat` (etapa 1: router y grafo)
+- `thread_id` pasa a ser **opcional**: si no viene, se crea uno nuevo (uuid) y se devuelve.
+- `gasto` **opcional** en la solicitud: un `Gasto` (§4) más `rut_emisor` y `folio` opcionales
+  (solo se usan en el encargo al verificador; el ReAct recibe únicamente los campos de `Gasto`).
+  Si no viene, el flujo `revisar_gasto` busca un objeto JSON con `"monto"` dentro de `texto`.
+  Si faltan campos obligatorios, el flujo los pide (no los completa).
+- El largo de `texto` (1 a 4000) lo revisa el router **antes** de llamar al modelo:
+  `422 {"detail": "El mensaje está vacío…"}` o `"…tiene N caracteres y el máximo es 4000…"`.
+- Respuesta `200`: además de `id_ejecucion, thread_id, ruta, respuesta, estado_final` (y `veredicto`),
+  trae `motivo` (del router), `hubo_a2a`, `herramientas_usadas`, `pasos` y, si hubo boleta, `verificacion`.
+- `502`: el `detail` termina con `(id_ejecucion: …)` para buscarla en el registro.
+- Tabla `ejecuciones`: si el turno falla antes de elegir ruta, la fila va con `ruta = "sin_ruta"`
+  y `estado_final = "error"`.
+- Un flujo que todavía no existe termina con `estado_final = "error"` y la respuesta
+  «Flujo <nombre> todavía no implementado.».
+- Si el router respondió con el modelo de respaldo, la ejecución queda `estado_final = "fallback"`.
+- Orden cuando dos piezas terminan distinto: `bloqueado` > `error` > `fallback` > `ok`.
