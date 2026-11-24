@@ -239,7 +239,7 @@ def test_el_bloqueo_no_se_hereda_al_turno_siguiente(revisor, monkeypatch):
 
     texto = revisar_gasto.conversar(agente, "Hola, ¿qué puedes hacer?", "hilo-2")
     estado = _estado(agente, "hilo-2")
-    assert estado["estado_final"] is None
+    assert estado["estado_final"] == "ok"
     assert "revisar gastos" in texto
     assert llm.llamadas == 2
 

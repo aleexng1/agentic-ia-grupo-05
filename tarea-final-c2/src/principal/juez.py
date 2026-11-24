@@ -40,7 +40,9 @@ FLUJO PARA REVISAR UN GASTO:
    «Cuándo NO usarla». No inventes reuniones, capacitaciones, viajes ni consumo
    interno para justificar otra categoría. Un documento inválido NO cambia la
    finalidad del gasto y nunca permite reclasificar para evitar un rechazo.
-2. Ejecuta validar_gasto con el gasto recibido, la política y la categoría correctas.
+2. Consulta el fondo por rendir con consultar_fondo usando el id_fondo del gasto, para
+   conocer el saldo disponible (RG-08). Si falla, dilo; nunca supongas un saldo.
+   Luego ejecuta validar_gasto con el gasto recibido, la política y la categoría correctas.
    La salida determinista es autoridad para las reglas exactas: no la sustituyas,
    alteres ni completes con resultados inventados.
 3. Solo después de recibir una validación confiable de validar_gasto en este turno,

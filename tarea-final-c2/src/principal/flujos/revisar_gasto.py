@@ -1,9 +1,11 @@
 """Ciclo ReAct del agente con historial de conversación (LangGraph).
 
-Origen: tarea-final-c1/src/grafo.py, copiado sin cambios de lógica (solo imports).
-Dueño en C2: Matías (c2tf/matias-react-seguridad). Pendiente: convertirlo en el nodo
-"revisar_gasto" del grafo principal, sumar consultar_fondo y delegar_verificador a las
-herramientas, y devolver pasos / herramientas_usadas / estado_final (docs/contratos.md).
+Origen: tarea-final-c1/src/grafo.py (imports ajustados).
+Dueño en C2: Matías (c2tf/matias-react-seguridad).
+Hecho en C2: consultar_fondo (por MCP) entre las herramientas, estado_final por cada
+salida del ciclo y revisar_caso, que devuelve pasos / herramientas_usadas / estado_final /
+veredicto (docs/contratos.md). Pendiente con Alex: sumar delegar_verificador cuando exista,
+y cambiar obtener_llm por obtener_llm_con_respaldo cuando se una el PR de Sebastián.
 
 El ciclo es:
     LLM ──(pide herramienta)──> herramientas ──(observación)──> LLM ...
@@ -38,6 +40,7 @@ from src.principal.herramientas.validar_gasto import (
     resolver_politica,
     validar_gasto,
 )
+from src.principal.herramientas.consultar_fondo import consultar_fondo
 from src.principal.herramientas.fondos import (
     anexar_revision_saldo,
     aplicar_veredicto,
@@ -91,7 +94,7 @@ def emitir_veredicto(
 emitir_veredicto.handle_tool_error = True
 
 
-HERRAMIENTAS = [buscar_politica, validar_gasto, emitir_veredicto]
+HERRAMIENTAS = [buscar_politica, consultar_fondo, validar_gasto, emitir_veredicto]
 
 
 class EstadoRevision(EstadoAgente):
@@ -269,6 +272,21 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
         argumentos = llamada.get("args", {})
         resultado = _leer_resultado_herramienta(mensaje)
 
+        if mensaje.name == "consultar_fondo" and isinstance(resultado, dict) and "id_fondo" in resultado:
+            # El MCP entrega el fondo registrado (saldo inicial). Si el hilo ya tiene ese fondo
+            # con aprobaciones anteriores, manda el saldo vigente del hilo (RG-08, caso GS-26).
+            vigente = actualizaciones.get("fondo") or estado.get("fondo")
+            if vigente and vigente["id_fondo"] == resultado["id_fondo"]:
+                mensajes_actualizados[indice] = ToolMessage(
+                    content=json.dumps(vigente, ensure_ascii=False),
+                    tool_call_id=mensaje.tool_call_id,
+                    name=mensaje.name,
+                    status=mensaje.status,
+                )
+            else:
+                actualizaciones["fondo"] = resultado
+            continue
+
         if mensaje.name != "validar_gasto" or not isinstance(resultado, dict):
             continue
 
@@ -373,7 +391,11 @@ def construir_agente():
             "llm",
             {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
         )
-        return {"messages": [respuesta], "pasos": pasos}
+        actualizaciones = {"messages": [respuesta], "pasos": pasos}
+        if not respuesta.tool_calls:
+            # Parada normal: el modelo respondió sin pedir herramientas (si validó, sigue "cerrar").
+            actualizaciones["estado_final"] = "ok"
+        return actualizaciones
 
     def nodo_ejecutar_herramientas(estado: EstadoRevision) -> dict:
         # Seguridad (C2): antes de ejecutar NADA se revisa cada acción pedida. Si alguna no está
@@ -461,7 +483,11 @@ def construir_agente():
         actualizaciones.update(_actualizar_estado_herramientas(estado_para_herramientas, mensajes))
         return actualizaciones
 
-    def nodo_cerrar(estado: EstadoAgente) -> dict:
+    def nodo_cerrar(estado: EstadoRevision) -> dict:
+        """Cierre normal del ciclo (veredicto válido o cierre seguro): estado_final = "ok"."""
+        return {**_cerrar(estado), "estado_final": "ok"}
+
+    def _cerrar(estado: EstadoRevision) -> dict:
         """Aplica el piso de reglas, el juez, el fondo y el registro al veredicto final."""
         if not _hay_validacion_exitosa_en_turno(estado["messages"]):
             registrar_traza("cerrar", {"registrado": False, "motivo": "sin validar_gasto en este turno"})
@@ -596,7 +622,8 @@ def construir_agente():
         ]
         aviso = AIMessage(f"Me detuve: alcancé el máximo de {MAX_PASOS} pasos sin una decisión final.")
         registrar_traza("parada", {"motivo": "MAX_PASOS", "pasos": estado.get("pasos", 0)})
-        return {"messages": [*cierres, aviso]}
+        # "error" y no "fallback": no hubo veredicto ni salida de respaldo (contratos.md §8).
+        return {"messages": [*cierres, aviso], "estado_final": "error"}
 
     def elegir_siguiente(estado: EstadoAgente) -> str:
         if not estado["messages"][-1].tool_calls:
@@ -664,6 +691,34 @@ def conversar_con_caso(
     if fondo is not None:
         estado_inicial["fondo"] = fondo
     return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
+
+
+def revisar_caso(
+    agente,
+    mensaje: str,
+    hilo: str,
+    gasto: Gasto,
+    fondo: EstadoFondo | None = None,
+) -> dict:
+    """Revisa un gasto y devuelve lo que necesitan el router y la tabla `ejecuciones`.
+
+    Es la entrega del flujo revisar_gasto para Alex (docs/reparto.md):
+        {"respuesta": str, "pasos": int, "herramientas_usadas": list[str],
+         "estado_final": "ok" | "bloqueado" | "error", "veredicto": Veredicto | None}
+    - "ok": cerró con un veredicto válido (o con un cierre seguro sin aprobar).
+    - "bloqueado": el modelo pidió una acción fuera de ACCIONES_PERMITIDAS; no se ejecutó nada.
+    - "error": se detuvo por MAX_PASOS_REACT sin veredicto.
+    "fallback" lo agrega quien integra (modelo de respaldo o A2A caído), no este flujo.
+    """
+    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo)
+    estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
+    return {
+        "respuesta": respuesta,
+        "pasos": int(estado.get("pasos", 0)),
+        "herramientas_usadas": list(estado.get("herramientas_usadas", [])),
+        "estado_final": estado.get("estado_final") or "ok",
+        "veredicto": estado.get("veredicto"),
+    }
 
 
 def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict) -> str:
