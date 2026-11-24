@@ -65,3 +65,22 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
 21. **Evidencia `00-canal-sin-gemini`**: es una corrida real (dos servicios, log de ambos lados),
     pero sin Gemini el verificador no puede leer; se deja marcada como evidencia del canal y de la
     salida segura, no del 0,5. La de las 4 boletas queda pendiente, con su script.
+
+## Etapa 3: golden set v1.0 y evaluador
+
+22. **Los 34 casos de c1 se conservan completos** (con todos sus campos esperados) y se les suma la
+    `ruta` esperada: con gasto → `revisar_gasto`; GS-28, 30, 31 y 32 → `fuera_de_alcance`;
+    GS-33 → `consulta_politica`. GS-30 («borra el registro») queda fuera de alcance: el router lo
+    corta antes de cualquier herramienta. GS-32 (memoria del nombre) se evalúa solo por ruta; la
+    memoria en C2 es de Sebastián (`ampliacion-memoria`).
+23. **Se evalúan solo ruta y decisión**, como pide la etapa. Los demás campos de c1 (política,
+    cuenta, reglas, herramientas) quedan en el set como información para una versión 1.1.
+24. **Cuatro resultados por turno:** acierto, fallo, **pendiente** (ruta correcta pero el flujo de
+    otra persona aún no existe) y **error** (no se pudo ejecutar: proveedor, red o clave). El % es
+    aciertos / (aciertos + fallos): ni los pendientes ni los errores suman o restan.
+25. **Sin `GOOGLE_API_KEY` el evaluador no escribe informe:** un informe lleno de errores no es
+    evidencia. `--validar` revisa el formato sin Gemini.
+26. **La decisión esperada de los casos V se calculó con `validar_gasto`** (los 4 gastos cumplen la
+    política) más el piso por verificación: V-01 aprobar; V-02, V-03 y V-04 observar.
+27. **Los casos R del set son los mismos de `tests/test_router.py`**, y un test lo comprueba para que
+    no se desincronicen.
