@@ -84,3 +84,19 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     política) más el piso por verificación: V-01 aprobar; V-02, V-03 y V-04 observar.
 27. **Los casos R del set son los mismos de `tests/test_router.py`**, y un test lo comprueba para que
     no se desincronicen.
+
+## Pendientes que dependen de otros (al 2026-11-24)
+
+- **Matías:** el ReAct registra su veredicto (`registro_veredictos`) antes de que el grafo aplique
+  el piso por verificación. Si la boleta no cuadra, `/chat` responde «observar», pero el registro
+  queda en «aprobar». Propuesta: que `revisar_caso` reciba el resultado del verificador y aplique
+  el piso antes de registrar (o que el grafo vuelva a registrar). Comprobado con una prueba de
+  integración local (grafo + ReAct real con LLM guionado + A2A real), que no se subió.
+- **Matías:** cuando se una #95, cambiar `proteger_app` por `proteger_con_token_a2a` en
+  `src/verificador/app.py` (el cliente ya manda el Bearer).
+- **Eduardo:** `responder_consulta`. Mientras no exista, `consulta_politica` termina en «Flujo
+  consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
+- **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
+  `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1).
+- **Alex (con `GOOGLE_API_KEY`):** generar las evidencias `dos-recorridos`, `a2a` (4 boletas) y el
+  informe del evaluador, y correr `pytest -m necesita_llm`.
