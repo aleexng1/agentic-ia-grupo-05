@@ -84,18 +84,19 @@ def segundos(valor: float) -> str:
 # ---------------------------------------------------------------------------
 
 
-def conectar_postgres() -> psycopg.Connection:
-    """Abre una conexión a Postgres con DATABASE_URL.
-
-    Heroku entrega la URL como postgres://; psycopg la acepta igual, pero se normaliza
-    a postgresql:// para no depender de esa compatibilidad.
-    """
+def url_postgres() -> str:
+    """DATABASE_URL normalizada. Heroku la entrega como postgres://; se pasa a postgresql://."""
     url = os.getenv("DATABASE_URL", "").strip()
     if not url:
         raise RuntimeError("Falta DATABASE_URL en .env (en Heroku lo crea el add-on de Postgres).")
     if url.startswith("postgres://"):
         url = "postgresql://" + url[len("postgres://"):]
-    return psycopg.connect(url)
+    return url
+
+
+def conectar_postgres() -> psycopg.Connection:
+    """Abre una conexión a Postgres con DATABASE_URL."""
+    return psycopg.connect(url_postgres())
 
 
 # ---------------------------------------------------------------------------

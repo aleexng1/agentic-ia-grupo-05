@@ -129,3 +129,21 @@ def test_respaldo_con_modelo_une_los_dos(monkeypatch):
     monkeypatch.setenv("MODELO_RESPALDO", "gemini-3.5-flash-lite")
     modelo = obtener_llm_con_respaldo()
     assert type(modelo).__name__ == "RunnableWithFallbacks"
+
+
+@requiere_postgres
+def test_memoria_guarda_y_recupera_el_hilo(monkeypatch):
+    """El checkpointer crea sus tablas y devuelve el último estado guardado de un thread_id."""
+    from langgraph.checkpoint.base import empty_checkpoint
+
+    from src.comun.memoria import crear_checkpointer
+
+    monkeypatch.setenv("DATABASE_URL", URL_PRUEBA)
+    saver = crear_checkpointer()
+    saver = crear_checkpointer()  # llamarlo dos veces no debe fallar
+    configuracion = {"configurable": {"thread_id": "hilo-memoria-prueba", "checkpoint_ns": ""}}
+    checkpoint = empty_checkpoint()
+    saver.put(configuracion, checkpoint, {"source": "input", "step": 0, "writes": None, "parents": {}}, {})
+    recuperado = saver.get_tuple({"configurable": {"thread_id": "hilo-memoria-prueba"}})
+    assert recuperado is not None
+    assert recuperado.checkpoint["id"] == checkpoint["id"]
