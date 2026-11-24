@@ -24,7 +24,7 @@ Requisitos base que cubre: router + worker, ReAct con parada explícita, delegac
 seguridad (clave + bloqueo de acción no autorizada), resiliencia (timeout y fallback sin
 inventar) y despliegue con registro de ejecuciones.
 Ampliaciones planeadas: RAG documental, GraphRAG (Neo4j), MCP, memoria persistente (Postgres),
-evaluación con golden set y, de respaldo, el flujo A2A con n8n.
+evaluación con golden set y, de respaldo, un caso A2A adicional con n8n.
 
 ## Arranque local del esqueleto
 
@@ -50,7 +50,7 @@ uvicorn src.verificador.app:app --port 8001   # verificador (otra terminal)
 | `src/conocimiento/` | RAG (Redis) y GraphRAG (Neo4j) |
 | `src/mcp_fondos/` | Servidor MCP con `consultar_fondo` |
 | `web/` | Chat web |
-| `n8n/` | Flujo A2A de respaldo exportado |
+| `n8n/` | Caso A2A adicional con n8n (ampliación de respaldo) |
 | `datos/` | Política, fondos, rendiciones y boletas: todo ficticio |
 | `evaluacion/` | Golden set versionado y script de % de aciertos |
 | `tests/` | Pruebas de humo |
