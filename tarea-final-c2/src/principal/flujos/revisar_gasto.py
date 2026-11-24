@@ -9,10 +9,15 @@ El ciclo es:
     LLM ──(pide herramienta)──> herramientas ──(observación)──> LLM ...
     LLM ──(responde sin pedir herramientas)──> FIN
     si se llega a MAX_PASOS ──> parada ──> FIN
+    si pide una acción fuera de ACCIONES_PERMITIDAS ──> no se ejecuta nada ──> FIN ("bloqueado")
+
+Hecho en C2 (seguridad): el bloqueo de acciones no autorizadas en el nodo de herramientas,
+y los campos herramientas_usadas y estado_final del estado (EstadoRevision).
 """
 
 import json
 import re
+from typing import NotRequired
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import ToolException, tool
@@ -23,6 +28,7 @@ from langgraph.prebuilt import ToolNode
 from src.comun.config import registrar_traza
 from src.comun.modelos import obtener_llm
 from src.comun.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
+from src.comun.seguridad import AccionNoAutorizada, exigir_accion_permitida
 from src.principal.herramientas.validar_gasto import (
     GRAVEDAD,
     campos_alterados,
@@ -86,6 +92,36 @@ emitir_veredicto.handle_tool_error = True
 
 
 HERRAMIENTAS = [buscar_politica, validar_gasto, emitir_veredicto]
+
+
+class EstadoRevision(EstadoAgente):
+    """Estado del ReAct de c1 más lo que C2 necesita para la tabla `ejecuciones` (contratos.md §7).
+
+    Se define aquí (y no en src/comun/contrato.py, que es compartido) porque solo lo usa este flujo.
+    Los dos campos vuelven a su valor inicial en cada turno, igual que `pasos`.
+    """
+
+    herramientas_usadas: NotRequired[list[str]]  # en orden, solo las que sí se ejecutaron
+    estado_final: NotRequired[str | None]  # "bloqueado" si se impidió una acción; None mientras corre
+
+
+MENSAJE_BLOQUEO = (
+    "Bloqueé la solicitud: el agente intentó una acción no autorizada ({acciones}). "
+    "No se ejecutó ninguna herramienta de ese paso y el registro no cambió."
+)
+
+
+def _acciones_no_autorizadas(llamadas: list) -> list[str]:
+    """Nombres de las llamadas que no pasan exigir_accion_permitida (en orden, sin repetir)."""
+    bloqueadas = []
+    for llamada in llamadas:
+        nombre = llamada.get("name")
+        try:
+            exigir_accion_permitida(nombre)
+        except AccionNoAutorizada as error:
+            if error.accion not in bloqueadas:
+                bloqueadas.append(error.accion)
+    return bloqueadas
 
 
 def _leer_resultado_herramienta(mensaje: ToolMessage):
@@ -339,7 +375,32 @@ def construir_agente():
         )
         return {"messages": [respuesta], "pasos": pasos}
 
-    def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
+    def nodo_ejecutar_herramientas(estado: EstadoRevision) -> dict:
+        # Seguridad (C2): antes de ejecutar NADA se revisa cada acción pedida. Si alguna no está
+        # en ACCIONES_PERMITIDAS no se ejecuta ninguna llamada de este paso (tampoco las
+        # permitidas), se responde cada llamada pendiente y el turno termina como "bloqueado".
+        llamadas_pedidas = getattr(estado["messages"][-1], "tool_calls", [])
+        no_autorizadas = _acciones_no_autorizadas(llamadas_pedidas)
+        if no_autorizadas:
+            cierres = [
+                ToolMessage(
+                    "No ejecutada: el paso incluía una acción no autorizada y se bloqueó completo.",
+                    tool_call_id=llamada["id"],
+                    name=llamada.get("name") or "",
+                    status="error",
+                )
+                for llamada in llamadas_pedidas
+            ]
+            registrar_traza(
+                "accion_bloqueada",
+                {
+                    "no_autorizadas": no_autorizadas,
+                    "llamadas_descartadas": [llamada.get("name") for llamada in llamadas_pedidas],
+                },
+            )
+            aviso = AIMessage(MENSAJE_BLOQUEO.format(acciones=", ".join(no_autorizadas)))
+            return {"messages": [*cierres, aviso], "estado_final": "bloqueado"}
+
         estado_para_herramientas, respuesta_corregida = _estado_con_gasto_original(estado)
         respuesta = estado_para_herramientas["messages"][-1]
         llamadas = getattr(respuesta, "tool_calls", [])
@@ -386,9 +447,17 @@ def construir_agente():
         else:
             resultado = nodo_herramientas.invoke(estado_para_herramientas)
             mensajes = resultado.get("messages", [])
+        ejecutadas = [
+            mensaje.name
+            for mensaje in mensajes
+            if isinstance(mensaje, ToolMessage) and not str(mensaje.content).startswith("No ejecutada")
+        ]
         if respuesta_corregida is not None:
             mensajes = [respuesta_corregida, *mensajes]
-        actualizaciones = {"messages": mensajes}
+        actualizaciones = {
+            "messages": mensajes,
+            "herramientas_usadas": [*estado.get("herramientas_usadas", []), *ejecutadas],
+        }
         actualizaciones.update(_actualizar_estado_herramientas(estado_para_herramientas, mensajes))
         return actualizaciones
 
@@ -539,21 +608,24 @@ def construir_agente():
             return "parada"
         return "herramientas"
 
-    def elegir_despues_herramientas(estado: EstadoAgente) -> str:
+    def elegir_despues_herramientas(estado: EstadoRevision) -> str:
+        if estado.get("estado_final") == "bloqueado":
+            # Sin volver al LLM: no puede reintentar la acción ni cerrar con un veredicto.
+            return END
         if not estado.get("gasto") and _emitio_veredicto_en_turno(estado["messages"]):
             return "cerrar"
         if _emitio_veredicto_valido_en_turno(estado["messages"]):
             return "cerrar"
         return "llm"
 
-    grafo = StateGraph(EstadoAgente)
+    grafo = StateGraph(EstadoRevision)
     grafo.add_node("llm", nodo_llm)
     grafo.add_node("herramientas", nodo_ejecutar_herramientas)
     grafo.add_node("cerrar", nodo_cerrar)
     grafo.add_node("parada", nodo_parada)
     grafo.add_edge(START, "llm")
     grafo.add_conditional_edges("llm", elegir_siguiente, ["herramientas", "cerrar", "parada", END])
-    grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm"])
+    grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm", END])
     grafo.add_edge("cerrar", END)
     grafo.add_edge("parada", END)
     return grafo.compile(checkpointer=InMemorySaver())
@@ -599,9 +671,12 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
     # recursion_limit es un freno de respaldo de LangGraph, por si falla la parada propia.
     configuracion = {"configurable": {"thread_id": hilo}, "recursion_limit": 3 * MAX_PASOS}
     # pasos vuelve a 0 en cada turno: el límite es por turno, no por conversación.
+    # Lo mismo herramientas_usadas y estado_final: un bloqueo anterior no se hereda.
     entrada = {
         "messages": [HumanMessage(mensaje)],
         "pasos": 0,
+        "herramientas_usadas": [],
+        "estado_final": None,
         "gasto": None,
         "clasificacion": None,
         "validacion": None,
