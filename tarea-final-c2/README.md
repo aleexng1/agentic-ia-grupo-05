@@ -200,12 +200,17 @@ Respuesta final (abreviada): la fila de `ejecuciones` más el estado y el `resul
 - Si algo falla, `estado = "error"` y `detail` trae un mensaje claro que termina con
   `(id_ejecucion: …)`. Nunca hay un resultado inventado.
 - **Tope global:** si la ejecución pasa de `TIEMPO_MAX_EJECUCION_SEG` (90 s), queda en `error` sin
-  resultado.
+  resultado. También vale con `?esperar=true`. La hora límite se le pasa al ReAct (`hora_limite`) para
+  que, pasado el tope, no registre el veredicto. **PENDIENTE (Matías):** que `revisar_caso` lo acepte.
 - **Modo síncrono** (como antes, para uso local, pruebas o el evaluador): `POST "$URL/chat?esperar=true"`
   responde `200` con la respuesta completa. En Heroku no sirve para `revisar_gasto` (corte a los 30 s).
 - **Límite:** el estado y la respuesta completa se guardan en la memoria del proceso. Tras un
   reinicio, `GET /registro/{id}` devuelve solo la fila de Postgres (`resultado: null`).
   **PENDIENTE (Sebastián):** guardarlos en Postgres.
+- **En Heroku, el principal tiene que correr con un solo proceso** (1 dyno `web`, `uvicorn` sin
+  `--workers`, como en el `Procfile` actual) hasta que el registro guarde `en_proceso` y la respuesta.
+  Si hubiera dos procesos, el `GET /registro/{id}` podría llegar al que no tiene esa ejecución y
+  responder 404 o «sin resultado».
 - **PENDIENTE (Eduardo):** que el chat web consulte `/registro/{id}` hasta que termine. Hoy espera la
   respuesta completa en el `POST`.
 
