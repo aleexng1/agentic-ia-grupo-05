@@ -3,18 +3,20 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f5f6f8">
-  <title>Planifica tu feria · Grupo 5</title>
+  <meta name="theme-color" content="#112c43">
+  <meta name="referrer" content="no-referrer">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-tdtrDbmDm8sdiE2vGQu62M1HkFZvsMnz2jOjoYYbuwk='; style-src 'sha256-OadbXYSBCD0uelxQSP2mY8gSe70kz9jct2S4gDAjmZc='; connect-src 'self'; img-src blob:; base-uri 'none'; form-action 'none'">
+  <title>Rendiciones IA · Comercial Los Alerces SpA</title>
   <style>
     :root {
       color-scheme: light;
-      --tinta: #172b3a;
+      --tinta: #153047;
       --tinta-suave: #526672;
-      --fondo: #f5f6f8;
+      --fondo: #f3f6f8;
       --papel: #ffffff;
       --borde: #e4e9ed;
-      --azul: #176b69;
-      --azul-oscuro: #105553;
+      --azul: #126660;
+      --azul-oscuro: #0b4e49;
       --menta: #e5f4ef;
       --verde: #25846c;
       --sombra: 0 18px 50px rgba(30, 54, 68, .08);
@@ -22,7 +24,7 @@
     }
     * { box-sizing: border-box; }
     [hidden] { display: none !important; }
-    body { margin: 0; background: var(--fondo); color: var(--tinta); }
+    body { margin: 0; background: radial-gradient(ellipse at 86% 8%, #e2f2ef 0, transparent 36rem), var(--fondo); color: var(--tinta); }
     button, input, textarea { font: inherit; }
     button { min-height: 44px; }
     button:disabled { cursor: not-allowed; opacity: .6; }
@@ -30,54 +32,50 @@
     .salto { position: absolute; top: -100px; left: 12px; z-index: 1; padding: 12px; background: white; color: var(--azul); }
     .salto:focus { top: 12px; }
     .barra-superior {
-      height: 72px; display: flex; align-items: center; justify-content: space-between;
-      padding: 0 clamp(20px, 5vw, 72px); background: rgba(255,255,255,.86);
-      border-bottom: 1px solid var(--borde);
+      min-height: 72px; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 12px clamp(16px, 5vw, 72px); background: #112c43; color: #fff;
     }
     .marca { display: flex; align-items: center; gap: 12px; font-weight: 750; letter-spacing: -.03em; }
     .marca-icono {
       width: 36px; height: 36px; border-radius: 12px; display: grid; place-items: center;
       color: white; background: var(--azul); font-size: 18px;
     }
-    .marca small { display: block; color: var(--tinta-suave); font-size: 10px; font-weight: 700; letter-spacing: .12em; margin-top: 2px; }
-    .estado-global { display: flex; align-items: center; gap: 9px; color: var(--tinta-suave); font-size: 13px; }
-    .enlace-estudio { color: var(--azul); font-size: 13px; text-decoration: none; font-weight: 750; }
-    .enlace-estudio:hover { text-decoration: underline; }
-    .punto { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: var(--tinta-suave); }
-    .contenedor { width: min(1180px, calc(100% - 40px)); margin: 44px auto 60px; }
-    .encabezado { margin-bottom: 26px; }
+    .marca small { display: block; color: #c8dce5; font-size: 11px; font-weight: 650; letter-spacing: .025em; margin-top: 2px; }
+    .estado-global { display: flex; align-items: center; gap: 8px; color: #fff; font-size: 12px; padding: 7px 11px; border: 1px solid #587386; border-radius: 999px; }
+    .punto { width: 8px; height: 8px; flex: 0 0 auto; border-radius: 50%; background: #b4c7d1; }
+    .estado-global[data-acceso="cargada"] .punto { background: #ffd288; }
+    .estado-global[data-acceso="verificado"] .punto { background: #8ce3bc; }
+    .contenedor { width: min(1180px, calc(100% - 40px)); margin: 34px auto 23px; }
+    .encabezado { margin-bottom: 22px; }
     .sobretitulo { color: var(--azul); font-size: 11px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
     h1 { font-size: clamp(30px, 4vw, 44px); letter-spacing: -.055em; margin: 10px 0 8px; }
     .bajada { color: var(--tinta-suave); margin: 0; font-size: 15px; line-height: 1.6; }
-    .rejilla { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 22px; align-items: start; }
-    .columna { display: grid; gap: 18px; }
+    .rejilla { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 22px; align-items: start; }
+    .columna { grid-column: 1; grid-row: 1; display: grid; gap: 15px; }
     .tarjeta { background: var(--papel); border: 1px solid var(--borde); border-radius: 20px; box-shadow: var(--sombra); }
-    .lista-agentes { padding: 20px 14px 14px; }
+    .capacidades { padding: 20px 14px 14px; }
     .titulo-seccion { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--tinta-suave); font-weight: 800; margin: 0 8px 13px; }
-    .agente {
+    .capacidad {
       width: 100%; display: flex; align-items: center; gap: 12px; padding: 12px 10px;
       border: 1px solid transparent; border-radius: 14px; text-align: left; color: inherit; background: transparent;
     }
-    .agente.activo { background: #eff8f5; border-color: #d5ebe3; }
-    .agente.proximamente { opacity: .67; }
-    .agente-icono { width: 40px; height: 40px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 13px; background: #edf1f4; font-size: 18px; }
-    .agente.activo .agente-icono { background: #d9eee6; }
-    .agente-texto { min-width: 0; flex: 1; }
-    .agente-nombre { display: block; font-size: 14px; font-weight: 750; }
-    .agente-detalle { display: block; color: var(--tinta-suave); font-size: 11px; margin-top: 4px; }
-    .etiqueta { color: var(--verde); font-size: 9px; letter-spacing: .09em; font-weight: 850; white-space: nowrap; }
-    .etiqueta.pendiente { color: #8a969e; }
-    .nota-datos { padding: 17px; background: #fffaf0; border-color: #f1e8d2; box-shadow: none; }
+    .capacidad + .capacidad { border-top: 1px solid var(--borde); border-radius: 0; }
+    .icono { width: 38px; height: 38px; flex: 0 0 auto; display: grid; place-items: center; border-radius: 12px; background: var(--menta); color: var(--azul-oscuro); font-size: 11px; font-weight: 820; }
+    .capacidad strong { display: block; font-size: 14px; }
+    .capacidad small { display: block; color: var(--tinta-suave); font-size: 12px; line-height: 1.4; margin-top: 3px; }
+    .nota-datos { padding: 17px; background: #f7fbfa; border-color: #dcebe7; box-shadow: none; }
     .nota-datos strong { font-size: 13px; }
-    .nota-datos p { margin: 7px 0 0; color: #786e58; line-height: 1.55; font-size: 12px; }
-    .chat { overflow: hidden; }
+    .nota-datos p { margin: 7px 0 0; color: var(--tinta-suave); line-height: 1.55; font-size: 12px; }
+    .chat { grid-column: 2; grid-row: 1; min-width: 0; }
     .chat-cabecera { display: flex; flex-wrap: wrap; gap: 14px; justify-content: space-between; align-items: center; padding: 19px 22px; border-bottom: 1px solid var(--borde); }
     .chat-identidad { display: flex; align-items: center; gap: 11px; }
-    .chat-identidad .agente-icono { background: var(--menta); }
     .chat-identidad strong { display: block; font-size: 14px; }
     .chat-identidad span { color: var(--tinta-suave); font-size: 11px; }
-    .protocolo { font-size: 10px; color: #6b7c86; font-weight: 800; letter-spacing: .1em; border: 1px solid var(--borde); padding: 7px 9px; border-radius: 8px; }
-    .conversacion { min-height: 345px; max-height: 52vh; overflow-y: auto; padding: 24px 22px; display: flex; flex-direction: column; gap: 15px; }
+    .conversacion { height: clamp(242px, 38vh, 490px); overflow-y: auto; padding: 22px; display: flex; flex-direction: column; gap: 15px; }
+    .inicio { max-width: 365px; margin: auto; text-align: center; color: var(--tinta-suave); line-height: 1.5; font-size: 14px; }
+    .inicio .icono { margin: 0 auto 9px; }
+    .inicio h2 { font-size: 20px; color: var(--tinta); margin: 5px 0; }
+    .inicio p { margin: 4px 0; }
     .mensaje { max-width: min(82%, 570px); display: flex; flex-direction: column; gap: 5px; animation: aparecer .2s ease-out; }
     @keyframes aparecer { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     .mensaje.usuario { align-self: flex-end; align-items: flex-end; }
@@ -88,16 +86,19 @@
     .mensaje.asistente .burbuja { background: #f0f4f5; border-bottom-left-radius: 5px; }
     .mensaje.usuario .burbuja { background: var(--azul); color: white; border-bottom-right-radius: 5px; }
     .hora { padding: 0 4px; font-size: 12px; color: var(--tinta-suave); white-space: pre-wrap; overflow-wrap: anywhere; }
-    .sugerencias { display: flex; gap: 8px; flex-wrap: wrap; padding: 0 22px 15px; }
+    .atajos { margin: 0 22px 10px; border-top: 1px solid var(--borde); }
+    summary { cursor: pointer; min-height: 44px; padding: 11px 0; color: var(--azul-oscuro); font-size: 13px; font-weight: 750; }
+    .sugerencias { display: flex; gap: 7px; flex-wrap: wrap; padding-bottom: 6px; }
     .sugerencia { cursor: pointer; border: 1px solid #dce8e5; background: white; color: var(--azul-oscuro); border-radius: 999px; padding: 8px 11px; font-size: 11px; transition: .15s ease; }
     .sugerencia:hover { background: var(--menta); border-color: #b8d9ce; }
-    .entrada { margin: 0 18px 18px; padding: 9px; display: flex; align-items: flex-end; gap: 10px; border: 1px solid #dce3e7; border-radius: 16px; background: #fbfcfc; }
+    .entrada { margin: 0 18px 10px; padding: 9px; display: grid; gap: 5px; border: 1px solid #dce3e7; border-radius: 16px; background: #fbfcfc; }
     .entrada:focus-within { border-color: #7bb6a2; box-shadow: 0 0 0 3px rgba(41, 132, 108, .1); }
-    textarea { resize: vertical; min-width: 0; min-height: 48px; max-height: 180px; flex: 1; padding: 11px 9px; border: 0; color: var(--tinta); background: transparent; font-size: 16px; }
+    textarea { resize: vertical; min-width: 0; width: 100%; min-height: 48px; max-height: 180px; padding: 9px; border: 0; color: var(--tinta); background: transparent; font-size: 16px; }
     textarea::placeholder { color: var(--tinta-suave); }
     .enviar { cursor: pointer; border: 0; border-radius: 12px; padding: 0 17px; height: 42px; color: white; background: var(--azul); font-size: 13px; font-weight: 750; transition: .15s; }
     .enviar:hover { background: var(--azul-oscuro); }
-    .pie { padding: 0 20px 18px; margin: 0; color: var(--tinta-suave); font-size: 12px; line-height: 1.6; }
+    .pie { padding: 0 20px 10px; margin: 0; color: var(--tinta-suave); font-size: 12px; line-height: 1.55; }
+    .pie:last-child { padding-bottom: 16px; }
     .acceso { max-width: 580px; margin: 0 auto; padding: clamp(20px, 4vw, 32px); }
     .acceso h2 { margin-top: 0; }
     .acceso p { line-height: 1.6; }
@@ -114,31 +115,45 @@
     .indicador i { width: 5px; height: 5px; border-radius: 50%; background: #82979e; animation: latido 1s infinite alternate; }
     .indicador i:nth-child(2) { animation-delay: .2s; } .indicador i:nth-child(3) { animation-delay: .4s; }
     @keyframes latido { to { opacity: .3; transform: translateY(-3px); } }
-    @media (max-width: 760px) {
-      .barra-superior { height: 62px; padding: 0 18px; }
-      .contenedor { width: min(100% - 24px, 620px); margin: 28px auto 40px; }
-      .rejilla { grid-template-columns: 1fr; }
-      .chat { grid-row: 1; }
+    .herramientas-entrada { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px; }
+    .contador { font-size: 12px; color: var(--tinta-suave); font-variant-numeric: tabular-nums; }
+    .adjunto { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 9px; align-items: center; padding: 6px; background: #eef5f4; border-radius: 10px; }
+    .adjunto img { width: 48px; height: 48px; object-fit: contain; border-radius: 7px; }
+    .adjunto p { margin: 2px 0; font-size: 12px; overflow-wrap: anywhere; }
+    .etiqueta { display: inline-block; width: fit-content; font-size: 12px; font-weight: 750; padding: 4px 9px; border-radius: 999px; background: #e9eff3; color: var(--tinta); }
+    .etiqueta:is(.ok, .aprobar) { background: #d8f2e5; color: #174d36; }
+    .etiqueta:is(.fallback, .observar) { background: #f9e8c8; color: #603b09; }
+    .etiqueta:is(.error, .bloqueado, .rechazar) { background: #fae0e0; color: #702525; }
+    .veredicto, .detalles { border: 1px solid var(--borde); border-radius: 12px; padding: 9px 12px; width: 100%; min-width: 0; }
+    .veredicto h3 { font-size: 14px; margin: 0 0 6px; }
+    .detalles summary { padding: 9px 0; }
+    dl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 5px 12px; font-size: 13px; margin: 8px 0; }
+    dt { font-weight: 700; }
+    dd { margin: 0; overflow-wrap: anywhere; }
+    .pie-global { text-align: center; color: var(--tinta-suave); font-size: 12px; margin: 0 auto 20px; padding: 0 12px; }
+    @media (max-width: 800px) {
+      .contenedor { width: min(100% - 24px, 650px); margin: 20px auto; }
+      .rejilla { grid-template-columns: minmax(0, 1fr); gap: 15px; }
+      .chat, .columna { grid-column: 1; }
       .columna { grid-row: 2; }
-      .lista-agentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); padding: 12px; }
-      .titulo-seccion { grid-column: 1 / -1; margin-bottom: 5px; }
-      .agente { padding: 9px 6px; flex-direction: column; align-items: flex-start; gap: 7px; }
-      .agente-icono { width: 34px; height: 34px; }
-      .agente-nombre { font-size: 12px; }
-      .agente-detalle { font-size: 10px; }
-      .etiqueta { font-size: 8px; }
-      .nota-datos { display: none; }
-      .conversacion { min-height: 300px; max-height: 48vh; padding: 18px 14px; }
-      .chat-cabecera { padding: 15px; }
-      .sugerencias { padding: 0 14px 13px; }
-      .entrada { margin: 0 12px 13px; }
-      .estado-global { font-size: 11px; }
-      .barra-superior { gap: 16px; }
-      .estado-global { max-width: 55%; }
-      .mensaje { max-width: 95%; }
-      .acciones { width: 100%; }
-      .acciones button { flex: 1; }
-      .enviar { padding: 0 12px; min-height: 48px; }
+      .capacidades { padding: 15px; }
+      .conversacion { height: clamp(205px, 33vh, 340px); padding: 16px 12px; }
+      .chat-cabecera { padding: 12px; }
+      .atajos { margin-inline: 12px; }
+      .entrada { margin-inline: 10px; }
+      .mensaje { max-width: 100%; }
+    }
+    @media (max-width: 460px) {
+      .barra-superior { padding-inline: 11px; }
+      .marca { gap: 7px; }
+      .marca small, .estado-global { font-size: 10px; }
+      .estado-global { max-width: 43%; padding-inline: 6px; border-radius: 12px; }
+      .chat-cabecera .acciones { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+      .sugerencia { min-height: 44px; }
+      .herramientas-entrada .acciones { flex: 1 1 auto; }
+      .enviar { min-height: 44px; }
+      dl { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+      dd { margin-bottom: 4px; }
     }
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { animation: none !important; transition: none !important; }
@@ -149,22 +164,22 @@
   <a class="salto" href="#contenido">Ir al contenido</a>
   <header class="barra-superior">
     <div class="marca">
-      <div class="marca-icono" aria-hidden="true">✳</div>
-      <div>AGENTES<small>CONSOLA A2A</small></div>
+      <div class="marca-icono" aria-hidden="true">≋</div>
+      <div>Rendiciones IA<small>Asistente inteligente de gastos</small></div>
     </div>
-    <div class="estado-global"><span class="punto" aria-hidden="true"></span><span id="estado-global">Sin clave cargada</span></div>
+    <div class="estado-global" id="acceso-chip"><span class="punto" aria-hidden="true"></span><span id="estado-global" role="status">Sin clave cargada</span></div>
   </header>
 
   <main class="contenedor" id="contenido" tabindex="-1">
     <section class="encabezado">
-      <div class="sobretitulo">Tu equipo de asistentes</div>
-      <h1>Planifica tu feria</h1>
-      <p class="bajada">El coordinador elige al agente que corresponde y te muestra su respuesta.</p>
+      <div class="sobretitulo">Comercial Los Alerces SpA · Empresa ficticia</div>
+      <h1>Rendiciones de gastos</h1>
+      <p class="bajada">Consulta las políticas o adjunta una boleta para solicitar una revisión.</p>
     </section>
 
     <section class="tarjeta acceso" id="acceso" aria-labelledby="titulo-acceso">
       <h2 id="titulo-acceso">Ingresa tu clave de acceso</h2>
-      <p>Usa la clave de la aplicación que te entregó el equipo, <strong>no tu clave de Google</strong>.</p>
+      <p>Usa la clave del servicio (<code>API_KEY_SERVICIO</code>) que te entregó el equipo.</p>
       <form id="formulario-acceso" autocomplete="off">
         <label for="clave">Clave de la aplicación</label>
         <input id="clave" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" aria-describedby="ayuda-clave error-acceso" required autofocus>
@@ -177,46 +192,11 @@
     <noscript><p class="error">Activa JavaScript para ingresar la clave y consultar el chat.</p></noscript>
 
     <div class="rejilla" id="panel-chat" hidden>
-      <aside class="columna" aria-label="Agentes del proyecto">
-        <section class="tarjeta lista-agentes">
-          <h2 class="titulo-seccion">Mis agentes</h2>
-          <div class="agente activo" aria-current="true">
-            <div class="agente-icono" aria-hidden="true">✣</div>
-            <div class="agente-texto"><span class="agente-nombre">Coordinador</span><span class="agente-detalle">Elige y delega por A2A</span></div>
-            <span class="etiqueta">SUPERVISOR</span>
-          </div>
-          <div class="agente">
-            <div class="agente-icono" aria-hidden="true">◷</div>
-            <div class="agente-texto"><span class="agente-nombre">Matías</span><span class="agente-detalle">Programa y horarios</span></div>
-            <span class="etiqueta">A2A</span>
-          </div>
-          <div class="agente">
-            <div class="agente-icono" aria-hidden="true">⌂</div>
-            <div class="agente-texto"><span class="agente-nombre">Alex</span><span class="agente-detalle">Lugares y capacidad</span></div>
-            <span class="etiqueta">A2A</span>
-          </div>
-          <div class="agente">
-            <div class="agente-icono" aria-hidden="true">$</div>
-            <div class="agente-texto"><span class="agente-nombre">Eduardo</span><span class="agente-detalle">Presupuesto y costos</span></div>
-            <span class="etiqueta">A2A</span>
-          </div>
-          <div class="agente">
-            <div class="agente-icono" aria-hidden="true">☕</div>
-            <div class="agente-texto"><span class="agente-nombre">Sebastián</span><span class="agente-detalle">Comida y catering</span></div>
-            <span class="etiqueta">A2A</span>
-          </div>
-        </section>
-        <section class="tarjeta nota-datos">
-          <strong>Sobre estos resultados</strong>
-          <p>Los recintos, programas, menús y costos son datos de demostración. No representan disponibilidad real y no permiten reservar ni pagar.</p>
-        </section>
-      </aside>
-
-      <section class="tarjeta chat" aria-label="Conversación con el coordinador">
+      <section class="tarjeta chat" aria-label="Conversación de rendiciones">
         <header class="chat-cabecera">
           <div class="chat-identidad">
-            <div class="agente-icono" aria-hidden="true">✣</div>
-            <div><strong>Coordinador</strong><span>Programa, lugar, presupuesto y comida</span></div>
+            <div class="icono" aria-hidden="true">IA</div>
+            <div><strong>Conversación</strong><span>Políticas y revisión documental</span></div>
           </div>
           <div class="acciones">
             <button class="secundario" id="nueva-conversacion" type="button">Nueva conversación</button>
@@ -224,25 +204,63 @@
           </div>
         </header>
 
-        <div class="conversacion" id="conversacion" role="log" aria-label="Historial de la conversación" aria-live="polite" aria-relevant="additions text" aria-busy="false" tabindex="0"></div>
-
-        <div class="sugerencias" aria-label="Preguntas sugeridas">
-          <button class="sugerencia" type="button" data-pregunta="Necesito armar el programa de una feria infantil de 3 horas que parta a las 15:00.">◷ Programa</button>
-          <button class="sugerencia" type="button" data-pregunta="Voy a hacer una feria tecnológica para 150 personas, ¿dónde la puedo hacer?">⌂ Lugar</button>
-          <button class="sugerencia" type="button" data-pregunta="¿Cuál es el presupuesto simulado de una feria tecnológica para 80 personas y 4 horas?">$ Presupuesto</button>
-          <button class="sugerencia" type="button" data-pregunta="Feria gastronómica de 4 horas desde las 12:00 para 120 personas, ¿qué les damos de comer?">☕ Comida</button>
+        <div class="conversacion" id="conversacion" role="log" aria-label="Historial de la conversación" aria-live="polite" aria-relevant="additions text" aria-busy="false" tabindex="0">
+          <div class="inicio" id="inicio">
+            <div class="icono" aria-hidden="true">✦</div>
+            <h2>¿En qué podemos ayudarte?</h2>
+            <p>Pregunta por un plazo, un tope o una regla. Para revisar un gasto, descríbelo y añade la imagen de la boleta si la tienes.</p>
+          </div>
         </div>
 
-        <form class="entrada" id="formulario" autocomplete="off">
-          <textarea id="pregunta" rows="2" placeholder="Escribe tu pregunta sobre la feria..." aria-label="Tu pregunta" aria-describedby="ayuda-pregunta aviso-entrada" required></textarea>
-          <button class="enviar" id="enviar" type="submit">Enviar&nbsp; ↑</button>
+        <details class="atajos">
+          <summary>Consultas sugeridas</summary>
+          <div class="sugerencias">
+            <button class="sugerencia" type="button" data-pregunta="¿Hasta cuándo puedo rendir un gasto?">Plazo de rendición</button>
+            <button class="sugerencia" type="button" data-pregunta="¿Cuál es el tope de hotel en un viaje interno?">Hotel · Viaje interno</button>
+            <button class="sugerencia" type="button" data-pregunta="¿Cuál es el tope de hotel para un jefe de tienda en un viaje externo?">Hotel · Por cargo</button>
+            <button class="sugerencia" type="button" data-pregunta="¿Qué pasa si presento una rendición fuera de plazo?">Fuera de plazo</button>
+            <button class="sugerencia" type="button" data-pregunta="Quiero revisar una boleta de combustible.">Boleta de combustible</button>
+          </div>
+        </details>
+
+        <form class="entrada" id="formulario" autocomplete="off" novalidate>
+          <textarea id="pregunta" rows="2" placeholder="Escribe tu consulta o describe tu gasto…" aria-label="Consulta o descripción del gasto" aria-describedby="ayuda-pregunta contador aviso-entrada" required></textarea>
+          <div class="adjunto" id="adjunto" hidden>
+            <img id="vista-adjunto" alt="Vista previa de la imagen adjunta">
+            <div><p id="nombre-adjunto"></p><p id="tamano-adjunto"></p></div>
+            <button class="secundario" id="quitar-adjunto" type="button" aria-label="Quitar imagen">Quitar</button>
+          </div>
+          <input id="archivo" type="file" accept="image/jpeg,image/png,image/webp" tabindex="-1" hidden>
+          <div class="herramientas-entrada">
+            <div class="acciones">
+              <button class="secundario" id="adjuntar" type="button" aria-describedby="ayuda-imagen">Adjuntar imagen</button>
+              <button class="secundario" id="cancelar" type="button" hidden>Cancelar espera</button>
+              <button class="enviar" id="enviar" type="submit">Enviar ↑</button>
+            </div>
+            <span class="contador" id="contador">0 / 4000</span>
+          </div>
         </form>
         <p class="error aviso-entrada" id="aviso-entrada" role="alert" hidden></p>
         <p class="pie" id="estado-consulta" role="status">La autorización se comprueba en el servidor al consultar.</p>
-        <p class="pie" id="ayuda-pregunta">Enter envía · Mayús + Enter agrega una línea. Espera máxima: 65 segundos. Los resultados son de demostración; no permiten reservar ni pagar.</p>
+        <p class="pie"><span id="ayuda-pregunta">Enter envía · Mayús + Enter agrega una línea.</span> <span id="ayuda-imagen">JPEG, PNG o WebP · hasta 5 MiB en este navegador.</span></p>
       </section>
+
+      <aside class="columna" aria-label="Capacidades del sistema">
+        <section class="tarjeta capacidades">
+          <h2 class="titulo-seccion">Capacidades del sistema</h2>
+          <div class="capacidad"><span class="icono" aria-hidden="true">01</span><div><strong>Políticas de gastos</strong><small>Reglas y documentos de respaldo</small></div></div>
+          <div class="capacidad"><span class="icono" aria-hidden="true">02</span><div><strong>Topes y contexto</strong><small>Viajes internos, externos y consultas por cargo</small></div></div>
+          <div class="capacidad"><span class="icono" aria-hidden="true">03</span><div><strong>Revisión de boletas</strong><small>Adjunto para verificación documental</small></div></div>
+          <div class="capacidad"><span class="icono" aria-hidden="true">04</span><div><strong>Trazabilidad</strong><small>Datos de la ejecución si el servidor los entrega</small></div></div>
+        </section>
+        <section class="tarjeta nota-datos">
+          <strong>Entorno académico</strong>
+          <p>Usa datos ficticios. Las capacidades descritas no indican disponibilidad ni autorización. No se garantiza continuidad después de reiniciar el servidor.</p>
+        </section>
+      </aside>
     </div>
   </main>
+  <footer class="pie-global">Grupo 05 · Agentic AI · Tarea final Curso 2</footer>
 
   <script>
   (() => {
@@ -260,11 +278,39 @@
     const estadoGlobal = document.getElementById("estado-global");
     const estadoConsulta = document.getElementById("estado-consulta");
     const avisoEntrada = document.getElementById("aviso-entrada");
+    const inicio = document.getElementById("inicio");
+    const archivo = document.getElementById("archivo");
+    const botonAdjuntar = document.getElementById("adjuntar");
+    const botonQuitar = document.getElementById("quitar-adjunto");
+    const botonCancelar = document.getElementById("cancelar");
+    const vista = document.getElementById("vista-adjunto");
+    const MAX_TEXTO = 4000;
+    const MAX_ARCHIVO = 5 * 1024 * 1024;
     const TIEMPO_LIMITE_MS = 65000;
+    const RUTAS = { consulta_politica: "Consulta de política", revisar_gasto: "Revisión de gasto", fuera_de_alcance: "Fuera de alcance" };
+    const ESTADOS = { ok: "OK", bloqueado: "Bloqueado", fallback: "Respaldo", error: "Error" };
+    const DECISIONES = { aprobar: "Aprobar", observar: "Observar", rechazar: "Rechazar" };
+    const UUID4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
     // No se usan almacenamiento web, cookies, URL ni registros para la clave.
     let claveApi = "";
-    let idContexto = crypto.randomUUID();
+    let threadId = nuevoId();
+    let adjunto = null;
+    let seleccion = null;
     let solicitudPendiente = null;
+    const registros = new Set();
+
+    class ErrorCliente extends Error {}
+
+    function nuevoId() {
+      if (typeof crypto.randomUUID === "function") return `conv-${crypto.randomUUID()}`;
+      const aleatorio = crypto.getRandomValues(new Uint8Array(16));
+      return `conv-${Array.from(aleatorio, (valor) => valor.toString(16).padStart(2, "0")).join("")}`;
+    }
+
+    function accesoEstado(estado, texto) {
+      document.getElementById("acceso-chip").dataset.acceso = estado;
+      estadoGlobal.textContent = texto;
+    }
 
     function agregarFormatoEnLinea(destino, texto) {
       // Subconjunto deliberado: código en línea y negritas. El resto queda literal.
@@ -328,203 +374,375 @@
       return contenedor;
     }
 
-    function fijarEspera(esperando) {
-      botonEnviar.disabled = esperando;
+    function controles() {
+      const esperando = Boolean(solicitudPendiente);
+      botonEnviar.disabled = esperando || Boolean(seleccion);
       botonEnviar.textContent = esperando ? "Consultando…" : "Enviar ↑";
+      pregunta.readOnly = esperando;
+      botonAdjuntar.disabled = botonQuitar.disabled = esperando;
+      botonCancelar.hidden = !esperando;
       sugerencias.forEach((boton) => { boton.disabled = esperando; });
       conversacion.setAttribute("aria-busy", String(esperando));
     }
 
-    function cancelarPendiente() {
-      const anterior = solicitudPendiente;
-      // Invalidar antes de abortar: un fetch ya resuelto también debe descartarse.
+    function actualizarContador() {
+      document.getElementById("contador").textContent = `${[...pregunta.value].length} / ${MAX_TEXTO}`;
+    }
+
+    function avisar(mensaje = "", invalida = false) {
+      avisoEntrada.textContent = mensaje;
+      avisoEntrada.hidden = !mensaje;
+      if (invalida) pregunta.setAttribute("aria-invalid", "true");
+      else pregunta.removeAttribute("aria-invalid");
+    }
+
+    function quitarImagen() {
+      seleccion = null;
+      if (adjunto) URL.revokeObjectURL(adjunto.url);
+      adjunto = null;
+      vista.removeAttribute("src");
+      document.getElementById("adjunto").hidden = true;
+      document.getElementById("nombre-adjunto").textContent = "";
+      document.getElementById("tamano-adjunto").textContent = "";
+      archivo.value = "";
+      controles();
+    }
+
+    function cerrarSolicitud(solicitud, abortar = false) {
+      if (solicitudPendiente !== solicitud) return;
+      // Invalidar antes de abortar: también protege si un fetch ya resuelto llega tarde.
       solicitudPendiente = null;
-      if (anterior) {
-        window.clearTimeout(anterior.temporizador);
-        anterior.control.abort();
-        anterior.espera.remove();
+      window.clearTimeout(solicitud.temporizador);
+      if (abortar) solicitud.control.abort();
+      solicitud.espera.remove();
+      inicio.hidden = Boolean(conversacion.querySelector(".mensaje"));
+      controles();
+    }
+
+    function detenerEspera(mensaje) {
+      if (!solicitudPendiente) return;
+      cerrarSolicitud(solicitudPendiente, true);
+      estadoConsulta.textContent = "La respuesta no se incorporó al chat.";
+      avisar(`${mensaje} Si el servidor ya recibió la solicitud, podría seguir procesándola. Conservamos tu borrador.`);
+      pregunta.focus();
+    }
+
+    function nuevaConversacion(conservarBorrador = false) {
+      if (solicitudPendiente) cerrarSolicitud(solicitudPendiente, true);
+      for (const registro of registros) {
+        registros.delete(registro);
+        window.clearTimeout(registro.temporizador);
+        registro.control.abort();
       }
-      fijarEspera(false);
+      threadId = nuevoId();
+      conversacion.replaceChildren(inicio);
+      inicio.hidden = false;
+      if (!conservarBorrador) {
+        pregunta.value = "";
+        quitarImagen();
+      }
+      actualizarContador();
+      avisar();
+      estadoConsulta.textContent = "Nueva conversación. El hilo se conserva durante esta sesión.";
     }
 
-    function nuevaConversacion() {
-      cancelarPendiente();
-      idContexto = crypto.randomUUID();
-      conversacion.replaceChildren();
-      agregarMensaje("¡Hola! Te ayudo a planificar una feria: programa, lugar, presupuesto y comida. ¿Qué necesitas?", "asistente", "Coordinador");
-      pregunta.value = "";
-      pregunta.removeAttribute("aria-invalid");
-      avisoEntrada.hidden = true;
-      estadoConsulta.textContent = "Nueva conversación. La autorización se comprueba en cada consulta.";
-      if (!panelChat.hidden) pregunta.focus();
-    }
-
-    function mostrarAcceso(mensaje) {
-      cancelarPendiente();
+    function mostrarAcceso(mensaje = "", conservarBorrador = false, enfocar = true) {
+      nuevaConversacion(conservarBorrador);
       claveApi = "";
       campoClave.value = "";
       panelChat.hidden = true;
       acceso.hidden = false;
-      estadoGlobal.textContent = "Sin clave cargada";
+      accesoEstado("sin-clave", "Sin clave cargada");
       errorAcceso.textContent = mensaje;
       errorAcceso.hidden = !mensaje;
-      campoClave.focus();
+      if (enfocar) campoClave.focus();
     }
 
-    const LARGO_MAXIMO_DETALLE = 300;
+    function resolverHttp(estado, registro = false) {
+      if (estado === 422 || estado === 400) return "Entrada inválida (HTTP " + estado + "). Revisa los datos antes de reintentar.";
+      if (estado === 404 && registro) return "No se encontró el registro (HTTP 404).";
+      if (estado === 501) return registro
+        ? "La consulta del registro aún no está integrada (HTTP 501)."
+        : "El flujo de chat aún no está integrado (HTTP 501). Tu borrador se conserva.";
+      if (estado === 502) return "El servicio no pudo completar la operación (HTTP 502).";
+      if (estado === 503) return "El servicio no está disponible o configurado (HTTP 503).";
+      if (estado === 413) return "El servidor rechazó el tamaño de la solicitud (HTTP 413).";
+      if (estado === 408 || estado === 504) return "El servidor agotó el tiempo de espera; la solicitud podría seguir procesándose.";
+      return `No se pudo completar la operación (HTTP ${estado}).`;
+    }
 
-    // El servidor responde los errores como {"detail": "mensaje en una línea"} (400, 401, 502, 503).
-    // Solo se acepta un texto corto de ese campo en una respuesta JSON; cualquier otra cosa
-    // (HTML de un proxy, trazas, listas de validación) se descarta y se usa el texto fijo.
-    async function detalleDelServidor(respuesta) {
-      if (!/\bapplication\/(?:[\w.-]+\+)?json\b/i.test(respuesta.headers.get("content-type") || "")) return "";
+    async function leerJson(respuesta) {
+      if (!/^application\/(?:[\w.-]+\+)?json(?:\s*;|$)/i.test(respuesta.headers.get("content-type") || "")) {
+        throw new ErrorCliente("Respuesta inválida: el servidor no devolvió JSON.");
+      }
+      try { return await respuesta.json(); }
+      catch { throw new ErrorCliente("Respuesta inválida: no se pudo leer el JSON del servidor."); }
+    }
+
+    function opciones(control, cuerpo) {
+      const headers = { Accept: "application/json", "X-API-Key": claveApi };
+      const solicitud = { headers, signal: control.signal, cache: "no-store", credentials: "omit", redirect: "error", mode: "same-origin" };
+      if (cuerpo) {
+        headers["Content-Type"] = "application/json";
+        solicitud.method = "POST";
+        solicitud.body = JSON.stringify(cuerpo);
+      } else solicitud.method = "GET";
+      return solicitud;
+    }
+
+    function objeto(valor) {
+      return valor !== null && typeof valor === "object" && !Array.isArray(valor);
+    }
+
+    function idValido(id) {
+      return typeof id === "string" && id.length === 36 && UUID4.test(id);
+    }
+
+    function claveEn(mapa, clave) {
+      return typeof clave === "string" && Object.hasOwn(mapa, clave);
+    }
+
+    function chatValido(datos, hilo) {
+      if (!objeto(datos) || datos.thread_id !== hilo || !idValido(datos.id_ejecucion)
+          || !claveEn(RUTAS, datos.ruta) || !claveEn(ESTADOS, datos.estado_final)
+          || typeof datos.respuesta !== "string" || !datos.respuesta.trim()) return false;
+      if (!Object.hasOwn(datos, "veredicto")) return true;
+      const v = datos.veredicto;
+      return datos.ruta === "revisar_gasto" && objeto(v) && claveEn(DECISIONES, v.decision)
+        && ["motivo", "politica_sugerida", "categoria_sugerida", "cuenta_sugerida"].every((k) => typeof v[k] === "string");
+    }
+
+    function registroValido(datos, id) {
+      return objeto(datos) && datos.id_ejecucion === id && claveEn(RUTAS, datos.ruta)
+        && claveEn(ESTADOS, datos.estado_final) && typeof datos.fecha === "string"
+        && /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})$/i.test(datos.fecha)
+        && Number.isFinite(Date.parse(datos.fecha)) && typeof datos.hubo_a2a === "boolean"
+        && [datos.pasos, datos.duracion_ms].every((n) => Number.isSafeInteger(n) && n >= 0)
+        && Array.isArray(datos.herramientas_usadas)
+        && datos.herramientas_usadas.every((h) => typeof h === "string" && h.trim());
+    }
+
+    function nodo(etiqueta, texto, clase) {
+      const elemento = document.createElement(etiqueta);
+      if (clase) elemento.className = clase;
+      elemento.textContent = texto;
+      return elemento;
+    }
+
+    function campos(pares) {
+      const lista = document.createElement("dl");
+      for (const [titulo, valor] of pares) lista.append(nodo("dt", titulo), nodo("dd", valor));
+      return lista;
+    }
+
+    function mostrarRespuesta(datos) {
+      const mensaje = agregarMensaje(datos.respuesta, "asistente", "Rendiciones IA", true);
+      mensaje.append(nodo("span", `${RUTAS[datos.ruta]} · ${ESTADOS[datos.estado_final]}`, `etiqueta ${datos.estado_final}`));
+      if (datos.veredicto) {
+        const v = datos.veredicto;
+        const tarjeta = nodo("section", "", "veredicto");
+        tarjeta.append(nodo("h3", "Veredicto"), nodo("span", DECISIONES[v.decision], `etiqueta ${v.decision}`),
+          campos([["Motivo", v.motivo || "No informado"], ["Política sugerida", v.politica_sugerida || "No informada"],
+            ["Categoría sugerida", v.categoria_sugerida || "No informada"], ["Cuenta sugerida", v.cuenta_sugerida || "No informada"]]));
+        mensaje.append(tarjeta);
+      }
+      const detalles = nodo("details", "", "detalles");
+      const boton = nodo("button", "Consultar registro", "secundario");
+      boton.type = "button";
+      const estado = nodo("p", "", "ayuda");
+      estado.setAttribute("role", "status");
+      const fila = document.createElement("div");
+      detalles.append(nodo("summary", "Detalles de ejecución"), campos([
+        ["Ruta", datos.ruta], ["Estado final", datos.estado_final],
+        ["ID de ejecución", datos.id_ejecucion], ["Thread ID", datos.thread_id],
+      ]), boton, estado, fila);
+      boton.addEventListener("click", () => consultarRegistro(datos.id_ejecucion, boton, estado, fila));
+      mensaje.append(detalles);
+      conversacion.scrollTop = conversacion.scrollHeight;
+    }
+
+    async function consultarRegistro(id, boton, estado, fila) {
+      if (!claveApi || boton.disabled || !idValido(id)) return;
+      const registro = { control: new AbortController() };
+      registros.add(registro);
+      boton.disabled = true;
+      estado.textContent = "Consultando registro…";
+      fila.replaceChildren();
+      function terminar() {
+        registros.delete(registro);
+        window.clearTimeout(registro.temporizador);
+        boton.disabled = false;
+      }
+      registro.temporizador = window.setTimeout(() => {
+        terminar();
+        registro.control.abort();
+        estado.textContent = "Se agotó el tiempo de espera del registro.";
+      }, 15000);
       try {
-        const cuerpo = await respuesta.json();
-        if (!cuerpo || typeof cuerpo.detail !== "string") return "";
-        const detalle = cuerpo.detail.replace(/\s+/g, " ").trim();
-        return detalle.length <= LARGO_MAXIMO_DETALLE ? detalle : "";
-      } catch {
-        return "";
+        const respuesta = await fetch(`/registro/${encodeURIComponent(id)}`, opciones(registro.control));
+        if (!registros.has(registro)) return;
+        if (respuesta.status === 401 || respuesta.status === 403) {
+          mostrarAcceso(`Acceso rechazado (HTTP ${respuesta.status}). Ingresa una clave válida.`, true);
+          return;
+        }
+        if (!respuesta.ok) throw new ErrorCliente(resolverHttp(respuesta.status, true));
+        const datos = await leerJson(respuesta);
+        if (!registros.has(registro)) return;
+        if (!registroValido(datos, id)) throw new ErrorCliente("Respuesta inválida: el registro no coincide con el contrato.");
+        fila.append(campos([["Fecha", datos.fecha], ["Ruta registrada", datos.ruta], ["Pasos", datos.pasos],
+          ["Herramientas utilizadas", datos.herramientas_usadas.join(", ") || "Ninguna"],
+          ["Hubo A2A", datos.hubo_a2a ? "Sí" : "No"], ["Estado final registrado", datos.estado_final],
+          ["Duración", `${datos.duracion_ms} ms`]]));
+        estado.textContent = "Registro recibido.";
+      } catch (error) {
+        if (registros.has(registro)) estado.textContent = error instanceof ErrorCliente
+          ? error.message : "No se pudo conectar para consultar el registro.";
+      } finally {
+        if (registros.has(registro)) terminar();
       }
     }
 
-    function mensajeHttp(estado) {
-      if (estado === 400 || estado === 422) return "Entrada inválida. Revisa la pregunta y vuelve a enviarla.";
-      if (estado === 413) return "La pregunta es demasiado larga. Acórtala y vuelve a enviarla.";
-      if (estado === 408 || estado === 504) return "Se agotó el tiempo de espera del servidor. Puedes reintentar; la consulta anterior podría seguir procesándose.";
-      if (estado === 429) return "El servicio alcanzó su límite de consultas. Espera un momento antes de reintentar.";
-      if (estado === 502) return "No se pudo consultar al proveedor o al agente. Inténtalo más tarde; si persiste, avisa al equipo.";
-      if (estado === 503) return "El servicio no está disponible temporalmente. Inténtalo más tarde; si persiste, avisa al equipo.";
-      if (estado >= 500) return "El servidor no pudo completar la consulta. Inténtalo más tarde.";
-      return `No se pudo completar la consulta (HTTP ${estado}). Si persiste, avisa al equipo.`;
+    function mimeCompatible(bytes, tipo) {
+      const empieza = (firma, desde = 0) => firma.every((valor, i) => bytes[desde + i] === valor);
+      if (tipo === "image/jpeg") return empieza([255, 216, 255]);
+      if (tipo === "image/png") return empieza([137, 80, 78, 71, 13, 10, 26, 10]);
+      return tipo === "image/webp" && empieza([82, 73, 70, 70]) && empieza([87, 69, 66, 80], 8);
     }
+
+    async function base64(archivoSeleccionado) {
+      const bytes = new Uint8Array(await archivoSeleccionado.arrayBuffer());
+      const partes = [];
+      for (let i = 0; i < bytes.length; i += 0x8000) {
+        partes.push(String.fromCharCode(...bytes.subarray(i, i + 0x8000)));
+      }
+      return btoa(partes.join(""));
+    }
+
+    function tamanoLegible(bytes) {
+      return bytes < 1024 ? `${bytes} B` : `${new Intl.NumberFormat("es", { maximumFractionDigits: 1 }).format(bytes / 1024)} KiB`;
+    }
+
+    botonAdjuntar.addEventListener("click", () => archivo.click());
+    botonQuitar.addEventListener("click", () => {
+      quitarImagen();
+      avisar();
+      botonAdjuntar.focus();
+    });
+    archivo.addEventListener("change", async () => {
+      const elegido = archivo.files[0];
+      if (!elegido || solicitudPendiente || !claveApi) return;
+      quitarImagen();
+      if (elegido.size <= 0 || elegido.size > MAX_ARCHIVO) {
+        avisar("Elige una imagen no vacía de hasta 5 MiB.");
+        return;
+      }
+      const token = {};
+      seleccion = token;
+      avisar();
+      controles();
+      try {
+        const bytes = new Uint8Array(await elegido.slice(0, 12).arrayBuffer());
+        if (seleccion !== token) return;
+        if (!mimeCompatible(bytes, elegido.type)) throw new ErrorCliente("La imagen debe ser JPEG, PNG o WebP y coincidir con su formato real.");
+        adjunto = { archivo: elegido, url: URL.createObjectURL(elegido) };
+        vista.src = adjunto.url;
+        document.getElementById("nombre-adjunto").textContent = elegido.name;
+        document.getElementById("tamano-adjunto").textContent = tamanoLegible(elegido.size);
+        document.getElementById("adjunto").hidden = false;
+      } catch (error) {
+        if (seleccion === token) avisar(error instanceof ErrorCliente ? error.message : "No se pudo leer la imagen seleccionada.");
+      } finally {
+        if (seleccion === token) {
+          seleccion = null;
+          controles();
+        }
+      }
+    });
 
     formularioAcceso.addEventListener("submit", (evento) => {
       evento.preventDefault();
-      if (!campoClave.value.trim()) {
-        errorAcceso.textContent = "Ingresa una clave de acceso para continuar.";
+      const valor = campoClave.value.trim();
+      campoClave.value = "";
+      if (!valor || /[^\x20-\x7e\x80-\xff]/.test(valor)) {
+        errorAcceso.textContent = "Ingresa una clave de servicio válida.";
         errorAcceso.hidden = false;
         campoClave.focus();
         return;
       }
-      claveApi = campoClave.value;
-      campoClave.value = "";
+      claveApi = valor;
       errorAcceso.textContent = "";
       errorAcceso.hidden = true;
       acceso.hidden = true;
       panelChat.hidden = false;
-      estadoGlobal.textContent = "Clave en memoria · acceso por verificar";
+      accesoEstado("cargada", "Clave cargada · acceso sin verificar");
       pregunta.focus();
     });
 
     formulario.addEventListener("submit", async (evento) => {
       evento.preventDefault();
-      if (solicitudPendiente || !claveApi) return;
+      if (solicitudPendiente || seleccion || !claveApi) return;
       const texto = pregunta.value.trim();
-      if (!texto) {
-        avisoEntrada.textContent = "Escribe una pregunta; no puede contener solo espacios.";
-        avisoEntrada.hidden = false;
-        pregunta.setAttribute("aria-invalid", "true");
+      if (!texto || [...pregunta.value].length > MAX_TEXTO) {
+        avisar("Escribe una consulta de 1 a 4000 caracteres, no solo espacios.", true);
         pregunta.focus();
         return;
       }
-
-      avisoEntrada.hidden = true;
-      pregunta.removeAttribute("aria-invalid");
-      agregarMensaje(texto, "usuario", "Tú");
-      pregunta.value = "";
-      fijarEspera(true);
-      estadoConsulta.textContent = "Consultando al coordinador… Puedes iniciar una conversación nueva para dejar de esperar.";
+      avisar();
+      inicio.hidden = true;
       const espera = agregarMensaje("", "asistente", "Consultando…");
-      const indicador = document.createElement("span");
-      indicador.className = "indicador";
+      const indicador = nodo("span", "", "indicador");
       indicador.setAttribute("aria-hidden", "true");
-      for (let punto = 0; punto < 3; punto += 1) indicador.appendChild(document.createElement("i"));
-      espera.querySelector(".burbuja").appendChild(indicador);
+      for (let i = 0; i < 3; i += 1) indicador.appendChild(document.createElement("i"));
+      espera.querySelector(".burbuja").append(indicador);
 
-      const solicitud = { control: new AbortController(), espera, agotada: false };
+      const solicitud = { control: new AbortController(), espera };
+      const hilo = threadId;
+      const imagen = adjunto?.archivo;
       solicitudPendiente = solicitud;
+      controles();
+      estadoConsulta.textContent = "Consultando al servidor. Espera máxima: 65 segundos.";
       solicitud.temporizador = window.setTimeout(() => {
-        solicitud.agotada = true;
-        solicitud.control.abort();
+        if (solicitudPendiente === solicitud) detenerEspera("Se agotaron los 65 segundos de espera.");
       }, TIEMPO_LIMITE_MS);
       try {
-        const respuesta = await fetch("/panel/consultar", {
-          method: "POST",
-          headers: { "Content-Type": "application/json", "Accept": "application/json", "X-API-Key": claveApi },
-          body: JSON.stringify({ texto, context_id: idContexto }),
-          signal: solicitud.control.signal,
-          cache: "no-store",
-          credentials: "omit",
-          redirect: "error"
-        });
+        const cuerpo = { thread_id: hilo, texto };
+        if (imagen) {
+          try { cuerpo.imagen = { mime_type: imagen.type, datos_base64: await base64(imagen) }; }
+          catch { throw new ErrorCliente("No se pudo preparar la imagen para el envío."); }
+        }
         if (solicitudPendiente !== solicitud) return;
-        // Clasificar por estado, incluso si un proxy devuelve HTML. Nunca mostrar
-        // cuerpos de error crudos: pueden contener trazas o credenciales del proveedor.
+        const respuesta = await fetch("/chat", opciones(solicitud.control, cuerpo));
+        if (solicitudPendiente !== solicitud) return;
         if (respuesta.status === 401 || respuesta.status === 403) {
-          const detalle = respuesta.status === 401 ? await detalleDelServidor(respuesta) : "";
-          if (solicitudPendiente !== solicitud) return;
-          if (!pregunta.value) pregunta.value = texto;
-          mostrarAcceso(`Acceso rechazado (${respuesta.status}). ${detalle ? detalle + " " : ""}Ingresa una clave válida. Tu pregunta se conserva para reintentar.`);
+          mostrarAcceso(`Acceso rechazado (HTTP ${respuesta.status}). Ingresa una clave válida; conservamos tu borrador.`, true);
           return;
         }
-        if (!respuesta.ok) {
-          const detalle = [400, 502, 503].includes(respuesta.status) ? await detalleDelServidor(respuesta) : "";
-          if (solicitudPendiente !== solicitud) return;
-          throw new Error(detalle || mensajeHttp(respuesta.status));
-        }
-        const tipo = respuesta.headers.get("content-type") || "";
-        if (!/\bapplication\/(?:[\w.-]+\+)?json\b/i.test(tipo)) {
-          throw new Error("El servidor devolvió una respuesta que no es JSON. Inténtalo de nuevo; si persiste, avisa al equipo.");
-        }
-        let datos;
-        try {
-          datos = await respuesta.json();
-        } catch {
-          throw new Error("El servidor devolvió JSON inválido. Inténtalo de nuevo; si persiste, avisa al equipo.");
-        }
+        if (!respuesta.ok) throw new ErrorCliente(resolverHttp(respuesta.status));
+        const datos = await leerJson(respuesta);
         if (solicitudPendiente !== solicitud) return;
-        if (!datos || typeof datos.respuesta !== "string" || !datos.respuesta.trim()
-            || typeof datos.context_id !== "string" || !datos.context_id.trim()
-            || typeof datos.agente !== "string" || typeof datos.motivo !== "string") {
-          throw new Error("La respuesta del servidor está incompleta o tiene un formato inesperado. Avisa al equipo.");
-        }
-        espera.remove();
-        idContexto = datos.context_id;
-        // Solo presentación DOM: no resumir, recalcular ni insertar HTML del modelo.
-        const mensaje = agregarMensaje(datos.respuesta, "asistente", `Agente: ${datos.agente || "No informado"}`, true);
-        const motivo = document.createElement("span");
-        motivo.className = "hora";
-        motivo.textContent = `Motivo: ${datos.motivo || "No informado"}`;
-        mensaje.appendChild(motivo);
-        conversacion.scrollTop = conversacion.scrollHeight;
-        estadoGlobal.textContent = "Clave en memoria · validación a cargo del servidor";
-        estadoConsulta.textContent = "Respuesta recibida.";
+        if (!chatValido(datos, hilo)) throw new ErrorCliente("Respuesta inválida: los campos no coinciden con el contrato del chat.");
+        cerrarSolicitud(solicitud);
+        inicio.hidden = true;
+        agregarMensaje(texto, "usuario", imagen ? `Tú · Imagen: ${imagen.name}` : "Tú");
+        mostrarRespuesta(datos);
+        pregunta.value = "";
+        actualizarContador();
+        quitarImagen();
+        accesoEstado("verificado", "Acceso verificado");
+        estadoConsulta.textContent = `Respuesta recibida · Estado final: ${datos.estado_final}.`;
+        if (document.activeElement === document.body) pregunta.focus();
       } catch (error) {
         if (solicitudPendiente !== solicitud) return;
-        espera.remove();
-        const mensaje = solicitud.agotada
-          ? "La consulta superó los 65 segundos de espera. Puedes reintentar; la consulta anterior podría seguir procesándose."
-          : error instanceof TypeError || error.name === "AbortError"
-            ? "No se pudo conectar con el servidor. Revisa tu conexión y que la aplicación esté encendida."
-            : error.message;
-        agregarMensaje(mensaje, "asistente", "Aviso");
-        if (!pregunta.value) pregunta.value = texto;
-        estadoConsulta.textContent = "La consulta no se completó. Puedes revisar la pregunta y reintentar.";
-      } finally {
-        window.clearTimeout(solicitud.temporizador);
-        // No alterar controles, foco ni mensajes de una conversación posterior.
-        if (solicitudPendiente === solicitud) {
-          solicitudPendiente = null;
-          fijarEspera(false);
-          if (document.activeElement === document.body || document.activeElement === botonEnviar) pregunta.focus();
-        }
+        cerrarSolicitud(solicitud);
+        estadoConsulta.textContent = "No se incorporó una respuesta. El borrador se conserva.";
+        avisar(error instanceof ErrorCliente ? error.message : "No se pudo conectar con el servidor. Si recibió la solicitud, podría seguir procesándola.");
+        if (document.activeElement === document.body) pregunta.focus();
       }
     });
 
     pregunta.addEventListener("input", () => {
-      avisoEntrada.hidden = true;
-      pregunta.removeAttribute("aria-invalid");
+      actualizarContador();
+      avisar();
     });
     pregunta.addEventListener("keydown", (evento) => {
       if (evento.key === "Enter" && !evento.shiftKey && !evento.isComposing) {
@@ -535,20 +753,24 @@
     sugerencias.forEach((boton) => {
       boton.addEventListener("click", () => {
         if (solicitudPendiente || !claveApi) return;
-        pregunta.value = boton.dataset.pregunta;
-        formulario.requestSubmit();
+        if (pregunta.value.trim()) {
+          avisar("Ya tienes un borrador. Borra el texto si quieres usar esta sugerencia.");
+        } else {
+          pregunta.value = boton.dataset.pregunta;
+          actualizarContador();
+          avisar();
+        }
+        pregunta.focus();
       });
     });
-    document.getElementById("nueva-conversacion").addEventListener("click", nuevaConversacion);
-    document.getElementById("cambiar-clave").addEventListener("click", () => {
+    document.getElementById("nueva-conversacion").addEventListener("click", () => {
       nuevaConversacion();
-      mostrarAcceso("");
+      pregunta.focus();
     });
-    window.addEventListener("pagehide", () => {
-      nuevaConversacion();
-      mostrarAcceso("");
-    });
-    nuevaConversacion();
+    document.getElementById("cambiar-clave").addEventListener("click", () => mostrarAcceso());
+    botonCancelar.addEventListener("click", () => detenerEspera("Cancelaste la espera."));
+    window.addEventListener("pagehide", () => mostrarAcceso("", false, false));
+    controles();
   })();
   </script>
 </body>
