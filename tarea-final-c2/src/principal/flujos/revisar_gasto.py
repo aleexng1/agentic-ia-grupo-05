@@ -4,8 +4,8 @@ Origen: tarea-final-c1/src/grafo.py (imports ajustados).
 Dueño en C2: Matías (c2tf/matias-react-seguridad).
 Hecho en C2: consultar_fondo (por MCP) entre las herramientas, estado_final por cada
 salida del ciclo y revisar_caso, que devuelve pasos / herramientas_usadas / estado_final /
-veredicto (docs/contratos.md). Pendiente con Alex: sumar delegar_verificador cuando exista,
-y cambiar obtener_llm por obtener_llm_con_respaldo cuando se una el PR de Sebastián.
+veredicto (docs/contratos.md). Issue #100: piso por verificación A2A antes de registrar,
+«ok» solo con veredicto, y modelo de respaldo en el ReAct y el juez (turno «fallback»).
 
 El ciclo es:
     LLM ──(pide herramienta)──> herramientas ──(observación)──> LLM ...
@@ -18,6 +18,7 @@ y los campos herramientas_usadas y estado_final del estado (EstadoRevision).
 """
 
 import json
+import os
 import re
 from typing import NotRequired
 
@@ -28,7 +29,7 @@ from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode
 
 from src.comun.config import registrar_traza
-from src.comun.modelos import obtener_llm
+from src.comun.modelos import TEMPERATURA, obtener_llm
 from src.comun.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
 from src.comun.seguridad import AccionNoAutorizada, exigir_accion_permitida
 from src.principal.herramientas.validar_gasto import (
@@ -106,6 +107,8 @@ class EstadoRevision(EstadoAgente):
 
     herramientas_usadas: NotRequired[list[str]]  # en orden, solo las que sí se ejecutaron
     estado_final: NotRequired[str | None]  # "bloqueado" si se impidió una acción; None mientras corre
+    verificacion: NotRequired[dict | None]  # respuesta del verificador A2A (o None si no hubo boleta)
+    uso_respaldo: NotRequired[bool]  # True si respondió MODELO_RESPALDO en el ReAct o en el juez
 
 
 # Separador con que el gasto viaja dentro del mensaje (mismo texto que en tarea-final-c1).
@@ -115,6 +118,65 @@ MENSAJE_BLOQUEO = (
     "Bloqueé la solicitud: el agente intentó una acción no autorizada ({acciones}). "
     "No se ejecutó ninguna herramienta de ese paso y el registro no cambió."
 )
+
+
+def _obtener_respaldo():
+    """Modelo de respaldo (MODELO_RESPALDO) sin herramientas, o None si no está configurado."""
+    nombre = os.getenv("MODELO_RESPALDO", "").strip()
+    if not nombre:
+        return None
+    from langchain_google_genai import ChatGoogleGenerativeAI
+
+    return ChatGoogleGenerativeAI(model=nombre, temperature=TEMPERATURA)
+
+
+def _modelos_react() -> list[tuple[str, object]]:
+    """[("principal", modelo), ("respaldo", modelo)] con las herramientas ya enlazadas.
+
+    Mismo criterio que obtener_llm_con_respaldo (Sebastián), pero con los modelos por separado
+    para saber CUÁL respondió: si fue el respaldo, el turno termina como "fallback".
+    (Igual que hace el router de Alex con with_structured_output.)
+    """
+    modelos = [("principal", obtener_llm().bind_tools(HERRAMIENTAS))]
+    respaldo = _obtener_respaldo()
+    if respaldo is not None:
+        modelos.append(("respaldo", respaldo.bind_tools(HERRAMIENTAS)))
+    return modelos
+
+
+def invocar_con_respaldo(modelos: list[tuple[str, object]], mensajes: list) -> tuple[object, bool]:
+    """Prueba los modelos en orden. Devuelve (respuesta, True si respondió el respaldo).
+
+    Solo cambia de modelo si el anterior lanza una excepción (cuota, 503, timeout): nunca
+    inventa una respuesta. Si fallan todos, relanza el error del último.
+    """
+    ultimo_error = None
+    for indice, (nombre, modelo) in enumerate(modelos):
+        try:
+            return modelo.invoke(mensajes), indice > 0
+        except Exception as error:
+            ultimo_error = error
+            registrar_traza("modelo_fallo", {"modelo": nombre, "error": type(error).__name__})
+    raise ultimo_error
+
+
+def motivo_piso_verificacion(verificacion: dict | None) -> str | None:
+    """Por qué una aprobación debe bajar a observar según el verificador A2A, o None si no aplica.
+
+    - Sin verificación (no hubo boleta): None, no cambia nada.
+    - Verificador caído o token rechazado ({"disponible": False}, o sin "disponible"): no se pudo
+      verificar → observar. delegar_verificador pone "disponible": True cuando responde bien.
+    - Algún campo de `cuadra` distinto de "sí": la boleta no coincide → observar.
+    Misma regla que aplicar_verificacion en src/principal/grafo.py (Alex).
+    """
+    if not verificacion:
+        return None
+    if not verificacion.get("disponible"):  # sin la marca de éxito se trata como no verificada
+        return "no se pudo verificar la boleta con el agente verificador"
+    no_cuadran = [campo for campo, valor in (verificacion.get("cuadra") or {}).items() if valor != "sí"]
+    if no_cuadran:
+        return f"la boleta no coincide con lo declarado en {', '.join(no_cuadran)}"
+    return None
 
 
 def _acciones_no_autorizadas(llamadas: list) -> list[str]:
@@ -367,14 +429,16 @@ def construir_agente(checkpointer=None):
     (InMemorySaver, se pierde al reiniciar); en el servicio se pasa el de Postgres
     (crear_checkpointer() de Sebastián) para que la memoria persista.
     """
-    llm = obtener_llm().bind_tools(HERRAMIENTAS)
+    modelos = _modelos_react()
     nodo_herramientas = ToolNode(HERRAMIENTAS, handle_tool_errors=(ToolException,))
 
-    def nodo_llm(estado: EstadoAgente) -> dict:
+    def nodo_llm(estado: EstadoRevision) -> dict:
         # Una vuelta del ciclo: el LLM lee el historial y decide (pensar → actuar).
         _trazar_observaciones(estado["messages"])
         pasos = estado.get("pasos", 0) + 1
-        respuesta = llm.invoke([SystemMessage(PROMPT_SISTEMA), *estado["messages"]])
+        respuesta, respondio_respaldo = invocar_con_respaldo(
+            modelos, [SystemMessage(PROMPT_SISTEMA), *estado["messages"]]
+        )
         texto_respuesta = respuesta.text or ""
         sin_veredicto_del_turno = not _emitio_veredicto_valido_en_turno(estado["messages"])
         respuesta_final_insegura = (
@@ -400,6 +464,8 @@ def construir_agente(checkpointer=None):
             {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
         )
         actualizaciones = {"messages": [respuesta], "pasos": pasos}
+        if respondio_respaldo:
+            actualizaciones["uso_respaldo"] = True
         if not respuesta.tool_calls:
             # Parada normal: el modelo respondió sin pedir herramientas (si validó, sigue "cerrar").
             actualizaciones["estado_final"] = "ok"
@@ -571,6 +637,14 @@ def construir_agente(checkpointer=None):
             veredicto["decision"] = "observar"
             ajustes.append(f"el juez no validó la aprobación: {juicio['razon']}")
 
+        # Piso por verificación (C2): va ANTES del fondo y del registro, para que lo que se
+        # guarda sea lo mismo que se responde. Solo endurece (aprobar → observar), nunca relaja.
+        motivo_verificacion = motivo_piso_verificacion(estado.get("verificacion"))
+        if motivo_verificacion and veredicto["decision"] == "aprobar":
+            veredicto["decision"] = "observar"
+            registrar_traza("piso_verificacion", {"gasto": gasto.get("id"), "motivo": motivo_verificacion})
+            ajustes.append(motivo_verificacion)
+
         fondo = estado.get("fondo") or buscar_fondo(gasto.get("id_fondo"))
         try:
             nuevo_fondo = aplicar_veredicto(fondo, gasto, veredicto)
@@ -614,6 +688,7 @@ def construir_agente(checkpointer=None):
             f"Motivo: {veredicto['motivo']}"
         )
         actualizaciones = {
+            "uso_respaldo": bool(estado.get("uso_respaldo")) or bool(juicio.get("uso_respaldo")),
             "veredicto": veredicto,
             "fondo": nuevo_fondo,
             "clasificacion": {**clasificacion, "razon": veredicto["motivo"]},
@@ -693,12 +768,29 @@ def conversar_con_caso(
     hilo: str,
     gasto: Gasto,
     fondo: EstadoFondo | None = None,
+    verificacion: dict | None = None,
 ) -> str:
-    """Inicia un turno con el gasto original y, opcionalmente, el fondo inicial."""
-    estado_inicial = {"gasto": gasto}
+    """Inicia un turno con el gasto original y, opcionalmente, el fondo y la verificación A2A."""
+    estado_inicial = {"gasto": gasto, "verificacion": verificacion}
     if fondo is not None:
         estado_inicial["fondo"] = fondo
     return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
+
+
+def estado_final_del_turno(estado: dict) -> str:
+    """Cómo terminó el turno, según docs/contratos.md §7 y §8.
+
+    - "bloqueado" / "error": se respetan tal cual (son los más graves).
+    - "ok" solo si hubo un veredicto válido; sin veredicto (por ejemplo, la boleta ilegible
+      y el modelo cerró sin emitir_veredicto) es "error".
+    - Si terminó bien pero respondió MODELO_RESPALDO (ReAct o juez), es "fallback".
+    """
+    estado_final = estado.get("estado_final") or "ok"
+    if estado_final in ("bloqueado", "error"):
+        return estado_final
+    if not estado.get("veredicto"):
+        return "error"
+    return "fallback" if estado.get("uso_respaldo") else "ok"
 
 
 def revisar_caso(
@@ -707,16 +799,21 @@ def revisar_caso(
     hilo: str,
     gasto: Gasto,
     fondo: EstadoFondo | None = None,
+    verificacion: dict | None = None,
 ) -> dict:
     """Revisa un gasto y devuelve lo que necesitan el router y la tabla `ejecuciones`.
 
     Es la entrega del flujo revisar_gasto para Alex (docs/reparto.md):
         {"respuesta": str, "pasos": int, "herramientas_usadas": list[str],
-         "estado_final": "ok" | "bloqueado" | "error", "veredicto": Veredicto | None}
-    - "ok": cerró con un veredicto válido (o con un cierre seguro sin aprobar).
+         "estado_final": "ok" | "fallback" | "bloqueado" | "error", "veredicto": Veredicto | None}
+    - "ok": cerró con un veredicto válido.
+    - "fallback": cerró con veredicto, pero respondió el modelo de respaldo.
     - "bloqueado": el modelo pidió una acción fuera de ACCIONES_PERMITIDAS; no se ejecutó nada.
-    - "error": se detuvo por MAX_PASOS_REACT sin veredicto.
-    "fallback" lo agrega quien integra (modelo de respaldo o A2A caído), no este flujo.
+    - "error": se detuvo por MAX_PASOS_REACT, o cerró sin veredicto.
+    El A2A caído lo marca quien integra (grafo.py), además de este estado.
+
+    `verificacion`: la respuesta del verificador A2A, si hubo boleta. Si no cuadra o no se pudo
+    verificar, una aprobación baja a "observar" ANTES de registrar el veredicto y tocar el fondo.
 
     El LLM solo lee mensajes: si `mensaje` no trae ya el gasto, se le agrega como JSON
     (igual que tarea-final-c1/pruebas/evaluar.py). El grafo igual valida y registra el
@@ -724,13 +821,13 @@ def revisar_caso(
     """
     if MARCA_GASTO not in mensaje:
         mensaje = mensaje + MARCA_GASTO + json.dumps(gasto, ensure_ascii=False)
-    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo)
+    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo, verificacion)
     estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
     return {
         "respuesta": respuesta,
         "pasos": int(estado.get("pasos", 0)),
         "herramientas_usadas": list(estado.get("herramientas_usadas", [])),
-        "estado_final": estado.get("estado_final") or "ok",
+        "estado_final": estado_final_del_turno(estado),
         "veredicto": estado.get("veredicto"),
     }
 
@@ -779,6 +876,8 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
         "pasos": 0,
         "herramientas_usadas": [],
         "estado_final": None,
+        "uso_respaldo": False,
+        "verificacion": None,
         "gasto": None,
         "clasificacion": None,
         "validacion": None,

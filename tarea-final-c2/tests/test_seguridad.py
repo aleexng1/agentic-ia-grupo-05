@@ -184,6 +184,7 @@ def revisor(monkeypatch):
         espias["validar_gasto"] += 1
         return original_validar(*args, **kwargs)
 
+    monkeypatch.setattr(revisar_gasto, "_obtener_respaldo", lambda: None)  # sin depender del .env
     monkeypatch.setattr(revisar_gasto, "registrar_veredicto", registrar_espia)
     monkeypatch.setattr(revisar_gasto.validar_gasto, "func", validar_espia)
     return revisar_gasto, espias

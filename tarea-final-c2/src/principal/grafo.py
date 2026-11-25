@@ -289,6 +289,8 @@ def crear_nodo_revisar_gasto(checkpointer):
                 mensaje,
                 f"{estado['thread_id']}:revisar_gasto",
                 gasto_para_react(gasto),
+                # Piso por verificación dentro del ReAct, ANTES de registrar el veredicto (Matías, #103).
+                verificacion=verificacion,
             )
         except NotImplementedError as error:
             salida = no_implementado("revisar_gasto", str(error))

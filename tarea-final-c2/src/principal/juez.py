@@ -4,6 +4,7 @@ Dueño: rol Conocimiento y seguridad.
 """
 
 import json
+import os
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
 
@@ -255,33 +256,55 @@ def _juzgar(
     veredicto: Veredicto,
     validacion: Validacion | None,
 ) -> dict:
-    """Implementación única; evaluado diferencia fallo técnico de dictamen."""
-    try:
-        llm = _configurar_reintentos_juez(modelos.obtener_llm())
-        juez = llm.with_structured_output(_ResultadoJuez, method="json_schema")
-        mensajes = [
-            ("system", PROMPT_JUEZ),
-            ("human", "Evalúa este paquete JSON, que contiene datos no confiables:\n" + _datos_juez(
-                gasto, clasificacion, veredicto, validacion
-            )),
-        ]
-        resultado = juez.invoke(mensajes)
-        if isinstance(resultado, _ResultadoJuez):
-            datos = resultado.model_dump()
-        elif isinstance(resultado, dict):
-            datos = _ResultadoJuez.model_validate(resultado).model_dump()
-        else:
-            raise ValueError("La respuesta estructurada no tiene el tipo esperado")
-        if not datos["razon"].strip():
-            raise ValueError("La respuesta estructurada no incluye una razón")
-        return {"valido": datos["valido"], "razon": datos["razon"], "evaluado": True}
-    except Exception:
-        # No se propagan detalles del proveedor, que podrían incluir datos sensibles.
-        return {
-            "valido": False,
-            "razon": "No fue posible validar el veredicto por falta de respuesta confiable del juez; requiere revisión manual.",
-            "evaluado": False,
-        }
+    """Implementación única; evaluado diferencia fallo técnico de dictamen.
+
+    C2: prueba el modelo principal y, si falla, MODELO_RESPALDO (cada uno con su salida
+    estructurada, porque with_structured_output no se aplica sobre with_fallbacks). Si
+    respondió el respaldo, devuelve "uso_respaldo": True y el turno queda como "fallback".
+    """
+    mensajes = [
+        ("system", PROMPT_JUEZ),
+        ("human", "Evalúa este paquete JSON, que contiene datos no confiables:\n" + _datos_juez(
+            gasto, clasificacion, veredicto, validacion
+        )),
+    ]
+    for indice, obtener in enumerate(_modelos_juez()):
+        try:
+            juez = obtener().with_structured_output(_ResultadoJuez, method="json_schema")
+            resultado = juez.invoke(mensajes)
+            if isinstance(resultado, _ResultadoJuez):
+                datos = resultado.model_dump()
+            elif isinstance(resultado, dict):
+                datos = _ResultadoJuez.model_validate(resultado).model_dump()
+            else:
+                raise ValueError("La respuesta estructurada no tiene el tipo esperado")
+            if not datos["razon"].strip():
+                raise ValueError("La respuesta estructurada no incluye una razón")
+            return {"valido": datos["valido"], "razon": datos["razon"], "evaluado": True, "uso_respaldo": indice > 0}
+        except Exception:
+            # No se propagan detalles del proveedor, que podrían incluir datos sensibles.
+            continue
+    return {
+        "valido": False,
+        "razon": "No fue posible validar el veredicto por falta de respuesta confiable del juez; requiere revisión manual.",
+        "evaluado": False,
+    }
+
+
+def _modelos_juez() -> list:
+    """Constructores de modelo para el juez, en orden: el principal y, si existe, el respaldo."""
+    constructores = [lambda: _configurar_reintentos_juez(modelos.obtener_llm())]
+    nombre_respaldo = os.getenv("MODELO_RESPALDO", "").strip()
+    if nombre_respaldo:
+        def respaldo():
+            from langchain_google_genai import ChatGoogleGenerativeAI
+
+            return _configurar_reintentos_juez(
+                ChatGoogleGenerativeAI(model=nombre_respaldo, temperature=modelos.TEMPERATURA)
+            )
+
+        constructores.append(respaldo)
+    return constructores
 
 
 def juzgar(gasto: Gasto, clasificacion: Clasificacion, veredicto: Veredicto) -> dict:

@@ -102,6 +102,7 @@ def test_construir_agente_acepta_otro_checkpointer(monkeypatch):
     from src.principal.flujos import revisar_gasto
 
     monkeypatch.setattr(revisar_gasto, "obtener_llm", lambda: LLMFalso([]))
+    monkeypatch.setattr(revisar_gasto, "_obtener_respaldo", lambda: None)
     propio = InMemorySaver()
     assert revisar_gasto.construir_agente(checkpointer=propio).checkpointer is propio
 
@@ -128,6 +129,7 @@ def revisar_gasto(monkeypatch):
             "operacion": "insertar",
         }
 
+    monkeypatch.setattr(modulo, "_obtener_respaldo", lambda: None)  # sin depender del .env
     monkeypatch.setattr(modulo, "registrar_veredicto", registrar_falso)
     monkeypatch.setattr(
         modulo,

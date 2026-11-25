@@ -10,6 +10,7 @@ from src.principal import router
 from src.principal.flujos import consulta_politica as modulo_consulta
 from src.principal.flujos import revisar_gasto as modulo_react
 from tests.conftest import CLAVE_DE_PRUEBA
+from tests.test_react_mcp import revisar_gasto  # noqa: F401  (fixture: ReAct con registro en memoria)
 
 GASTO = {
     "id": "G-0101", "fecha_gasto": "2026-10-06", "fecha_rendicion": "2026-10-09", "monto": 7800,
@@ -113,8 +114,8 @@ def test_revisar_gasto_sin_revisar_caso_termina_en_error(ruta_fija, filas, monke
 def _react_falso(monkeypatch, decision="aprobar", estado_final="ok"):
     recibido = {}
 
-    def revisar_caso(agente, mensaje, hilo, gasto, fondo=None):
-        recibido.update(mensaje=mensaje, hilo=hilo, gasto=gasto)
+    def revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None):
+        recibido.update(mensaje=mensaje, hilo=hilo, gasto=gasto, verificacion=verificacion)
         return {
             "respuesta": f"Decisión: {decision}.", "pasos": 3, "estado_final": estado_final,
             "herramientas_usadas": ["buscar_politica", "validar_gasto", "emitir_veredicto"],
@@ -268,3 +269,26 @@ def test_chat_sin_thread_id_crea_uno(cliente, ruta_fija, filas):
     ruta_fija("fuera_de_alcance")
     datos = cliente.post("/chat", json={"texto": "hola"}, headers=CABECERAS).json()
     assert datos["thread_id"] and datos["id_ejecucion"]
+
+
+def test_boleta_que_no_cuadra_chat_y_registro_dicen_observar(ruta_fija, filas, monkeypatch, revisar_gasto):  # noqa: F811
+    """Punta a punta con el ReAct real de Matías (LLM guionado): el modelo propone aprobar, el
+    verificador dice que el monto no cuadra, y tanto /chat como el registro quedan en «observar»."""
+    from tests.test_revisar_gasto_c2 import _guion_aprobar_gs01
+    from tests.test_seguridad import LLMFalso
+
+    turno, pasos = _guion_aprobar_gs01()
+    monkeypatch.setattr(revisar_gasto, "obtener_llm", lambda: LLMFalso(pasos))
+    monkeypatch.setattr(modulo_grafo, "_AGENTE_REACT", None)  # compila el ReAct con el LLM guionado
+    ruta_fija("revisar_gasto")
+    no_cuadra = {"disponible": True, "leido": {"monto": 9800}, "confianza": 0.9, "observaciones": "",
+                 "cuadra": {"monto": "no", "fecha": "sí", "rut_emisor": "sí", "folio": "sí", "categoria": "sí"}}
+    llamadas = _verificador_falso(monkeypatch, no_cuadra)
+    gasto = {**turno["gasto"], "rut_emisor": "11.111.111-1", "folio": "000123"}
+
+    salida = _ejecutar("Revisa este gasto.", gasto=gasto, imagen=IMAGEN)
+
+    assert len(llamadas) == 1 and salida["hubo_a2a"] is True
+    assert salida["veredicto"]["decision"] == "observar"
+    assert revisar_gasto.registros_de_prueba == [(gasto["id"], "observar")]  # no «aprobar»
+    assert filas[0]["ruta"] == "revisar_gasto"
