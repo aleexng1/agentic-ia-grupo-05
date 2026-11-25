@@ -1,0 +1,42 @@
+{
+  "proyecto": "grupo05-tarea-final-c2-graphrag",
+  "version_catalogo": 1,
+  "estado": "propuesta_academica_pendiente_de_aprobacion",
+  "normativa": {
+    "codigo": "POL-RG-01",
+    "version": "1.6",
+    "categorias": [
+      {"id": "P02:desayuno", "nombre": "Desayuno", "tope_clp": 10000, "fuente": "datos/politica_ficticia.md#P02"},
+      {"id": "P02:almuerzo", "nombre": "Almuerzo", "tope_clp": 20000, "fuente": "datos/politica_ficticia.md#P02"},
+      {"id": "P02:cena", "nombre": "Cena", "tope_clp": 45000, "fuente": "datos/politica_ficticia.md#P02"},
+      {"id": "P02:hotel", "nombre": "Hotel", "tope_clp": 445000, "fuente": "datos/politica_ficticia.md#P02"},
+      {"id": "P02:hostal", "nombre": "Hostal", "tope_clp": 295000, "fuente": "datos/politica_ficticia.md#P02"},
+      {"id": "P03:desayuno", "nombre": "Desayuno", "tope_clp": 20000, "fuente": "datos/politica_ficticia.md#P03"},
+      {"id": "P03:almuerzo", "nombre": "Almuerzo", "tope_clp": 45000, "fuente": "datos/politica_ficticia.md#P03"},
+      {"id": "P03:cena", "nombre": "Cena", "tope_clp": 50000, "fuente": "datos/politica_ficticia.md#P03"},
+      {"id": "P03:hotel", "nombre": "Hotel", "tope_clp": 325000, "fuente": "datos/politica_ficticia.md#P03"},
+      {"id": "P03:hostal", "nombre": "Hostal", "tope_clp": 265000, "fuente": "datos/politica_ficticia.md#P03"}
+    ]
+  },
+  "organizacion_ficticia": {
+    "niveles": [
+      {"id": "nivel:jefatura", "nombre": "Jefatura"},
+      {"id": "nivel:profesional", "nombre": "Profesional"}
+    ],
+    "cargos": [
+      {"id": "cargo:jefe-de-tienda", "nombre": "Jefe de tienda", "nivel_id": "nivel:jefatura"},
+      {"id": "cargo:analista-de-operaciones", "nombre": "Analista de Operaciones", "nivel_id": "nivel:profesional"}
+    ],
+    "elegibilidad_propuesta": [
+      {
+        "nivel_id": "nivel:jefatura",
+        "categorias": ["P02:desayuno", "P02:almuerzo", "P02:cena", "P02:hotel", "P02:hostal",
+                       "P03:desayuno", "P03:almuerzo", "P03:cena", "P03:hotel", "P03:hostal"]
+      },
+      {
+        "nivel_id": "nivel:profesional",
+        "categorias": ["P02:desayuno", "P02:almuerzo", "P02:cena", "P02:hotel", "P02:hostal"]
+      }
+    ]
+  }
+}

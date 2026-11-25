@@ -2,12 +2,14 @@
 
 import os
 from functools import lru_cache
+from math import isfinite
 
 from langchain_core.tools import ToolException, tool
 
 # Importar config carga el .env del proyecto en el entorno, sin imprimir valores.
 from src.comun.config import CARPETA_PROYECTO
 from src.comun.contrato import Fragmento
+from src.conocimiento.rag.lector_redis import ErrorLectura, LectorRedis
 
 
 @lru_cache(maxsize=1)
@@ -19,28 +21,7 @@ def _obtener_indice():
     if not all((redis_url, prefijo, modelo)):
         raise RuntimeError("Falta REDIS_URL, REDIS_PREFIJO o EMBEDDING_MODEL en el entorno.")
 
-    try:
-        from langchain_google_genai import GoogleGenerativeAIEmbeddings
-        from langchain_redis import RedisConfig, RedisVectorStore
-
-        embeddings = GoogleGenerativeAIEmbeddings(model=modelo, max_retries=0)
-        configuracion = RedisConfig(
-            index_name=prefijo,
-            redis_url=redis_url,
-            embedding_dimensions=3072,
-            distance_metric="COSINE",
-            indexing_algorithm="FLAT",
-            legacy_key_format=False,
-        )
-        return RedisVectorStore(
-            embeddings=embeddings,
-            config=configuracion,
-        )
-    except Exception as error:
-        raise RuntimeError(
-            f"No se pudo inicializar la búsqueda Redis ({type(error).__name__}). "
-            "Verifica dependencias, configuración y disponibilidad del servicio."
-        ) from None
+    return LectorRedis(redis_url, prefijo, modelo)
 
 
 @tool
@@ -63,6 +44,9 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
         resultados = _obtener_indice().similarity_search_with_score(
             consulta, k=k
         )
+    except ErrorLectura as error:
+        # ErrorLectura solo contiene mensajes fijos del lector.
+        raise ToolException(str(error)) from None
     except Exception as error:
         # No incluir el mensaje original: puede revelar la URL o detalles de credenciales.
         raise ToolException(
@@ -74,17 +58,19 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
     for documento, puntaje in resultados:
         metadatos = documento.metadata
         texto = metadatos.get("texto_completo")
-        if not isinstance(texto, str):
+        if not isinstance(texto, str) or not texto.strip():
             # No completar con instrucciones ni texto fabricado: índice incompatible.
             raise ToolException("El documento recuperado no contiene texto_completo válido.")
         politica = metadatos.get("politica")
         fuente = metadatos.get("fuente")
-        if not isinstance(politica, str) or not isinstance(fuente, str):
+        if not all(isinstance(valor, str) and valor.strip() for valor in (politica, fuente)):
             raise ToolException("El documento recuperado tiene metadatos incompatibles.")
         try:
             puntaje_seguro = -float(puntaje)
         except (TypeError, ValueError, OverflowError):
             raise ToolException("Redis devolvió una puntuación incompatible.") from None
+        if not isfinite(puntaje_seguro):
+            raise ToolException("Redis devolvió una puntuación incompatible.")
         fragmentos.append({
             "politica": politica,
             "texto": texto,
