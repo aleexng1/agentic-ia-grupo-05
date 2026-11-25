@@ -8,7 +8,12 @@
 """
 
 import logging
+import os
 import sys
+
+import psycopg
+from psycopg.rows import dict_row
+from psycopg.types.json import Jsonb
 
 
 NOMBRE_REGISTRO = "tarea_final"
@@ -72,29 +77,90 @@ def segundos(valor: float) -> str:
     return f"{valor:.1f}".replace(".", ",") + " s"
 
 
+
+
 # ---------------------------------------------------------------------------
-# Tabla `ejecuciones` (pendiente C2, dueño: Sebastián). Ver docs/contratos.md.
+# Conexión a Postgres (DATABASE_URL). Compartida con registro_veredictos.py.
+# ---------------------------------------------------------------------------
+
+
+def url_postgres() -> str:
+    """DATABASE_URL normalizada. Heroku la entrega como postgres://; se pasa a postgresql://."""
+    url = os.getenv("DATABASE_URL", "").strip()
+    if not url:
+        raise RuntimeError("Falta DATABASE_URL en .env (en Heroku lo crea el add-on de Postgres).")
+    if url.startswith("postgres://"):
+        url = "postgresql://" + url[len("postgres://"):]
+    return url
+
+
+def conectar_postgres() -> psycopg.Connection:
+    """Abre una conexión a Postgres con DATABASE_URL."""
+    return psycopg.connect(url_postgres())
+
+
+# ---------------------------------------------------------------------------
+# Tabla `ejecuciones` (C2, dueño: Sebastián). Ver docs/contratos.md, sección 7.
 # ---------------------------------------------------------------------------
 
 ESTADOS_FINALES = ("ok", "bloqueado", "fallback", "error")
+RUTAS = ("consulta_politica", "revisar_gasto", "fuera_de_alcance")
+
+_ESQUEMA_EJECUCIONES = f"""
+CREATE TABLE IF NOT EXISTS ejecuciones (
+    id_ejecucion        TEXT PRIMARY KEY,
+    fecha               TIMESTAMPTZ NOT NULL,
+    ruta                TEXT NOT NULL CHECK (ruta IN {RUTAS!r}),
+    pasos               INTEGER NOT NULL,
+    herramientas_usadas JSONB NOT NULL,
+    hubo_a2a            BOOLEAN NOT NULL,
+    estado_final        TEXT NOT NULL CHECK (estado_final IN {ESTADOS_FINALES!r}),
+    duracion_ms         INTEGER NOT NULL
+)
+"""
+
+_COLUMNAS_EJECUCION = (
+    "id_ejecucion", "fecha", "ruta", "pasos", "herramientas_usadas", "hubo_a2a", "estado_final", "duracion_ms",
+)
+
+_tabla_lista = False
 
 
 def crear_tabla_ejecuciones() -> None:
-    """Crea la tabla `ejecuciones` en Postgres (DATABASE_URL) si no existe.
-
-    Columnas: id_ejecucion, fecha, ruta, pasos, herramientas_usadas, hubo_a2a,
-    estado_final (CHECK en ESTADOS_FINALES) y duracion_ms. Se puede llamar varias veces.
-    """
-    raise NotImplementedError("crear_tabla_ejecuciones: pendiente (Sebastián, c2tf/sebastian-despliegue).")
+    """Crea la tabla `ejecuciones` en Postgres si no existe. Se puede llamar varias veces."""
+    global _tabla_lista
+    with conectar_postgres() as conexion:
+        conexion.execute(_ESQUEMA_EJECUCIONES)
+    _tabla_lista = True
 
 
 def guardar_ejecucion(ejecucion: dict) -> None:
     """Inserta una fila en `ejecuciones` con las columnas de docs/contratos.md.
 
     No guarda el texto del usuario ni la imagen ni claves: solo los metadatos de la ejecución.
-    Si la base no responde, debe dejar una línea de log de error y NO romper la respuesta de /chat.
+    Si la base no responde, deja una línea de log de error y NO rompe la respuesta de /chat.
+    Si el id ya existe, no duplica la fila.
     """
-    raise NotImplementedError("guardar_ejecucion: pendiente (Sebastián, c2tf/sebastian-despliegue).")
+    if ejecucion.get("estado_final") not in ESTADOS_FINALES:
+        raise ValueError(f"estado_final no válido: {ejecucion.get('estado_final')!r}")
+    try:
+        if not _tabla_lista:
+            crear_tabla_ejecuciones()
+        fila = {c: ejecucion[c] for c in _COLUMNAS_EJECUCION}
+        fila["herramientas_usadas"] = Jsonb(list(ejecucion["herramientas_usadas"]))
+        with conectar_postgres() as conexion:
+            conexion.execute(
+                """
+                INSERT INTO ejecuciones (id_ejecucion, fecha, ruta, pasos, herramientas_usadas,
+                                         hubo_a2a, estado_final, duracion_ms)
+                VALUES (%(id_ejecucion)s, %(fecha)s, %(ruta)s, %(pasos)s, %(herramientas_usadas)s,
+                        %(hubo_a2a)s, %(estado_final)s, %(duracion_ms)s)
+                ON CONFLICT (id_ejecucion) DO NOTHING
+                """,
+                fila,
+            )
+    except Exception as error:  # la respuesta al usuario no depende del registro
+        obtener_registro().error("no se pudo guardar la ejecución %s · %s", ejecucion.get("id_ejecucion"), error)
 
 
 def leer_ejecucion(id_ejecucion: str) -> dict | None:
@@ -102,4 +168,16 @@ def leer_ejecucion(id_ejecucion: str) -> dict | None:
 
     La usa GET /registro/{id_ejecucion} (protegido con X-API-Key) en api/app.py.
     """
-    raise NotImplementedError("leer_ejecucion: pendiente (Sebastián, c2tf/sebastian-despliegue).")
+    if not _tabla_lista:
+        crear_tabla_ejecuciones()
+    with conectar_postgres() as conexion:
+        cursor = conexion.cursor(row_factory=dict_row)
+        cursor.execute(
+            "SELECT " + ", ".join(_COLUMNAS_EJECUCION) + " FROM ejecuciones WHERE id_ejecucion = %s",
+            (id_ejecucion,),
+        )
+        fila = cursor.fetchone()
+    if fila is None:
+        return None
+    fila["fecha"] = fila["fecha"].isoformat()
+    return dict(fila)
