@@ -77,7 +77,7 @@ Errores (todos con el formato `{"detail": "mensaje en una línea"}`):
 | `validar_gasto` | `(gasto: Gasto, politica: str, categoria: str) -> Validacion` | `src/principal/herramientas/validar_gasto.py` | copiada de c1 |
 | `emitir_veredicto` | `(decision: Decision, politica: str, categoria: str, cuenta: str, motivo: str) -> Veredicto` | `src/principal/flujos/revisar_gasto.py` | copiada de c1 |
 | `consultar_fondo` | `(id_fondo: str) -> EstadoFondo` (vía MCP) | `src/principal/herramientas/consultar_fondo.py` | hecho (servidor MCP stdio en `src/mcp_fondos/`) |
-| `delegar_verificador` | `async (imagen: dict, declarado: dict) -> RespuestaVerificador` | `src/principal/herramientas/delegar_verificador.py` | esqueleto |
+| `delegar_verificador` | `async (imagen: dict, declarado: dict) -> RespuestaVerificador` | `src/principal/herramientas/delegar_verificador.py` | hecho (verificador A2A en `src/verificador/`; formato en §11.2) |
 
 Y para el GraphRAG: `tope_para(cargo: str, categoria: str) -> dict | None` en
 `src/conocimiento/grafo/consultar.py` → `{"cargo", "nivel", "categoria", "tope_clp", "fuente"}`.

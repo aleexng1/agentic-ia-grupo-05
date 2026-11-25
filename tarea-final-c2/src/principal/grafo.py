@@ -380,6 +380,15 @@ def _registrar_ejecucion(fila: dict) -> None:
         _REGISTRO.error("ejecución %s · no se pudo guardar: %s", fila["id_ejecucion"], traducir_error(error))
 
 
+def _ruta_alcanzada(grafo, configuracion) -> str | None:
+    """Ruta que el router eligió en este turno, leída del último checkpoint (None si no alcanzó)."""
+    try:
+        ruta = grafo.get_state(configuracion).values.get("ruta")
+    except Exception:  # noqa: BLE001 (sin checkpointer o base caída: se registra como sin_ruta)
+        return None
+    return ruta if ruta in router.RUTAS else None
+
+
 def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gasto: dict | None = None, grafo=None) -> dict:
     """Corre un turno completo (síncrono) y devuelve la respuesta de /chat (docs/contratos.md §2).
 
@@ -417,14 +426,18 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
             "duracion_ms": int((time.monotonic() - inicio) * 1000),
         }
 
+    grafo = grafo or obtener_grafo()
+    configuracion = {"configurable": {"thread_id": thread_id}}
     try:
-        estado = (grafo or obtener_grafo()).invoke(entrada, {"configurable": {"thread_id": thread_id}})
+        estado = grafo.invoke(entrada, configuracion)
     except router.MensajeInvalido:
         raise
     except Exception as error:
         mensaje = traducir_error(error)
-        _REGISTRO.error("ejecución %s · falló sin salida: %s", id_ejecucion, mensaje)
-        _registrar_ejecucion(fila({"estado_final": "error"}))
+        # Si el router alcanzó a elegir, la fila lleva esa ruta; "sin_ruta" es solo para fallas previas.
+        ruta = _ruta_alcanzada(grafo, configuracion)
+        _REGISTRO.error("ejecución %s · ruta=%s · falló sin salida: %s", id_ejecucion, ruta or "sin_ruta", mensaje)
+        _registrar_ejecucion(fila({"ruta": ruta, "estado_final": "error"}))
         raise ErrorDeEjecucion(mensaje, id_ejecucion) from None
     finally:
         with _CANDADO_ADJUNTOS:

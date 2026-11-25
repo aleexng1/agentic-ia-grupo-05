@@ -12,8 +12,15 @@ Cómo generarla (desde `tarea-final-c2/`, con `.env` completo):
 ```bash
 python -m evaluacion.evaluar --validar     # 1) formato (no necesita Gemini)
 python -m evaluacion.evaluar               # 2) corrida completa → escribe el informe aquí
+python -m evaluacion.evaluar --pausa 20    #    lo mismo, con 20 s entre casos (cuota por minuto de Gemini)
 ```
 Para la entrega conviene correrla cuando estén unidos los flujos de Matías (`revisar_gasto`) y de
 Eduardo (`consulta_politica`): antes de eso, sus casos salen como **pendientes** (no cuentan).
 
 Formato (2026-11-24): `--validar` → «golden set v1.0: formato correcto, 57 casos (59 turnos)».
+
+Intento de corrida completa en `main` integrado (2026-11-24, con Postgres de prueba y verificador):
+**se detuvo en el caso 16 de 57** porque se agotó la cuota de Gemini (`GoogleRateLimitError`). El
+router cambió al respaldo, pero el ReAct todavía no tiene respaldo. No se guardó informe, porque
+uno lleno de errores de cuota no mide al agente. Hay que repetirla con cuota disponible, `--pausa`,
+`DATABASE_URL` y el verificador levantado, idealmente con Redis real.
