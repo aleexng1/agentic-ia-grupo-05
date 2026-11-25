@@ -130,3 +130,18 @@ def test_router_con_gemini_acierta_al_menos_13_de_15():
         detalle.append(f"{'✅' if ok else '❌'} {esperada:18} ← {decision['ruta']:18} | {texto[:60]} {nota}")
     print("\n".join(detalle))
     assert aciertos >= MINIMO_ACIERTOS, f"{aciertos}/15 aciertos:\n" + "\n".join(detalle)
+
+
+def test_nivel_de_razonamiento_se_aplica_a_los_dos_modelos(monkeypatch):
+    monkeypatch.setenv("GOOGLE_API_KEY", "clave-falsa-sin-red")
+    monkeypatch.setenv("MODELO_PRINCIPAL", "gemini-3.5-flash-lite")
+    monkeypatch.setenv("MODELO_RESPALDO", "gemini-3.5-flash")
+    monkeypatch.delenv("NIVEL_RAZONAMIENTO", raising=False)
+    assert [m.reasoning_effort for _, m in router._modelos()] == ["minimal", "minimal"]
+    monkeypatch.setenv("NIVEL_RAZONAMIENTO", "low")
+    assert [m.reasoning_effort for _, m in router._modelos()] == ["low", "low"]
+    monkeypatch.setenv("NIVEL_RAZONAMIENTO", "predeterminado")
+    assert [m.reasoning_effort for _, m in router._modelos()] == [None, None]
+    monkeypatch.setenv("NIVEL_RAZONAMIENTO", "nada")
+    with pytest.raises(ValueError, match="NIVEL_RAZONAMIENTO"):
+        router._modelos()

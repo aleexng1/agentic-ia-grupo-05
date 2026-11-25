@@ -184,12 +184,14 @@ def leer_imagen(imagen: bytes, tipo: str, categoria_declarada: str | None) -> Le
     from langchain_core.messages import HumanMessage, SystemMessage
 
     from src.comun.modelos import obtener_llm
+    from src.comun.razonamiento import con_nivel_razonamiento
 
     contenido = [
         {"type": "text", "text": f"Categoría declarada del gasto: {categoria_declarada or 'no declarada'}."},
         {"type": "image_url", "image_url": f"data:{tipo};base64,{base64.b64encode(imagen).decode('ascii')}"},
     ]
-    salida = obtener_llm().with_structured_output(LecturaBoleta).invoke(
+    # Leer cuatro datos de una imagen no necesita razonar: NIVEL_RAZONAMIENTO ("minimal" por defecto).
+    salida = con_nivel_razonamiento(obtener_llm()).with_structured_output(LecturaBoleta).invoke(
         [SystemMessage(PROMPT_LECTURA), HumanMessage(content=contenido)]
     )
     if isinstance(salida, dict):

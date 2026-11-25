@@ -254,6 +254,33 @@ nuevos; no cambia ni borra nada de las secciones 1 a 10.
 - Si el router respondió con el modelo de respaldo, la ejecución queda `estado_final = "fallback"`.
 - Orden cuando dos piezas terminan distinto: `bloqueado` > `error` > `fallback` > `ok`.
 
+#### 11.1 bis — `/chat` asíncrono (agregado por Alex, revisar · 2026-11-25)
+Motivo: Heroku corta una solicitud a los 30 s y `revisar_gasto` tarda 31–52 s
+(`docs/medicion-tiempos.md`). Cambia el **código por defecto** de `POST /chat`; lo demás del
+§2 y del §11.1 sigue igual.
+- `POST /chat` → **`202`** `{"id_ejecucion", "estado": "en_proceso", "consultar": "/registro/<id>", "thread_id"}`.
+  El grafo corre en segundo plano, en un hilo del mismo proceso (`src/principal/en_segundo_plano.py`).
+  Un texto vacío o de más de 4000 caracteres responde `422` **antes** de aceptarse; 401 y 503 no cambian.
+- `POST /chat?esperar=true` → igual que antes, síncrono (`200` con la respuesta completa, `422`, `502`).
+  Es para el uso local, las pruebas y quien no pueda consultar después.
+- `GET /registro/{id_ejecucion}` (exige `X-API-Key`) → `200`:
+  - en proceso: `{"id_ejecucion", "estado": "en_proceso", "thread_id", "inicio", "segundos", "resultado": null}`;
+  - terminada: los campos de la fila de `ejecuciones` (§7) más `"estado"` (= `ok` / `bloqueado` /
+    `fallback` / `error`), `"resultado"` (la respuesta completa del `200` de `/chat`) o `"detail"`
+    (mensaje de error, que termina con `(id_ejecucion: …)`), `"inicio"`, `"fin"` y `"segundos"`;
+  - si el proceso se reinició, solo queda la fila: `"estado" = estado_final` y `"resultado": null`;
+  - `404` si no existe y `503` si no está en memoria y la base no responde.
+- **Tope global** `TIEMPO_MAX_EJECUCION_SEG` (90 s por defecto): si no termina a tiempo, queda
+  `"estado": "error"` con el mensaje «La ejecución superó el tiempo máximo de N s…», sin resultado,
+  y su fila se registra como `error` en ese momento. Si el turno termina después, su resultado se
+  descarta y su registro se ignora (mismo `id_ejecucion`).
+- **El estado y la respuesta completa viven en la memoria del proceso** (las últimas 500), porque la
+  tabla `ejecuciones` no admite `en_proceso` ni guarda la respuesta. Con más de un proceso o dyno
+  no se comparten. **Propuesta para Sebastián:** una columna `respuesta JSONB` y admitir
+  `estado_final = "en_proceso"` (insertar al aceptar y actualizar al terminar), o una tabla aparte
+  `resultados_chat (id_ejecucion, estado, respuesta, actualizado_en)`.
+- Hasta `MAX_EJECUCIONES_SIMULTANEAS` (4) a la vez; las demás esperan su turno, dentro del mismo tope.
+
 ### 11.2 Delegación A2A al verificador (etapa 2)
 - Encargo: igual que §5. La parte de archivo es `Part(raw, media_type, filename)` y la de datos,
   `Part(data, media_type="application/json")`. Imagen ≤ 5 MB, `image/jpeg|png|webp`.

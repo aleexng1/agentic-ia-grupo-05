@@ -160,7 +160,12 @@ def enviar_en_proceso(turno: dict, thread_id: str) -> dict:
 
 
 def crear_envio_http(url: str):
-    """Corre el turno contra POST /chat de un servicio levantado (local o Heroku)."""
+    """Corre el turno contra POST /chat de un servicio levantado (local o Heroku).
+
+    /chat es asíncrono: responde 202 y el resultado se consulta en GET /registro/{id} cada 1 s,
+    sin quedar atado a los 30 s de Heroku. Si la ejecución termina en error, se lanza con su
+    mensaje (así una falta de cuota se reconoce y corta la corrida).
+    """
     import httpx
 
     clave = os.getenv("API_KEY_SERVICIO", "").strip()
@@ -171,10 +176,22 @@ def crear_envio_http(url: str):
             cuerpo["gasto"] = turno["gasto"]
         if turno.get("imagen"):
             cuerpo["imagen"] = _imagen(turno["imagen"])
-        respuesta = httpx.post(f"{url.rstrip('/')}/chat", json=cuerpo, headers={"X-API-Key": clave}, timeout=180)
-        if respuesta.status_code != 200:
+        base = url.rstrip("/")
+        respuesta = httpx.post(f"{base}/chat", json=cuerpo, headers={"X-API-Key": clave}, timeout=60)
+        if respuesta.status_code == 200:  # servicio antiguo, síncrono
+            return respuesta.json()
+        if respuesta.status_code != 202:
             raise RuntimeError(f"HTTP {respuesta.status_code}: {respuesta.json().get('detail', respuesta.text)[:200]}")
-        return respuesta.json()
+        consultar = f"{base}{respuesta.json()['consultar']}"
+        fin = time.monotonic() + 300
+        while time.monotonic() < fin:
+            datos = httpx.get(consultar, headers={"X-API-Key": clave}, timeout=30).json()
+            if datos.get("estado") != "en_proceso":
+                if datos.get("resultado"):
+                    return datos["resultado"]
+                raise RuntimeError(str(datos.get("detail") or f"la ejecución terminó en {datos.get('estado')} sin resultado"))
+            time.sleep(1)
+        raise RuntimeError("la ejecución siguió en proceso más de 300 s")
 
     return enviar
 

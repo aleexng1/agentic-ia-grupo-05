@@ -34,7 +34,10 @@ def test_chat_con_clave_incorrecta_responde_401(cliente):
 
 
 def test_chat_con_router_falso_responde_200(cliente, monkeypatch):
-    """Con la clave, /chat corre el grafo: responde 200 con ruta e id_ejecucion (router falso, sin Gemini)."""
+    """Con la clave y ?esperar=true, /chat corre el grafo y responde 200 con ruta e id_ejecucion (router falso).
+
+    Sin ?esperar, /chat responde 202 y corre en segundo plano (tests/test_chat_async.py).
+    """
     from src.comun import registro
     from src.principal import grafo, router
 
@@ -44,7 +47,7 @@ def test_chat_con_router_falso_responde_200(cliente, monkeypatch):
     )
     monkeypatch.setattr(registro, "guardar_ejecucion", lambda fila: None)
     monkeypatch.setattr(grafo, "_GRAFO", grafo.construir_grafo())
-    respuesta = cliente.post("/chat", json=CHAT, headers={"X-API-Key": CLAVE_DE_PRUEBA})
+    respuesta = cliente.post("/chat?esperar=true", json=CHAT, headers={"X-API-Key": CLAVE_DE_PRUEBA})
     assert respuesta.status_code == 200
     datos = respuesta.json()
     assert datos["ruta"] == "fuera_de_alcance" and datos["id_ejecucion"]

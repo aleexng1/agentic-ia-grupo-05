@@ -233,3 +233,26 @@ def test_main_retomar_sin_avance_o_con_otra_seleccion_avisa(main_simulado, golde
     assert evaluar.main(["--casos", "X-01", "X-02", "--salida", str(tmp_path), "--espera-cuota", "0"]) == 3
     assert evaluar.main(["--casos", "X-03", "--salida", str(tmp_path), "--retomar"]) == 2
     assert evaluar.posicion_desde("2", evaluar.filtrar(golden["casos"], ids=IDS_CORTOS)) == 1
+
+
+def test_envio_http_sigue_el_flujo_asincrono(monkeypatch):
+    """POST /chat → 202; GET /registro/{id} en proceso y después con el resultado (sin red)."""
+    import httpx
+
+    class Respuesta:
+        def __init__(self, codigo, datos):
+            self.status_code, self._datos, self.text = codigo, datos, json.dumps(datos)
+
+        def json(self):
+            return self._datos
+
+    consultas = iter([{"estado": "en_proceso"}, {"estado": "ok", "resultado": {"ruta": "fuera_de_alcance"}}])
+    monkeypatch.setattr(httpx, "post", lambda *a, **k: Respuesta(202, {"id_ejecucion": "e-1", "consultar": "/registro/e-1"}))
+    monkeypatch.setattr(httpx, "get", lambda url, **k: Respuesta(200, next(consultas)))
+    monkeypatch.setattr(evaluar.time, "sleep", lambda s: None)
+    enviar = evaluar.crear_envio_http("http://servicio")
+    assert enviar({"mensaje": "hola"}, "t-1") == {"ruta": "fuera_de_alcance"}
+
+    monkeypatch.setattr(httpx, "get", lambda url, **k: Respuesta(200, {"estado": "error", "detail": "Gemini no tiene cuota disponible"}))
+    with pytest.raises(RuntimeError, match="cuota"):
+        enviar({"mensaje": "hola"}, "t-2")

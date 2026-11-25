@@ -141,6 +141,23 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     solo agregaba exposición. Si el principal no tiene `TOKEN_A2A`, no llama al verificador
     (`rechazado`, con un motivo claro), porque el encargo sería rechazado igual. En los tests se usa
     un token falso, nunca el del `.env`.
+36. **`/chat` asíncrono (`c2tf/alex-chat-async`):** `POST /chat` responde 202 y el grafo corre
+    en un grupo de hilos del mismo proceso, sin servicios nuevos. `?esperar=true` mantiene el modo
+    síncrono para el uso local, las pruebas y el evaluador.
+    - El estado y la respuesta completa se guardan en memoria, sin tocar la tabla de Sebastián
+      (no admite `en_proceso` ni guarda la respuesta); queda una propuesta en contratos §11.1 bis.
+    - **Tope global de 90 s.** Python no puede matar un hilo, así que a los 90 s la ejecución se
+      marca «error» y su fila se registra en ese momento. Si el turno termina después, su resultado
+      se descarta y su registro se ignora, porque el id es el mismo.
+    - **Límite conocido:** si el ReAct termina tarde, igual registra su veredicto en `veredictos`.
+      Es trabajo real, no inventado, pero `/chat` ya informó «error». Para cortarlo de verdad, el
+      ReAct tendría que revisar un plazo entre pasos (propuesta para Matías).
+    - El evaluador con `--url` y la captura de los dos recorridos siguen el flujo asíncrono
+      (POST → 202 → `GET /registro`), para que también funcionen contra Heroku.
+37. **`NIVEL_RAZONAMIENTO=minimal` en el router y el verificador (`src/comun/razonamiento.py`):**
+    el principal ya no razonaba (0 tokens), así que no cambia su tiempo. El respaldo
+    (`gemini-3.5-flash`) razona en `medium` por defecto, y clasificar o leer cuatro datos no lo
+    necesita. No toqué `obtener_llm` (Sebastián): el nivel se fija sobre el modelo que devuelve.
 
 ## Pendientes que dependen de otros (al 2026-11-24)
 
