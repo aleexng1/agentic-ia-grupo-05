@@ -7,6 +7,7 @@ from fastapi.testclient import TestClient
 
 from src.principal import grafo as modulo_grafo
 from src.principal import router
+from src.principal.flujos import consulta_politica as modulo_consulta
 from src.principal.flujos import revisar_gasto as modulo_react
 from tests.conftest import CLAVE_DE_PRUEBA
 
@@ -56,16 +57,25 @@ def test_fuera_de_alcance_responde_sin_herramientas(ruta_fija, filas):
     assert len(filas) == 1 and filas[0]["ruta"] == "fuera_de_alcance"
 
 
-def test_dos_solicitudes_distintas_activan_flujos_distintos(ruta_fija, filas):
+def test_dos_solicitudes_distintas_activan_flujos_distintos(ruta_fija, filas, monkeypatch):
+    # Flujo de Eduardo falso: la prueba no depende de Redis ni de Gemini.
+    monkeypatch.setattr(modulo_consulta, "responder_consulta", lambda texto, thread_id: {
+        "respuesta": "Plazo de 30 días. [Fuente: politica#RG-03]", "fuentes": ["politica#RG-03"],
+        "herramientas_usadas": ["buscar_politica"]})
     ruta_fija("fuera_de_alcance")
     primera = _ejecutar("¿Qué tiempo hará mañana?")
     ruta_fija("consulta_politica")
     segunda = _ejecutar("¿Cuál es el plazo para rendir?")
     assert primera["ruta"] != segunda["ruta"]
     assert primera["id_ejecucion"] != segunda["id_ejecucion"]
+    assert segunda["estado_final"] == "ok" and segunda["herramientas_usadas"] == ["buscar_politica"]
 
 
-def test_flujo_de_otro_sin_implementar_termina_en_error_claro(ruta_fija, filas):
+def test_flujo_de_otro_sin_implementar_termina_en_error_claro(ruta_fija, filas, monkeypatch):
+    def sin_implementar(texto, thread_id):
+        raise NotImplementedError("responder_consulta: pendiente")
+
+    monkeypatch.setattr(modulo_consulta, "responder_consulta", sin_implementar)
     ruta_fija("consulta_politica")
     salida = _ejecutar("¿Cuál es el plazo para rendir?")
     assert salida["estado_final"] == "error"
