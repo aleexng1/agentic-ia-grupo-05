@@ -124,7 +124,18 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
 - **Eduardo:** `responder_consulta`. Mientras no exista, `consulta_politica` termina en «Flujo
   consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
 - **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
-  `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1).
+  `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1). **Choque con #94:** su tabla
+  tiene `CHECK (ruta IN (consulta_politica, revisar_gasto, fuera_de_alcance))`, así que esa fila se
+  rechaza (queda solo el log de error). Comprobado con un Postgres local de prueba. Hay que elegir
+  una salida: agregar `sin_ruta` al CHECK (propuesta) o que yo no guarde esas filas.
+- **Matías + Sebastián:** con #94, `registrar_veredicto` exige `DATABASE_URL`. Sin ella, todo
+  `revisar_gasto` que llega a un veredicto falla con 502 («Falta DATABASE_URL»). En local hay que
+  tener un Postgres para correr el flujo completo y el evaluador.
+- **Matías:** `revisar_caso` devuelve `estado_final = "ok"` con `veredicto = None` cuando el
+  modelo cierra sin `emitir_veredicto`. En la corrida integrada pasó con V-04 (boleta ilegible).
+  §8 dice que «ok» es la parada por veredicto válido.
+- **Contrato §3 (después de unir):** la fila de `delegar_verificador` todavía dice «esqueleto». No
+  la cambio en mi PR porque la fila de al lado la cambió #95 y habría conflicto.
 - **Alex:** las evidencias con Gemini y `pytest -m necesita_llm` ya están hechas (2026-11-24).
   Falta volver a capturar `dos-recorridos/01` y volver a correr el evaluador cuando estén unidos
   #95 (Matías) y el flujo de Eduardo.
