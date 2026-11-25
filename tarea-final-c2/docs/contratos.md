@@ -194,12 +194,16 @@ Una fila por cada llamada a `/chat` (`src/comun/registro.py`). Va en **Postgres*
   (código de c1) y la ejecución termina con **`estado_final = "error"`** (decidido: no hubo
   veredicto ni salida de respaldo; `"fallback"` queda para el modelo de respaldo y el A2A caído).
 - La otra parada es normal: el LLM emite un veredicto válido (`emitir_veredicto`) y el grafo
-  cierra con `estado_final = "ok"`.
+  cierra con `estado_final = "ok"`. **«ok» exige veredicto**: si el modelo cierra sin
+  `emitir_veredicto` (por ejemplo, boleta ilegible), el turno es `"error"`.
+- Si respondió `MODELO_RESPALDO` (en el ReAct o en el juez) y hubo veredicto, el turno es `"fallback"`.
 - Si el LLM pide una acción fuera de `ACCIONES_PERMITIDAS`, no se ejecuta nada de ese paso y el
   turno termina con `estado_final = "bloqueado"` (§6).
-- Entrega para el router: `revisar_caso(agente, mensaje, hilo, gasto, fondo=None)` en
-  `src/principal/flujos/revisar_gasto.py` devuelve
+- Entrega para el router: `revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None)`
+  en `src/principal/flujos/revisar_gasto.py` devuelve
   `{"respuesta", "pasos", "herramientas_usadas", "estado_final", "veredicto"}`.
+  `verificacion` es la respuesta del verificador A2A (§5): si no cuadra o no se pudo verificar, una
+  aprobación baja a «observar» **antes** de tocar el fondo y de `registrar_veredicto`.
 
 ---
 
