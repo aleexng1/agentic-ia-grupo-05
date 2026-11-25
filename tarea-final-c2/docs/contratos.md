@@ -76,7 +76,7 @@ Errores (todos con el formato `{"detail": "mensaje en una línea"}`):
 | `buscar_politica` | `(consulta: str, k: int = 3) -> list[Fragmento]` | `src/conocimiento/rag/rag.py` | copiada de c1 |
 | `validar_gasto` | `(gasto: Gasto, politica: str, categoria: str) -> Validacion` | `src/principal/herramientas/validar_gasto.py` | copiada de c1 |
 | `emitir_veredicto` | `(decision: Decision, politica: str, categoria: str, cuenta: str, motivo: str) -> Veredicto` | `src/principal/flujos/revisar_gasto.py` | copiada de c1 |
-| `consultar_fondo` | `(id_fondo: str) -> EstadoFondo` (vía MCP) | `src/principal/herramientas/consultar_fondo.py` | esqueleto |
+| `consultar_fondo` | `(id_fondo: str) -> EstadoFondo` (vía MCP) | `src/principal/herramientas/consultar_fondo.py` | hecho (servidor MCP stdio en `src/mcp_fondos/`) |
 | `delegar_verificador` | `async (imagen: dict, declarado: dict) -> RespuestaVerificador` | `src/principal/herramientas/delegar_verificador.py` | esqueleto |
 
 Y para el GraphRAG: `tope_para(cargo: str, categoria: str) -> dict | None` en
@@ -153,8 +153,9 @@ n8n **no** reemplaza esta delegación ni la repite: la ampliación n8n A2A es un
 - **Clave del servicio**: todo `POST` y `GET /registro/...` exige `X-API-Key = API_KEY_SERVICIO`
   (`src/comun/seguridad.py`, copiado de taller-02-c2). Comparación con `secrets.compare_digest`;
   la clave nunca va a logs ni respuestas.
-- **Canal A2A**: `TOKEN_A2A` en `Authorization: Bearer` (`revisar_token_a2a`, pendiente).
-  Mientras tanto el verificador usa `proteger_app` (X-API-Key) de forma provisoria.
+- **Canal A2A**: `TOKEN_A2A` en `Authorization: Bearer` (`revisar_token_a2a`, hecho).
+  Para activarlo, el verificador cambia `proteger_app` por `proteger_con_token_a2a` y el cliente
+  manda la cabecera; las dos cosas en el mismo PR (si no, cada encargo recibe 401).
 - **Acciones permitidas**: `ACCIONES_PERMITIDAS` en `src/comun/seguridad.py` =
   `buscar_politica, validar_gasto, consultar_fondo, emitir_veredicto, delegar_verificador`.
   Cualquier otra (por ejemplo `modificar_registro`, del golden set de c1) se bloquea con
@@ -190,8 +191,15 @@ Una fila por cada llamada a `/chat` (`src/comun/registro.py`). Va en **Postgres*
 - Máximo de vueltas: `MAX_PASOS`, que se lee de la variable **`MAX_PASOS_REACT` (10 si no existe)**
   en `src/comun/config.py`. `src/comun/contrato.py` lo reexporta para el código copiado de c1.
 - Al llegar al máximo, el nodo `parada` responde «Me detuve: alcancé el máximo de N pasos…»
-  (código de c1) y la ejecución termina con `estado_final = "error"` o `"fallback"`, según lo decida Matías.
-- La otra parada es normal: el LLM emite un veredicto válido (`emitir_veredicto`) y el grafo cierra.
+  (código de c1) y la ejecución termina con **`estado_final = "error"`** (decidido: no hubo
+  veredicto ni salida de respaldo; `"fallback"` queda para el modelo de respaldo y el A2A caído).
+- La otra parada es normal: el LLM emite un veredicto válido (`emitir_veredicto`) y el grafo
+  cierra con `estado_final = "ok"`.
+- Si el LLM pide una acción fuera de `ACCIONES_PERMITIDAS`, no se ejecuta nada de ese paso y el
+  turno termina con `estado_final = "bloqueado"` (§6).
+- Entrega para el router: `revisar_caso(agente, mensaje, hilo, gasto, fondo=None)` en
+  `src/principal/flujos/revisar_gasto.py` devuelve
+  `{"respuesta", "pasos", "herramientas_usadas", "estado_final", "veredicto"}`.
 
 ---
 

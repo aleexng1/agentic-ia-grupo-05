@@ -14,6 +14,7 @@ Origen: copiado de taller-02-c2 (allí la variable se llamaba CLAVE_API).
 """
 
 import os
+import re
 import secrets
 
 from fastapi import FastAPI
@@ -108,7 +109,7 @@ def proteger_app(app: FastAPI) -> FastAPI:
 
 
 # ---------------------------------------------------------------------------
-# Pendiente C2 (dueño: Matías). Ver docs/contratos.md, sección "Seguridad".
+# Acciones permitidas y token A2A (C2, dueño: Matías). Ver docs/contratos.md §6.
 # ---------------------------------------------------------------------------
 
 # Acciones que el agente principal puede ejecutar. Cualquier otra se bloquea y la
@@ -124,22 +125,115 @@ ACCIONES_PERMITIDAS = frozenset(
 )
 
 
+class AccionNoAutorizada(Exception):
+    """Se pidió una acción que no está en ACCIONES_PERMITIDAS. No se ejecuta."""
+
+    def __init__(self, accion: str) -> None:
+        self.accion = accion
+        super().__init__(
+            f"Acción bloqueada: «{accion}» no está autorizada para este agente; no se ejecutó."
+        )
+
+
+def _nombre_para_log(accion: object) -> str:
+    """Nombre de la acción apto para el log: una línea, corto y sin caracteres raros."""
+    texto = re.sub(r"[^\w.-]", "_", str(accion))[:60]
+    return texto or "(vacía)"
+
+
 def exigir_accion_permitida(accion: str) -> None:
     """Bloquea una acción que no está en ACCIONES_PERMITIDAS.
 
-    Debe lanzar una excepción propia (por ejemplo AccionNoAutorizada) con un mensaje claro
-    si `accion` no está en la lista, y registrar el intento en el log (sin datos sensibles).
+    Lanza AccionNoAutorizada si `accion` no está en la lista (comparación exacta) y deja
+    una línea en el log con el nombre de la acción, sin argumentos ni datos del gasto.
     El flujo que la llama marca la ejecución como "bloqueado" y NO ejecuta la acción.
-    Ejemplo de acción a bloquear (caso del golden set de c1): "modificar_registro".
+    Ejemplo de acción a bloquear (caso GS-30 del golden set de c1): "modificar_registro".
     """
-    raise NotImplementedError("exigir_accion_permitida: pendiente (Matías, c2tf/matias-react-seguridad).")
+    if isinstance(accion, str) and accion in ACCIONES_PERMITIDAS:
+        return
+    _REGISTRO.warning("acción bloqueada · %s · no está en ACCIONES_PERMITIDAS", _nombre_para_log(accion))
+    raise AccionNoAutorizada(str(accion))
 
 
-def revisar_token_a2a(recibido: str | None) -> tuple[int, str] | None:
+CABECERA_A2A = "Authorization"
+MENSAJE_A2A_FALTA = "Falta el token A2A. Envíalo en la cabecera Authorization: Bearer <token>."
+MENSAJE_A2A_INCORRECTO = "El token A2A es incorrecto."
+MENSAJE_A2A_SIN_CONFIGURAR = (
+    "El verificador no tiene configurado el token A2A (TOKEN_A2A), así que no acepta encargos. "
+    "Avisa a quien lo administra."
+)
+
+
+def token_a2a_configurado() -> str:
+    """Token compartido del canal A2A (TOKEN_A2A); vacío si no se configuró."""
+    return os.getenv("TOKEN_A2A", "").strip()
+
+
+def revisar_token_a2a(recibido: bytes | str | None) -> tuple[int, str] | None:
     """Comprueba el token que el principal envía al verificador por A2A.
 
-    Igual que revisar_clave, pero contra TOKEN_A2A (cabecera Authorization: Bearer <token>).
+    `recibido` es el valor completo de la cabecera Authorization ("Bearer <token>").
     Devuelve None si es correcto, o (código HTTP, mensaje) para rechazar: 503 si el
-    verificador no tiene TOKEN_A2A, 401 si falta o no coincide. Usa secrets.compare_digest.
+    verificador no tiene TOKEN_A2A, 401 si falta, no es Bearer o no coincide.
+    Compara bytes con secrets.compare_digest (no revela el token por el tiempo de respuesta).
     """
-    raise NotImplementedError("revisar_token_a2a: pendiente (Matías, c2tf/matias-react-seguridad).")
+    esperado = token_a2a_configurado()
+    if not esperado:
+        return 503, MENSAJE_A2A_SIN_CONFIGURAR
+    if isinstance(recibido, bytes):
+        recibido = recibido.decode("latin-1")
+    partes = (recibido or "").strip().split(None, 1)
+    if not partes:
+        return 401, MENSAJE_A2A_FALTA
+    if len(partes) != 2 or partes[0].lower() != "bearer" or not partes[1].strip():
+        return 401, MENSAJE_A2A_FALTA
+    if not secrets.compare_digest(partes[1].strip().encode("utf-8"), esperado.encode("utf-8")):
+        return 401, MENSAJE_A2A_INCORRECTO
+    return None
+
+
+class ControlTokenA2A:
+    """Middleware ASGI del verificador: exige Authorization: Bearer <TOKEN_A2A> en POST/PUT/PATCH/DELETE.
+
+    Las lecturas (GET /health y la ficha /.well-known/agent-card.json) quedan públicas.
+    Nunca registra el token ni las cabeceras: solo la ruta y el motivo del rechazo.
+    """
+
+    def __init__(self, app: ASGIApp) -> None:
+        self.app = app
+        self._cabecera = CABECERA_A2A.lower().encode("latin-1")
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] == "http" and scope["method"] in METODOS_PROTEGIDOS:
+            recibido = next(
+                (valor for nombre, valor in scope["headers"] if nombre == self._cabecera),
+                None,
+            )
+            rechazo = revisar_token_a2a(recibido)
+            if rechazo is not None:
+                codigo, mensaje = rechazo
+                motivo = {
+                    503: "verificador sin TOKEN_A2A",
+                    401: "token incorrecto" if mensaje == MENSAJE_A2A_INCORRECTO else "sin token",
+                }[codigo]
+                _REGISTRO.warning("encargo A2A rechazado · %s %s · %s", scope["method"], scope["path"], motivo)
+                respuesta = JSONResponse(status_code=codigo, content={"detail": mensaje})
+                await respuesta(scope, receive, send)
+                return
+        await self.app(scope, receive, send)
+
+
+async def avisar_si_falta_token_a2a() -> None:
+    """Al arrancar el verificador, avisa con un error claro si TOKEN_A2A está vacío."""
+    if not token_a2a_configurado():
+        _REGISTRO.error(
+            "TOKEN_A2A está vacío: el verificador rechaza todos los encargos (503) hasta que se "
+            "configure. Defínelo en el .env (o en las Config Vars de Heroku) y reinicia."
+        )
+
+
+def proteger_con_token_a2a(app: FastAPI) -> FastAPI:
+    """Protege la app del verificador con TOKEN_A2A (reemplaza a proteger_app en src/verificador/app.py)."""
+    app.add_middleware(ControlTokenA2A)
+    app.router.on_startup.append(avisar_si_falta_token_a2a)
+    return app

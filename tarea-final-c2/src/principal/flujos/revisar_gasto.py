@@ -1,18 +1,25 @@
 """Ciclo ReAct del agente con historial de conversación (LangGraph).
 
-Origen: tarea-final-c1/src/grafo.py, copiado sin cambios de lógica (solo imports).
-Dueño en C2: Matías (c2tf/matias-react-seguridad). Pendiente: convertirlo en el nodo
-"revisar_gasto" del grafo principal, sumar consultar_fondo y delegar_verificador a las
-herramientas, y devolver pasos / herramientas_usadas / estado_final (docs/contratos.md).
+Origen: tarea-final-c1/src/grafo.py (imports ajustados).
+Dueño en C2: Matías (c2tf/matias-react-seguridad).
+Hecho en C2: consultar_fondo (por MCP) entre las herramientas, estado_final por cada
+salida del ciclo y revisar_caso, que devuelve pasos / herramientas_usadas / estado_final /
+veredicto (docs/contratos.md). Pendiente con Alex: sumar delegar_verificador cuando exista,
+y cambiar obtener_llm por obtener_llm_con_respaldo cuando se una el PR de Sebastián.
 
 El ciclo es:
     LLM ──(pide herramienta)──> herramientas ──(observación)──> LLM ...
     LLM ──(responde sin pedir herramientas)──> FIN
     si se llega a MAX_PASOS ──> parada ──> FIN
+    si pide una acción fuera de ACCIONES_PERMITIDAS ──> no se ejecuta nada ──> FIN ("bloqueado")
+
+Hecho en C2 (seguridad): el bloqueo de acciones no autorizadas en el nodo de herramientas,
+y los campos herramientas_usadas y estado_final del estado (EstadoRevision).
 """
 
 import json
 import re
+from typing import NotRequired
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
 from langchain_core.tools import ToolException, tool
@@ -23,6 +30,7 @@ from langgraph.prebuilt import ToolNode
 from src.comun.config import registrar_traza
 from src.comun.modelos import obtener_llm
 from src.comun.contrato import DECISIONES, MAX_PASOS, Decision, EstadoAgente, EstadoFondo, Gasto, Veredicto
+from src.comun.seguridad import AccionNoAutorizada, exigir_accion_permitida
 from src.principal.herramientas.validar_gasto import (
     GRAVEDAD,
     campos_alterados,
@@ -32,6 +40,7 @@ from src.principal.herramientas.validar_gasto import (
     resolver_politica,
     validar_gasto,
 )
+from src.principal.herramientas.consultar_fondo import consultar_fondo
 from src.principal.herramientas.fondos import (
     anexar_revision_saldo,
     aplicar_veredicto,
@@ -85,7 +94,40 @@ def emitir_veredicto(
 emitir_veredicto.handle_tool_error = True
 
 
-HERRAMIENTAS = [buscar_politica, validar_gasto, emitir_veredicto]
+HERRAMIENTAS = [buscar_politica, consultar_fondo, validar_gasto, emitir_veredicto]
+
+
+class EstadoRevision(EstadoAgente):
+    """Estado del ReAct de c1 más lo que C2 necesita para la tabla `ejecuciones` (contratos.md §7).
+
+    Se define aquí (y no en src/comun/contrato.py, que es compartido) porque solo lo usa este flujo.
+    Los dos campos vuelven a su valor inicial en cada turno, igual que `pasos`.
+    """
+
+    herramientas_usadas: NotRequired[list[str]]  # en orden, solo las que sí se ejecutaron
+    estado_final: NotRequired[str | None]  # "bloqueado" si se impidió una acción; None mientras corre
+
+
+# Separador con que el gasto viaja dentro del mensaje (mismo texto que en tarea-final-c1).
+MARCA_GASTO = "\n\nGasto rendido (JSON):\n"
+
+MENSAJE_BLOQUEO = (
+    "Bloqueé la solicitud: el agente intentó una acción no autorizada ({acciones}). "
+    "No se ejecutó ninguna herramienta de ese paso y el registro no cambió."
+)
+
+
+def _acciones_no_autorizadas(llamadas: list) -> list[str]:
+    """Nombres de las llamadas que no pasan exigir_accion_permitida (en orden, sin repetir)."""
+    bloqueadas = []
+    for llamada in llamadas:
+        nombre = llamada.get("name")
+        try:
+            exigir_accion_permitida(nombre)
+        except AccionNoAutorizada as error:
+            if error.accion not in bloqueadas:
+                bloqueadas.append(error.accion)
+    return bloqueadas
 
 
 def _leer_resultado_herramienta(mensaje: ToolMessage):
@@ -233,6 +275,21 @@ def _actualizar_estado_herramientas(estado: EstadoAgente, mensajes: list) -> dic
         argumentos = llamada.get("args", {})
         resultado = _leer_resultado_herramienta(mensaje)
 
+        if mensaje.name == "consultar_fondo" and isinstance(resultado, dict) and "id_fondo" in resultado:
+            # El MCP entrega el fondo registrado (saldo inicial). Si el hilo ya tiene ese fondo
+            # con aprobaciones anteriores, manda el saldo vigente del hilo (RG-08, caso GS-26).
+            vigente = actualizaciones.get("fondo") or estado.get("fondo")
+            if vigente and vigente["id_fondo"] == resultado["id_fondo"]:
+                mensajes_actualizados[indice] = ToolMessage(
+                    content=json.dumps(vigente, ensure_ascii=False),
+                    tool_call_id=mensaje.tool_call_id,
+                    name=mensaje.name,
+                    status=mensaje.status,
+                )
+            else:
+                actualizaciones["fondo"] = resultado
+            continue
+
         if mensaje.name != "validar_gasto" or not isinstance(resultado, dict):
             continue
 
@@ -303,8 +360,13 @@ def _trazar_observaciones(mensajes: list) -> None:
         registrar_traza("observacion", {"herramienta": mensaje.name, "resultado": mensaje.content})
 
 
-def construir_agente():
-    """Arma y devuelve el grafo compilado, con memoria de conversación por hilo."""
+def construir_agente(checkpointer=None):
+    """Arma y devuelve el grafo compilado, con memoria de conversación por hilo.
+
+    `checkpointer`: dónde se guarda la memoria por thread_id. Por defecto en memoria
+    (InMemorySaver, se pierde al reiniciar); en el servicio se pasa el de Postgres
+    (crear_checkpointer() de Sebastián) para que la memoria persista.
+    """
     llm = obtener_llm().bind_tools(HERRAMIENTAS)
     nodo_herramientas = ToolNode(HERRAMIENTAS, handle_tool_errors=(ToolException,))
 
@@ -337,9 +399,38 @@ def construir_agente():
             "llm",
             {"paso": pasos, "pide_herramientas": respuesta.tool_calls, "texto": respuesta.text},
         )
-        return {"messages": [respuesta], "pasos": pasos}
+        actualizaciones = {"messages": [respuesta], "pasos": pasos}
+        if not respuesta.tool_calls:
+            # Parada normal: el modelo respondió sin pedir herramientas (si validó, sigue "cerrar").
+            actualizaciones["estado_final"] = "ok"
+        return actualizaciones
 
-    def nodo_ejecutar_herramientas(estado: EstadoAgente) -> dict:
+    def nodo_ejecutar_herramientas(estado: EstadoRevision) -> dict:
+        # Seguridad (C2): antes de ejecutar NADA se revisa cada acción pedida. Si alguna no está
+        # en ACCIONES_PERMITIDAS no se ejecuta ninguna llamada de este paso (tampoco las
+        # permitidas), se responde cada llamada pendiente y el turno termina como "bloqueado".
+        llamadas_pedidas = getattr(estado["messages"][-1], "tool_calls", [])
+        no_autorizadas = _acciones_no_autorizadas(llamadas_pedidas)
+        if no_autorizadas:
+            cierres = [
+                ToolMessage(
+                    "No ejecutada: el paso incluía una acción no autorizada y se bloqueó completo.",
+                    tool_call_id=llamada["id"],
+                    name=llamada.get("name") or "",
+                    status="error",
+                )
+                for llamada in llamadas_pedidas
+            ]
+            registrar_traza(
+                "accion_bloqueada",
+                {
+                    "no_autorizadas": no_autorizadas,
+                    "llamadas_descartadas": [llamada.get("name") for llamada in llamadas_pedidas],
+                },
+            )
+            aviso = AIMessage(MENSAJE_BLOQUEO.format(acciones=", ".join(no_autorizadas)))
+            return {"messages": [*cierres, aviso], "estado_final": "bloqueado"}
+
         estado_para_herramientas, respuesta_corregida = _estado_con_gasto_original(estado)
         respuesta = estado_para_herramientas["messages"][-1]
         llamadas = getattr(respuesta, "tool_calls", [])
@@ -386,13 +477,25 @@ def construir_agente():
         else:
             resultado = nodo_herramientas.invoke(estado_para_herramientas)
             mensajes = resultado.get("messages", [])
+        ejecutadas = [
+            mensaje.name
+            for mensaje in mensajes
+            if isinstance(mensaje, ToolMessage) and not str(mensaje.content).startswith("No ejecutada")
+        ]
         if respuesta_corregida is not None:
             mensajes = [respuesta_corregida, *mensajes]
-        actualizaciones = {"messages": mensajes}
+        actualizaciones = {
+            "messages": mensajes,
+            "herramientas_usadas": [*estado.get("herramientas_usadas", []), *ejecutadas],
+        }
         actualizaciones.update(_actualizar_estado_herramientas(estado_para_herramientas, mensajes))
         return actualizaciones
 
-    def nodo_cerrar(estado: EstadoAgente) -> dict:
+    def nodo_cerrar(estado: EstadoRevision) -> dict:
+        """Cierre normal del ciclo (veredicto válido o cierre seguro): estado_final = "ok"."""
+        return {**_cerrar(estado), "estado_final": "ok"}
+
+    def _cerrar(estado: EstadoRevision) -> dict:
         """Aplica el piso de reglas, el juez, el fondo y el registro al veredicto final."""
         if not _hay_validacion_exitosa_en_turno(estado["messages"]):
             registrar_traza("cerrar", {"registrado": False, "motivo": "sin validar_gasto en este turno"})
@@ -527,7 +630,8 @@ def construir_agente():
         ]
         aviso = AIMessage(f"Me detuve: alcancé el máximo de {MAX_PASOS} pasos sin una decisión final.")
         registrar_traza("parada", {"motivo": "MAX_PASOS", "pasos": estado.get("pasos", 0)})
-        return {"messages": [*cierres, aviso]}
+        # "error" y no "fallback": no hubo veredicto ni salida de respaldo (contratos.md §8).
+        return {"messages": [*cierres, aviso], "estado_final": "error"}
 
     def elegir_siguiente(estado: EstadoAgente) -> str:
         if not estado["messages"][-1].tool_calls:
@@ -539,24 +643,27 @@ def construir_agente():
             return "parada"
         return "herramientas"
 
-    def elegir_despues_herramientas(estado: EstadoAgente) -> str:
+    def elegir_despues_herramientas(estado: EstadoRevision) -> str:
+        if estado.get("estado_final") == "bloqueado":
+            # Sin volver al LLM: no puede reintentar la acción ni cerrar con un veredicto.
+            return END
         if not estado.get("gasto") and _emitio_veredicto_en_turno(estado["messages"]):
             return "cerrar"
         if _emitio_veredicto_valido_en_turno(estado["messages"]):
             return "cerrar"
         return "llm"
 
-    grafo = StateGraph(EstadoAgente)
+    grafo = StateGraph(EstadoRevision)
     grafo.add_node("llm", nodo_llm)
     grafo.add_node("herramientas", nodo_ejecutar_herramientas)
     grafo.add_node("cerrar", nodo_cerrar)
     grafo.add_node("parada", nodo_parada)
     grafo.add_edge(START, "llm")
     grafo.add_conditional_edges("llm", elegir_siguiente, ["herramientas", "cerrar", "parada", END])
-    grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm"])
+    grafo.add_conditional_edges("herramientas", elegir_despues_herramientas, ["cerrar", "llm", END])
     grafo.add_edge("cerrar", END)
     grafo.add_edge("parada", END)
-    return grafo.compile(checkpointer=InMemorySaver())
+    return grafo.compile(checkpointer=checkpointer if checkpointer is not None else InMemorySaver())
 
 
 def conversar(agente, mensaje: str, hilo: str) -> str:
@@ -594,14 +701,84 @@ def conversar_con_caso(
     return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
 
 
+def revisar_caso(
+    agente,
+    mensaje: str,
+    hilo: str,
+    gasto: Gasto,
+    fondo: EstadoFondo | None = None,
+) -> dict:
+    """Revisa un gasto y devuelve lo que necesitan el router y la tabla `ejecuciones`.
+
+    Es la entrega del flujo revisar_gasto para Alex (docs/reparto.md):
+        {"respuesta": str, "pasos": int, "herramientas_usadas": list[str],
+         "estado_final": "ok" | "bloqueado" | "error", "veredicto": Veredicto | None}
+    - "ok": cerró con un veredicto válido (o con un cierre seguro sin aprobar).
+    - "bloqueado": el modelo pidió una acción fuera de ACCIONES_PERMITIDAS; no se ejecutó nada.
+    - "error": se detuvo por MAX_PASOS_REACT sin veredicto.
+    "fallback" lo agrega quien integra (modelo de respaldo o A2A caído), no este flujo.
+
+    El LLM solo lee mensajes: si `mensaje` no trae ya el gasto, se le agrega como JSON
+    (igual que tarea-final-c1/pruebas/evaluar.py). El grafo igual valida y registra el
+    gasto original del estado, no lo que diga el texto.
+    """
+    if MARCA_GASTO not in mensaje:
+        mensaje = mensaje + MARCA_GASTO + json.dumps(gasto, ensure_ascii=False)
+    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo)
+    estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
+    return {
+        "respuesta": respuesta,
+        "pasos": int(estado.get("pasos", 0)),
+        "herramientas_usadas": list(estado.get("herramientas_usadas", [])),
+        "estado_final": estado.get("estado_final") or "ok",
+        "veredicto": estado.get("veredicto"),
+    }
+
+
+def _principal() -> None:
+    """Corre un caso del golden set de c1 desde la terminal, sin servidor (para evidencias).
+
+    Uso (desde tarea-final-c2/):  python -m src.principal.flujos.revisar_gasto GS-01
+    Con MOSTRAR_TRAZAS=1 (por defecto) se ve cada paso: llm → herramienta → observación.
+    Al final imprime el resumen de revisar_caso. Usa Gemini de verdad (GOOGLE_API_KEY).
+    """
+    import argparse
+    import sys
+    from uuid import uuid4
+
+    from src.comun.config import CARPETA_PROYECTO
+    from src.comun.errores import traducir_error
+
+    parser = argparse.ArgumentParser(description="Revisa un gasto del golden set de c1 con el ReAct.")
+    parser.add_argument("caso", help="id del caso, por ejemplo GS-01")
+    argumentos = parser.parse_args()
+
+    golden = json.loads((CARPETA_PROYECTO / "evaluacion" / "golden_set_c1.json").read_text(encoding="utf-8"))
+    caso = next((c for c in golden["casos"] if c["id"] == argumentos.caso), None)
+    if caso is None or "gasto" not in caso["turnos"][0]:
+        sys.exit(f"El caso {argumentos.caso} no existe o no trae un gasto.")
+    turno = caso["turnos"][0]
+    hilo = f"cli-{argumentos.caso}-{uuid4().hex[:8]}"
+    print(f"Caso {caso['id']}: {caso['descripcion']}\nMensaje: {turno['mensaje']}\nMAX_PASOS: {MAX_PASOS}\n")
+    try:
+        resultado = revisar_caso(construir_agente(), turno["mensaje"], hilo, turno["gasto"])
+    except Exception as error:
+        sys.exit(f"No se pudo revisar el gasto: {traducir_error(error)}")
+    print("\n══ Resumen ══")
+    print(json.dumps({**resultado, "esperado": turno["esperado"].get("decision")}, ensure_ascii=False, indent=2))
+
+
 def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict) -> str:
     """Ejecuta un turno y conserva los campos existentes del hilo."""
     # recursion_limit es un freno de respaldo de LangGraph, por si falla la parada propia.
     configuracion = {"configurable": {"thread_id": hilo}, "recursion_limit": 3 * MAX_PASOS}
     # pasos vuelve a 0 en cada turno: el límite es por turno, no por conversación.
+    # Lo mismo herramientas_usadas y estado_final: un bloqueo anterior no se hereda.
     entrada = {
         "messages": [HumanMessage(mensaje)],
         "pasos": 0,
+        "herramientas_usadas": [],
+        "estado_final": None,
         "gasto": None,
         "clasificacion": None,
         "validacion": None,
@@ -612,3 +789,7 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
         entrada["veredicto"] = None
     resultado = agente.invoke(entrada, configuracion)
     return resultado["messages"][-1].text
+
+
+if __name__ == "__main__":
+    _principal()
