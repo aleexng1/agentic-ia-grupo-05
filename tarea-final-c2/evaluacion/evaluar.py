@@ -25,6 +25,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from collections import Counter, defaultdict
 from datetime import datetime
 from pathlib import Path
@@ -281,9 +282,12 @@ def guardar_informe(datos: dict, carpeta: Path = CARPETA_INFORMES) -> tuple[Path
     return ruta_md, ruta_json
 
 
-def correr(golden: dict, casos: list[dict], enviar, modo: str) -> dict:
+def correr(golden: dict, casos: list[dict], enviar, modo: str, pausa: float = 0.0) -> dict:
+    """Corre los casos en orden. `pausa`: segundos entre casos, para no chocar con el límite por minuto de Gemini."""
     resultados = []
-    for caso in casos:
+    for n, caso in enumerate(casos):
+        if pausa > 0 and n:
+            time.sleep(pausa)
         resultado = evaluar_caso(caso, enviar)
         resultados.append(resultado)
         print(f"{resultado['id']:6} {resultado['grupo']:20} {resultado['resultado']}", flush=True)
@@ -308,6 +312,8 @@ def main(argumentos: list[str] | None = None) -> int:
     parser.add_argument("--grupo")
     parser.add_argument("--casos", nargs="*")
     parser.add_argument("--salida", default=str(CARPETA_INFORMES))
+    parser.add_argument("--pausa", type=float, default=0.0,
+                        help="segundos de espera entre casos (ej. 20) para no agotar la cuota por minuto")
     opciones = parser.parse_args(argumentos)
 
     from src.comun import config  # noqa: F401  (carga el .env)
@@ -329,7 +335,7 @@ def main(argumentos: list[str] | None = None) -> int:
             return 2
         enviar, modo = enviar_en_proceso, "en proceso (src.principal.grafo.ejecutar)"
 
-    datos = correr(golden, casos, enviar, modo)
+    datos = correr(golden, casos, enviar, modo, pausa=max(opciones.pausa, 0.0))
     ruta_md, _ = guardar_informe(datos, Path(opciones.salida))
     r = datos["resumen"]["casos"]
     print(f"\n% de aciertos: {texto_porcentaje(r['porcentaje_aciertos'])} · aciertos {r['acierto']} · fallos {r['fallo']}"

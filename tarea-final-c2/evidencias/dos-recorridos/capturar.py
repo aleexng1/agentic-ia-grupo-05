@@ -12,6 +12,7 @@ líneas del log con su id_ejecucion) y el resultado.
 import argparse
 import json
 import os
+import re
 import sys
 import time
 from datetime import datetime
@@ -68,7 +69,8 @@ def main() -> int:
     for nombre, esperada, texto, gasto in CASOS:
         if opciones.solo and opciones.solo not in nombre:
             continue
-        cuerpo = {"thread_id": f"evidencia-{nombre}", "texto": texto}
+        # Hilo nuevo en cada captura: con memoria persistente, un hilo repetido arrastra el turno anterior.
+        cuerpo = {"thread_id": f"evidencia-{nombre}-{datetime.now():%Y%m%dT%H%M%S}", "texto": texto}
         if gasto:
             cuerpo["gasto"] = gasto
         respuesta = httpx.post(f"{opciones.url}/chat", json=cuerpo, headers={"X-API-Key": clave}, timeout=120)
@@ -77,8 +79,15 @@ def main() -> int:
         except ValueError:
             datos = {"texto_crudo": respuesta.text}
         id_ejecucion = datos.get("id_ejecucion", "")
+        if not id_ejecucion and isinstance(datos.get("detail"), str):
+            # En un 502 el id viene al final del mensaje: «… (id_ejecucion: <uuid>)».
+            encontrado = re.search(r"id_ejecucion: ([0-9a-f-]{36})", datos["detail"])
+            id_ejecucion = encontrado.group(1) if encontrado else ""
         rutas_obtenidas.append(datos.get("ruta"))
         log = lineas_del_log(opciones.log, id_ejecucion)
+        registro_http = None
+        if id_ejecucion:  # la ruta y el estado_final también tienen que verse en el registro
+            registro_http = httpx.get(f"{opciones.url}/registro/{id_ejecucion}", headers={"X-API-Key": clave}, timeout=30)
         md = [
             f"# Recorrido {nombre}: ruta esperada `{esperada}`",
             "",
@@ -101,8 +110,25 @@ def main() -> int:
             ocultar_secretos(json.dumps(datos, ensure_ascii=False, indent=2)),
             "```",
             "",
-            f"Ruta obtenida: `{datos.get('ruta')}` · estado_final: `{datos.get('estado_final')}`"
-            f" · {'coincide' if datos.get('ruta') == esperada else 'NO coincide'} con la esperada.",
+            *(
+                [
+                    f"## Registro (`GET /registro/{id_ejecucion}` con `X-API-Key: ***` → HTTP {registro_http.status_code})",
+                    "```json",
+                    ocultar_secretos(registro_http.text if registro_http.status_code != 200
+                                     else json.dumps(registro_http.json(), ensure_ascii=False, indent=2)),
+                    "```",
+                    "",
+                ]
+                if registro_http is not None
+                else []
+            ),
+            (
+                f"Ruta obtenida: `{datos.get('ruta')}` · estado_final: `{datos.get('estado_final')}`"
+                f" · {'coincide' if datos.get('ruta') == esperada else 'NO coincide'} con la esperada."
+                if respuesta.status_code == 200
+                else f"La ejecución falló (HTTP {respuesta.status_code}) con un mensaje claro y sin datos inventados;"
+                " la ruta que eligió el router y su `estado_final` quedan en el log de arriba y en `ejecuciones`."
+            ),
             "",
         ]
         destino = Path(opciones.salida) / f"{nombre}.md"

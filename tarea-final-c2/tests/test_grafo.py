@@ -83,6 +83,18 @@ def test_flujo_de_otro_sin_implementar_termina_en_error_claro(ruta_fija, filas, 
     assert filas[0]["estado_final"] == "error"
 
 
+def test_falla_del_flujo_registra_la_ruta_elegida(ruta_fija, filas, monkeypatch):
+    def falla(texto, thread_id):
+        raise RuntimeError("No se pudo completar la búsqueda documental (Redis o embeddings).")
+
+    monkeypatch.setattr(modulo_consulta, "responder_consulta", falla)
+    ruta_fija("consulta_politica")
+    with pytest.raises(modulo_grafo.ErrorDeEjecucion) as error:
+        _ejecutar("¿Cuál es el plazo para rendir?")
+    assert filas[0]["id_ejecucion"] == error.value.id_ejecucion
+    assert (filas[0]["ruta"], filas[0]["estado_final"]) == ("consulta_politica", "error")
+
+
 def test_revisar_gasto_sin_datos_los_pide_sin_inventarlos(ruta_fija, filas):
     ruta_fija("revisar_gasto")
     salida = _ejecutar("Revisa mi gasto de bencina")

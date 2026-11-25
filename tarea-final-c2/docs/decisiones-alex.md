@@ -112,6 +112,24 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     que cualquier otro módulo cargue el `.env`. Por eso, en esta rama, el test del router con
     Gemini se saltaba («falta GOOGLE_API_KEY») aunque la clave estuviera en el `.env`.
 
+## Después de unir los PR (rama `c2tf/alex-evidencias`)
+
+30. **Una falla dentro de un flujo conserva la ruta elegida.** Antes, si el flujo lanzaba una
+    excepción después del router (por ejemplo, Redis caído en `consulta_politica`), la fila iba con
+    `ruta = "sin_ruta"`, y además chocaba con el CHECK de `ejecuciones`. Ahora `ejecutar` lee la ruta
+    del último checkpoint (`_ruta_alcanzada`), así que `sin_ruta` queda solo para las fallas
+    anteriores al router, como dice §11.1. Lo cubre una prueba nueva en `tests/test_grafo.py`.
+31. **`dos-recorridos/capturar.py` muestra también el registro:** agrega `GET /registro/{id}`,
+    porque la pauta pide la ruta visible en la respuesta *y en el registro*. Además lee el
+    `id_ejecucion` del `detail` de un 502 y usa un `thread_id` nuevo en cada captura. La memoria
+    persistente hacía que un hilo repetido siguiera la revisión anterior en 1 paso.
+32. **Pruebas del grafo independientes del flujo real de Eduardo:** `tests/test_grafo.py` reemplaza
+    `responder_consulta` por uno falso, porque al unir #99 dos pruebas suponían todavía el esqueleto.
+33. **Corrida completa del evaluador detenida por cuota:** con todo unido, el ReAct hace varias
+    llamadas por caso y la cuota de Gemini se agotó en el caso 16 de 57 (8 errores de cuota). La
+    detuve para no gastar más y no guardé un informe que mediría la cuota y no al agente. Agregué
+    `--pausa SEG` a `evaluar.py` para espaciar los casos en la próxima corrida.
+
 ## Pendientes que dependen de otros (al 2026-11-24)
 
 - **Matías:** el ReAct registra su veredicto (`registro_veredictos`) antes de que el grafo aplique
