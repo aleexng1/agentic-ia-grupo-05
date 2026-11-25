@@ -164,13 +164,14 @@ def motivo_piso_verificacion(verificacion: dict | None) -> str | None:
     """Por qué una aprobación debe bajar a observar según el verificador A2A, o None si no aplica.
 
     - Sin verificación (no hubo boleta): None, no cambia nada.
-    - Verificador caído o token rechazado ({"disponible": False}): no se pudo verificar → observar.
+    - Verificador caído o token rechazado ({"disponible": False}, o sin "disponible"): no se pudo
+      verificar → observar. delegar_verificador pone "disponible": True cuando responde bien.
     - Algún campo de `cuadra` distinto de "sí": la boleta no coincide → observar.
     Misma regla que aplicar_verificacion en src/principal/grafo.py (Alex).
     """
     if not verificacion:
         return None
-    if not verificacion.get("disponible", True):
+    if not verificacion.get("disponible"):  # sin la marca de éxito se trata como no verificada
         return "no se pudo verificar la boleta con el agente verificador"
     no_cuadran = [campo for campo, valor in (verificacion.get("cuadra") or {}).items() if valor != "sí"]
     if no_cuadran:
