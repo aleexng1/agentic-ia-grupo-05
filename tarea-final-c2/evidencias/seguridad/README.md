@@ -1,10 +1,21 @@
 # Evidencia: seguridad (Matías)
 
-## Pendiente para la nota (criterio de la pauta)
-- **(a)** `/chat` sin clave → 401: se toma por `/chat` cuando el router esté integrado.
-- **(b)** Acción no autorizada bloqueada **sin ejecutarse** (`estado_final = "bloqueado"`, registro igual
-  antes y después): el código y sus pruebas están (`tests/test_seguridad.py`); falta acordar con Alex cómo
-  provocarla en vivo desde `/chat`.
+## Criterio de la pauta
+
+### (a) Sin clave, el servicio rechaza la petición: hecho en LOCAL
+
+| Archivo | Entrada | Ejecución observada | Resultado |
+|---|---|---|---|
+| `01-chat-sin-clave-401-local.txt` | Servidor real (`uvicorn api.app:app`, 2026-11-25). `POST /chat` sin `X-API-Key`, con la cabecera vacía y con una clave inventada; `GET /registro/{id}` sin clave | Log del servidor: «acceso rechazado · POST /chat · sin clave / clave incorrecta» (sin mostrar ninguna clave) | **401** con `{"detail": "..."}` en una línea, en los cuatro casos. `/health` sigue público (200) |
+
+Estas peticiones **no tienen `id_ejecucion`, y es correcto**: el control de acceso las corta antes de
+entrar al agente, así que no se ejecuta ningún flujo ni se crea fila en `ejecuciones`. Falta repetirla
+contra Heroku cuando Sebastián cargue `API_KEY_SERVICIO` (hoy respondería 503: servidor sin clave).
+
+### (b) Acción no autorizada bloqueada sin ejecutarse: pendiente
+
+`estado_final = "bloqueado"` y registro igual antes y después: el código y sus pruebas están
+(`tests/test_seguridad.py`); falta acordar con Alex cómo provocarla en vivo desde `/chat`.
 
 ## Extra: el agente no obedece instrucciones escondidas (casos de c1)
 
