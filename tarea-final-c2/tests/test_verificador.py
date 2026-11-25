@@ -22,6 +22,8 @@ from src.comun.config import CARPETA_PROYECTO
 from src.principal.herramientas import delegar_verificador as modulo_delegar
 from src.verificador import agente
 from src.verificador.agente import EncargoInvalido, LecturaBoleta, comparar, leer_encargo
+from tests.test_grafo import filas, ruta_fija  # noqa: F401  (fixtures del grafo)
+from tests.test_react_mcp import revisar_gasto  # noqa: F401  (fixture: ReAct con registro en memoria)
 
 CARPETA_BOLETAS = CARPETA_PROYECTO / "datos" / "boletas"
 DECLARADO = json.loads((CARPETA_BOLETAS / "declarado.json").read_text(encoding="utf-8"))["boletas"]
@@ -130,6 +132,15 @@ def test_respuesta_que_dice_cuadra_sin_leer_es_invalida():
 # ---------------------------------------------------------------------------
 
 
+TOKEN_DE_PRUEBA = "token-a2a-de-prueba-solo-para-pytest"
+
+
+@pytest.fixture(autouse=True)
+def token_a2a_de_prueba(monkeypatch):
+    """TOKEN_A2A falso para el principal y el verificador (nunca el del .env de quien corre)."""
+    monkeypatch.setenv("TOKEN_A2A", TOKEN_DE_PRUEBA)
+
+
 @pytest.fixture
 def verificador(monkeypatch):
     """Levanta src.verificador.app en un puerto libre y apunta URL_VERIFICADOR a él."""
@@ -195,10 +206,82 @@ def test_a2a_timeout_devuelve_error_estructurado(verificador, monkeypatch):
     assert respuesta["tipo_fallo"] == "timeout" and time.monotonic() - inicio < 2.5
 
 
-def test_a2a_con_clave_incorrecta_es_rechazado(verificador, monkeypatch):
-    monkeypatch.setattr(modulo_delegar, "_cabeceras", lambda: {"X-API-Key": "clave-equivocada"})
+@pytest.mark.parametrize("cabeceras", [
+    {},                                                    # sin token
+    {"Authorization": "Bearer token-equivocado"},          # token incorrecto
+    {"Authorization": TOKEN_DE_PRUEBA},                    # sin «Bearer»
+    {"X-API-Key": "clave-de-prueba-solo-para-pytest"},     # la protección provisoria ya no sirve
+], ids=["sin-token", "token-incorrecto", "sin-bearer", "solo-x-api-key"])
+def test_a2a_sin_token_valido_es_rechazado_y_no_lee_la_boleta(verificador, monkeypatch, cabeceras, lineas_log):
+    leidas = []
+    monkeypatch.setattr(agente, "leer_imagen", lambda *a: leidas.append(a))
+    monkeypatch.setattr(modulo_delegar, "_cabeceras", lambda: cabeceras or {"X-Nada": "1"})
     respuesta = asyncio.run(modulo_delegar.delegar_verificador(_imagen("boleta-01-cuadra.png"), DECLARADO_01))
-    assert respuesta["disponible"] is False and respuesta["tipo_fallo"] == "rechazado"
+    assert respuesta == {"disponible": False, "tipo_fallo": "rechazado", "motivo": respuesta["motivo"]}
+    assert leidas == [], "el verificador no debe leer una boleta de un encargo rechazado"
+    assert any("encargo A2A rechazado" in linea for linea in lineas_log)
+    assert all(TOKEN_DE_PRUEBA not in linea for linea in lineas_log)  # el token nunca va al log
+
+
+def test_a2a_con_token_correcto_responde_y_manda_solo_el_bearer(verificador, monkeypatch):
+    _lector_falso(monkeypatch, LecturaBoleta(legible=True, monto_total=45000, fecha_emision="2026-10-02",
+                                             rut_emisor="11.111.111-1", folio="000123", categoria_gasto="bencina",
+                                             categoria_compatible=True, confianza=0.95))
+    assert modulo_delegar._cabeceras() == {"Authorization": f"Bearer {TOKEN_DE_PRUEBA}"}  # sin X-API-Key
+    respuesta = asyncio.run(modulo_delegar.delegar_verificador(_imagen("boleta-01-cuadra.png"), DECLARADO_01))
+    assert respuesta["disponible"] is True and set(respuesta["cuadra"].values()) == {"sí"}
+
+
+def test_principal_sin_token_no_llama_al_verificador(monkeypatch):
+    monkeypatch.delenv("TOKEN_A2A", raising=False)
+    monkeypatch.setenv("URL_VERIFICADOR", "http://127.0.0.1:9")  # si llamara, daría sin_conexion
+    respuesta = asyncio.run(modulo_delegar.delegar_verificador(_imagen("boleta-01-cuadra.png"), DECLARADO_01))
+    assert respuesta["tipo_fallo"] == "rechazado" and "TOKEN_A2A" in respuesta["motivo"]
+
+
+def test_verificador_sin_token_configurado_rechaza_con_503(verificador):
+    import httpx
+
+    os.environ.pop("TOKEN_A2A")  # el fixture autouse lo restaura al terminar
+    respuesta = httpx.post(os.environ["URL_VERIFICADOR"] + "/", json={},
+                           headers={"Authorization": f"Bearer {TOKEN_DE_PRUEBA}"})
+    assert respuesta.status_code == 503 and "TOKEN_A2A" in respuesta.json()["detail"]
+
+
+def test_health_y_ficha_siguen_publicos(verificador):
+    import httpx
+
+    base = os.environ["URL_VERIFICADOR"]
+    assert httpx.get(base + "/health").status_code == 200
+    assert httpx.get(base + "/.well-known/agent-card.json").status_code == 200
+
+
+def test_cadena_revisar_gasto_con_verificador_real_y_token(verificador, monkeypatch, ruta_fija, filas, revisar_gasto):
+    """/chat → router (fijo) → revisar_gasto → A2A por HTTP con Bearer → ReAct real (LLM guionado).
+
+    El verificador lee un monto distinto: /chat y el registro de veredictos quedan en «observar».
+    """
+    from src.principal import grafo as modulo_grafo
+    from tests.test_revisar_gasto_c2 import _guion_aprobar_gs01
+    from tests.test_seguridad import LLMFalso
+
+    turno, pasos = _guion_aprobar_gs01()
+    gasto = {**turno["gasto"], "rut_emisor": "11.111.111-1", "folio": "000123"}
+    _lector_falso(monkeypatch, LecturaBoleta(legible=True, monto_total=62000, fecha_emision=gasto["fecha_gasto"],
+                                             rut_emisor="11.111.111-1", folio="000123", categoria_gasto="peaje",
+                                             categoria_compatible=True, confianza=0.9))
+    monkeypatch.setattr(revisar_gasto, "obtener_llm", lambda: LLMFalso(pasos))
+    monkeypatch.setattr(modulo_grafo, "_AGENTE_REACT", None)
+    ruta_fija("revisar_gasto")
+
+    salida = modulo_grafo.ejecutar("t-cadena", "Revisa este gasto.", _imagen("boleta-01-cuadra.png"), gasto,
+                                   grafo=modulo_grafo.construir_grafo())
+
+    assert salida["hubo_a2a"] is True and salida["verificacion"]["disponible"] is True
+    assert salida["verificacion"]["cuadra"]["monto"] == "no"
+    assert salida["veredicto"]["decision"] == "observar"
+    assert revisar_gasto.registros_de_prueba == [(gasto["id"], "observar")]
+    assert filas[0]["hubo_a2a"] is True and filas[0]["ruta"] == "revisar_gasto"
 
 
 def test_ficha_publica_la_skill(verificador):

@@ -1,6 +1,6 @@
 # A2A · boleta-01-cuadra.png (cuadra)
 
-Capturado el 2026-11-24T21:32:22-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 4514 ms.
+Capturado el 2026-11-25T19:22:09-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 5718 ms.
 
 ## Encargo (principal → verificador)
 Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (lo declarado):
@@ -44,7 +44,7 @@ Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (
     "categoria": "sí"
   },
   "confianza": 1.0,
-  "observaciones": "Documento legible y datos completos."
+  "observaciones": "Documento legible y datos extraídos correctamente."
 }
 ```
 
@@ -55,12 +55,12 @@ En el nodo `revisar_gasto` del grafo principal: el resultado se pasa al ReAct co
 
 ## Log del principal (este proceso)
 ```text
-2026-11-24 21:32:17 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 42579 bytes · tiempo límite 20 s
-2026-11-24 21:32:22 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=1.00 · no cuadra: -
+2026-11-25 19:22:04 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 42579 bytes · tiempo límite 20 s
+2026-11-25 19:22:09 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=1.00 · no cuadra: -
 ```
 
 ## Log del verificador
 ```text
-2026-11-24 21:32:17 INFO    [tarea_final] verificador · encargo b9bc519e · imagen image/png 42579 bytes sha256:dbd473e801de6cdc · declarado monto=45000 fecha=2026-10-02 folio=000123
-2026-11-24 21:32:22 INFO    [tarea_final] verificador · respuesta b9bc519e · confianza=1.00 · no cuadra: -
+2026-11-25 19:22:04 INFO    [tarea_final] verificador · encargo 95bff538 · imagen image/png 42579 bytes sha256:dbd473e801de6cdc · declarado monto=45000 fecha=2026-10-02 folio=000123
+2026-11-25 19:22:09 INFO    [tarea_final] verificador · respuesta 95bff538 · confianza=1.00 · no cuadra: -
 ```

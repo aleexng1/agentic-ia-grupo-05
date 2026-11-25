@@ -81,6 +81,6 @@ Criterios y puntos según [pauta.md](pauta.md). Cada evidencia muestra la **entr
   `APP_MODULE=api.app:app` (principal) y `APP_MODULE=src.verificador.app:app` (verificador).
   Alternativa: `git subtree push --prefix tarea-final-c2 heroku main`.
   **No tocar** el `Procfile`, el `requirements.txt` ni el `.slugignore` de la raíz (son del taller 02).
-- **Verificador (Alex + Matías):** hoy está protegido con X-API-Key de forma provisoria; pasa a
-  `TOKEN_A2A` cuando exista `revisar_token_a2a`.
+- **Verificador (Alex + Matías):** hecho (2026-11-25). Está protegido con `TOKEN_A2A`
+  (`proteger_con_token_a2a`) y el principal manda el Bearer.
 - **`tests/test_humo.py::test_chat_sin_router_responde_501`:** se borra o se cambia a 200 cuando el router exista (Alex).

@@ -7,16 +7,17 @@ En Heroku es una app aparte con APP_MODULE=src.verificador.app:app (ver docs/rep
 - GET  /.well-known/agent-card.json  ficha A2A (pública)
 - POST /                             JSON-RPC A2A (protegido)
 
-Protección PROVISORIA: proteger_app (X-API-Key con API_KEY_SERVICIO). El contrato final es
-TOKEN_A2A: cuando esté unido el PR de Matías (proteger_con_token_a2a en src/comun/seguridad.py),
-se cambia la última línea por `proteger_con_token_a2a(app)`. El cliente (delegar_verificador)
-ya manda las dos cabeceras: X-API-Key y, si TOKEN_A2A tiene valor, Authorization: Bearer.
+Protección del canal A2A (docs/contratos.md §6 y §11.2): proteger_con_token_a2a (Matías,
+src/comun/seguridad.py) exige `Authorization: Bearer <TOKEN_A2A>` en todo POST/PUT/PATCH/DELETE;
+GET /health y la ficha quedan públicos. Sin TOKEN_A2A configurado, el verificador rechaza todo
+encargo con 503 y lo avisa al arrancar. El principal (delegar_verificador) manda el Bearer con
+el mismo TOKEN_A2A; en Heroku, las dos apps tienen que tener el mismo valor.
 """
 
 from fastapi import FastAPI
 
 from src.comun.registro import configurar_registro
-from src.comun.seguridad import proteger_app
+from src.comun.seguridad import proteger_con_token_a2a
 from src.comun.servidor import registrar_agente
 from src.verificador.agente import responder, responder_partes
 from src.verificador.ficha import tarjeta
@@ -32,4 +33,4 @@ async def health() -> dict[str, bool]:
 
 
 registrar_agente(app, tarjeta, responder, responder_partes=responder_partes)
-proteger_app(app)
+proteger_con_token_a2a(app)

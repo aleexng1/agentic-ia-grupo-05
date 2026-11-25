@@ -1,6 +1,6 @@
 # A2A · boleta-02-monto-distinto.png (monto distinto)
 
-Capturado el 2026-11-24T21:32:25-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 2897 ms.
+Capturado el 2026-11-25T19:22:19-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 9290 ms.
 
 ## Encargo (principal → verificador)
 Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (lo declarado):
@@ -34,7 +34,7 @@ Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (
     "fecha": "2026-10-14",
     "rut_emisor": "22.222.222-2",
     "folio": "004512",
-    "categoria": "hotel y cena"
+    "categoria": "hotel"
   },
   "cuadra": {
     "monto": "no",
@@ -44,7 +44,7 @@ Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (
     "categoria": "sí"
   },
   "confianza": 1.0,
-  "observaciones": "Documento legible de prueba para gasto de hotel."
+  "observaciones": "Documento legible y datos extraidos correctamente."
 }
 ```
 
@@ -55,12 +55,12 @@ En el nodo `revisar_gasto` del grafo principal: el resultado se pasa al ReAct co
 
 ## Log del principal (este proceso)
 ```text
-2026-11-24 21:32:22 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 44527 bytes · tiempo límite 20 s
-2026-11-24 21:32:25 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=1.00 · no cuadra: monto
+2026-11-25 19:22:10 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 44527 bytes · tiempo límite 20 s
+2026-11-25 19:22:19 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=1.00 · no cuadra: monto
 ```
 
 ## Log del verificador
 ```text
-2026-11-24 21:32:22 INFO    [tarea_final] verificador · encargo 005039a1 · imagen image/png 44527 bytes sha256:e3180ac8b2f1c5e1 · declarado monto=52000 fecha=2026-10-14 folio=004512
-2026-11-24 21:32:25 INFO    [tarea_final] verificador · respuesta 005039a1 · confianza=1.00 · no cuadra: monto
+2026-11-25 19:22:10 INFO    [tarea_final] verificador · encargo 19117fcc · imagen image/png 44527 bytes sha256:e3180ac8b2f1c5e1 · declarado monto=52000 fecha=2026-10-14 folio=004512
+2026-11-25 19:22:19 INFO    [tarea_final] verificador · respuesta 19117fcc · confianza=1.00 · no cuadra: monto
 ```
