@@ -262,7 +262,8 @@ Motivo: Heroku corta una solicitud a los 30 s y `revisar_gasto` tarda 31–52 s
   El grafo corre en segundo plano, en un hilo del mismo proceso (`src/principal/en_segundo_plano.py`).
   Un texto vacío o de más de 4000 caracteres responde `422` **antes** de aceptarse; 401 y 503 no cambian.
 - `POST /chat?esperar=true` → igual que antes, síncrono (`200` con la respuesta completa, `422`, `502`).
-  Es para el uso local, las pruebas y quien no pueda consultar después.
+  Es para el uso local, las pruebas y quien no pueda consultar después. Desde §11.1 ter también
+  respeta el tope global: si termina después de `TIEMPO_MAX_EJECUCION_SEG`, responde `estado_final = "error"`.
 - `GET /registro/{id_ejecucion}` (exige `X-API-Key`) → `200`:
   - en proceso: `{"id_ejecucion", "estado": "en_proceso", "thread_id", "inicio", "segundos", "resultado": null}`;
   - terminada: los campos de la fila de `ejecuciones` (§7) más `"estado"` (= `ok` / `bloqueado` /
@@ -280,6 +281,22 @@ Motivo: Heroku corta una solicitud a los 30 s y `revisar_gasto` tarda 31–52 s
   `estado_final = "en_proceso"` (insertar al aceptar y actualizar al terminar), o una tabla aparte
   `resultados_chat (id_ejecucion, estado, respuesta, actualizado_en)`.
 - Hasta `MAX_EJECUCIONES_SIMULTANEAS` (4) a la vez; las demás esperan su turno, dentro del mismo tope.
+- **Heroku: el principal corre con un solo proceso** (el `Procfile` actual: `uvicorn` sin
+  `--workers`, y 1 dyno `web`) hasta que el registro guarde `en_proceso` y la respuesta. Con dos
+  procesos, un `GET /registro/{id}` podría llegar al que no tiene esa ejecución en memoria.
+
+#### 11.1 ter — `revisar_caso` recibe `hora_limite` (agregado por Alex, revisar · 2026-11-25)
+- Firma: `revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None, hora_limite=None)`.
+- `hora_limite` es un `datetime` **con zona UTC**: inicio de la ejecución + `TIEMPO_MAX_EJECUCION_SEG`.
+  En el modo asíncrono se cuenta desde que `/chat` aceptó el mensaje. Se compara con
+  `datetime.now(timezone.utc)`. Se calcula en **toda** ejecución, también con `?esperar=true`.
+- **Si ya pasó, `revisar_caso` NO debe llamar a `registrar_veredicto` ni tocar el fondo.** Debe
+  devolver `estado_final = "error"`, sin veredicto, con un mensaje claro. Motivo: pasado el tope,
+  `/chat` ya informó «error», y lo registrado tiene que coincidir con lo informado. Conviene revisarlo
+  justo antes de registrar y, si se puede, también entre pasos del ciclo, para no seguir gastando llamadas.
+- Hasta que la firma lo acepte, el grafo **no lo pasa** (revisa la firma con `inspect`) y deja una
+  vez en el log: «revisar_caso no acepta «hora_limite» todavía». Lo mismo vale para cualquier
+  argumento opcional nuevo.
 
 ### 11.2 Delegación A2A al verificador (etapa 2)
 - Encargo: igual que §5. La parte de archivo es `Part(raw, media_type, filename)` y la de datos,

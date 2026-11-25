@@ -114,8 +114,8 @@ def test_revisar_gasto_sin_revisar_caso_termina_en_error(ruta_fija, filas, monke
 def _react_falso(monkeypatch, decision="aprobar", estado_final="ok"):
     recibido = {}
 
-    def revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None):
-        recibido.update(mensaje=mensaje, hilo=hilo, gasto=gasto, verificacion=verificacion)
+    def revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None, hora_limite=None):
+        recibido.update(mensaje=mensaje, hilo=hilo, gasto=gasto, verificacion=verificacion, hora_limite=hora_limite)
         return {
             "respuesta": f"Decisión: {decision}.", "pasos": 3, "estado_final": estado_final,
             "herramientas_usadas": ["buscar_politica", "validar_gasto", "emitir_veredicto"],
@@ -292,3 +292,39 @@ def test_boleta_que_no_cuadra_chat_y_registro_dicen_observar(ruta_fija, filas, m
     assert salida["veredicto"]["decision"] == "observar"
     assert revisar_gasto.registros_de_prueba == [(gasto["id"], "observar")]  # no «aprobar»
     assert filas[0]["ruta"] == "revisar_gasto"
+
+
+def test_revisar_caso_recibe_la_hora_limite_de_la_ejecucion(ruta_fija, filas, monkeypatch):
+    from datetime import datetime, timedelta, timezone
+
+    monkeypatch.setenv("TIEMPO_MAX_EJECUCION_SEG", "60")
+    ruta_fija("revisar_gasto")
+    recibido = _react_falso(monkeypatch)
+    antes = datetime.now(timezone.utc)
+    _ejecutar("Revisa este gasto:\n" + json.dumps(GASTO))
+    hora = recibido["hora_limite"]
+    assert hora.tzinfo is not None  # hora de pared en UTC, comparable con datetime.now(timezone.utc)
+    assert antes + timedelta(seconds=58) <= hora <= datetime.now(timezone.utc) + timedelta(seconds=60)
+
+
+def test_revisar_caso_sin_hora_limite_no_rompe_el_grafo_y_avisa_una_vez(ruta_fija, filas, monkeypatch, caplog):
+    """Si la firma de Matías todavía no acepta hora_limite, se llama sin él y queda un aviso."""
+    monkeypatch.setattr(modulo_grafo, "_AVISADOS", set())
+    ruta_fija("revisar_gasto")
+    llamadas = []
+
+    def revisar_caso(agente, mensaje, hilo, gasto, fondo=None, verificacion=None):  # versión sin hora_limite
+        llamadas.append(verificacion)
+        return {"respuesta": "Decisión: observar.", "pasos": 2, "estado_final": "ok", "herramientas_usadas": [],
+                "veredicto": {"decision": "observar", "motivo": "x", "politica_sugerida": "P02",
+                              "categoria_sugerida": "Peaje", "cuenta_sugerida": "CTA-6100"}}
+
+    monkeypatch.setattr(modulo_react, "revisar_caso", revisar_caso, raising=False)
+    monkeypatch.setattr(modulo_grafo, "_agente_react", lambda modulo, checkpointer: object())
+    with caplog.at_level("WARNING", logger="tarea_final"):
+        primera = _ejecutar("Revisa este gasto:\n" + json.dumps(GASTO))
+        segunda = _ejecutar("Revisa este gasto:\n" + json.dumps(GASTO))
+    assert primera["veredicto"]["decision"] == segunda["veredicto"]["decision"] == "observar"
+    assert len(llamadas) == 2
+    avisos = [r for r in caplog.records if "no acepta «hora_limite»" in r.getMessage()]
+    assert len(avisos) == 1

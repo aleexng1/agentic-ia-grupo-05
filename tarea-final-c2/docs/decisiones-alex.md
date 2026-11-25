@@ -158,6 +158,16 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     el principal ya no razonaba (0 tokens), así que no cambia su tiempo. El respaldo
     (`gemini-3.5-flash`) razona en `medium` por defecto, y clasificar o leer cuatro datos no lo
     necesita. No toqué `obtener_llm` (Sebastián): el nivel se fija sobre el modelo que devuelve.
+38. **`hora_limite` hacia el ReAct (`c2tf/alex-hora-limite`):** el grafo calcula la hora límite de
+    cada ejecución (inicio + `TIEMPO_MAX_EJECUCION_SEG`, en UTC) y se la pasa a `revisar_caso`.
+    Así, pasado el tope, no registra un veredicto que `/chat` ya informó como «error» (era el límite
+    conocido de la decisión 36).
+    - Va como `datetime` de pared y no como el reloj monotónico, porque es lo que el ReAct puede
+      comparar sin depender de mi código.
+    - Se pasa solo si la firma lo acepta (`inspect`), con un aviso único en el log. Así el grafo no
+      se rompe mientras Matías no lo implemente; lo mismo vale para `verificacion`.
+    - **El modo síncrono también respeta el tope** desde ahora. Si no, con `?esperar=true` el ReAct
+      dejaría de registrar mientras `/chat` igual entregaría un veredicto.
 
 ## Pendientes que dependen de otros (al 2026-11-24)
 
