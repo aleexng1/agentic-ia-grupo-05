@@ -97,6 +97,18 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     política) más el piso por verificación: V-01 aprobar; V-02, V-03 y V-04 observar.
 27. **Los casos R del set son los mismos de `tests/test_router.py`**, y un test lo comprueba para que
     no se desincronicen.
+28. **Primera corrida del evaluador con Gemini (2026-11-24):** se corrió en proceso, con el
+    verificador levantado (`evidencias/ampliacion-evaluacion/informe-20261124T213858.md`). El router
+    acertó las 59 rutas (59/59). Hubo 17/17 aciertos en los casos que ya se pueden evaluar y 40
+    pendientes, porque `revisar_caso` y `responder_consulta` todavía no están en `main`. Se deja
+    como evidencia de que el set y el evaluador funcionan, pero la corrida para la nota es la que
+    se haga con #95 y el flujo de Eduardo ya unidos. Aviso: `langchain-google-genai` advierte que
+    `gemini-3.5-flash-lite` *ignora* `temperature=0` (usa sus valores fijos). Por eso los
+    resultados pueden variar un poco entre corridas, y el umbral del router es 13/15, no 15/15.
+29. **Arreglo en `tests/test_router.py`:** ahora importa `src.comun.config` (que carga el `.env`)
+    antes de su `skipif`. `test_evaluacion.py` importa `test_router` durante la recolección, antes
+    que cualquier otro módulo cargue el `.env`. Por eso, en esta rama, el test del router con
+    Gemini se saltaba («falta GOOGLE_API_KEY») aunque la clave estuviera en el `.env`.
 
 ## Pendientes que dependen de otros (al 2026-11-24)
 
@@ -111,5 +123,6 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
   consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
 - **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
   `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1).
-- **Alex (con `GOOGLE_API_KEY`):** generar las evidencias `dos-recorridos`, `a2a` (4 boletas) y el
-  informe del evaluador, y correr `pytest -m necesita_llm`.
+- **Alex:** las evidencias con Gemini y `pytest -m necesita_llm` ya están hechas (2026-11-24).
+  Falta volver a capturar `dos-recorridos/01` y volver a correr el evaluador cuando estén unidos
+  #95 (Matías) y el flujo de Eduardo.
