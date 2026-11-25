@@ -1,4 +1,4 @@
-"""Captura la evidencia «dos recorridos»: dos solicitudes distintas activan flujos distintos.
+"""Captura la evidencia «dos recorridos»: solicitudes distintas activan flujos distintos.
 
 Uso (desde tarea-final-c2/, con el principal corriendo y su salida guardada en un archivo):
     uvicorn api.app:app --port 8000 2>&1 | tee /tmp/principal.log      # otra terminal
@@ -25,9 +25,19 @@ sys.path.insert(0, str(CARPETA.parents[1]))
 from src.comun import config  # noqa: E402,F401  (carga el .env)
 from src.comun.errores import ocultar_secretos  # noqa: E402
 
+# La pauta pide consulta_politica y revisar_gasto; fuera_de_alcance se deja como tercer recorrido.
+# El gasto de 03 es el de GS-01 (golden set de c1, ficticio): peaje de $7.800, esperado «aprobar».
+GASTO_GS01 = {
+    "id": "G-0101", "fecha_gasto": "2026-10-06", "fecha_rendicion": "2026-10-09", "monto": 7800,
+    "tipo_documento": "boleta", "proveedor": "Concesionaria Vial Lago Verde",
+    "glosa": "peaje ida y vuelta CD - tienda Norte, camión de reparto", "politica_declarada": "Viajes Internos",
+    "categoria_declarada": "Peaje", "unidad_negocio": "CD", "patente": "RZPT41", "numero_ot": None,
+    "vb_gerente_general": False, "id_fondo": "FR-001",
+}
 CASOS = [
-    ("01-consulta-politica", "consulta_politica", "¿Cuál es el plazo máximo para rendir un gasto que hice en octubre?"),
-    ("02-fuera-de-alcance", "fuera_de_alcance", "Escríbeme un poema sobre el lago Llanquihue."),
+    ("01-consulta-politica", "consulta_politica", "¿Cuál es el plazo máximo para rendir un gasto que hice en octubre?", None),
+    ("02-fuera-de-alcance", "fuera_de_alcance", "Escríbeme un poema sobre el lago Llanquihue.", None),
+    ("03-revisar-gasto", "revisar_gasto", "Revisa este gasto rendido.", GASTO_GS01),
 ]
 
 
@@ -47,6 +57,7 @@ def main() -> int:
     argumentos.add_argument("--url", default="http://127.0.0.1:8000")
     argumentos.add_argument("--log", help="archivo con la salida de uvicorn del principal")
     argumentos.add_argument("--salida", default=str(CARPETA))
+    argumentos.add_argument("--solo", help="solo el recorrido cuyo nombre contiene este texto (ej. 03)")
     opciones = argumentos.parse_args()
 
     clave = os.getenv("API_KEY_SERVICIO", "").strip()
@@ -54,8 +65,12 @@ def main() -> int:
         print("Falta API_KEY_SERVICIO en el entorno o en el .env.")
         return 1
     rutas_obtenidas = []
-    for nombre, esperada, texto in CASOS:
+    for nombre, esperada, texto, gasto in CASOS:
+        if opciones.solo and opciones.solo not in nombre:
+            continue
         cuerpo = {"thread_id": f"evidencia-{nombre}", "texto": texto}
+        if gasto:
+            cuerpo["gasto"] = gasto
         respuesta = httpx.post(f"{opciones.url}/chat", json=cuerpo, headers={"X-API-Key": clave}, timeout=120)
         try:
             datos = respuesta.json()
@@ -93,8 +108,8 @@ def main() -> int:
         destino = Path(opciones.salida) / f"{nombre}.md"
         destino.write_text("\n".join(md), encoding="utf-8")
         print(f"{destino}: HTTP {respuesta.status_code}, ruta={datos.get('ruta')}")
-    distintas = len(set(rutas_obtenidas)) == len(CASOS)
-    print("Dos flujos distintos:", "sí" if distintas else "NO")
+    distintas = len(set(rutas_obtenidas)) == len(rutas_obtenidas)
+    print("Flujos distintos en cada recorrido:", "sí" if distintas else "NO")
     return 0 if distintas else 1
 
 

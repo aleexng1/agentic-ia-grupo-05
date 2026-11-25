@@ -14,6 +14,8 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
    API con la clave del grupo. El respaldo es otro modelo flash real y distinto, con su propia
    cuota. El router acertó **15/15** en `CASOS_ROUTER`, en dos corridas seguidas (el umbral
    es 13/15), así que no se ajustó el prompt.
+   *Dos recorridos:* `reparto.md` pide `consulta_politica` **y** `revisar_gasto`. El script ahora
+   captura también `03-revisar-gasto` (gasto GS-01); `fuera_de_alcance` queda como tercer recorrido.
 2. **Una falla del proveedor no se disfraza de `fuera_de_alcance`.** Solo una salida *no válida*
    del modelo cae en `fuera_de_alcance` (como pide el contrato); si Gemini no responde, la
    ejecución termina en `error` con 502 y su `id_ejecucion`.
