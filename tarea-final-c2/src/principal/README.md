@@ -4,7 +4,7 @@ Agente principal (LangGraph): `grafo.py` arma router → flujos; `router.py` cla
 
 | Archivo | Origen | Dueño | Estado |
 |---|---|---|---|
-| `grafo.py`, `router.py`, `flujos/fuera_de_alcance.py` | nuevo | Alex | esqueleto |
+| `grafo.py`, `router.py`, `flujos/fuera_de_alcance.py` | nuevo | Alex | hecho (router con salida estructurada, grafo router → flujo, A2A antes del ReAct; ver `docs/decisiones-alex.md`) |
 | `flujos/revisar_gasto.py` | `tarea-final-c1/src/grafo.py` (solo imports) | Matías | ReAct de c1 funcionando; falta integrarlo como nodo |
 | `flujos/consulta_politica.py` | nuevo | Eduardo | esqueleto |
 | `juez.py` | `tarea-final-c1/src/seguridad.py` (prompt + juez) | Matías | copiado |

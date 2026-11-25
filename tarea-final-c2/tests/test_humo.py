@@ -33,11 +33,22 @@ def test_chat_con_clave_incorrecta_responde_401(cliente):
     assert respuesta.status_code == 401
 
 
-def test_chat_sin_router_responde_501(cliente):
-    """BORRAR o cambiar cuando exista el router (Alex): entonces /chat responde 200."""
+def test_chat_con_router_falso_responde_200(cliente, monkeypatch):
+    """Con la clave, /chat corre el grafo: responde 200 con ruta e id_ejecucion (router falso, sin Gemini)."""
+    from src.comun import registro
+    from src.principal import grafo, router
+
+    monkeypatch.setattr(
+        router, "clasificar",
+        lambda texto, tiene_imagen=False, trae_gasto=False: {"ruta": "fuera_de_alcance", "motivo": "prueba", "modelo": "principal"},
+    )
+    monkeypatch.setattr(registro, "guardar_ejecucion", lambda fila: None)
+    monkeypatch.setattr(grafo, "_GRAFO", grafo.construir_grafo())
     respuesta = cliente.post("/chat", json=CHAT, headers={"X-API-Key": CLAVE_DE_PRUEBA})
-    assert respuesta.status_code == 501
-    assert "router" in respuesta.json()["detail"]
+    assert respuesta.status_code == 200
+    datos = respuesta.json()
+    assert datos["ruta"] == "fuera_de_alcance" and datos["id_ejecucion"]
+    assert datos["thread_id"] == CHAT["thread_id"] and datos["estado_final"] == "ok"
 
 
 def test_registro_sin_clave_responde_401(cliente):
