@@ -6,3 +6,6 @@ __pycache__/
 *.db
 .pytest_cache/
 node_modules/
+# Avance parcial del evaluador (se borra solo al escribir el informe final).
+evidencias/ampliacion-evaluacion/avance-parcial.json
+evidencias/ampliacion-evaluacion/avance-parcial.tmp

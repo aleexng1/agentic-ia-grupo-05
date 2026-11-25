@@ -13,7 +13,10 @@ Cómo generarla (desde `tarea-final-c2/`, con `.env` completo):
 python -m evaluacion.evaluar --validar     # 1) formato (no necesita Gemini)
 python -m evaluacion.evaluar               # 2) corrida completa → escribe el informe aquí
 python -m evaluacion.evaluar --pausa 20    #    lo mismo, con 20 s entre casos (cuota por minuto de Gemini)
+python -m evaluacion.evaluar --retomar --pausa 20   # si se cortó por cuota: sigue donde quedó
 ```
+Si se agota la cuota, la corrida se detiene sola (después de 2 reintentos), guarda el avance y dice
+cómo seguir. El informe final indica en cuántas corridas se armó y con qué modelos.
 Para la entrega conviene correrla cuando estén unidos los flujos de Matías (`revisar_gasto`) y de
 Eduardo (`consulta_politica`): antes de eso, sus casos salen como **pendientes** (no cuentan).
 

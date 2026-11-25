@@ -129,6 +129,12 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     llamadas por caso y la cuota de Gemini se agotó en el caso 16 de 57 (8 errores de cuota). La
     detuve para no gastar más y no guardé un informe que mediría la cuota y no al agente. Agregué
     `--pausa SEG` a `evaluar.py` para espaciar los casos en la próxima corrida.
+34. **Evaluador que se puede retomar (`c2tf/alex-evaluador`):** el avance se guarda después de cada
+    caso y se puede seguir con `--retomar` o `--desde`. Ante un 429 hay 2 reintentos con espera
+    creciente; si sigue sin cuota, la corrida se detiene sola. El caso cortado **no se cuenta** y se
+    repite entero (hilo nuevo), porque un caso de 2 turnos a medias no es comparable. El informe dice
+    cuántas corridas y qué modelos lo armaron, porque mezclar modelos entre corridas cambia la lectura
+    del %. El «429» se busca como código aislado, para no confundirlo con un monto o un folio.
 
 ## Pendientes que dependen de otros (al 2026-11-24)
 
