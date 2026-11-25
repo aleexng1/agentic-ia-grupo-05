@@ -4,12 +4,12 @@ Dos solicitudes distintas activan flujos distintos del **mismo** agente principa
 
 | Archivo | Ruta esperada | Estado |
 |---|---|---|
-| `01-consulta-politica.md` | `consulta_politica` | **pendiente** (falta `GOOGLE_API_KEY`) |
-| `02-fuera-de-alcance.md` | `fuera_de_alcance` | **pendiente** (falta `GOOGLE_API_KEY`) |
+| `01-consulta-politica.md` | `consulta_politica` | capturado 2026-11-24 con Gemini (`gemini-3.5-flash-lite`). El router acierta; el flujo responde «todavía no implementado» hasta que se una el de Eduardo. **Volver a capturar** después de esa unión |
+| `02-fuera-de-alcance.md` | `fuera_de_alcance` | capturado 2026-11-24 con Gemini: `estado_final = ok` |
 
 Cómo generarla (desde `tarea-final-c2/`, con `.env` completo):
 ```bash
-uvicorn api.app:app --port 8000 2>&1 | tee /tmp/principal.log        # terminal 1
+uvicorn api.app:app --port 8000 2>&1 | tee /tmp/principal.log        # terminal 1 (MOSTRAR_TRAZAS=0)
 python evidencias/dos-recorridos/capturar.py --url http://127.0.0.1:8000 --log /tmp/principal.log   # terminal 2
 ```
 Cada `.md` trae la **entrada** (curl con la clave tapada), la **ejecución observada** (líneas del
