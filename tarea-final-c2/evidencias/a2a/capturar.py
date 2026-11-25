@@ -44,13 +44,23 @@ class Captura(logging.Handler):
         self.lineas.append(self.format(registro))
 
 
-def log_del_verificador(ruta: str | None, huella: str) -> list[str]:
-    """Líneas del verificador de este encargo: la del encargo (trae el hash) y la de su respuesta."""
+def largo_del_log(ruta: str | None) -> int:
+    """Bytes que ya tiene el log antes del encargo (para no mezclar corridas anteriores)."""
+    try:
+        return Path(ruta).stat().st_size if ruta else 0
+    except OSError:
+        return 0
+
+
+def log_del_verificador(ruta: str | None, huella: str, desde: int = 0) -> list[str]:
+    """Líneas del verificador de ESTE encargo (escritas después de `desde`): encargo (trae el hash) y respuesta."""
     if not ruta:
         return ["(no se pasó --log-verificador)"]
     time.sleep(0.5)
     try:
-        lineas = Path(ruta).read_text(encoding="utf-8", errors="replace").splitlines()
+        with open(ruta, "rb") as archivo:
+            archivo.seek(desde)
+            lineas = archivo.read().decode("utf-8", errors="replace").splitlines()
     except OSError as error:
         return [f"(no se pudo leer el log: {error})"]
     elegidas = []
@@ -60,7 +70,7 @@ def log_del_verificador(ruta: str | None, huella: str) -> list[str]:
             contexto = linea.split("encargo ", 1)[1].split(" ", 1)[0] if "encargo " in linea else None
             elegidas += [l for l in lineas[i + 1 :] if contexto and f"respuesta {contexto}" in l][:1]
             elegidas += [l for l in lineas[i + 1 : i + 6] if "ERROR" in l or "error" in l.lower()][:2]
-    return [ocultar_secretos(l) for l in elegidas] or ["(no hubo líneas con el hash de esta imagen)"]
+    return [ocultar_secretos(l) for l in elegidas] or ["(el verificador no registró este encargo: no le llegó)"]
 
 
 async def capturar(boleta: dict, opciones, captura: Captura, prefijo: str) -> Path:
@@ -68,6 +78,7 @@ async def capturar(boleta: dict, opciones, captura: Captura, prefijo: str) -> Pa
     huella = hashlib.sha256(datos).hexdigest()[:16]
     imagen = {"mime_type": boleta["mime_type"], "datos_base64": base64.b64encode(datos).decode("ascii")}
     captura.lineas.clear()
+    desde = largo_del_log(opciones.log_verificador)
     inicio = time.monotonic()
     respuesta = await delegar_verificador(imagen, boleta["declarado"])
     duracion = int((time.monotonic() - inicio) * 1000)
@@ -92,7 +103,13 @@ async def capturar(boleta: dict, opciones, captura: Captura, prefijo: str) -> Pa
         ocultar_secretos(json.dumps(respuesta, ensure_ascii=False, indent=2)),
         "```",
         "",
-        f"Esperado según `datos/boletas/declarado.json`: `{json.dumps(boleta['esperado_cuadra'], ensure_ascii=False)}`",
+        (
+            f"Esperado según `datos/boletas/declarado.json`: `{json.dumps(boleta['esperado_cuadra'], ensure_ascii=False)}`"
+            if respuesta.get("disponible")
+            else f"**Fallo controlado** (`tipo_fallo = {respuesta.get('tipo_fallo')}`): el principal no recibe ningún "
+            "campo leído, así que no hay nada que comparar ni que inventar. En el grafo, el gasto queda en «observar» "
+            "con `estado_final = \"fallback\"` (pruebas `tests/test_grafo.py` y `tests/test_verificador.py`)."
+        ),
         "",
         "## Dónde se usa",
         "En el nodo `revisar_gasto` del grafo principal: el resultado se pasa al ReAct como dato y, si algún "
@@ -105,7 +122,7 @@ async def capturar(boleta: dict, opciones, captura: Captura, prefijo: str) -> Pa
         "",
         "## Log del verificador",
         "```text",
-        *log_del_verificador(opciones.log_verificador, huella),
+        *log_del_verificador(opciones.log_verificador, huella, desde),
         "```",
         "",
     ]
