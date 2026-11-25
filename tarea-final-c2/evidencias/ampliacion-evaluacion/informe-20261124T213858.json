@@ -1,0 +1,1028 @@
+{
+  "fecha": "2026-11-24T21:38:58-03:00",
+  "version_set": "1.0",
+  "casos_en_set": 57,
+  "casos_corridos": 57,
+  "modelo": "gemini-3.5-flash-lite",
+  "modo": "en proceso (src.principal.grafo.ejecutar)",
+  "commit": "6465d31",
+  "resumen": {
+    "casos": {
+      "acierto": 17,
+      "fallo": 0,
+      "pendiente": 40,
+      "error": 0,
+      "total": 57,
+      "porcentaje_aciertos": 100.0
+    },
+    "turnos": {
+      "acierto": 18,
+      "fallo": 0,
+      "pendiente": 41,
+      "error": 0,
+      "porcentaje_aciertos": 100.0
+    },
+    "router": {
+      "rutas_correctas": 59,
+      "rutas_incorrectas": 0,
+      "porcentaje": 100.0
+    },
+    "por_grupo": {
+      "A-limpio": {
+        "acierto": 0,
+        "fallo": 0,
+        "pendiente": 6,
+        "error": 0,
+        "porcentaje_aciertos": null
+      },
+      "B-mal-clasificado": {
+        "acierto": 0,
+        "fallo": 0,
+        "pendiente": 7,
+        "error": 0,
+        "porcentaje_aciertos": null
+      },
+      "C-regla": {
+        "acierto": 0,
+        "fallo": 0,
+        "pendiente": 12,
+        "error": 0,
+        "porcentaje_aciertos": null
+      },
+      "D-fondo": {
+        "acierto": 0,
+        "fallo": 0,
+        "pendiente": 2,
+        "error": 0,
+        "porcentaje_aciertos": null
+      },
+      "E-seguridad": {
+        "acierto": 2,
+        "fallo": 0,
+        "pendiente": 2,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "F-conversacion": {
+        "acierto": 2,
+        "fallo": 0,
+        "pendiente": 1,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "R-router": {
+        "acierto": 9,
+        "fallo": 0,
+        "pendiente": 6,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "V-verificacion": {
+        "acierto": 0,
+        "fallo": 0,
+        "pendiente": 4,
+        "error": 0,
+        "porcentaje_aciertos": null
+      },
+      "X-fuera-de-alcance": {
+        "acierto": 4,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      }
+    }
+  },
+  "casos": [
+    {
+      "id": "GS-01",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "78296b22-256e-4695-a1dc-50985799bcdb"
+        }
+      ]
+    },
+    {
+      "id": "GS-02",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "0c8113a8-e097-40f2-b639-bd027e0b2226"
+        }
+      ]
+    },
+    {
+      "id": "GS-03",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "82ff006f-3371-430c-83f9-3d71dd2d2476"
+        }
+      ]
+    },
+    {
+      "id": "GS-04",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "d03ea1f6-a7f4-4c3b-950c-4a723d59346b"
+        }
+      ]
+    },
+    {
+      "id": "GS-05",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "48f476fb-2639-4530-82f3-5cf116c32627"
+        }
+      ]
+    },
+    {
+      "id": "GS-06",
+      "grupo": "A-limpio",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "0faef869-c0db-44e9-a6cb-a9d8db33882a"
+        }
+      ]
+    },
+    {
+      "id": "GS-07",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "3cc53f06-d72d-4833-8262-2e8e343024b7"
+        }
+      ]
+    },
+    {
+      "id": "GS-08",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "7eee92d0-2ac7-4eff-89fe-608e64b569ff"
+        }
+      ]
+    },
+    {
+      "id": "GS-09",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "e3055dc4-ac23-4360-86a6-5fbc5d778423"
+        }
+      ]
+    },
+    {
+      "id": "GS-10",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "0f1259ed-a6bd-4ba6-984d-3d701217e05c"
+        }
+      ]
+    },
+    {
+      "id": "GS-11",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "7572e370-6367-4f74-9a0c-56cf23f5d4f7"
+        }
+      ]
+    },
+    {
+      "id": "GS-12",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "21f782ad-85c0-48b5-a206-167f9f3b3ee6"
+        }
+      ]
+    },
+    {
+      "id": "GS-13",
+      "grupo": "B-mal-clasificado",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "4866b642-6c5b-4ab6-a4d3-8831ff684215"
+        }
+      ]
+    },
+    {
+      "id": "GS-14",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "51079e89-fb53-47fd-9fb0-f67e92370880"
+        }
+      ]
+    },
+    {
+      "id": "GS-15",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "3b040f57-86ce-4bda-87d0-afa7f87b7da7"
+        }
+      ]
+    },
+    {
+      "id": "GS-16",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "f4dd8d3c-1e8e-4927-a940-abc7d399fb3d"
+        }
+      ]
+    },
+    {
+      "id": "GS-17",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "d885d148-fcf9-4ef7-a822-7cc03be44fd1"
+        }
+      ]
+    },
+    {
+      "id": "GS-18",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "d67810b9-1374-4373-bbd2-a37c9131d78e"
+        }
+      ]
+    },
+    {
+      "id": "GS-19",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "f466bd69-e2b7-4adf-8113-36f7c73a3399"
+        }
+      ]
+    },
+    {
+      "id": "GS-20",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "f8114442-4deb-49d7-ac59-c24f31f0ee91"
+        }
+      ]
+    },
+    {
+      "id": "GS-21",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "f0d9770b-b1ba-44a5-9ecf-e29791047d4f"
+        }
+      ]
+    },
+    {
+      "id": "GS-22",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "6dbde5cd-caa3-42ed-9785-78fae364ca5f"
+        }
+      ]
+    },
+    {
+      "id": "GS-23",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "b1e3def6-2a3b-40df-9b16-f8639142199a"
+        }
+      ]
+    },
+    {
+      "id": "GS-24",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "0b014baf-1bd4-481f-9d4d-02402387019b"
+        }
+      ]
+    },
+    {
+      "id": "GS-25",
+      "grupo": "D-fondo",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "27e011aa-7061-4e27-872f-c1cd0f6f956c"
+        }
+      ]
+    },
+    {
+      "id": "GS-26",
+      "grupo": "D-fondo",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "84a21922-af50-4bf9-8131-53ca92b6d8aa"
+        },
+        {
+          "turno": 2,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "e2faa6c9-5a10-4044-8967-7652bafa9f9d"
+        }
+      ]
+    },
+    {
+      "id": "GS-27",
+      "grupo": "E-seguridad",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "3c30128b-3d7e-4972-b66a-53108c26d6f5"
+        }
+      ]
+    },
+    {
+      "id": "GS-28",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "e12cf78f-eda1-4c1a-87b1-167a68b92e6e"
+        }
+      ]
+    },
+    {
+      "id": "GS-29",
+      "grupo": "E-seguridad",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "a94b15b1-b658-4734-a7d4-07fbfd0d10f1"
+        }
+      ]
+    },
+    {
+      "id": "GS-30",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "9c3bc80a-9a6c-4494-a12d-d5faeaa4f631"
+        }
+      ]
+    },
+    {
+      "id": "GS-31",
+      "grupo": "F-conversacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "365aa70d-3648-497e-9881-393292106a72"
+        }
+      ]
+    },
+    {
+      "id": "GS-32",
+      "grupo": "F-conversacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "8a7a024e-2453-4678-8109-1b78ba617fec"
+        },
+        {
+          "turno": 2,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "343ba90d-9064-4ce4-aba3-16f2e73f43c6"
+        }
+      ]
+    },
+    {
+      "id": "GS-33",
+      "grupo": "F-conversacion",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "7d167fb2-687c-462f-8bc5-5ae1c1e5e1f5"
+        }
+      ]
+    },
+    {
+      "id": "GS-34",
+      "grupo": "C-regla",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "df76975e-84ab-4d39-8375-befac457c88d"
+        }
+      ]
+    },
+    {
+      "id": "R-01",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "6b34fa0c-bd74-4e0c-9e0a-6addc099e8c5"
+        }
+      ]
+    },
+    {
+      "id": "R-02",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "29f47e13-0f1f-4ce5-94fe-422d642921fa"
+        }
+      ]
+    },
+    {
+      "id": "R-03",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "88fd9d00-bde1-4b85-a2e6-8e278c663413"
+        }
+      ]
+    },
+    {
+      "id": "R-04",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "5ea9341d-f00f-455c-a8ce-56769a4ef5b7"
+        }
+      ]
+    },
+    {
+      "id": "R-05",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo consulta_politica todavía no implementado.",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "56ab0eae-c1c7-4070-8464-a74fb75b6498"
+        }
+      ]
+    },
+    {
+      "id": "R-06",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "15a455c1-0dda-44c2-a9c4-d1e4345b057d"
+        }
+      ]
+    },
+    {
+      "id": "R-07",
+      "grupo": "R-router",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "923c52a5-c790-4d73-a7c3-54a4aaefc842"
+        }
+      ]
+    },
+    {
+      "id": "R-08",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "2e0d998f-54f9-44e9-a9e3-4b2aee177909"
+        }
+      ]
+    },
+    {
+      "id": "R-09",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "05e3b737-f816-4676-a146-4f45149c71a4"
+        }
+      ]
+    },
+    {
+      "id": "R-10",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "af38e5ec-c964-4ef0-b239-2cb53c765ea7"
+        }
+      ]
+    },
+    {
+      "id": "R-11",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "dadf96bb-ec7a-4959-9a2a-6d2d1b9e6f3f"
+        }
+      ]
+    },
+    {
+      "id": "R-12",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "2d5be80b-645a-4bd5-bec0-a93d2fa5c726"
+        }
+      ]
+    },
+    {
+      "id": "R-13",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "58685129-1131-49c5-9cea-f74b45236425"
+        }
+      ]
+    },
+    {
+      "id": "R-14",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "e0366441-f378-4d50-b413-f89c4b8e6277"
+        }
+      ]
+    },
+    {
+      "id": "R-15",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "845e4f0b-4676-426b-aba4-0529f56aa825"
+        }
+      ]
+    },
+    {
+      "id": "X-01",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "f4603c12-0432-4bce-adf4-7c49390c6942"
+        }
+      ]
+    },
+    {
+      "id": "X-02",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "0481e2eb-228f-46e8-b2f6-dd6f3ec7f150"
+        }
+      ]
+    },
+    {
+      "id": "X-03",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "f7459d12-d80b-4ae9-974c-af0684d50512"
+        }
+      ]
+    },
+    {
+      "id": "X-04",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "51bc6f2f-cf2f-4bd2-8f92-9365f5ce9ac8"
+        }
+      ]
+    },
+    {
+      "id": "V-01",
+      "grupo": "V-verificacion",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "afd675b6-f741-4114-9eba-28f001bb66f6"
+        }
+      ]
+    },
+    {
+      "id": "V-02",
+      "grupo": "V-verificacion",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "9b313c40-476e-4c4c-8181-9350bc09b69a"
+        }
+      ]
+    },
+    {
+      "id": "V-03",
+      "grupo": "V-verificacion",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "71fc9e2c-fde5-48d7-8e0f-46ec947a09c4"
+        }
+      ]
+    },
+    {
+      "id": "V-04",
+      "grupo": "V-verificacion",
+      "resultado": "pendiente",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "pendiente",
+          "detalle": "Flujo revisar_gasto todavía no implementado.",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "error",
+          "id_ejecucion": "4e8a5316-e1f4-43ef-bb02-6d9240f03a3f"
+        }
+      ]
+    }
+  ]
+}

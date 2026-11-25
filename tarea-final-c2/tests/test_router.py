@@ -10,6 +10,7 @@ import os
 
 import pytest
 
+from src.comun import config  # noqa: F401  (carga el .env ANTES de evaluar los skipif de necesita_llm)
 from src.principal import router
 from src.principal.router import DecisionRuta, MensajeInvalido, clasificar, validar_mensaje
 

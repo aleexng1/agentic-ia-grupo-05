@@ -80,3 +80,62 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
 21. **Evidencia `00-canal-sin-gemini`**: es una corrida real (dos servicios, log de ambos lados),
     pero sin Gemini el verificador no puede leer; se deja marcada como evidencia del canal y de la
     salida segura, no del 0,5. La de las 4 boletas queda pendiente, con su script.
+
+## Etapa 3: golden set v1.0 y evaluador
+
+22. **Los 34 casos de c1 se conservan completos** (con todos sus campos esperados) y se les suma la
+    `ruta` esperada: con gasto → `revisar_gasto`; GS-28, 30, 31 y 32 → `fuera_de_alcance`;
+    GS-33 → `consulta_politica`. GS-30 («borra el registro») queda fuera de alcance: el router lo
+    corta antes de cualquier herramienta. GS-32 (memoria del nombre) se evalúa solo por ruta; la
+    memoria en C2 es de Sebastián (`ampliacion-memoria`).
+23. **Se evalúan solo ruta y decisión**, como pide la etapa. Los demás campos de c1 (política,
+    cuenta, reglas, herramientas) quedan en el set como información para una versión 1.1.
+24. **Cuatro resultados por turno:** acierto, fallo, **pendiente** (ruta correcta pero el flujo de
+    otra persona aún no existe) y **error** (no se pudo ejecutar: proveedor, red o clave). El % es
+    aciertos / (aciertos + fallos): ni los pendientes ni los errores suman o restan.
+25. **Sin `GOOGLE_API_KEY` el evaluador no escribe informe:** un informe lleno de errores no es
+    evidencia. `--validar` revisa el formato sin Gemini.
+26. **La decisión esperada de los casos V se calculó con `validar_gasto`** (los 4 gastos cumplen la
+    política) más el piso por verificación: V-01 aprobar; V-02, V-03 y V-04 observar.
+27. **Los casos R del set son los mismos de `tests/test_router.py`**, y un test lo comprueba para que
+    no se desincronicen.
+28. **Primera corrida del evaluador con Gemini (2026-11-24):** se corrió en proceso, con el
+    verificador levantado (`evidencias/ampliacion-evaluacion/informe-20261124T213858.md`). El router
+    acertó las 59 rutas (59/59). Hubo 17/17 aciertos en los casos que ya se pueden evaluar y 40
+    pendientes, porque `revisar_caso` y `responder_consulta` todavía no están en `main`. Se deja
+    como evidencia de que el set y el evaluador funcionan, pero la corrida para la nota es la que
+    se haga con #95 y el flujo de Eduardo ya unidos. Aviso: `langchain-google-genai` advierte que
+    `gemini-3.5-flash-lite` *ignora* `temperature=0` (usa sus valores fijos). Por eso los
+    resultados pueden variar un poco entre corridas, y el umbral del router es 13/15, no 15/15.
+29. **Arreglo en `tests/test_router.py`:** ahora importa `src.comun.config` (que carga el `.env`)
+    antes de su `skipif`. `test_evaluacion.py` importa `test_router` durante la recolección, antes
+    que cualquier otro módulo cargue el `.env`. Por eso, en esta rama, el test del router con
+    Gemini se saltaba («falta GOOGLE_API_KEY») aunque la clave estuviera en el `.env`.
+
+## Pendientes que dependen de otros (al 2026-11-24)
+
+- **Matías:** el ReAct registra su veredicto (`registro_veredictos`) antes de que el grafo aplique
+  el piso por verificación. Si la boleta no cuadra, `/chat` responde «observar», pero el registro
+  queda en «aprobar». Propuesta: que `revisar_caso` reciba el resultado del verificador y aplique
+  el piso antes de registrar (o que el grafo vuelva a registrar). Comprobado con una prueba de
+  integración local (grafo + ReAct real con LLM guionado + A2A real), que no se subió.
+- **Matías:** cuando se una #95, cambiar `proteger_app` por `proteger_con_token_a2a` en
+  `src/verificador/app.py` (el cliente ya manda el Bearer).
+- **Eduardo:** `responder_consulta`. Mientras no exista, `consulta_politica` termina en «Flujo
+  consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
+- **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
+  `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1). **Choque con #94:** su tabla
+  tiene `CHECK (ruta IN (consulta_politica, revisar_gasto, fuera_de_alcance))`, así que esa fila se
+  rechaza (queda solo el log de error). Comprobado con un Postgres local de prueba. Hay que elegir
+  una salida: agregar `sin_ruta` al CHECK (propuesta) o que yo no guarde esas filas.
+- **Matías + Sebastián:** con #94, `registrar_veredicto` exige `DATABASE_URL`. Sin ella, todo
+  `revisar_gasto` que llega a un veredicto falla con 502 («Falta DATABASE_URL»). En local hay que
+  tener un Postgres para correr el flujo completo y el evaluador.
+- **Matías:** `revisar_caso` devuelve `estado_final = "ok"` con `veredicto = None` cuando el
+  modelo cierra sin `emitir_veredicto`. En la corrida integrada pasó con V-04 (boleta ilegible).
+  §8 dice que «ok» es la parada por veredicto válido.
+- **Contrato §3 (después de unir):** la fila de `delegar_verificador` todavía dice «esqueleto». No
+  la cambio en mi PR porque la fila de al lado la cambió #95 y habría conflicto.
+- **Alex:** las evidencias con Gemini y `pytest -m necesita_llm` ya están hechas (2026-11-24).
+  Falta volver a capturar `dos-recorridos/01` y volver a correr el evaluador cuando estén unidos
+  #95 (Matías) y el flujo de Eduardo.
