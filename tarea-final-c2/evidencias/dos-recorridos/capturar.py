@@ -42,6 +42,16 @@ CASOS = [
 ]
 
 
+def esperar_registro(url: str, clave: str, id_ejecucion: str, tope: float = 150.0) -> dict:
+    """/chat es asíncrono (202): consulta GET /registro/{id} hasta que deje de estar en proceso."""
+    fin = time.monotonic() + tope
+    while True:
+        datos = httpx.get(f"{url}/registro/{id_ejecucion}", headers={"X-API-Key": clave}, timeout=30).json()
+        if datos.get("estado") != "en_proceso" or time.monotonic() > fin:
+            return datos
+        time.sleep(1)
+
+
 def lineas_del_log(ruta_log: str | None, id_ejecucion: str) -> list[str]:
     if not ruta_log or not id_ejecucion:
         return []
@@ -78,7 +88,14 @@ def main() -> int:
             datos = respuesta.json()
         except ValueError:
             datos = {"texto_crudo": respuesta.text}
-        id_ejecucion = datos.get("id_ejecucion", "")
+        aceptado = None
+        exito = respuesta.status_code == 200
+        if respuesta.status_code == 202:  # /chat asíncrono: el resultado se lee en GET /registro/{id}
+            aceptado = datos
+            final = esperar_registro(opciones.url, clave, aceptado["id_ejecucion"])
+            datos = final.get("resultado") or {"estado": final.get("estado"), "detail": final.get("detail")}
+            exito = bool(final.get("resultado"))
+        id_ejecucion = (aceptado or datos).get("id_ejecucion", "")
         if not id_ejecucion and isinstance(datos.get("detail"), str):
             # En un 502 el id viene al final del mensaje: «… (id_ejecucion: <uuid>)».
             encontrado = re.search(r"id_ejecucion: ([0-9a-f-]{36})", datos["detail"])
@@ -100,12 +117,18 @@ def main() -> int:
             f"  -d '{json.dumps(cuerpo, ensure_ascii=False)}'",
             "```",
             "",
+            *(
+                [f"Respuesta inmediata (HTTP 202, `/chat` asíncrono):", "```json",
+                 json.dumps(aceptado, ensure_ascii=False, indent=2), "```", ""]
+                if aceptado else []
+            ),
             "## Ejecución observada (log del servidor con este id_ejecucion)",
             "```text",
             *(log or ["(no se pasó --log o no hubo líneas con este id)"]),
             "```",
             "",
-            f"## Resultado (HTTP {respuesta.status_code})",
+            (f"## Resultado (`GET /registro/{id_ejecucion}` al terminar → `resultado`)" if aceptado
+             else f"## Resultado (HTTP {respuesta.status_code})"),
             "```json",
             ocultar_secretos(json.dumps(datos, ensure_ascii=False, indent=2)),
             "```",
@@ -114,8 +137,8 @@ def main() -> int:
                 [
                     f"## Registro (`GET /registro/{id_ejecucion}` con `X-API-Key: ***` → HTTP {registro_http.status_code})",
                     "```json",
-                    ocultar_secretos(registro_http.text if registro_http.status_code != 200
-                                     else json.dumps(registro_http.json(), ensure_ascii=False, indent=2)),
+                    ocultar_secretos(registro_http.text if registro_http.status_code != 200 else json.dumps(
+                        {k: v for k, v in registro_http.json().items() if k != "resultado"}, ensure_ascii=False, indent=2)),
                     "```",
                     "",
                 ]
@@ -125,8 +148,8 @@ def main() -> int:
             (
                 f"Ruta obtenida: `{datos.get('ruta')}` · estado_final: `{datos.get('estado_final')}`"
                 f" · {'coincide' if datos.get('ruta') == esperada else 'NO coincide'} con la esperada."
-                if respuesta.status_code == 200
-                else f"La ejecución falló (HTTP {respuesta.status_code}) con un mensaje claro y sin datos inventados;"
+                if exito
+                else f"La ejecución falló (estado `{datos.get('estado') or respuesta.status_code}`) con un mensaje claro y sin datos inventados;"
                 " la ruta que eligió el router y su `estado_final` quedan en el log de arriba y en `ejecuciones`."
             ),
             "",

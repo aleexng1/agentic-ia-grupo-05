@@ -78,11 +78,13 @@ def _modelos() -> list[tuple[str, object]]:
     from langchain_google_genai import ChatGoogleGenerativeAI
 
     from src.comun.modelos import TEMPERATURA, obtener_llm
+    from src.comun.razonamiento import con_nivel_razonamiento
 
-    modelos = [("principal", obtener_llm())]
+    # Clasificar no necesita razonar: NIVEL_RAZONAMIENTO ("minimal" por defecto) en los dos modelos.
+    modelos = [("principal", con_nivel_razonamiento(obtener_llm()))]
     respaldo = os.getenv("MODELO_RESPALDO", "").strip()
     if respaldo:
-        modelos.append(("respaldo", ChatGoogleGenerativeAI(model=respaldo, temperature=TEMPERATURA)))
+        modelos.append(("respaldo", con_nivel_razonamiento(ChatGoogleGenerativeAI(model=respaldo, temperature=TEMPERATURA))))
     return modelos
 
 

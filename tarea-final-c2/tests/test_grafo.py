@@ -260,15 +260,15 @@ def test_chat_falla_del_router_responde_502_con_id(cliente, monkeypatch, filas):
         raise RuntimeError("503 UNAVAILABLE")
 
     monkeypatch.setattr(router, "clasificar", falla)
-    respuesta = cliente.post("/chat", json={"texto": "hola"}, headers=CABECERAS)
+    respuesta = cliente.post("/chat?esperar=true", json={"texto": "hola"}, headers=CABECERAS)
     assert respuesta.status_code == 502 and "id_ejecucion:" in respuesta.json()["detail"]
     assert filas[0]["ruta"] == "sin_ruta" and filas[0]["estado_final"] == "error"
 
 
 def test_chat_sin_thread_id_crea_uno(cliente, ruta_fija, filas):
     ruta_fija("fuera_de_alcance")
-    datos = cliente.post("/chat", json={"texto": "hola"}, headers=CABECERAS).json()
-    assert datos["thread_id"] and datos["id_ejecucion"]
+    datos = cliente.post("/chat?esperar=true", json={"texto": "hola"}, headers=CABECERAS).json()
+    assert datos["thread_id"] and datos["id_ejecucion"] and datos["ruta"] == "fuera_de_alcance"
 
 
 def test_boleta_que_no_cuadra_chat_y_registro_dicen_observar(ruta_fija, filas, monkeypatch, revisar_gasto):  # noqa: F811

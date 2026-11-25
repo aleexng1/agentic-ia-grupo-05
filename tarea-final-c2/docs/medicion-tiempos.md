@@ -121,6 +121,47 @@ Reglas para todo `/chat`:
 **Margen:** con el presupuesto típico (~16–22 s) quedan 8–14 s bajo los 30 s. Con el tope de 25 s
 quedan 5 s para la red de Heroku y el arranque en frío del dyno.
 
+## Actualización 2026-11-25 (tarde): razonamiento de Gemini y `/chat` asíncrono
+
+**Decisión: `/chat` pasa a asíncrono.** `POST /chat` responde 202 con el `id_ejecucion`, y el
+resultado se consulta en `GET /registro/{id}`. Así ninguna solicitud HTTP pasa de los 30 s de
+Heroku, aunque la revisión tarde más. El tope global es `TIEMPO_MAX_EJECUCION_SEG=90`: si se pasa,
+la ejecución queda en «error» sin resultado. Detalle en `docs/contratos.md` §11.1 bis.
+
+**Razonamiento interno («thinking») del router y del verificador** (12 llamadas a Gemini):
+
+| Modelo | Nivel | Tiempo de una clasificación | Tokens de razonamiento |
+|---|---|---|---|
+| `gemini-3.5-flash-lite` (principal) | predeterminado (`minimal`) | 1,1 s | **0** |
+| `gemini-3.5-flash-lite` | `minimal` explícito | 4,6 s | **0** |
+| `gemini-3.5-flash` (respaldo) | predeterminado (`medium`) | — | 503: el modelo estaba saturado |
+| `gemini-3.5-flash` | `minimal` | — | 503 |
+
+- **El modelo principal no razona:** usa 0 tokens de razonamiento con su valor por defecto. Los
+  modelos Gemini 3 no permiten apagarlo del todo; `minimal` es el nivel más bajo.
+- **La lentitud del router no viene del razonamiento.** El mismo mensaje tardó 1,1 s y 4,6 s en dos
+  llamadas seguidas. La diferencia es latencia del proveedor.
+- **El respaldo (`gemini-3.5-flash`) sí razona por defecto** (nivel `medium`). Por eso ahora el
+  router y el verificador fijan `NIVEL_RAZONAMIENTO=minimal` en los dos modelos
+  (`src/comun/razonamiento.py`). Su efecto en el respaldo no se pudo medir, porque respondió 503.
+
+**Tiempos nuevos** (con `NIVEL_RAZONAMIENTO=minimal`, local):
+
+| Medición | Antes (mediana / máx) | Ahora (3 corridas) |
+|---|---|---|
+| `fuera_de_alcance` completo (= router) | 5,4 / 11,8 s | 6,2 · 4,8 · **28,5** s |
+| Router solo, con el log de reintentos del SDK visible | — | 7,2 · 6,3 s, **sin reintentos** |
+| A2A (lectura de la boleta) | 5,5 / 10,8 s | 3,5 · 2,2 · **16,7** s (las 3 con el `cuadra` esperado) |
+| `POST /chat` (asíncrono) | — | responde 202 al instante; el resultado del poema estuvo listo en 2,3 s |
+
+**Lectura:** el razonamiento no era el problema. El problema es la **variación del proveedor**:
+una misma llamada corta va de 1 a 28 s. En esos minutos el respaldo respondía 503. En las 2
+llamadas con el log visible no hubo reintentos. Que los dos casos de 17 y 28 s incluyeran
+reintentos silenciosos del SDK ante un 503 es plausible (1+2+4+8 s de espera), pero no quedó
+comprobado. Con `/chat` asíncrono, esa variación ya no rompe la solicitud HTTP, pero sigue
+haciendo falta un **tiempo límite por llamada** y **menos intentos**: sin eso, una sola llamada
+colgada consume el tope de 90 s. Ese cambio es de Sebastián, en `obtener_llm`.
+
 ## Cómo repetir la medición
 
 1. Levantar el Postgres temporal y el verificador como en el README.

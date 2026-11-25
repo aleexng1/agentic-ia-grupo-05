@@ -391,15 +391,42 @@ def _ruta_alcanzada(grafo, configuracion) -> str | None:
     return ruta if ruta in router.RUTAS else None
 
 
-def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gasto: dict | None = None, grafo=None) -> dict:
+TIEMPO_MAX_POR_DEFECTO = 90.0
+
+
+def tiempo_max_ejecucion_seg() -> float:
+    """Tope global de una ejecución de /chat (TIEMPO_MAX_EJECUCION_SEG, 90 s por defecto)."""
+    valor = os.getenv("TIEMPO_MAX_EJECUCION_SEG", "").strip()
+    if not valor:
+        return TIEMPO_MAX_POR_DEFECTO
+    try:
+        segundos = float(valor)
+    except ValueError:
+        raise ValueError(f"TIEMPO_MAX_EJECUCION_SEG debe ser un número de segundos; vale «{valor}».") from None
+    if segundos <= 0:
+        raise ValueError(f"TIEMPO_MAX_EJECUCION_SEG debe ser mayor que 0; vale «{valor}».")
+    return segundos
+
+
+def mensaje_tope(segundos: float) -> str:
+    """Mensaje para una ejecución que superó TIEMPO_MAX_EJECUCION_SEG (nunca trae un resultado)."""
+    return (f"La ejecución superó el tiempo máximo de {segundos:g} s y se dio por terminada sin resultado. "
+            "Vuelve a intentarlo; si se repite, avisa con este id_ejecucion.")
+
+
+def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gasto: dict | None = None, grafo=None,
+             *, id_ejecucion: str | None = None, limite: float | None = None) -> dict:
     """Corre un turno completo (síncrono) y devuelve la respuesta de /chat (docs/contratos.md §2).
 
     Lanza router.MensajeInvalido si el texto no sirve (sin llamar al modelo) y ErrorDeEjecucion
     si el turno falla sin salida (por ejemplo, el proveedor del router no responde).
+    - `id_ejecucion`: el modo asíncrono de /chat lo crea antes, para devolverlo en el 202.
+    - `limite`: instante (time.monotonic) del tope global. Si el turno termina después, no se
+      entrega su resultado: la ejecución queda en "error" con un mensaje claro (y así se registra).
     """
     texto = router.validar_mensaje(texto)
     thread_id = (thread_id or "").strip() or str(uuid4())
-    id_ejecucion = str(uuid4())
+    id_ejecucion = id_ejecucion or str(uuid4())
     fecha = datetime.now(timezone.utc)
     inicio = time.monotonic()
     entrada: EstadoPrincipal = {
@@ -450,6 +477,13 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         estado.get("estado_final"), "fallback" if estado.get("modelo_router") == "respaldo" else "ok"
     )
     estado = {**estado, "estado_final": estado_final}
+    if limite is not None and time.monotonic() > limite:
+        # Terminó después del tope: su resultado ya no se entrega (quien consultó vio "error").
+        segundos = round(time.monotonic() - inicio, 1)
+        _REGISTRO.error("ejecución %s · terminó en %s s, después del tiempo máximo: queda como error", id_ejecucion, segundos)
+        estado = {**estado, "estado_final": "error", "respuesta": mensaje_tope(tiempo_max_ejecucion_seg()),
+                  "veredicto": None, "verificacion": None}
+        estado_final = "error"
     _registrar_ejecucion(fila(estado))
     respuesta = {
         "id_ejecucion": id_ejecucion,
@@ -468,6 +502,20 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         respuesta["verificacion"] = estado["verificacion"]
     _REGISTRO.info("chat · %s · «%s» → %s", id_ejecucion, recortar(texto), estado["ruta"])
     return respuesta
+
+
+def registrar_vencida(id_ejecucion: str, thread_id: str, fecha: datetime, duracion_ms: int) -> None:
+    """Registra como "error" una ejecución que superó el tope global y sigue corriendo.
+
+    La fila se escribe en el momento del tope (aunque el modelo siga colgado). Si el turno termina
+    después, su propio registro se ignora: `ejecuciones` no duplica un id_ejecucion.
+    """
+    ruta = _ruta_alcanzada(obtener_grafo(), {"configurable": {"thread_id": thread_id}})
+    _REGISTRO.error("ejecución %s · ruta=%s · superó el tiempo máximo: queda como error", id_ejecucion, ruta or "sin_ruta")
+    _registrar_ejecucion({
+        "id_ejecucion": id_ejecucion, "fecha": fecha, "ruta": ruta or "sin_ruta", "pasos": 0,
+        "herramientas_usadas": [], "hubo_a2a": False, "estado_final": "error", "duracion_ms": duracion_ms,
+    })
 
 
 async def responder(thread_id: str | None, texto: str, imagen: dict | None = None, gasto: dict | None = None) -> dict:

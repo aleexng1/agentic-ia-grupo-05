@@ -141,14 +141,15 @@ Las pruebas de persistencia **borran y recrean tablas**: usa una base de prueba,
 Endpoints del principal:
 - `GET /health` (público).
 - `GET /` (chat web, público; la clave se ingresa en la página).
-- `POST /chat`.
-- `GET /registro/{id_ejecucion}`.
+- `POST /chat` (asíncrono: responde 202; ver abajo).
+- `GET /registro/{id_ejecucion}` (estado y resultado).
 
 Despliegue previsto: dos apps de Heroku con el mismo `Procfile`
 (`web: uvicorn $APP_MODULE --host 0.0.0.0 --port $PORT`). Usan `APP_MODULE=api.app:app` y
 `APP_MODULE=src.verificador.app:app`, y el buildpack de monorepo con `APP_BASE=tarea-final-c2`.
-**PENDIENTE (Sebastián):** la URL, las Config Vars y la evidencia. **Ojo:** hoy `revisar_gasto`
-tarda 31–52 s y Heroku corta a los 30 s; ver [docs/medicion-tiempos.md](docs/medicion-tiempos.md).
+**PENDIENTE (Sebastián):** la URL, las Config Vars y la evidencia. Como `revisar_gasto` tarda
+31–52 s y Heroku corta a los 30 s, `/chat` es asíncrono (ver abajo y
+[docs/medicion-tiempos.md](docs/medicion-tiempos.md)).
 
 ### Autenticación
 
@@ -161,28 +162,54 @@ tarda 31–52 s y Heroku corta a los 30 s; ver [docs/medicion-tiempos.md](docs/m
   manda al verificador.
 - **Las credenciales se entregan aparte**, nunca en el repositorio.
 
+### `/chat` es asíncrono
+
+Heroku corta las solicitudes a los 30 s y una revisión de gasto tarda más
+([docs/medicion-tiempos.md](docs/medicion-tiempos.md)). Por eso `POST /chat` responde de
+inmediato **202** con un `id_ejecucion`, y el resultado se consulta en `GET /registro/{id}` hasta
+que `estado` deje de ser `en_proceso`.
+
 ```bash
 export API_KEY_SERVICIO='<tu clave>'      # en la terminal, no en un archivo que se suba
-curl -s -X POST http://127.0.0.1:8000/chat \
+URL=http://127.0.0.1:8000                 # o la URL de Heroku
+
+# 1) Enviar el mensaje → 202 {"id_ejecucion", "estado": "en_proceso", "consultar", "thread_id"}
+ID=$(curl -s -X POST "$URL/chat" \
   -H 'Content-Type: application/json' -H "X-API-Key: $API_KEY_SERVICIO" \
-  -d '{"thread_id": "demo-1", "texto": "Escríbeme un poema sobre el lago Llanquihue."}'
+  -d '{"thread_id": "demo-1", "texto": "Escríbeme un poema sobre el lago Llanquihue."}' \
+  | python -c 'import json,sys; print(json.load(sys.stdin)["id_ejecucion"])')
+
+# 2) Consultar hasta que termine (estado: ok / bloqueado / fallback / error)
+while true; do
+  R=$(curl -s "$URL/registro/$ID" -H "X-API-Key: $API_KEY_SERVICIO")
+  echo "$R" | python -c 'import json,sys; d=json.load(sys.stdin); print(d["estado"])' | grep -qv en_proceso && break
+  sleep 2
+done
+echo "$R" | python -m json.tool
 ```
 
-Respuesta (abreviada):
+Respuesta final (abreviada): la fila de `ejecuciones` más el estado y el `resultado` completo.
 
 ```json
-{"id_ejecucion": "…", "thread_id": "demo-1", "ruta": "fuera_de_alcance", "motivo": "…",
- "respuesta": "Soy el revisor de rendiciones…", "estado_final": "ok", "hubo_a2a": false,
- "herramientas_usadas": [], "pasos": 0}
+{"id_ejecucion": "…", "ruta": "fuera_de_alcance", "estado_final": "ok", "duracion_ms": 4810, "…": "…",
+ "estado": "ok", "segundos": 4.8,
+ "resultado": {"id_ejecucion": "…", "thread_id": "demo-1", "ruta": "fuera_de_alcance",
+               "respuesta": "Soy el revisor de rendiciones…", "estado_final": "ok", "pasos": 0, "…": "…"}}
 ```
 
-Ver cómo quedó registrada:
+- Si algo falla, `estado = "error"` y `detail` trae un mensaje claro que termina con
+  `(id_ejecucion: …)`. Nunca hay un resultado inventado.
+- **Tope global:** si la ejecución pasa de `TIEMPO_MAX_EJECUCION_SEG` (90 s), queda en `error` sin
+  resultado.
+- **Modo síncrono** (como antes, para uso local, pruebas o el evaluador): `POST "$URL/chat?esperar=true"`
+  responde `200` con la respuesta completa. En Heroku no sirve para `revisar_gasto` (corte a los 30 s).
+- **Límite:** el estado y la respuesta completa se guardan en la memoria del proceso. Tras un
+  reinicio, `GET /registro/{id}` devuelve solo la fila de Postgres (`resultado: null`).
+  **PENDIENTE (Sebastián):** guardarlos en Postgres.
+- **PENDIENTE (Eduardo):** que el chat web consulte `/registro/{id}` hasta que termine. Hoy espera la
+  respuesta completa en el `POST`.
 
-```bash
-curl -s http://127.0.0.1:8000/registro/<id_ejecucion> -H "X-API-Key: $API_KEY_SERVICIO"
-```
-
-Revisar un gasto con su boleta (la imagen va en base64):
+Revisar un gasto con su boleta (la imagen va en base64; aquí en modo síncrono, en local):
 
 ```bash
 python - <<'EOF'
@@ -192,7 +219,7 @@ turno = next(c for c in casos if c["id"] == "V-02")["turnos"][0]
 cuerpo = {"thread_id": "demo-boleta", "texto": turno["mensaje"], "gasto": turno["gasto"],
           "imagen": {"mime_type": "image/png",
                      "datos_base64": base64.b64encode(open(turno["imagen"], "rb").read()).decode()}}
-pedido = urllib.request.Request("http://127.0.0.1:8000/chat", json.dumps(cuerpo).encode(),
+pedido = urllib.request.Request("http://127.0.0.1:8000/chat?esperar=true", json.dumps(cuerpo).encode(),
                                 {"Content-Type": "application/json", "X-API-Key": os.environ["API_KEY_SERVICIO"]})
 print(json.dumps(json.load(urllib.request.urlopen(pedido, timeout=120)), ensure_ascii=False, indent=2))
 EOF
@@ -235,6 +262,9 @@ git ignora; en Heroku van como Config Vars. **Nunca** se suben valores reales.
 | `TIMEOUT_A2A_SEG` | Segundos que el principal espera al verificador; si vence, «observar» + `fallback` | `20` (ver presupuesto en `docs/medicion-tiempos.md`) |
 | `FORZAR_FALLO_A2A` | `1` simula que el verificador falla (evidencia de fallo controlado) | `0` |
 | `MAX_PASOS_REACT` | Máximo de vueltas del ReAct por turno (condición de parada) | `10` |
+| `TIEMPO_MAX_EJECUCION_SEG` | Tope global de una ejecución de `/chat`; si se pasa, queda en `error` sin resultado | `90` |
+| `MAX_EJECUCIONES_SIMULTANEAS` | Ejecuciones de `/chat` a la vez en el proceso; las demás esperan su turno | `4` |
+| `NIVEL_RAZONAMIENTO` | Razonamiento interno de Gemini en el router y el verificador (`minimal`, `low`, `medium`, `high` o `predeterminado`) | `minimal` |
 | `DATABASE_URL` | Postgres: `ejecuciones`, `veredictos` y memoria. Heroku la crea sola | ver sección 2 |
 | `REDIS_URL` | Redis con el índice de la política (RAG) | *(secreta)* · **PENDIENTE (Eduardo)** |
 | `REDIS_PREFIJO` | Índice del grupo en Redis (no es secreto) | `grupo05_v15` |
