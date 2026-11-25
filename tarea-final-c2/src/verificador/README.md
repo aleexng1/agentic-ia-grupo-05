@@ -10,5 +10,6 @@ App FastAPI propia (`app.py`) con su ficha (`ficha.py`). Encargo y respuesta en
   muestran los valores declarados (salvo la categoría), así no puede copiarlos. Lo no leído va
   `null` y `cuadra = "no"`. La imagen no se guarda ni va al log (solo tipo, tamaño y hash).
   `src/comun/executor.py` ya lee FilePart + DataPart y responde DataPart (`responder_partes`).
-- **Falta:** cambiar `proteger_app` por `proteger_con_token_a2a` cuando se una el PR de Matías
-  (el cliente ya manda `Authorization: Bearer <TOKEN_A2A>`); correr las pruebas `necesita_llm`.
+- **Hecho:** `app.py` está protegido con `proteger_con_token_a2a` (exige `Authorization: Bearer
+  <TOKEN_A2A>` en los POST; `/health` y la ficha son públicos). Las pruebas `necesita_llm` corren con
+  las 4 boletas.

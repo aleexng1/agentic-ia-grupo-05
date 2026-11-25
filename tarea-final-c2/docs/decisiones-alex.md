@@ -135,6 +135,12 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     repite entero (hilo nuevo), porque un caso de 2 turnos a medias no es comparable. El informe dice
     cuántas corridas y qué modelos lo armaron, porque mezclar modelos entre corridas cambia la lectura
     del %. El «429» se busca como código aislado, para no confundirlo con un monto o un folio.
+35. **Canal A2A con `TOKEN_A2A` (`c2tf/alex-token-a2a`):** el verificador pasa a
+    `proteger_con_token_a2a`, y el cliente manda **solo** el Bearer: se retira la `X-API-Key` que
+    iba al verificador (decisión 18). Con el token activo, mandar la clave del servicio a otra app
+    solo agregaba exposición. Si el principal no tiene `TOKEN_A2A`, no llama al verificador
+    (`rechazado`, con un motivo claro), porque el encargo sería rechazado igual. En los tests se usa
+    un token falso, nunca el del `.env`.
 
 ## Pendientes que dependen de otros (al 2026-11-24)
 
@@ -143,8 +149,8 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
   queda en «aprobar». Propuesta: que `revisar_caso` reciba el resultado del verificador y aplique
   el piso antes de registrar (o que el grafo vuelva a registrar). Comprobado con una prueba de
   integración local (grafo + ReAct real con LLM guionado + A2A real), que no se subió.
-- **Matías:** cuando se una #95, cambiar `proteger_app` por `proteger_con_token_a2a` en
-  `src/verificador/app.py` (el cliente ya manda el Bearer).
+- ~~Cambiar `proteger_app` por `proteger_con_token_a2a` en `src/verificador/app.py`~~: hecho en
+  `c2tf/alex-token-a2a` (decisión 35).
 - **Eduardo:** `responder_consulta`. Mientras no exista, `consulta_politica` termina en «Flujo
   consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
 - **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con

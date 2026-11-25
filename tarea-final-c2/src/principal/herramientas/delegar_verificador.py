@@ -2,10 +2,10 @@
 
 Dueño: Alex (c2tf/alex-integracion). Encargo y respuesta en docs/contratos.md (§5 y §11.2).
 
-Usa src/comun/cliente_a2a.enviar_partes con URL_VERIFICADOR, TIMEOUT_A2A_SEG y las cabeceras
-del canal: X-API-Key (protección provisoria del verificador) y, si TOKEN_A2A tiene valor,
-Authorization: Bearer <TOKEN_A2A> (la definitiva, de Matías). Las cabeceras solo van a
-URL_VERIFICADOR.
+Usa src/comun/cliente_a2a.enviar_partes con URL_VERIFICADOR, TIMEOUT_A2A_SEG y la cabecera
+del canal: Authorization: Bearer <TOKEN_A2A> (el verificador usa proteger_con_token_a2a). La
+cabecera solo va a URL_VERIFICADOR; la clave del servicio (X-API-Key) no sale del principal.
+Si el principal no tiene TOKEN_A2A, no se llama al verificador: el encargo sería rechazado.
 
 Nunca devuelve datos inventados. Ante cualquier falla devuelve un error estructurado:
     {"disponible": False, "tipo_fallo": <TIPOS_FALLO>, "motivo": "frase clara"}
@@ -14,7 +14,6 @@ y el grafo deja el gasto en «observar» con estado_final = "fallback".
 
 import asyncio
 import base64
-import os
 
 import httpx
 
@@ -36,14 +35,9 @@ def fallo(tipo: str, motivo: str) -> dict:
 
 
 def _cabeceras() -> dict[str, str]:
-    cabeceras = {}
-    clave = seguridad.clave_configurada()
-    if clave:
-        cabeceras[seguridad.CABECERA] = clave
-    token = os.getenv("TOKEN_A2A", "").strip()
-    if token:
-        cabeceras["Authorization"] = f"Bearer {token}"
-    return cabeceras
+    """Cabecera del canal A2A (vacía si falta TOKEN_A2A). Nunca se registra en el log."""
+    token = seguridad.token_a2a_configurado()
+    return {seguridad.CABECERA_A2A: f"Bearer {token}"} if token else {}
 
 
 def _partes(datos: bytes, tipo: str, declarado: dict) -> list:
@@ -122,13 +116,16 @@ async def delegar_verificador(imagen: dict, declarado: dict) -> dict:
     if not datos:
         return fallo("encargo_invalido", "la imagen está vacía")
     declarado = {campo: (declarado or {}).get(campo) for campo in CAMPOS}
+    cabeceras = _cabeceras()
+    if not cabeceras:
+        return fallo("rechazado", "el principal no tiene TOKEN_A2A configurado: el verificador rechazaría el encargo")
 
     url = config.url_verificador()
     segundos = config.timeout_a2a_seg()
     _REGISTRO.info("a2a · encargo → %s · imagen %s %d bytes · tiempo límite %g s", url, tipo, len(datos), segundos)
     try:
         partes = await asyncio.wait_for(
-            enviar_partes(url, _partes(datos, tipo, declarado), cabeceras=_cabeceras(), tiempo_limite=segundos),
+            enviar_partes(url, _partes(datos, tipo, declarado), cabeceras=cabeceras, tiempo_limite=segundos),
             timeout=segundos,
         )
     except Exception as error:  # noqa: BLE001 (toda falla se clasifica, ninguna se convierte en datos)

@@ -1,6 +1,6 @@
 # A2A · boleta-04-ilegible.png (ilegible)
 
-Capturado el 2026-11-24T21:32:32-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 2608 ms.
+Capturado el 2026-11-25T19:22:27-03:00 · verificador en `http://127.0.0.1:8001` · tiempo límite 20 s · duración 4877 ms.
 
 ## Encargo (principal → verificador)
 Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (lo declarado):
@@ -44,7 +44,7 @@ Parte de archivo (la imagen; aquí solo tipo, tamaño y hash) + parte de datos (
     "categoria": "no"
   },
   "confianza": 0.0,
-  "observaciones": "La imagen no es legible: no se leyó ningún campo. El documento es una imagen borrosa de prueba y no permite leer ninguno de los datos principales con claridad."
+  "observaciones": "La imagen no es legible: no se leyó ningún campo. El documento es una imagen borrosa de prueba y no permite leer ningún dato legible."
 }
 ```
 
@@ -55,12 +55,12 @@ En el nodo `revisar_gasto` del grafo principal: el resultado se pasa al ReAct co
 
 ## Log del principal (este proceso)
 ```text
-2026-11-24 21:32:29 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 113655 bytes · tiempo límite 20 s
-2026-11-24 21:32:32 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=0.00 · no cuadra: monto,fecha,rut_emisor,folio,categoria
+2026-11-25 19:22:22 INFO    [tarea_final] a2a · encargo → http://127.0.0.1:8001 · imagen image/png 113655 bytes · tiempo límite 20 s
+2026-11-25 19:22:27 INFO    [tarea_final] a2a · respuesta ← verificador · confianza=0.00 · no cuadra: monto,fecha,rut_emisor,folio,categoria
 ```
 
 ## Log del verificador
 ```text
-2026-11-24 21:32:29 INFO    [tarea_final] verificador · encargo 1eadcf0f · imagen image/png 113655 bytes sha256:5866b893c43544cb · declarado monto=15990 fecha=2026-10-20 folio=000456
-2026-11-24 21:32:32 INFO    [tarea_final] verificador · respuesta 1eadcf0f · confianza=0.00 · no cuadra: monto,fecha,rut_emisor,folio,categoria
+2026-11-25 19:22:22 INFO    [tarea_final] verificador · encargo ec2211d9 · imagen image/png 113655 bytes sha256:5866b893c43544cb · declarado monto=15990 fecha=2026-10-20 folio=000456
+2026-11-25 19:22:27 INFO    [tarea_final] verificador · respuesta ec2211d9 · confianza=0.00 · no cuadra: monto,fecha,rut_emisor,folio,categoria
 ```

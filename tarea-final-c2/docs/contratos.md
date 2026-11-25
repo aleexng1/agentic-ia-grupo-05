@@ -154,8 +154,9 @@ n8n **no** reemplaza esta delegación ni la repite: la ampliación n8n A2A es un
   (`src/comun/seguridad.py`, copiado de taller-02-c2). Comparación con `secrets.compare_digest`;
   la clave nunca va a logs ni respuestas.
 - **Canal A2A**: `TOKEN_A2A` en `Authorization: Bearer` (`revisar_token_a2a`, hecho).
-  Para activarlo, el verificador cambia `proteger_app` por `proteger_con_token_a2a` y el cliente
-  manda la cabecera; las dos cosas en el mismo PR (si no, cada encargo recibe 401).
+  **Activo** (2026-11-25): el verificador usa `proteger_con_token_a2a` y `delegar_verificador` manda
+  el Bearer. Sin token, con un token incorrecto o sin «Bearer» → 401; si el verificador no tiene
+  `TOKEN_A2A` → 503. Las dos apps de Heroku necesitan el **mismo** `TOKEN_A2A`.
 - **Acciones permitidas**: `ACCIONES_PERMITIDAS` en `src/comun/seguridad.py` =
   `buscar_politica, validar_gasto, consultar_fondo, emitir_veredicto, delegar_verificador`.
   Cualquier otra (por ejemplo `modificar_registro`, del golden set de c1) se bloquea con
@@ -256,8 +257,10 @@ nuevos; no cambia ni borra nada de las secciones 1 a 10.
 ### 11.2 Delegación A2A al verificador (etapa 2)
 - Encargo: igual que §5. La parte de archivo es `Part(raw, media_type, filename)` y la de datos,
   `Part(data, media_type="application/json")`. Imagen ≤ 5 MB, `image/jpeg|png|webp`.
-- Cabeceras del canal: `X-API-Key` (protección provisoria del verificador) y, si `TOKEN_A2A` tiene
-  valor, `Authorization: Bearer <TOKEN_A2A>`. Solo se mandan a `URL_VERIFICADOR`.
+- Cabecera del canal: solo `Authorization: Bearer <TOKEN_A2A>`, y solo hacia `URL_VERIFICADOR`. La
+  clave del servicio (`X-API-Key`) ya no se manda al verificador (la protección provisoria se
+  retiró). Si el principal no tiene `TOKEN_A2A`, no llama al verificador y devuelve
+  `tipo_fallo = "rechazado"`. `GET /health` y la ficha siguen públicos.
 - `delegar_verificador` devuelve, si todo sale bien, `{"disponible": true, "leido", "cuadra",
   "confianza", "observaciones"}` (`disponible` es el agregado).
 - Si falla: `{"disponible": false, "tipo_fallo", "motivo"}` (`tipo_fallo` es el agregado), con
