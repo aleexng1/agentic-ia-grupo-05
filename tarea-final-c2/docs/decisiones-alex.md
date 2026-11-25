@@ -9,6 +9,11 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
    El router usa `obtener_llm()` y arma su propio respaldo con `MODELO_RESPALDO`, porque
    `with_structured_output` no se puede aplicar a un `RunnableWithFallbacks` (lo que devuelve
    `obtener_llm_con_respaldo`). Un intento por modelo, sin repetir indefinidamente.
+   *Corrida con Gemini (2026-11-24):* en el `.env` local, `MODELO_PRINCIPAL=gemini-3.5-flash-lite`
+   y `MODELO_RESPALDO=gemini-3.5-flash`, los dos tomados de la lista de modelos que devuelve la
+   API con la clave del grupo. El respaldo es otro modelo flash real y distinto, con su propia
+   cuota. El router acertó **15/15** en `CASOS_ROUTER`, en dos corridas seguidas (el umbral
+   es 13/15), así que no se ajustó el prompt.
 2. **Una falla del proveedor no se disfraza de `fuera_de_alcance`.** Solo una salida *no válida*
    del modelo cae en `fuera_de_alcance` (como pide el contrato); si Gemini no responde, la
    ejecución termina en `error` con 502 y su `id_ejecucion`.
