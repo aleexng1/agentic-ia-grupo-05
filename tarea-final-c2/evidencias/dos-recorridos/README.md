@@ -1,16 +1,18 @@
 # Evidencia: dos recorridos (router + worker, parte del 1,0)
 
-Dos solicitudes distintas activan flujos distintos del **mismo** agente principal.
+Solicitudes distintas activan flujos distintos del **mismo** agente principal. La pauta pide
+`consulta_politica` **y** `revisar_gasto` (01 y 03); `fuera_de_alcance` (02) es un tercer recorrido.
 
 | Archivo | Ruta esperada | Estado |
 |---|---|---|
 | `01-consulta-politica.md` | `consulta_politica` | capturado 2026-11-24 con Gemini (`gemini-3.5-flash-lite`). El router acierta; el flujo responde «todavía no implementado» hasta que se una el de Eduardo. **Volver a capturar** después de esa unión |
 | `02-fuera-de-alcance.md` | `fuera_de_alcance` | capturado 2026-11-24 con Gemini: `estado_final = ok` |
+| `03-revisar-gasto.md` | `revisar_gasto` | capturado 2026-11-24 con Gemini (gasto GS-01). El router acierta; el flujo responde «todavía no implementado» hasta que se una #95 (Matías). **Volver a capturar** después de esa unión |
 
 Cómo generarla (desde `tarea-final-c2/`, con `.env` completo):
 ```bash
 uvicorn api.app:app --port 8000 2>&1 | tee /tmp/principal.log        # terminal 1 (MOSTRAR_TRAZAS=0)
-python evidencias/dos-recorridos/capturar.py --url http://127.0.0.1:8000 --log /tmp/principal.log   # terminal 2
+python evidencias/dos-recorridos/capturar.py --url http://127.0.0.1:8000 --log /tmp/principal.log   # terminal 2 (--solo 03: uno solo)
 ```
 Cada `.md` trae la **entrada** (curl con la clave tapada), la **ejecución observada** (líneas del
 log con su `id_ejecucion`) y el **resultado** (JSON de `/chat`).
