@@ -19,7 +19,9 @@ tarjeta = crear_tarjeta(
             "Verificar boleta",
             "Recibe la imagen (FilePart) y los datos declarados (DataPart) y responde qué leyó, "
             "si cuadra cada campo y con qué confianza. Formato en docs/contratos.md.",
-            "Boleta adjunta; declarado: monto 45000, fecha 2026-10-02, folio 123456.",
+            "Boleta adjunta; declarado: monto 45000, fecha 2026-10-02, folio 000123.",
         )
     ],
+    modos_entrada=["image/png", "image/jpeg", "image/webp", "application/json"],
+    modos_salida=["application/json"],
 )

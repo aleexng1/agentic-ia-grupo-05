@@ -212,3 +212,65 @@ async def cerrar_clientes() -> None:
         if _CLIENTE_HTTP is not None and not _CLIENTE_HTTP.is_closed:
             await _CLIENTE_HTTP.aclose()
         _CLIENTE_HTTP = None
+
+
+async def enviar_partes(
+    url: str,
+    partes: list[Part],
+    *,
+    cabeceras: dict[str, str] | None = None,
+    tiempo_limite: float = TIEMPO_LIMITE,
+) -> list[Part]:
+    """Envía un mensaje con varias partes (archivo, datos, texto) y devuelve las partes de la respuesta.
+
+    A diferencia de obtener_cliente, crea un cliente propio para esta llamada (sin caché), con
+    su tiempo límite y sus cabeceras (clave o token del canal), y lo cierra al terminar. Así el
+    encargo no depende del bucle de eventos de otra llamada ni del TIEMPO_LIMITE fijo de 10 s.
+    El JSON-RPC se envía a `url` aunque la ficha publique otra dirección.
+    Lanza la excepción original si algo falla (quien llama la clasifica).
+    """
+    direccion = url.strip().rstrip("/")
+    async with httpx.AsyncClient(
+        timeout=tiempo_limite, headers=cabeceras or {}, verify=ssl.create_default_context()
+    ) as http:
+        tarjeta = await A2ACardResolver(httpx_client=http, base_url=direccion).get_agent_card(
+            http_kwargs={"timeout": tiempo_limite}
+        )
+        for interfaz in tarjeta.supported_interfaces:
+            interfaz.url = direccion
+        cliente = await create_client(
+            agent=tarjeta,
+            client_config=ClientConfig(
+                streaming=False,
+                polling=True,
+                httpx_client=http,
+                supported_protocol_bindings=["JSONRPC"],
+                accepted_output_modes=["application/json", "text/plain"],
+            ),
+        )
+        try:
+            mensaje = Message(
+                message_id=str(uuid4()), context_id=str(uuid4()), role=Role.ROLE_USER, parts=partes
+            )
+            respuesta = None
+            async for evento in cliente.send_message(
+                SendMessageRequest(message=mensaje), context=ClientCallContext(timeout=tiempo_limite)
+            ):
+                respuesta = evento
+            if respuesta is None:
+                raise RuntimeError("El agente A2A no devolvió ninguna respuesta.")
+            tipo = respuesta.WhichOneof("payload")
+            if tipo == "message":
+                return list(respuesta.message.parts)
+            if tipo == "task":
+                tarea = await _esperar_tarea(cliente, respuesta.task)
+                for artefacto in tarea.artifacts:
+                    if artefacto.parts:
+                        return list(artefacto.parts)
+                for anterior in reversed(tarea.history):
+                    if anterior.role == Role.ROLE_AGENT and anterior.parts:
+                        return list(anterior.parts)
+                raise RuntimeError("La tarea A2A terminó sin partes en la respuesta.")
+            raise RuntimeError("El agente A2A devolvió una respuesta no reconocida.")
+        finally:
+            await cliente.close()

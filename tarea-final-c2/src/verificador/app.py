@@ -8,7 +8,9 @@ En Heroku es una app aparte con APP_MODULE=src.verificador.app:app (ver docs/rep
 - POST /                             JSON-RPC A2A (protegido)
 
 Protección PROVISORIA: proteger_app (X-API-Key con API_KEY_SERVICIO). El contrato final es
-TOKEN_A2A (src/comun/seguridad.revisar_token_a2a, pendiente de Matías).
+TOKEN_A2A: cuando esté unido el PR de Matías (proteger_con_token_a2a en src/comun/seguridad.py),
+se cambia la última línea por `proteger_con_token_a2a(app)`. El cliente (delegar_verificador)
+ya manda las dos cabeceras: X-API-Key y, si TOKEN_A2A tiene valor, Authorization: Bearer.
 """
 
 from fastapi import FastAPI
@@ -16,7 +18,7 @@ from fastapi import FastAPI
 from src.comun.registro import configurar_registro
 from src.comun.seguridad import proteger_app
 from src.comun.servidor import registrar_agente
-from src.verificador.agente import responder
+from src.verificador.agente import responder, responder_partes
 from src.verificador.ficha import tarjeta
 
 configurar_registro()
@@ -29,5 +31,5 @@ async def health() -> dict[str, bool]:
     return {"ok": True}
 
 
-registrar_agente(app, tarjeta, responder)
+registrar_agente(app, tarjeta, responder, responder_partes=responder_partes)
 proteger_app(app)

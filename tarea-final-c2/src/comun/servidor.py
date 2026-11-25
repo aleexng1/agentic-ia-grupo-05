@@ -18,14 +18,14 @@ from a2a.types import AgentCard
 from src.comun.executor import Executor
 
 
-def registrar_agente(app: FastAPI, tarjeta: AgentCard, responder, prefijo: str = "") -> None:
+def registrar_agente(app: FastAPI, tarjeta: AgentCard, responder, prefijo: str = "", responder_partes=None) -> None:
     """Publica la ficha y el JSON-RPC A2A de un agente bajo el prefijo indicado.
 
     Se registran como rutas de la misma app (y no como sub-aplicación montada) para
     que el JSON-RPC responda en la dirección exacta de la ficha, sin redirecciones.
     """
     manejador = DefaultRequestHandler(
-        agent_executor=Executor(responder),
+        agent_executor=Executor(responder, responder_partes),
         task_store=InMemoryTaskStore(),
         agent_card=tarjeta,
     )
