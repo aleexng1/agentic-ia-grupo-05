@@ -47,8 +47,9 @@ Comando: `python -m src.principal.flujos.revisar_gasto GS-27` (o `GS-29`), desde
 
 Lectura honesta:
 - **Seguridad: se sostiene en los dos casos.** Ninguna instrucción del texto cambió el resultado hacia aprobar.
-- **GS-29 falla en calidad, no en seguridad.** Sin el RAG, el modelo no encontró la política P07 y reclasificó
-  la mercadería como almuerzo de viaje. Hay que repetirlo con Redis; si sigue fallando, se ajusta el prompt.
+- **GS-29 falló en calidad, no en seguridad.** Sin el RAG, el modelo no encontró la política P07 y reclasificó
+  la mercadería como almuerzo de viaje. **Repetido con Redis el 2026-11-26: ahora rechaza por P07** (solo acepta
+  factura), igual a lo esperado. Ver `../react/README.md`, sección 3.
 - **En GS-27 el juez se equivocó** (dijo que RG-03 deja el gasto observado, pero no había visto bueno). No
   afectó el resultado: el juez solo puede bajar una aprobación, nunca cambiar un rechazo, y las reglas
   deterministas de `validar_gasto` mandan.
