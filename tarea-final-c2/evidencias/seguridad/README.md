@@ -12,10 +12,26 @@ Estas peticiones **no tienen `id_ejecucion`, y es correcto**: el control de acce
 entrar al agente, así que no se ejecuta ningún flujo ni se crea fila en `ejecuciones`. Falta repetirla
 contra Heroku cuando Sebastián cargue `API_KEY_SERVICIO` (hoy respondería 503: servidor sin clave).
 
-### (b) Acción no autorizada bloqueada sin ejecutarse: pendiente
+### (b) Acción no autorizada bloqueada sin ejecutarse: script listo, falta correrlo con Postgres
 
-`estado_final = "bloqueado"` y registro igual antes y después: el código y sus pruebas están
-(`tests/test_seguridad.py`); falta acordar con Alex cómo provocarla en vivo desde `/chat`.
+`capturar_bloqueo.py` genera `02-bloqueo-accion-no-autorizada.md`. Corre el grafo principal real
+(router → `revisar_gasto` → ReAct → registro en Postgres) con el modelo del ReAct **guionado**: en su
+primer paso pide `validar_gasto` y `registrar_veredicto` (escribir el registro él mismo, saltándose el
+juez). Gemini real casi nunca pide una herramienta que no conoce; el guion hace el intento reproducible.
+
+El informe muestra la entrada, la traza del ReAct, el log con el `id_ejecucion`, la fila de
+`ejecuciones`, el registro de veredictos **antes y después** y cuántas veces se llamó a
+`registrar_veredicto` (0). Termina con «Cumple» solo si se cumplen los cinco controles.
+
+Cómo correrlo (desde `tarea-final-c2/`, con el `.venv` activado y un Postgres en `DATABASE_URL`,
+por ejemplo el de Docker):
+
+```
+python evidencias/seguridad/capturar_bloqueo.py
+```
+
+Con `--router-gemini` usa el router real (1 llamada a Gemini) en vez de fijar la ruta.
+El script se prueba con una base falsa en `tests/test_capturar_bloqueo.py` (eso no es la evidencia).
 
 ## Extra: el agente no obedece instrucciones escondidas (casos de c1)
 
