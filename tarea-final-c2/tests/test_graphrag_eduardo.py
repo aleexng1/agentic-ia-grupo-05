@@ -12,6 +12,7 @@ from src.conocimiento.grafo import cargar_grafo as carga
 from src.conocimiento.grafo import catalogo, conexion, consultar
 
 DESTINO_SIMULADO = "neo4j+s://neo4j.invalid:7687/neo4j"
+BASE_SIMULADA = "8a2b3c4d"
 CARGO_ID = "cargo:jefe-de-tienda"
 
 
@@ -20,7 +21,7 @@ def driver_simulado(monkeypatch):
     """No usa credenciales reales; el driver y sus contextos no salen a red."""
     fabrica = MagicMock(name="driver_simulado")
     monkeypatch.setattr(conexion.GraphDatabase, "driver", fabrica)
-    for variable in ("NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD"):
+    for variable in ("NEO4J_URI", "NEO4J_USER", "NEO4J_PASSWORD", "NEO4J_DATABASE"):
         monkeypatch.delenv(variable, raising=False)
     yield fabrica
 
@@ -33,6 +34,28 @@ def entorno_simulado(monkeypatch, driver_simulado):
     driver = driver_simulado.return_value.__enter__.return_value
     sesion = driver.session.return_value.__enter__.return_value
     return driver, sesion
+
+
+@pytest.mark.parametrize("base", [None, BASE_SIMULADA, "ensayo.g05-v2"])
+def test_configuracion_comparte_base_y_destino(entorno_simulado, monkeypatch, base):
+    if base is not None:
+        monkeypatch.setenv("NEO4J_DATABASE", base)
+    ajustes = conexion.configuracion()
+    assert ajustes.base == (base or "neo4j")
+    assert ajustes.destino == f"neo4j+s://neo4j.invalid:7687/{base or 'neo4j'}"
+
+
+@pytest.mark.parametrize("base", [
+    "", "  ", " neo4j", "neo4j\n", "ab", "a" * 64, "ensáyo", "_ensayo",
+    "-ensayo", "ensayo/base", "ensayo?base", "ensayo#base", "ensayo%2Fbase",
+])
+def test_base_invalida_se_rechaza_antes_del_driver(entorno_simulado, driver_simulado, monkeypatch, base):
+    monkeypatch.setenv("NEO4J_DATABASE", base)
+    with pytest.raises(ToolException, match="NEO4J_DATABASE"):
+        consultar.tope_para("Jefe de tienda", "P02:hotel")
+    with carga.confirmar_carga(DESTINO_SIMULADO), pytest.raises(conexion.ErrorGrafo, match="NEO4J_DATABASE"):
+        carga.cargar_grafo(str(catalogo.RUTA_CATALOGO))
+    driver_simulado.assert_not_called()
 
 
 @pytest.fixture
@@ -169,9 +192,12 @@ def lectura(entorno_simulado):
 
 
 @pytest.mark.parametrize("politica_id,monto", [("P02", 445000), ("P03", 325000)])
+@pytest.mark.parametrize("base", [None, BASE_SIMULADA])
 def test_tope_publico_y_recorrido_parametrizado(
-    lectura, driver_simulado, entorno_simulado, politica_id, monto,
+    lectura, driver_simulado, entorno_simulado, monkeypatch, politica_id, monto, base,
 ):
+    if base is not None:
+        monkeypatch.setenv("NEO4J_DATABASE", base)
     fila = _camino(politica_id, monto)
     categoria_id = fila["categoria_id"]
     candidato = [{"cargo_id": CARGO_ID, "categoria_id": categoria_id}]
@@ -197,7 +223,7 @@ def test_tope_publico_y_recorrido_parametrizado(
     )
     lectura.commit.assert_not_called()
     driver, sesion = entorno_simulado
-    driver.session.assert_called_with(database="neo4j", default_access_mode=READ_ACCESS)
+    driver.session.assert_called_with(database=base or "neo4j", default_access_mode=READ_ACCESS)
     sesion.begin_transaction.assert_called_with(timeout=5)
     driver_simulado.return_value.__exit__.assert_called()
 
@@ -300,6 +326,13 @@ def test_carga_sin_confirmacion_o_con_otro_destino_no_crea_driver(driver_simulad
     driver_simulado.assert_not_called()
 
 
+def test_carga_rechaza_otra_base_en_el_mismo_servidor(entorno_simulado, driver_simulado, monkeypatch):
+    monkeypatch.setenv("NEO4J_DATABASE", BASE_SIMULADA)
+    with carga.confirmar_carga(DESTINO_SIMULADO), pytest.raises(conexion.ErrorGrafo, match="no coincide"):
+        carga.cargar_grafo(str(catalogo.RUTA_CATALOGO))
+    driver_simulado.assert_not_called()
+
+
 @pytest.fixture
 def escritura(entorno_simulado):
     driver, sesion = entorno_simulado
@@ -316,7 +349,12 @@ def _conteo(total):
     return resultado
 
 
-def test_carga_simulada_repetible_y_aislada(escritura, driver_simulado):
+@pytest.mark.parametrize("base", [None, BASE_SIMULADA])
+def test_carga_simulada_repetible_y_aislada(escritura, driver_simulado, monkeypatch, base):
+    destino = DESTINO_SIMULADO
+    if base is not None:
+        monkeypatch.setenv("NEO4J_DATABASE", base)
+        destino = f"neo4j+s://neo4j.invalid:7687/{base}"
     driver, sesion, ddl, datos = escritura
     nodos = {("proyecto-ajeno", "categoria:hotel"): "huella-ajena"}
     relaciones = {("proyecto-ajeno", "TIENE_TOPE", "hotel", "tope")}
@@ -342,7 +380,7 @@ def test_carga_simulada_repetible_y_aislada(escritura, driver_simulado):
         return Mock()
 
     datos.run.side_effect = simular_merge
-    with carga.confirmar_carga(DESTINO_SIMULADO):
+    with carga.confirmar_carga(destino):
         primero = carga.cargar_grafo(str(catalogo.RUTA_CATALOGO))
         segundo = carga.cargar_grafo(str(catalogo.RUTA_CATALOGO))
     assert primero == segundo == {"nodos": 24, "relaciones": 27}
@@ -352,7 +390,7 @@ def test_carga_simulada_repetible_y_aislada(escritura, driver_simulado):
     assert "IF NOT EXISTS" in carga._RESTRICCION and "(n.proyecto, n.id) IS UNIQUE" in carga._RESTRICCION
     assert ddl.commit.call_count == datos.commit.call_count == 2
     assert sesion.begin_transaction.call_args_list == [call(timeout=20), call(timeout=10)] * 2
-    driver.session.assert_called_with(database="neo4j", default_access_mode=WRITE_ACCESS)
+    driver.session.assert_called_with(database=base or "neo4j", default_access_mode=WRITE_ACCESS)
     opciones = driver_simulado.call_args.kwargs
     assert opciones["connection_timeout"] == 3
     assert opciones["connection_acquisition_timeout"] == opciones["connection_write_timeout"] == 5

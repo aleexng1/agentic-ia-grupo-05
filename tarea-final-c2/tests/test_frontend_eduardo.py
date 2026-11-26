@@ -1,6 +1,7 @@
 """Pruebas locales de Rendiciones IA: Chromium real y API simulada, sin red externa."""
 
 import base64
+import csv
 import hashlib
 import json
 import os
@@ -23,8 +24,8 @@ const $ = id => document.getElementById(id);
 const m = window.mock = { cola: [], llamadas: [], plazos: [], revocadas: [] };
 const esperaOriginal = window.setTimeout.bind(window);
 window.setTimeout = (fn, ms, ...args) => {
-  if (ms === 65000 || ms === 15000) m.plazos.push({fn, ms});
-  return esperaOriginal(fn, ms, ...args);
+  if ([105000, 15000, 1500].includes(ms)) m.plazos.push({fn, ms});
+  return esperaOriginal(fn, ms === 1500 ? 30 : ms, ...args);
 };
 const revocar = URL.revokeObjectURL.bind(URL);
 URL.revokeObjectURL = url => { m.revocadas.push(url); revocar(url); };
@@ -34,12 +35,19 @@ window.fetch = async (url, opciones) => {
   m.llamadas.push(llamada);
   const plan = m.cola.shift() || {};
   if (plan.red) throw new TypeError("fallo de red simulado");
+  const hilo = cuerpo?.thread_id ?? m.llamadas.findLast(l => l.cuerpo)?.cuerpo.thread_id;
   const base = {id_ejecucion: "e9137f48-8911-42c4-9020-e6e48e4aec0d",
-    thread_id: cuerpo?.thread_id, ruta: "consulta_politica", respuesta: "Respuesta simulada",
-    estado_final: "ok"};
-  const construir = () => new Response(plan.raw ?? JSON.stringify({...base, ...plan.datos}), {
-    status: plan.status ?? 200,
-    headers: {"Content-Type": plan.mime ?? "application/json"}});
+    thread_id: hilo, ruta: "consulta_politica", respuesta: "Respuesta simulada", estado_final: "ok"};
+  const construir = () => {
+    const datos = {...base, ...plan.datos};
+    if (datos.resultado) datos.resultado = {thread_id: hilo, ...datos.resultado};
+    if (!cuerpo && datos.estado) {
+      if (!Object.hasOwn(plan.datos, "estado_final")) delete datos.estado_final;
+      if (!Object.hasOwn(plan.datos, "ruta")) delete datos.ruta;
+    }
+    return new Response(plan.raw ?? JSON.stringify(datos), {
+      status: plan.status ?? 200, headers: {"Content-Type": plan.mime ?? "application/json"}});
+  };
   if (plan.tardia) return new Promise(resolve => { llamada.resolver = () => resolve(construir()); });
   return construir();
 };
@@ -53,6 +61,14 @@ const enviar = texto => {
   if (texto !== undefined) escribir(texto);
   $("formulario").requestSubmit();
 };
+const preparar202 = (...planes) => {
+  mock.cola.push({status: 202, datos: {estado: 'en_proceso', consultar: 'https://prueba.invalid/no-usar'}}, ...planes);
+};
+const progreso = () => ({datos: {estado: 'en_proceso', resultado: null}});
+const terminal = (estado = 'ok', extra = {}) => ({datos: {
+  estado, resultado: {id_ejecucion: "e9137f48-8911-42c4-9020-e6e48e4aec0d",
+    ruta: "consulta_politica", respuesta: "Resultado seguido", estado_final: estado, ...extra},
+}});
 const adjuntar = archivo => {
   const datos = new DataTransfer();
   datos.items.add(archivo);
@@ -347,7 +363,7 @@ def test_error_http_preserva_borrador_sin_verificar_acceso(pagina, estado):
 def test_401_conserva_texto_e_imagen_y_obliga_a_recargar_clave(pagina):
     pagina.js("guardar(); imagen('image/png')")
     pagina.espera("!$('adjunto').hidden")
-    pagina.js("mock.cola.push({status:401}); enviar('Borrador para reintentar')")
+    pagina.js("mock.cola.push({status:401}); $('gasto').value = '{\"folio\":\"000123\"}'; enviar('Borrador para reintentar')")
     pagina.espera("!$('acceso').hidden && $('error-acceso').textContent.includes('401')")
     assert pagina.js("$('acceso-chip').dataset.acceso === 'sin-clave' && $('clave').value === ''")
     pagina.js("guardar('clave-nueva-ficticia'); enviar()")
@@ -355,6 +371,170 @@ def test_401_conserva_texto_e_imagen_y_obliga_a_recargar_clave(pagina):
     assert pagina.js("mock.llamadas[1].opciones.headers['X-API-Key']") == "clave-nueva-ficticia"
     assert pagina.js("mock.llamadas[1].cuerpo.texto") == "Borrador para reintentar"
     assert pagina.js("mock.llamadas[1].cuerpo.imagen.mime_type") == "image/png"
+    assert pagina.js("mock.llamadas[1].cuerpo.gasto") == {"folio": "000123"}
+
+
+@pytest.mark.parametrize("status,detail,esperado", [
+    (422, "El gasto no cumple el formato.", "El gasto no cumple el formato."),
+    (422, [{"loc": ["body", "imagen", "mime_type"], "msg": "Tipo no permitido",
+            "input": "dato-no-mostrar", "ctx": {"valor": "ctx-no-mostrar"}}, None], "imagen.mime_type: Tipo no permitido"),
+    (502, f"No se pudo completar la búsqueda (id_ejecucion: {ID})", ID),
+    (502, f"Authorization: Bearer token-ficticio (id_ejecucion: {ID})", ID),
+    (502, f"GOOGLE_API_KEY=secreto-de-diagnostico (id_ejecucion: {ID})", ID),
+    (422, "<img alt='mensaje de error' onerror='window.inyectado = true'>", "<img alt="),
+    (422, {"input": "dato-no-mostrar"}, "Entrada inválida"),
+    (422, [{"loc": ["body", "campo-secreto"], "msg": f"Clave {CLAVE}"}], "Entrada inválida"),
+    (422, 'payload={"texto":"dato-no-mostrar"}', "Entrada inválida"),
+    (502, None, "no pudo completar"),
+])
+def test_detail_http_seguro_con_borrador_completo(pagina, status, detail, esperado):
+    pagina.js("guardar(); imagen('image/png')")
+    pagina.espera("!$('adjunto').hidden")
+    plan = {"status": status, "raw": json.dumps({"detail": detail})}
+    pagina.js(f"mock.cola.push({json.dumps(plan)}); $('gasto').value = '{{}}'; enviar('Borrador ficticio')")
+    pagina.espera("!$('aviso-entrada').hidden")
+    aviso = pagina.js("$('aviso-entrada').textContent")
+    assert esperado in aviso and f"HTTP {status}" in aviso
+    assert all(x not in aviso for x in (CLAVE, "token-ficticio", "secreto-de-diagnostico", "dato-no-mostrar",
+                                       "ctx-no-mostrar", "campo-secreto"))
+    assert pagina.js("!$('aviso-entrada').querySelector('img') && !window.inyectado")
+    assert pagina.js("$('pregunta').value === 'Borrador ficticio' && $('gasto').value === '{}' && !$('adjunto').hidden")
+
+
+@pytest.mark.parametrize("raw", ['{', 'null', '{"otra_propiedad":"privado"}', '{"detail":[{"msg":42}]}'])
+def test_error_http_con_json_malformado_o_sin_detail(pagina, raw):
+    pagina.js(f"guardar(); mock.cola.push({{status:422, raw:{json.dumps(raw)}}}); enviar('Borrador')")
+    pagina.espera("!$('aviso-entrada').hidden")
+    assert pagina.js("$('aviso-entrada').textContent") == "Entrada inválida (HTTP 422). Revisa los datos antes de reintentar."
+
+
+@pytest.mark.parametrize("valor", ["{", "[]", "null", "12", "false", '"texto"'])
+def test_gasto_requiere_objeto_json_antes_del_post(pagina, valor):
+    pagina.js(f"guardar(); $('gasto').value = {json.dumps(valor)}; enviar('Borrador')")
+    assert pagina.js("mock.llamadas.length === 0 && $('datos-gasto').open && document.activeElement === $('gasto')")
+    assert pagina.js("$('gasto').getAttribute('aria-invalid')") == "true"
+    assert pagina.js("$('gasto').value") == valor
+
+
+@pytest.mark.parametrize("valor", ['{"monto":"45000","folio":"000123","cargo":"Jefe de tienda","rut_emisor":"11.111.111-1"}',
+                                  '{"monto":9007199254740993,"folio":"000123"}', "  "])
+def test_gasto_y_boleta_preservan_entrada_en_el_post_y_limpian_en_200(pagina, valor):
+    pagina.js("guardar(); imagen('image/png')")
+    pagina.espera("!$('adjunto').hidden")
+    pagina.js(f"$('gasto').value = {json.dumps(valor)}; enviar('Revisar boleta')")
+    pagina.espera("Boolean(document.querySelector('.detalles'))")
+    llamada = pagina.js("mock.llamadas[0]")
+    assert llamada["cuerpo"]["imagen"]["mime_type"] == "image/png"
+    assert json.loads(llamada["opciones"]["body"]).get("gasto") == (json.loads(valor) if valor.strip() else None)
+    assert ("gasto" in llamada["cuerpo"]) == bool(valor.strip())
+    assert pagina.js("$('gasto').value === '' && $('adjunto').hidden && localStorage.length === 0 && sessionStorage.length === 0")
+
+
+@pytest.mark.parametrize("datos", [{"id_ejecucion": "../registro"}, {"thread_id": "otro"}, {"estado": "ok"}])
+def test_202_invalido_no_consulta(pagina, datos):
+    pagina.js(f"guardar(); mock.cola.push({{status:202, datos:{json.dumps({'estado': 'en_proceso', **datos})}}}); enviar('Borrador')")
+    pagina.espera("!$('aviso-entrada').hidden")
+    assert pagina.js("mock.llamadas.length === 1 && $('seguimiento').hidden")
+    assert "No reenvíes el gasto" in pagina.js("$('aviso-entrada').textContent")
+
+
+@pytest.mark.parametrize("estado", ["ok", "fallback", "bloqueado", "error"])
+def test_202_sigue_hasta_resultado_terminal_y_conserva_metadatos(pagina, estado):
+    veredicto = {"decision": "observar", "motivo": "Prueba", "politica_sugerida": "P02",
+                 "categoria_sugerida": "Hotel", "cuenta_sugerida": "Prueba"}
+    extra = {"ruta": "revisar_gasto", "veredicto": veredicto} if estado == "fallback" else {}
+    pagina.js(f"guardar(); $('gasto').value = '{{}}'; preparar202(progreso(), terminal('{estado}', {json.dumps(extra)})); enviar('Consulta')")
+    pagina.espera(f"Boolean(document.querySelector('.etiqueta.{estado}'))")
+    llamadas = pagina.js("mock.llamadas")
+    assert [l["url"] for l in llamadas] == ["/chat", f"/registro/{ID}", f"/registro/{ID}"]
+    assert all(l["opciones"]["method"] == "GET" and l["opciones"]["headers"]["X-API-Key"] == CLAVE
+               and l["opciones"]["mode"] == "same-origin" and l["opciones"]["redirect"] == "error" for l in llamadas[1:])
+    detalles = pagina.js("document.querySelector('.detalles').textContent")
+    assert all(x in detalles for x in (estado, ID, llamadas[0]["cuerpo"]["thread_id"], extra.get("ruta", "consulta_politica")))
+    assert pagina.js("Boolean(document.querySelector('.veredicto'))") == bool(extra)
+    assert pagina.js("$('gasto').value") == ("{}" if estado == "error" else "")
+
+
+@pytest.mark.parametrize("estado", ["ok", "error"])
+def test_seguimiento_sin_resultado_muestra_detail_o_fila_sin_inventar(pagina, estado):
+    datos = {"estado": estado, "estado_final": estado, "resultado": None, "ruta": "sin_ruta" if estado == "error" else "consulta_politica",
+             "fecha": "2026-11-24T10:15:00-03:00", "pasos": 0, "duracion_ms": 12, "hubo_a2a": False, "herramientas_usadas": []}
+    if estado == "error":
+        datos["detail"] = f"No se pudo completar (id_ejecucion: {ID})"
+    else:
+        datos["thread_id"] = None  # La fila después de reiniciar no trae thread_id.
+    plan = f"{{datos:{json.dumps(datos)}}}"
+    if estado == "ok":
+        plan = f"{{raw:JSON.stringify({json.dumps({'id_ejecucion': ID, **{k: v for k, v in datos.items() if k != 'thread_id'}})})}}"
+    pagina.js(f"guardar(); preparar202({plan}); $('gasto').value = '{{}}'; enviar('Consulta')")
+    pagina.espera(f"Boolean(document.querySelector('.etiqueta.{estado}'))")
+    texto = pagina.js("$('conversacion').textContent")
+    assert (datos.get("detail") or "El resultado completo no está disponible") in texto
+    assert "Respuesta simulada" not in texto and pagina.js("$('gasto').value") == "{}"
+
+
+@pytest.mark.parametrize("accion", ["$('cancelar').click()", "mock.plazos.find(p => p.ms === 105000).fn()",
+                                    "$('nueva-conversacion').click()", None])
+def test_seguimiento_interrumpido_no_duplica_post_y_conserva_id(pagina, accion):
+    if accion is None:
+        plan = "{status:401}"
+    else:
+        plan = "{...terminal('ok', {respuesta:'Respuesta tardía'}), tardia:true}"
+    pagina.js(f"guardar(); preparar202({plan}); $('gasto').value = '{{}}'; enviar('Consulta')")
+    pagina.espera("mock.llamadas.length === 2")
+    if accion:
+        assert pagina.js("!$('cancelar').hidden && $('enviar').disabled && $('gasto').readOnly")
+        pagina.js(f"enviar(); {accion}; mock.llamadas[1].resolver()")
+        assert pagina.js("mock.llamadas[1].opciones.signal.aborted")
+    else:
+        pagina.espera("!$('acceso').hidden")
+        pagina.js("guardar('clave-nueva-ficticia')")
+    assert ID in pagina.js("$('ejecucion-aceptada').textContent")
+    assert pagina.js("!$('conversacion').textContent.includes('Respuesta tardía')")
+    if accion == "$('nueva-conversacion').click()":
+        assert pagina.js("$('gasto').value === '' && $('pregunta').value === ''")
+        pagina.js("mock.cola.push(progreso()); $('retomar').click()")
+        pagina.espera("$('estado-registro').textContent.includes('sigue en proceso')")
+    else:
+        assert pagina.js("$('gasto').value === '{}' && $('pregunta').value === 'Consulta' && $('enviar').disabled")
+        pagina.js("enviar(); mock.cola.push(terminal()); $('retomar').click()")
+        pagina.espera("$('conversacion').textContent.includes('Resultado seguido')")
+    assert pagina.js("mock.llamadas.map(l => l.opciones.method)") == ["POST", "GET", "GET"]
+    if accion is None:
+        assert pagina.js("mock.llamadas[2].opciones.headers['X-API-Key']") == "clave-nueva-ficticia"
+
+
+def test_cancelar_entre_consultas_no_dispara_otro_get(pagina):
+    pagina.js("guardar(); preparar202(progreso()); enviar('Consulta')")
+    pagina.espera("mock.plazos.some(p => p.ms === 1500)")
+    pagina.js("$('cancelar').click(); mock.plazos.find(p => p.ms === 1500).fn()")
+    assert pagina.js("mock.llamadas.length") == 2
+    assert ID in pagina.js("$('ejecucion-aceptada').textContent")
+
+
+@pytest.mark.parametrize("plan,mensaje", [
+    ("{status:503}", "HTTP 503"),
+    ("{datos:{estado:'ok', id_ejecucion:'otro'}}", "no coincide"),
+    ("terminal('ok', {thread_id:'otro'})", "no coincide"),
+])
+def test_seguimiento_invalido_o_no_disponible_se_puede_retomar(pagina, plan, mensaje):
+    pagina.js(f"guardar(); preparar202({plan}); enviar('Consulta')")
+    pagina.espera("!$('aviso-entrada').hidden")
+    assert mensaje in pagina.js("$('aviso-entrada').textContent")
+    assert pagina.js("$('enviar').disabled && !$('retomar').hidden && mock.llamadas.length === 2")
+    assert ID in pagina.js("$('ejecucion-aceptada').textContent")
+
+
+def test_ejemplo_gasto_coincide_con_los_fixtures(pagina):
+    ejemplo = json.loads(pagina.js("$('datos-gasto').querySelector('pre').textContent"))
+    datos = WEB.parents[1] / "datos"
+    with (datos / "rendiciones_prueba.csv").open(encoding="utf-8", newline="") as archivo:
+        gasto = next(fila for fila in csv.DictReader(archivo) if fila["id"] == ejemplo["id"])
+    assert all(ejemplo[k] == v for k, v in gasto.items() if k in ejemplo and k != "monto")
+    boletas = json.loads((datos / "boletas/declarado.json").read_text(encoding="utf-8"))
+    declarado = next(b["declarado"] for b in boletas["boletas"] if b["declarado"]["folio"] == ejemplo["folio"])
+    assert ejemplo["monto"] == int(gasto["monto"]) == declarado["monto"]
+    assert ejemplo["rut_emisor"] == declarado["rut_emisor"] and ejemplo["fecha_gasto"] == declarado["fecha"]
 
 
 @pytest.mark.parametrize("plan,mensaje", [
@@ -370,13 +550,14 @@ def test_respuestas_invalidas_y_red_no_se_muestran_ni_verifican_clave(pagina, pl
     pagina.js(f"guardar(); mock.cola.push({json.dumps(plan)}); enviar('Borrador')")
     pagina.espera("!$('aviso-entrada').hidden")
     assert mensaje in pagina.js("$('aviso-entrada').textContent")
+    assert "No reenvíes el gasto" in pagina.js("$('aviso-entrada').textContent")
     assert pagina.js("$('pregunta').value === 'Borrador' && $('acceso-chip').dataset.acceso === 'cargada'")
     assert pagina.js("!document.querySelector('.detalles') && mock.llamadas.length === 1")
 
 
 @pytest.mark.parametrize("accion,aviso", [
     ("$('cancelar').click()", "Cancelaste la espera"),
-    ("mock.plazos.find(p => p.ms === 65000).fn()", "65 segundos"),
+    ("mock.plazos.find(p => p.ms === 105000).fn()", "105 segundos"),
     ("$('nueva-conversacion').click()", ""),
 ])
 def test_cancelacion_timeout_doble_envio_y_respuesta_tardia(pagina, accion, aviso):
@@ -385,6 +566,7 @@ def test_cancelacion_timeout_doble_envio_y_respuesta_tardia(pagina, accion, avis
     assert pagina.js("mock.llamadas.length") == 1
     pagina.js(accion)
     assert pagina.js("mock.llamadas[0].opciones.signal.aborted")
+    assert "No reenvíes el gasto" in pagina.js("$('aviso-entrada').textContent")
     if aviso:
         assert aviso in pagina.js("$('aviso-entrada').textContent")
         assert pagina.js("$('pregunta').value") == "Primer borrador"
@@ -440,11 +622,12 @@ def test_responsive_en_chromium_con_adjunto_y_trazabilidad(chrome, ancho, alto):
     assert chrome.js("document.documentElement.scrollWidth <= innerWidth")
     chrome.js("guardar(); enviar('Consulta anterior')")
     chrome.espera("Boolean(document.querySelector('.detalles'))")
-    chrome.js("document.querySelector('.detalles').open = true; document.querySelector('.atajos').open = true; imagen('image/png')")
+    chrome.js("document.querySelector('.detalles').open = true; document.querySelector('.atajos').open = true; "
+              "$('datos-gasto').open = true; $('datos-gasto').querySelector('details').open = true; imagen('image/png')")
     chrome.espera("!$('adjunto').hidden && $('vista-adjunto').naturalWidth === 2")
     assert chrome.js("document.documentElement.scrollWidth <= innerWidth && innerWidth") == ancho
     assert chrome.js("""
-    ['pregunta', 'enviar', 'adjuntar', 'nueva-conversacion', 'cambiar-clave', 'quitar-adjunto'].every(id => {
+    ['pregunta', 'gasto', 'enviar', 'adjuntar', 'nueva-conversacion', 'cambiar-clave', 'quitar-adjunto'].every(id => {
       const e = $(id); e.scrollIntoView({block:'center'});
       const caja = e.getBoundingClientRect();
       const centro = document.elementFromPoint(caja.left + caja.width / 2, caja.top + caja.height / 2);

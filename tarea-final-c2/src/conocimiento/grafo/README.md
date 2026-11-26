@@ -1,8 +1,10 @@
 # GraphRAG de rendiciones — Eduardo
 
-**Estado:** implementación y pruebas offline. No hay una carga, consultas ni
-evidencia real de Neo4j en esta fase. El catálogo es una propuesta académica
-versionada: requiere aprobación del grupo antes de cargarlo.
+**Estado:** implementación y pruebas offline. La carga de ensayo y las
+consultas reales históricas se documentan como
+[resultados informados por el operador](../../../evidencias/ampliacion-graphrag/README.md).
+El catálogo sigue siendo una propuesta académica versionada y pendiente de
+aprobación grupal. No se repitió la carga para este cierre.
 
 ## Modelo y procedencia
 
@@ -87,10 +89,24 @@ previsto es **24 nodos** (2 cargos, 2 niveles, 10 categorías y 10 topes) y
 
 ## Carga posterior — solo con aprobación y autorización humana
 
+`NEO4J_DATABASE` selecciona la misma base para lectura y carga. Si no está
+definida, GraphRAG usa `neo4j`; no delega la selección a la base predeterminada
+del servidor. Si está definida, debe tener de 3 a 63 caracteres ASCII:
+letras, dígitos, puntos o guiones, empezando por letra o dígito (Aura puede
+asignar nombres que empiezan por un dígito). Un valor vacío o con espacios se
+rechaza antes de abrir el driver. La validación local no comprueba que la base
+exista ni que la cuenta tenga acceso.
+
+**Pendiente de coordinación con Alex y Sebastián:** incorporar la variable
+opcional `NEO4J_DATABASE=neo4j` con un comentario en `.env.example`, y acordar
+la configuración de la base efectiva en despliegue y en los procesos de carga
+y lectura. No se modificó `.env.example`.
+
 1. Confirmar la versión del catálogo, las relaciones propuestas y el
    destino exacto con el grupo. Usar una base de ensayo autorizada
-   llamada `neo4j`. Inyectar `NEO4J_URI`, `NEO4J_USER` y `NEO4J_PASSWORD`
-   en el proceso seguro del operador. El componente no carga `.env`.
+   e inyectar `NEO4J_URI`, `NEO4J_USER` y `NEO4J_PASSWORD` en el proceso
+   seguro del operador. Si la base autorizada no se llama `neo4j`,
+   definir también `NEO4J_DATABASE`. El componente no carga `.env`.
    No poner credenciales en la URI ni en comandos, logs o evidencias.
 2. Usar TLS con certificados verificados si el servicio es remoto. La
    cuenta de carga necesita crear la restricción y leer/escribir las
@@ -98,12 +114,14 @@ previsto es **24 nodos** (2 cargos, 2 niveles, 10 categorías y 10 topes) y
    lectura de las propiedades requeridas, con el menor alcance que
    permita la infraestructura. `READ_ACCESS` orienta el driver, **no**
    reemplaza los permisos de lectura del usuario.
-3. Solo después de la autorización, sustituir `HOST` por el destino
-   confirmado, incluyendo esquema, puerto y base. La comparación es
-   contra `NEO4J_URI` y la base `neo4j`, antes de abrir el driver:
+3. Solo después de la autorización, sustituir `HOST` y `BASE_AUTORIZADA`
+   por los valores aprobados y ajustar el esquema y el puerto si corresponde.
+   Verificar el destino de forma independiente: la comparación contra
+   `NEO4J_URI` y la base efectiva ocurre antes de abrir el driver.
 
    ```powershell
-   & .\.venv\Scripts\python.exe -X utf8 -B -m src.conocimiento.grafo.cargar_grafo --cargar --confirmar-destino 'neo4j+s://HOST:7687/neo4j'
+   $env:NEO4J_DATABASE = 'BASE_AUTORIZADA'
+   & .\.venv\Scripts\python.exe -X utf8 -B -m src.conocimiento.grafo.cargar_grafo --cargar --confirmar-destino 'neo4j+s://HOST:7687/BASE_AUTORIZADA'
    ```
 
 La restricción `CREATE CONSTRAINT … IF NOT EXISTS` se ejecuta primero en
@@ -149,7 +167,7 @@ WHERE type(r) IN ['TIENE_NIVEL', 'PUEDE_RENDIR', 'TIENE_TOPE']
 RETURN a.id AS origen, type(r) AS tipo, b.id AS destino ORDER BY origen, tipo, destino
 ```
 
-En otro proceso con las credenciales de lectura, ejecutar el diagnóstico
+En otro proceso con las credenciales de lectura y la misma base, ejecutar el diagnóstico
 desde `tarea-final-c2/`. Solo después de la carga real autorizada:
 
 ```powershell
@@ -167,7 +185,7 @@ print(json.dumps({"consulta": [cargo, categoria], "recorrido": recorrido}, ensur
 '@ | & .\.venv\Scripts\python.exe -X utf8 -B -
 ```
 
-| Cargo | Categoría | Resultado esperado, no observado en Neo4j |
+| Cargo | Categoría | Resultado esperado del diagnóstico |
 |---|---|---|
 | Jefe de tienda | `P02:hotel` | Jefatura, ruta completa, `#P02`, 445.000 CLP. |
 | Jefe de tienda | `P03:hotel` | Jefatura, ruta completa, `#P03`, 325.000 CLP. |
@@ -182,4 +200,4 @@ los conteos reales. La pregunta distintiva sería: «¿Qué camino de nivel
 tiene un jefe de tienda hasta el tope de hotel en un viaje interno?».
 El texto de la respuesta debe distinguir el nivel propuesto del monto
 documental. La demostración vía `/chat` y el `id_ejecucion` quedan pendientes
-de la integración posterior; no hay evidencia acreditable todavía.
+de la validación remota; las pruebas directas informadas no sustituyen esa evidencia.

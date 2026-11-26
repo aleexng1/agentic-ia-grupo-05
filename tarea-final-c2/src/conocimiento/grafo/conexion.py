@@ -1,6 +1,7 @@
 """Configuración explícita del proceso para Neo4j; no abre ni carga .env."""
 
 import os
+import re
 from contextlib import contextmanager
 from dataclasses import dataclass
 from urllib.parse import urlsplit
@@ -16,7 +17,9 @@ from neo4j.exceptions import (
     SessionExpired,
 )
 
-BASE = "neo4j"
+_BASE_PREDETERMINADA = "neo4j"
+# Los identificadores de base asignados por Aura también pueden empezar por un dígito.
+_NOMBRE_BASE = re.compile(r"[A-Za-z0-9][A-Za-z0-9.-]{2,62}")
 
 
 class ErrorGrafo(RuntimeError):
@@ -28,6 +31,7 @@ class Conexion:
     uri: str
     usuario: str
     clave: str
+    base: str
     destino: str
 
 
@@ -37,6 +41,9 @@ def configuracion() -> Conexion:
     clave = os.getenv("NEO4J_PASSWORD", "")
     if not (uri and usuario and clave.strip()):
         raise ErrorGrafo("Falta configurar la conexión a Neo4j en el entorno del proceso.")
+    base = os.getenv("NEO4J_DATABASE", _BASE_PREDETERMINADA)
+    if not _NOMBRE_BASE.fullmatch(base):
+        raise ErrorGrafo("NEO4J_DATABASE no contiene un nombre de base válido para GraphRAG.")
     try:
         url = urlsplit(uri)
         puerto = 7687 if url.port is None else url.port
@@ -49,7 +56,7 @@ def configuracion() -> Conexion:
         host = f"[{url.hostname}]" if ":" in url.hostname else url.hostname
     except ValueError:
         raise ErrorGrafo("La URI de Neo4j no es válida para GraphRAG.") from None
-    return Conexion(uri, usuario, clave, f"{url.scheme}://{host}:{puerto}/{BASE}")
+    return Conexion(uri, usuario, clave, base, f"{url.scheme}://{host}:{puerto}/{base}")
 
 
 def _mensaje(error: Exception) -> str:
@@ -77,7 +84,7 @@ def sesion_neo4j(ajustes: Conexion, modo: str):
             connection_write_timeout=5,
             connection_acquisition_timeout=5,
             max_transaction_retry_time=0,
-        ) as driver, driver.session(database=BASE, default_access_mode=modo) as sesion:
+        ) as driver, driver.session(database=ajustes.base, default_access_mode=modo) as sesion:
             yield sesion
     except (Neo4jError, DriverError, OSError, ValueError) as error:
         raise ErrorGrafo(_mensaje(error)) from None
