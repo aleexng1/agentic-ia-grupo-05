@@ -7,7 +7,7 @@
 | Archivo | Entrada | Ejecución observada | Resultado |
 |---|---|---|---|
 | `01-chat-sin-clave-401-local.txt` | Servidor real (`uvicorn api.app:app`, 2026-11-25). `POST /chat` sin `X-API-Key`, con la cabecera vacía y con una clave inventada; `GET /registro/{id}` sin clave | Log del servidor: «acceso rechazado · POST /chat · sin clave / clave incorrecta» (sin mostrar ninguna clave) | **401** con `{"detail": "..."}` en una línea, en los cuatro casos. `/health` sigue público (200) |
-| `01b-chat-sin-clave-401-heroku.txt` | Las mismas cinco peticiones contra la app desplegada `grupo05-tf-principal-seba` (Heroku, 2026-11-25 22:08) | El log de Heroku lo tiene Sebastián (`heroku logs`); se agrega el extracto cuando lo comparta | **401** en los cuatro casos protegidos, `/health` 200. El despliegue tiene `API_KEY_SERVICIO` cargada (si no, respondería 503) |
+| `01b-chat-sin-clave-401-heroku.txt` | Las mismas cinco peticiones contra la app desplegada `grupo05-tf-principal-seba` (Heroku, 2026-11-25 22:08) | Extracto de `heroku logs` (entregado por Sebastián): «acceso rechazado · POST /chat · sin clave / clave incorrecta» y los 401, a la misma hora (01:08 UTC) | **401** en los cuatro casos protegidos, `/health` 200. El despliegue tiene `API_KEY_SERVICIO` cargada (si no, respondería 503) |
 
 Estas peticiones **no tienen `id_ejecucion`, y es correcto**: el control de acceso las corta antes de
 entrar al agente, así que no se ejecuta ningún flujo ni se crea fila en `ejecuciones`.
