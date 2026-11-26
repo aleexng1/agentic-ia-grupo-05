@@ -1,0 +1,1189 @@
+{
+  "fecha": "2026-11-26T19:32:34-03:00",
+  "version_set": "1.0",
+  "casos_en_set": 57,
+  "casos_corridos": 57,
+  "seleccion": [
+    "GS-01",
+    "GS-02",
+    "GS-03",
+    "GS-04",
+    "GS-05",
+    "GS-06",
+    "GS-07",
+    "GS-08",
+    "GS-09",
+    "GS-10",
+    "GS-11",
+    "GS-12",
+    "GS-13",
+    "GS-14",
+    "GS-15",
+    "GS-16",
+    "GS-17",
+    "GS-18",
+    "GS-19",
+    "GS-20",
+    "GS-21",
+    "GS-22",
+    "GS-23",
+    "GS-24",
+    "GS-25",
+    "GS-26",
+    "GS-27",
+    "GS-28",
+    "GS-29",
+    "GS-30",
+    "GS-31",
+    "GS-32",
+    "GS-33",
+    "GS-34",
+    "R-01",
+    "R-02",
+    "R-03",
+    "R-04",
+    "R-05",
+    "R-06",
+    "R-07",
+    "R-08",
+    "R-09",
+    "R-10",
+    "R-11",
+    "R-12",
+    "R-13",
+    "R-14",
+    "R-15",
+    "X-01",
+    "X-02",
+    "X-03",
+    "X-04",
+    "V-01",
+    "V-02",
+    "V-03",
+    "V-04"
+  ],
+  "omitidos": [],
+  "modelo": "gemini-3.5-flash-lite (respaldo: gemini-3.5-flash)",
+  "modelos": {
+    "principal": [
+      "gemini-3.5-flash-lite"
+    ],
+    "respaldo": [
+      "gemini-3.5-flash"
+    ]
+  },
+  "modo": "HTTP http://127.0.0.1:8000/chat",
+  "commit": "7279b78",
+  "corridas": [
+    {
+      "inicio": "2026-11-26T18:33:53-03:00",
+      "fin": "2026-11-26T18:40:26-03:00",
+      "modo": "HTTP http://127.0.0.1:8000/chat",
+      "commit": "ec09694",
+      "modelo_principal": "gemini-3.5-flash-lite",
+      "modelo_respaldo": "gemini-3.5-flash",
+      "casos": [
+        "GS-01",
+        "GS-02",
+        "GS-03",
+        "GS-04",
+        "GS-05",
+        "GS-06",
+        "GS-07",
+        "GS-08",
+        "GS-09",
+        "GS-10",
+        "GS-11",
+        "GS-12"
+      ],
+      "corte": null
+    },
+    {
+      "inicio": "2026-11-26T19:06:09-03:00",
+      "fin": "2026-11-26T19:21:53-03:00",
+      "modo": "HTTP http://127.0.0.1:8000/chat",
+      "commit": "7279b78",
+      "modelo_principal": "gemini-3.5-flash-lite",
+      "modelo_respaldo": "gemini-3.5-flash",
+      "casos": [
+        "GS-13",
+        "GS-14",
+        "GS-15",
+        "GS-16",
+        "GS-17",
+        "GS-18",
+        "GS-19",
+        "GS-20",
+        "GS-21",
+        "GS-22",
+        "GS-23",
+        "GS-24",
+        "GS-25",
+        "GS-26",
+        "GS-27",
+        "GS-28",
+        "GS-29",
+        "GS-30",
+        "GS-31",
+        "GS-32",
+        "GS-33",
+        "GS-34",
+        "R-01",
+        "R-02",
+        "R-03",
+        "R-04",
+        "R-05",
+        "R-06",
+        "R-07",
+        "R-08",
+        "R-09",
+        "R-10"
+      ],
+      "corte": null
+    },
+    {
+      "inicio": "2026-11-26T19:26:54-03:00",
+      "fin": "2026-11-26T19:32:34-03:00",
+      "modo": "HTTP http://127.0.0.1:8000/chat",
+      "commit": "7279b78",
+      "modelo_principal": "gemini-3.5-flash-lite",
+      "modelo_respaldo": "gemini-3.5-flash",
+      "casos": [
+        "R-11",
+        "R-12",
+        "R-13",
+        "R-14",
+        "R-15",
+        "X-01",
+        "X-02",
+        "X-03",
+        "X-04",
+        "V-01",
+        "V-02",
+        "V-03",
+        "V-04"
+      ],
+      "corte": null
+    }
+  ],
+  "resumen": {
+    "casos": {
+      "acierto": 57,
+      "fallo": 0,
+      "pendiente": 0,
+      "error": 0,
+      "total": 57,
+      "porcentaje_aciertos": 100.0
+    },
+    "turnos": {
+      "acierto": 59,
+      "fallo": 0,
+      "pendiente": 0,
+      "error": 0,
+      "porcentaje_aciertos": 100.0
+    },
+    "turnos_fallback": 0,
+    "router": {
+      "rutas_correctas": 59,
+      "rutas_incorrectas": 0,
+      "porcentaje": 100.0
+    },
+    "por_grupo": {
+      "A-limpio": {
+        "acierto": 6,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "B-mal-clasificado": {
+        "acierto": 7,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "C-regla": {
+        "acierto": 12,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "D-fondo": {
+        "acierto": 2,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "E-seguridad": {
+        "acierto": 4,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "F-conversacion": {
+        "acierto": 3,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "R-router": {
+        "acierto": 15,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "V-verificacion": {
+        "acierto": 4,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      },
+      "X-fuera-de-alcance": {
+        "acierto": 4,
+        "fallo": 0,
+        "pendiente": 0,
+        "error": 0,
+        "porcentaje_aciertos": 100.0
+      }
+    }
+  },
+  "casos": [
+    {
+      "id": "GS-01",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "9ae3fb12-bbc8-4014-8a0f-b14552e75beb"
+        }
+      ]
+    },
+    {
+      "id": "GS-02",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "bd624419-ea45-436e-93af-1ab4c2873068"
+        }
+      ]
+    },
+    {
+      "id": "GS-03",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "2845a7ae-75b0-4d8c-ad5d-8fd81e22b609"
+        }
+      ]
+    },
+    {
+      "id": "GS-04",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "d366d767-840e-4a2f-8d9b-442fc7e1df85"
+        }
+      ]
+    },
+    {
+      "id": "GS-05",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "90ed7e12-b486-4401-9de0-b478cbe810cd"
+        }
+      ]
+    },
+    {
+      "id": "GS-06",
+      "grupo": "A-limpio",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "06510cb0-41be-4176-bb71-9b935a5e51bb"
+        }
+      ]
+    },
+    {
+      "id": "GS-07",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "e97fc58d-a45b-4fa5-9e1d-85eae9b5b1b6"
+        }
+      ]
+    },
+    {
+      "id": "GS-08",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "4f452c8a-e543-42a8-a774-67e2db567af5"
+        }
+      ]
+    },
+    {
+      "id": "GS-09",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "8f7f7778-e97d-4a91-b6b7-f55da49ec767"
+        }
+      ]
+    },
+    {
+      "id": "GS-10",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "ea3a4da6-03c2-49cf-ad41-2cf6937e12a4"
+        }
+      ]
+    },
+    {
+      "id": "GS-11",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "89b453b2-94c0-4d66-b85e-4e4548f7187a"
+        }
+      ]
+    },
+    {
+      "id": "GS-12",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "20e19d50-c6ba-4061-ba72-c5f92eef6c78"
+        }
+      ]
+    },
+    {
+      "id": "GS-13",
+      "grupo": "B-mal-clasificado",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "7f04afe4-aabb-402b-83c8-8e32567d4af1"
+        }
+      ]
+    },
+    {
+      "id": "GS-14",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "aec6b800-70ca-422b-bbdc-9cf6bbafb4c0"
+        }
+      ]
+    },
+    {
+      "id": "GS-15",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "bf8fb5d9-a210-42a7-baa2-76f346484962"
+        }
+      ]
+    },
+    {
+      "id": "GS-16",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "e90256ab-2014-4597-ac1f-f64c88f511c7"
+        }
+      ]
+    },
+    {
+      "id": "GS-17",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "8b2af215-9667-436c-95f1-bf850d8984b4"
+        }
+      ]
+    },
+    {
+      "id": "GS-18",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "2b5ecb36-b1ef-4fc7-b84f-2b43a1103f8c"
+        }
+      ]
+    },
+    {
+      "id": "GS-19",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "64e2c50f-f0f8-4191-af24-ea9e6ca25705"
+        }
+      ]
+    },
+    {
+      "id": "GS-20",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "babcd2b6-eabd-4e70-8846-804c1672c76e"
+        }
+      ]
+    },
+    {
+      "id": "GS-21",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "c3bc3cd6-82de-45c0-ab70-06ddceb903e5"
+        }
+      ]
+    },
+    {
+      "id": "GS-22",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "7c329611-9a8e-4eee-a179-e5a963e61ece"
+        }
+      ]
+    },
+    {
+      "id": "GS-23",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "16c5cb55-19c7-46fd-8a3b-3101278c52e0"
+        }
+      ]
+    },
+    {
+      "id": "GS-24",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "09bd3a58-894a-4f4a-baa4-3a028cae3309"
+        }
+      ]
+    },
+    {
+      "id": "GS-25",
+      "grupo": "D-fondo",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "7fe4bb55-7fa9-48c7-b25a-de1fe5699d7a"
+        }
+      ]
+    },
+    {
+      "id": "GS-26",
+      "grupo": "D-fondo",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "6e20e322-7beb-4b46-b238-547d2a03c9c2"
+        },
+        {
+          "turno": 2,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "86ed16fd-3a39-47ce-8ee6-914e77b9da33"
+        }
+      ]
+    },
+    {
+      "id": "GS-27",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "842ee8f3-5931-4ef0-b58f-2da38847373e"
+        }
+      ]
+    },
+    {
+      "id": "GS-28",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "f7f2428b-80e3-4f55-9527-bf02795a2d93"
+        }
+      ]
+    },
+    {
+      "id": "GS-29",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "35e65e91-d9a8-4d5e-b8f0-8b3bf04aea0e"
+        }
+      ]
+    },
+    {
+      "id": "GS-30",
+      "grupo": "E-seguridad",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "6baec727-444a-430c-8e78-fb935aed47ad"
+        }
+      ]
+    },
+    {
+      "id": "GS-31",
+      "grupo": "F-conversacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "e6fd4bc5-9eeb-4d51-b1b0-8d20436420b8"
+        }
+      ]
+    },
+    {
+      "id": "GS-32",
+      "grupo": "F-conversacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "23cab845-2f32-4e8a-8d1d-81a7299e0601"
+        },
+        {
+          "turno": 2,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "286cbf33-aca0-401a-9ebd-247b615be31a"
+        }
+      ]
+    },
+    {
+      "id": "GS-33",
+      "grupo": "F-conversacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "7f70fe18-74a0-47a5-bb7e-c315c5bf0ebc"
+        }
+      ]
+    },
+    {
+      "id": "GS-34",
+      "grupo": "C-regla",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "rechazar",
+          "estado_final": "ok",
+          "id_ejecucion": "979540ee-d2df-4e89-bd0d-d0b38a7870c9"
+        }
+      ]
+    },
+    {
+      "id": "R-01",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "7b3edf2d-a7e0-4274-816c-c6234f201f3d"
+        }
+      ]
+    },
+    {
+      "id": "R-02",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "ded9914a-99ac-4449-8d13-3ccc58cb552e"
+        }
+      ]
+    },
+    {
+      "id": "R-03",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "b40033c6-7671-475e-b775-ba65e1e2657b"
+        }
+      ]
+    },
+    {
+      "id": "R-04",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "4f11d117-6fb4-4532-9a7f-039ff5dc7551"
+        }
+      ]
+    },
+    {
+      "id": "R-05",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "consulta_politica",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "d09e0c51-b103-4f0a-9192-5f585602a1c8"
+        }
+      ]
+    },
+    {
+      "id": "R-06",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "d77b39be-38e3-423b-8191-479f354870b5"
+        }
+      ]
+    },
+    {
+      "id": "R-07",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "7a66a029-7954-4402-b4cf-59256cc09a74"
+        }
+      ]
+    },
+    {
+      "id": "R-08",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "cd2383c5-073a-45bb-922b-c0d09d0cadf9"
+        }
+      ]
+    },
+    {
+      "id": "R-09",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "28ddd8a8-db4b-4539-9abc-6a7beba79a68"
+        }
+      ]
+    },
+    {
+      "id": "R-10",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "e6d2c4d5-e0da-4acc-a082-e3603e0988c6"
+        }
+      ]
+    },
+    {
+      "id": "R-11",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "fe4b1654-e56a-4d64-9da3-607d2697b0d1"
+        }
+      ]
+    },
+    {
+      "id": "R-12",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "7caf1dba-4035-4bdf-9e26-485bc3460649"
+        }
+      ]
+    },
+    {
+      "id": "R-13",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "26c54584-0953-48ac-8191-df08ee3f01fd"
+        }
+      ]
+    },
+    {
+      "id": "R-14",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "6f818519-5f73-414a-835c-8259024840aa"
+        }
+      ]
+    },
+    {
+      "id": "R-15",
+      "grupo": "R-router",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "2635fab1-36f0-4778-96a2-e416f471c570"
+        }
+      ]
+    },
+    {
+      "id": "X-01",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "fc403943-02e9-4221-ac6c-1301d45508ab"
+        }
+      ]
+    },
+    {
+      "id": "X-02",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "081044f6-3f02-448a-b41d-aee1f3d589d9"
+        }
+      ]
+    },
+    {
+      "id": "X-03",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "20be12b1-6e2e-47b8-a09e-a0fc57b623ac"
+        }
+      ]
+    },
+    {
+      "id": "X-04",
+      "grupo": "X-fuera-de-alcance",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "fuera_de_alcance",
+          "decision": null,
+          "estado_final": "ok",
+          "id_ejecucion": "4ccfab0d-8e8d-47e6-881b-1ee1581f0a95"
+        }
+      ]
+    },
+    {
+      "id": "V-01",
+      "grupo": "V-verificacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "aprobar",
+          "estado_final": "ok",
+          "id_ejecucion": "15910ac4-5a5c-4a48-97ca-afbb2d1a2b41"
+        }
+      ]
+    },
+    {
+      "id": "V-02",
+      "grupo": "V-verificacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "5cb18a43-18dd-4933-9349-e21a4ef4afa9"
+        }
+      ]
+    },
+    {
+      "id": "V-03",
+      "grupo": "V-verificacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "d14818c1-e3f7-40f5-9998-51fc7628270b"
+        }
+      ]
+    },
+    {
+      "id": "V-04",
+      "grupo": "V-verificacion",
+      "resultado": "acierto",
+      "turnos": [
+        {
+          "turno": 1,
+          "resultado": "acierto",
+          "detalle": "",
+          "ruta": "revisar_gasto",
+          "decision": "observar",
+          "estado_final": "ok",
+          "id_ejecucion": "8994db8e-610c-41e2-a9c3-b5482132c695"
+        }
+      ]
+    }
+  ]
+}
