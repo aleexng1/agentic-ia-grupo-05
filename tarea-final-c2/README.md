@@ -245,7 +245,7 @@ Todo está en `datos/` y es ficticio.
 | `datos/fondos_ficticios.json` | Fondos por rendir (FR-001, FR-020, FR-050), que lee el servidor MCP |
 | `datos/rendiciones_prueba.csv` | Rendiciones de prueba (de tarea-final-c1) |
 | `datos/cargos_niveles.json` | Cargos, niveles y topes para el GraphRAG (catálogo propuesto, pendiente de aprobación) |
-| `datos/boletas/boleta-0{1..4}-*.png` + `declarado.json` | 4 boletas («DOCUMENTO DE PRUEBA»): una que cuadra, monto distinto, fecha distinta e ilegible |
+| `datos/boletas/boleta-0{1..5}-*.png` + `declarado.json` | 5 boletas («DOCUMENTO DE PRUEBA»): una que cuadra, monto distinto, fecha distinta, ilegible, y la 05 (la 01 con otro monto) |
 | `evaluacion/golden_set.json` | Golden set v1.0: 57 casos (59 turnos) con ruta y decisión esperadas |
 
 ---

@@ -76,6 +76,25 @@
         "folio": "no",
         "categoria": "no"
       }
+    },
+    {
+      "archivo": "boleta-05-monto-distinto-01.png",
+      "mime_type": "image/png",
+      "caso": "monto distinto (misma boleta 01)",
+      "declarado": {
+        "monto": 45000,
+        "fecha": "2026-10-02",
+        "rut_emisor": "11.111.111-1",
+        "folio": "000123",
+        "categoria": "Gasolina (vehículo propio)"
+      },
+      "esperado_cuadra": {
+        "monto": "no",
+        "fecha": "sí",
+        "rut_emisor": "sí",
+        "folio": "sí",
+        "categoria": "sí"
+      }
     }
   ]
 }
