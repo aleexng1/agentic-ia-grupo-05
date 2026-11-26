@@ -5,9 +5,9 @@ Solicitudes distintas activan flujos distintos del **mismo** agente principal. L
 
 | Archivo | Ruta esperada | Estado |
 |---|---|---|
-| `01-consulta-politica.md` | `consulta_politica` | recapturado 2026-11-24 en `main` integrado, con el flujo de Eduardo y Postgres: el router elige `consulta_politica` (se ve en el log y en `GET /registro/{id}`), pero sin acceso a Redis el flujo responde **502** «No se pudo completar la búsqueda documental (Redis o embeddings)», sin inventar. **Volver a capturar cuando haya `REDIS_URL` real**: esa es la versión para la nota |
+| `01-consulta-politica.md` | `consulta_politica` | recapturado 2026-11-26 con Redis (valores de desarrollo del grupo, solo lectura) y Postgres: el router elige `consulta_politica` y el flujo responde con **RG-03** citando su fuente (`datos/politica_ficticia.md#reglas-generales/RG-03`), con `id_ejecucion` y `GET /registro/{id}`. Esta es la versión para la nota |
 | `02-fuera-de-alcance.md` | `fuera_de_alcance` | capturado 2026-11-24 con Gemini: `estado_final = ok` |
-| `03-revisar-gasto.md` | `revisar_gasto` | recapturado 2026-11-24 en `main` integrado (ReAct de Matías, MCP, juez y Postgres): **APROBAR P02 / Peaje / CTA-6100** en 5 pasos, igual a lo esperado de GS-01; la ruta y el `estado_final = ok` se ven en la respuesta y en `GET /registro/{id}` |
+| `03-revisar-gasto.md` | `revisar_gasto` | recapturado 2026-11-26 con Redis (ReAct de Matías, MCP, juez y Postgres): **APROBAR P02 / Peaje / CTA-6100** en 4 pasos, igual a lo esperado de GS-01; la ruta y el `estado_final = ok` se ven en la respuesta y en `GET /registro/{id}` |
 
 Cómo generarla (desde `tarea-final-c2/`, con `.env` completo):
 ```bash

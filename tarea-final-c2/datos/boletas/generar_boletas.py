@@ -1,4 +1,4 @@
-"""Genera 4 boletas FICTICIAS como imagen PNG y el JSON con lo declarado en cada rendición.
+"""Genera 5 boletas FICTICIAS como imagen PNG y el JSON con lo declarado en cada rendición.
 
 Todo es inventado: emisores, RUT (11.111.111-1, 22.222.222-2, 33.333.333-3, de ejemplo),
 folios y montos. Cada imagen dice «DOCUMENTO DE PRUEBA» en grande.
@@ -7,8 +7,11 @@ folios y montos. Cada imagen dice «DOCUMENTO DE PRUEBA» en grande.
     boleta-02-monto-distinto.png   la boleta dice $62.000; se declaró $52.000
     boleta-03-fecha-distinta.png   la boleta es del 12-09-2026; se declaró 2026-10-12
     boleta-04-ilegible.png         borrosa y con ruido: no se puede leer
+    boleta-05-monto-distinto-01.png  igual a la 01 (emisor, RUT, folio y fecha), pero dice $54.000;
+                                     se declaró $45.000 (evidencia A2A «uso del resultado», capturar_uso.py)
 
 Uso (desde tarea-final-c2/):  pip install Pillow && python datos/boletas/generar_boletas.py
+Solo algunas (no reescribe las otras imágenes):  python datos/boletas/generar_boletas.py boleta-05
 Pillow solo hace falta para volver a generarlas; las imágenes ya están en el repo.
 """
 
@@ -64,6 +67,16 @@ BOLETAS = [
         "esperado_cuadra": {"monto": "no", "fecha": "no", "rut_emisor": "no", "folio": "no", "categoria": "no"},
         "ilegible": True,
     },
+    {
+        "archivo": "boleta-05-monto-distinto-01.png",
+        "caso": "monto distinto (misma boleta 01)",
+        "emisor": "Estación de Servicio El Roble (ficticia)",
+        "rut": "11.111.111-1", "folio": "000123", "fecha_impresa": "02-10-2026",
+        "items": [("Gasolina 95 octanos  38,6 L", 54000)], "total": 54000,
+        "declarado": {"monto": 45000, "fecha": "2026-10-02", "rut_emisor": "11.111.111-1", "folio": "000123",
+                      "categoria": "Gasolina (vehículo propio)"},
+        "esperado_cuadra": {"monto": "no", "fecha": "sí", "rut_emisor": "sí", "folio": "sí", "categoria": "sí"},
+    },
 ]
 
 
@@ -117,15 +130,16 @@ def dibujar(boleta: dict) -> Image.Image:
     return imagen
 
 
-def main() -> None:
+def main(solo: list[str] | None = None) -> None:
     declarado = []
     for boleta in BOLETAS:
-        dibujar(boleta).save(CARPETA / boleta["archivo"], optimize=True)
+        if not solo or any(nombre in boleta["archivo"] for nombre in solo):
+            dibujar(boleta).save(CARPETA / boleta["archivo"], optimize=True)
+            print("generada", boleta["archivo"])
         declarado.append({
             "archivo": boleta["archivo"], "mime_type": "image/png", "caso": boleta["caso"],
             "declarado": boleta["declarado"], "esperado_cuadra": boleta["esperado_cuadra"],
         })
-        print("generada", boleta["archivo"])
     (CARPETA / "declarado.json").write_text(
         json.dumps({"descripcion": "Boletas FICTICIAS para el verificador A2A. Todo es inventado.",
                     "boletas": declarado}, ensure_ascii=False, indent=2) + "\n",
@@ -135,4 +149,6 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+
+    main(sys.argv[1:])

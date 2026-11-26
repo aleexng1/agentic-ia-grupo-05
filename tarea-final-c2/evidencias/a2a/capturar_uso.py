@@ -7,8 +7,9 @@ Qué hace (todo real: router, verificador, ReAct, juez y Postgres; nada guionado
 - Manda por /chat asíncrono (POST → 202 → GET /registro/{id}) la MISMA solicitud de revisar_gasto
   dos veces: mismo texto y mismo gasto (el de V-01 del golden set), con dos boletas distintas:
     a) boleta-01-cuadra.png         → se espera «aprobar»
-    b) boleta-02-monto-distinto.png → se espera «observar»
-  Lo único que cambia entre a) y b) es la imagen (y el thread_id, para no mezclar memoria).
+    b) boleta-05-monto-distinto-01.png → se espera «observar» por el piso por verificación
+  La boleta 05 es la 01 con otro monto ($54.000 contra $45.000 declarados): lo único que cambia
+  entre a) y b) es la imagen (y el thread_id, para no mezclar memoria).
 - Por cada corrida guarda la solicitud (de la imagen solo archivo, tamaño y SHA-256), el id_ejecucion,
   el encargo A2A, la respuesta del verificador, la propuesta del ReAct, el juez, el piso por
   verificación de nodo_cerrar, el veredicto final, la fila del registro de veredictos (leída justo
@@ -55,7 +56,7 @@ BOLETAS = PROYECTO / "datos" / "boletas"
 CASO_GOLDEN = "V-01"
 CORRIDAS = [
     ("a", "boleta-01-cuadra.png", "aprobar"),
-    ("b", "boleta-02-monto-distinto.png", "observar"),
+    ("b", "boleta-05-monto-distinto-01.png", "observar"),
 ]
 TRAZAS_DE_INTERES = ("juez", "piso_reglas", "piso_verificacion", "cerrar", "tiempo_agotado", "modelo_fallo")
 _CABECERA_TRAZA = re.compile(r"^── \[([a-z_]+)\] ──$")
