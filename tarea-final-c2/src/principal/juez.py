@@ -241,12 +241,14 @@ def _datos_juez(
 
 
 def _configurar_reintentos_juez(llm):
-    """Alinea el presupuesto de intentos del juez con el agente (valor 6)."""
+    """Fija los reintentos del juez: 1 si hay MODELO_RESPALDO, 2 si no (en c1 eran 6)."""
     if "max_retries" not in getattr(type(llm), "model_fields", {}):
         raise TypeError("El cliente del juez no permite configurar max_retries")
     # LangChain lee este atributo al preparar cada solicitud y el SDK convierte
     # el valor en HttpRetryOptions(attempts=...). No reconstruimos el cliente.
-    llm.max_retries = 6
+    # C2: con MODELO_RESPALDO el respaldo ES el reintento, así que el principal intenta 1 vez más
+    # y no 6 (con 6, el respaldo llegaba después de minutos: docs/medicion-tiempos.md).
+    llm.max_retries = 1 if os.getenv("MODELO_RESPALDO", "").strip() else 2
     return llm
 
 
