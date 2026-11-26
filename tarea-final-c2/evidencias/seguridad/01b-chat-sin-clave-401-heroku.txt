@@ -1,0 +1,24 @@
+﻿Evidencia REMOTA · 2026-11-25T22:08:36-03:00 · servicio: https://grupo05-tf-principal-seba-693519082f42.herokuapp.com (Heroku)
+
+── GET /health (público)
+   GET /health
+   → 200  {"ok":true}
+
+── POST /chat SIN cabecera X-API-Key
+   POST /chat  cuerpo={"thread_id": "evidencia-401-remoto", "texto": "Revisa este gasto: peaje $7.800, 2026-10-06"}
+   → 401  {"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+── POST /chat con X-API-Key vacía
+   POST /chat  cuerpo={"thread_id": "evidencia-401-remoto", "texto": "Revisa este gasto: peaje $7.800, 2026-10-06"}
+   cabeceras enviadas: {'X-API-Key': ''}
+   → 401  {"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
+── POST /chat con X-API-Key INCORRECTA
+   POST /chat  cuerpo={"thread_id": "evidencia-401-remoto", "texto": "Revisa este gasto: peaje $7.800, 2026-10-06"}
+   cabeceras enviadas: {'X-API-Key': 'clave-inventada-para-la-prueba'}
+   → 401  {"detail":"La clave de acceso es incorrecta."}
+
+── GET /registro/cualquier-id SIN clave
+   GET /registro/cualquier-id
+   → 401  {"detail":"Falta la clave de acceso. Envíala en la cabecera X-API-Key."}
+
