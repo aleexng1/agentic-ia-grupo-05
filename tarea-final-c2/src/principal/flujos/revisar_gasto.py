@@ -20,6 +20,7 @@ y los campos herramientas_usadas y estado_final del estado (EstadoRevision).
 import json
 import os
 import re
+from datetime import datetime, timezone
 from typing import NotRequired
 
 from langchain_core.messages import AIMessage, HumanMessage, SystemMessage, ToolMessage
@@ -109,6 +110,23 @@ class EstadoRevision(EstadoAgente):
     estado_final: NotRequired[str | None]  # "bloqueado" si se impidió una acción; None mientras corre
     verificacion: NotRequired[dict | None]  # respuesta del verificador A2A (o None si no hubo boleta)
     uso_respaldo: NotRequired[bool]  # True si respondió MODELO_RESPALDO en el ReAct o en el juez
+    hora_limite: NotRequired[str | None]  # ISO UTC; pasada esa hora no se registra nada (contratos §11.1 ter)
+
+
+MENSAJE_TIEMPO_AGOTADO = (
+    "Me detuve: se acabó el tiempo máximo de la ejecución. No registré ningún veredicto ni toqué el fondo."
+)
+
+
+def tiempo_agotado(estado: dict) -> bool:
+    """True si el turno ya pasó su hora_limite (contratos §11.1 ter). Sin hora_limite, nunca."""
+    hora = estado.get("hora_limite")
+    if not hora:
+        return False
+    limite = datetime.fromisoformat(hora)
+    if limite.tzinfo is None:  # el contrato pide UTC; si viene sin zona se asume UTC
+        limite = limite.replace(tzinfo=timezone.utc)
+    return datetime.now(timezone.utc) >= limite
 
 
 # Separador con que el gasto viaja dentro del mensaje (mismo texto que en tarea-final-c1).
@@ -127,7 +145,9 @@ def _obtener_respaldo():
         return None
     from langchain_google_genai import ChatGoogleGenerativeAI
 
-    return ChatGoogleGenerativeAI(model=nombre, temperature=TEMPERATURA)
+    # Es el último recurso del turno: 1 reintento y 20 s por llamada (lo mismo que Sebastián
+    # fija en obtener_llm), para no dejar colgado el /chat.
+    return ChatGoogleGenerativeAI(model=nombre, temperature=TEMPERATURA, max_retries=1, timeout=20)
 
 
 def _modelos_react() -> list[tuple[str, object]]:
@@ -435,6 +455,10 @@ def construir_agente(checkpointer=None):
     def nodo_llm(estado: EstadoRevision) -> dict:
         # Una vuelta del ciclo: el LLM lee el historial y decide (pensar → actuar).
         _trazar_observaciones(estado["messages"])
+        if tiempo_agotado(estado):
+            # Pasada la hora límite no se sigue gastando llamadas: el turno termina en "error".
+            registrar_traza("tiempo_agotado", {"donde": "antes de llamar al modelo", "pasos": estado.get("pasos", 0)})
+            return {"messages": [AIMessage(MENSAJE_TIEMPO_AGOTADO)], "estado_final": "error"}
         pasos = estado.get("pasos", 0) + 1
         respuesta, respondio_respaldo = invocar_con_respaldo(
             modelos, [SystemMessage(PROMPT_SISTEMA), *estado["messages"]]
@@ -559,7 +583,7 @@ def construir_agente(checkpointer=None):
 
     def nodo_cerrar(estado: EstadoRevision) -> dict:
         """Cierre normal del ciclo (veredicto válido o cierre seguro): estado_final = "ok"."""
-        return {**_cerrar(estado), "estado_final": "ok"}
+        return {"estado_final": "ok", **_cerrar(estado)}  # _cerrar puede devolver "error" (tiempo agotado)
 
     def _cerrar(estado: EstadoRevision) -> dict:
         """Aplica el piso de reglas, el juez, el fondo y el registro al veredicto final."""
@@ -627,7 +651,17 @@ def construir_agente(checkpointer=None):
             )
             ajustes.append(f"las reglas exactas exigen {piso.upper()} ({reglas})")
 
-        juicio = juzgar_con_validacion(gasto, clasificacion, validacion, veredicto)
+        if veredicto["decision"] == "aprobar":
+            juicio = juzgar_con_validacion(gasto, clasificacion, validacion, veredicto)
+        else:
+            # El juez solo puede bajar una aprobación: con observar o rechazar no cambia nada,
+            # así que no se gasta una llamada a Gemini (docs/medicion-tiempos.md).
+            juicio = {
+                "valido": True,
+                "razon": "Juez no consultado: la decisión no es aprobar.",
+                "evaluado": True,
+                "omitido": True,
+            }
         registrar_traza("juez", juicio)
         if not juicio.get("evaluado", False):
             if veredicto["decision"] == "aprobar":
@@ -644,6 +678,12 @@ def construir_agente(checkpointer=None):
             veredicto["decision"] = "observar"
             registrar_traza("piso_verificacion", {"gasto": gasto.get("id"), "motivo": motivo_verificacion})
             ajustes.append(motivo_verificacion)
+
+        if tiempo_agotado(estado):
+            # Última revisión justo antes de tocar el fondo y el registro (contratos §11.1 ter):
+            # /chat ya informó «error», así que no se guarda nada distinto a eso.
+            registrar_traza("tiempo_agotado", {"donde": "antes de registrar", "gasto": gasto.get("id")})
+            return {"messages": [AIMessage(MENSAJE_TIEMPO_AGOTADO)], "veredicto": None, "estado_final": "error"}
 
         fondo = estado.get("fondo") or buscar_fondo(gasto.get("id_fondo"))
         try:
@@ -708,7 +748,9 @@ def construir_agente(checkpointer=None):
         # "error" y no "fallback": no hubo veredicto ni salida de respaldo (contratos.md §8).
         return {"messages": [*cierres, aviso], "estado_final": "error"}
 
-    def elegir_siguiente(estado: EstadoAgente) -> str:
+    def elegir_siguiente(estado: EstadoRevision) -> str:
+        if estado.get("estado_final") == "error":
+            return END  # tiempo agotado: ni cerrar (registraría) ni seguir
         if not estado["messages"][-1].tool_calls:
             # Si el agente termina sin emitir estructura tras validar, se cierra de forma segura.
             if _hay_validacion_exitosa_en_turno(estado["messages"]):
@@ -769,9 +811,14 @@ def conversar_con_caso(
     gasto: Gasto,
     fondo: EstadoFondo | None = None,
     verificacion: dict | None = None,
+    hora_limite: datetime | None = None,
 ) -> str:
-    """Inicia un turno con el gasto original y, opcionalmente, el fondo y la verificación A2A."""
-    estado_inicial = {"gasto": gasto, "verificacion": verificacion}
+    """Inicia un turno con el gasto original y, opcionalmente, el fondo, la verificación A2A y la hora límite."""
+    estado_inicial = {
+        "gasto": gasto,
+        "verificacion": verificacion,
+        "hora_limite": hora_limite.isoformat() if hora_limite else None,
+    }
     if fondo is not None:
         estado_inicial["fondo"] = fondo
     return _conversar_con_estado(agente, mensaje, hilo, estado_inicial)
@@ -800,8 +847,12 @@ def revisar_caso(
     gasto: Gasto,
     fondo: EstadoFondo | None = None,
     verificacion: dict | None = None,
+    hora_limite: datetime | None = None,
 ) -> dict:
     """Revisa un gasto y devuelve lo que necesitan el router y la tabla `ejecuciones`.
+
+    `hora_limite` (datetime en UTC, contratos §11.1 ter): si pasa antes de terminar, el ciclo se
+    detiene, no se llama a registrar_veredicto ni se toca el fondo, y el turno es "error" sin veredicto.
 
     Es la entrega del flujo revisar_gasto para Alex (docs/reparto.md):
         {"respuesta": str, "pasos": int, "herramientas_usadas": list[str],
@@ -821,7 +872,7 @@ def revisar_caso(
     """
     if MARCA_GASTO not in mensaje:
         mensaje = mensaje + MARCA_GASTO + json.dumps(gasto, ensure_ascii=False)
-    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo, verificacion)
+    respuesta = conversar_con_caso(agente, mensaje, hilo, gasto, fondo, verificacion, hora_limite)
     estado = agente.get_state({"configurable": {"thread_id": hilo}}).values
     return {
         "respuesta": respuesta,
@@ -878,6 +929,7 @@ def _conversar_con_estado(agente, mensaje: str, hilo: str, estado_inicial: dict)
         "estado_final": None,
         "uso_respaldo": False,
         "verificacion": None,
+        "hora_limite": None,
         "gasto": None,
         "clasificacion": None,
         "validacion": None,

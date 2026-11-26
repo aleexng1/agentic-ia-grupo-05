@@ -205,6 +205,12 @@ Una fila por cada llamada a `/chat` (`src/comun/registro.py`). Va en **Postgres*
   `{"respuesta", "pasos", "herramientas_usadas", "estado_final", "veredicto"}`.
   `verificacion` es la respuesta del verificador A2A (§5): si no cuadra o no se pudo verificar, una
   aprobación baja a «observar» **antes** de tocar el fondo y de `registrar_veredicto`.
+  `hora_limite` (§11.1 ter, hecho): se revisa antes de cada llamada al modelo y justo antes de
+  registrar; si pasó, el turno es `"error"` sin veredicto, sin registro y sin tocar el fondo.
+- El juez solo se consulta si la decisión es «aprobar» (solo puede bajar una aprobación); con
+  «observar» o «rechazar» no se gasta esa llamada.
+- `MAX_PASOS_REACT=6` en `.env.example` y en Heroku (una revisión normal cierra en 5 vueltas); el
+  valor por defecto del código sigue en 10.
 
 ---
 
