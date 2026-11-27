@@ -108,17 +108,25 @@ def habilitado(monkeypatch):
     monkeypatch.setattr(fondos, "CONSULTA_FONDOS_HABILITADA", True)
 
 
-def test_deshabilitada_por_defecto(servicios):
+@pytest.mark.parametrize("pregunta", [
+    PREGUNTA,
+    "FR-020, Analista de Operaciones y P03:hotel",
+])
+def test_deshabilitada_por_defecto(servicios, pregunta):
     driver, _, _, rag = servicios
-    assert "no está habilitada" in flujo.responder_consulta(PREGUNTA, "hilo")["respuesta"]
+    assert "no está habilitada" in flujo.responder_consulta(pregunta, "hilo")["respuesta"]
     driver.assert_not_called()
     rag.invoke.assert_not_called()
 
 
-def test_graph_agrega_recorrido_que_no_da_rag_documental(habilitado, neo4j, servicios):
+@pytest.mark.parametrize("pregunta", [
+    PREGUNTA,
+    "¿Qué recorrido conecta FR-020 con Jefe de tienda y el tope P03:hotel?",
+])
+def test_graph_agrega_recorrido_que_no_da_rag_documental(habilitado, neo4j, servicios, pregunta):
     _, sesion, tx, rag = servicios
     solo_rag = flujo.responder_consulta("¿Cuál es el tope P03:hotel?", "hilo")
-    grafo = flujo.responder_consulta(PREGUNTA, "hilo")
+    grafo = flujo.responder_consulta(pregunta, "hilo")
 
     assert solo_rag["herramientas_usadas"] == ["buscar_politica"]
     assert grafo["herramientas_usadas"] == ["recorrido_fondo", "buscar_politica"]
@@ -150,7 +158,10 @@ def test_fondo_sin_vinculo(habilitado, neo4j, servicios):
     ("¿Cuál es el tope P03:hotel para FR-999?", "no figura"),
     ("¿Cuál es el tope de hotel para FR-020?", "P02"),
     ("¿Cuál es el tope de hotel o hostal P03 para FR-020?", "una por consulta"),
+    ("¿Tope P03:hotel para FR-020, cargo: Gerente de Finanzas?", "cargo solicitado es incompatible"),
+    ("¿Qué recorrido conecta FR-020 con Jefe de tienda y Analista de Operaciones en P03:hotel?", "un solo cargo"),
     ("¿Qué saldo le queda hoy a FR-020?", "MCP de fondos"),
+    ("¿Cuál es el saldo actual de FR-020 para Analista de Operaciones?", "MCP de fondos"),
     ("¿Cuál es el tope P03:hotel para FR-020 y su saldo inicial y actual?", "MCP de fondos"),
     ("¿Cuál es el tope P03:hotel para FR-020 y FR-001?", "un solo identificador"),
 ])
@@ -159,6 +170,17 @@ def test_control_antes_de_contactar_servicios(habilitado, servicios, pregunta, m
     assert mensaje in flujo.responder_consulta(pregunta, "hilo")["respuesta"]
     driver.assert_not_called()
     rag.invoke.assert_not_called()
+
+
+def test_cargo_incompatible_no_se_sustituye(habilitado, servicios):
+    resultado = flujo.responder_consulta("FR-020, Analista de Operaciones y P03:hotel", "hilo")
+    assert resultado == {
+        "respuesta": "El cargo solicitado es incompatible con el vínculo organizacional propuesto para FR-020.",
+        "fuentes": [],
+        "herramientas_usadas": [],
+    }
+    servicios[0].assert_not_called()
+    servicios[3].invoke.assert_not_called()
 
 
 def test_adaptador_directo_reconoce_ambiguedad(habilitado, servicios):

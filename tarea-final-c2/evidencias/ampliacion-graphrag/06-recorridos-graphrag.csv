@@ -1,0 +1,16 @@
+Cargo,Nivel,Politica,Categoria,Tope_CLP,Fuente,Estado
+Analista de Operaciones,Profesional,P02,Almuerzo,20000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Analista de Operaciones,Profesional,P02,Cena,45000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Analista de Operaciones,Profesional,P02,Desayuno,10000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Analista de Operaciones,Profesional,P02,Hostal,295000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Analista de Operaciones,Profesional,P02,Hotel,445000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P02,Almuerzo,20000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P02,Cena,45000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P02,Desayuno,10000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P02,Hostal,295000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P02,Hotel,445000,datos/politica_ficticia.md#P02,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P03,Almuerzo,45000,datos/politica_ficticia.md#P03,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P03,Cena,50000,datos/politica_ficticia.md#P03,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P03,Desayuno,20000,datos/politica_ficticia.md#P03,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P03,Hostal,265000,datos/politica_ficticia.md#P03,propuesta_academica_pendiente_de_aprobacion
+Jefe de tienda,Jefatura,P03,Hotel,325000,datos/politica_ficticia.md#P03,propuesta_academica_pendiente_de_aprobacion

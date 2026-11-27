@@ -104,6 +104,13 @@ class _Tope:
 
 
 @dataclass(frozen=True)
+class _Cargo:
+    nombre: str
+    nivel: str
+    id: str
+
+
+@dataclass(frozen=True)
 class _Pasaje:
     texto: str
     fuente: str
@@ -125,12 +132,12 @@ def _resultado(respuesta: str, usadas: list[str], fuentes=()) -> dict:
 
 
 @lru_cache(maxsize=1)
-def _organizacion() -> dict[str, tuple[str, str]]:
+def _organizacion() -> dict[str, _Cargo]:
     """Permite no reproducir nombres arbitrarios de una respuesta del grafo."""
     try:
         org = leer_catalogo(str(RUTA_CATALOGO)).organizacion_ficticia
         niveles = {n.id: n.nombre for n in org.niveles}
-        return {normalizar(c.nombre): (c.nombre, niveles[c.nivel_id]) for c in org.cargos}
+        return {normalizar(c.nombre): _Cargo(c.nombre, niveles[c.nivel_id], c.id) for c in org.cargos}
     except (OSError, ValueError):
         raise ErrorDeServicio("No se pudo verificar la propuesta organizacional de GraphRAG.") from None
 
@@ -315,13 +322,14 @@ def _recorrido(peticion: _Tope, usadas: list[str]) -> dict | None:
         raise ErrorDeServicio("No se pudo consultar el recorrido de GraphRAG en Neo4j.") from None
     if grafo is None:
         return None
+    cargo = _organizacion().get(peticion.cargo)
     if not (
         isinstance(grafo, dict)
         and isinstance(grafo.get("categoria"), str)
         and normalizar(grafo["categoria"]) == peticion.categoria
         and grafo.get("fuente") == fuente_para(peticion.politica)
         and type(grafo.get("tope_clp")) is int and 0 < grafo["tope_clp"] < 2**63
-        and _organizacion().get(peticion.cargo) == (grafo.get("cargo"), grafo.get("nivel"))
+        and cargo is not None and (cargo.nombre, cargo.nivel) == (grafo.get("cargo"), grafo.get("nivel"))
     ):
         raise ErrorDeServicio("Neo4j devolvió un recorrido incompatible con la propuesta de rendiciones.")
     return grafo
@@ -395,6 +403,13 @@ def _responder_fondo(clave: str, ids: list[str], usadas: list[str]) -> dict:
         return _resultado(peticion, usadas)
     if peticion is None:
         return _resultado("Indica una categoría y su política, por ejemplo P03:hotel.", usadas)
+    if ids[0].upper() == fondos.FONDO_PROPUESTO and peticion.cargo is not None:
+        cargo = _organizacion().get(peticion.cargo)
+        if cargo is None or cargo.id != fondos.CARGO_PROPUESTO:
+            return _resultado(
+                f"El cargo solicitado es incompatible con el vínculo organizacional propuesto para {fondos.FONDO_PROPUESTO}.",
+                usadas,
+            )
     usadas.append("recorrido_fondo")
     try:
         recorrido = fondos.recorrido_fondo(ids[0], f"{peticion.politica}:{slug(peticion.categoria)}")
