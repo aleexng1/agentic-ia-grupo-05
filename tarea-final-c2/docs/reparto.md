@@ -72,15 +72,19 @@ Criterios y puntos según [pauta.md](pauta.md). Cada evidencia muestra la **entr
 `docs/contratos.md`, `src/comun/contrato.py`, `src/comun/config.py`, `requirements.txt`,
 `.env.example`, `api/app.py`, `tests/test_humo.py`.
 
-## Pendientes que cruzan áreas
-- **Antes del despliegue (Sebastián):** `registro_veredictos` (hoy SQLite en
-  `src/principal/registro_veredictos.py`) pasa a Postgres, porque en Heroku el disco se borra al
-  reiniciar. Lo mismo para la tabla `ejecuciones` y la memoria por `thread_id`.
+## Pendientes que cruzan áreas (al 2026-11-26)
+- **Persistencia (Sebastián): hecha.** `registro_veredictos`, la tabla `ejecuciones` y la memoria
+  por `thread_id` están en Postgres (`contratos.md` §9). Sigue abierto, de Sebastián:
+  - agregar `"sin_ruta"` al `CHECK` de `ruta` (§7);
+  - guardar `en_proceso` y la respuesta completa en Postgres (§2).
 - **Despliegue (Sebastián):** opción preferida, buildpack de monorepo con `APP_BASE=tarea-final-c2`,
-  en dos apps de Heroku con el mismo `Procfile`:
+  en dos apps de Heroku con el `Procfile` de `tarea-final-c2/`:
   `APP_MODULE=api.app:app` (principal) y `APP_MODULE=src.verificador.app:app` (verificador).
   Alternativa: `git subtree push --prefix tarea-final-c2 heroku main`.
   **No tocar** el `Procfile`, el `requirements.txt` ni el `.slugignore` de la raíz (son del taller 02).
+  Faltan las Config Vars de §9 (el mismo `TOKEN_A2A` en las dos apps, `MAX_PASOS_REACT=6`, Redis,
+  Neo4j con `NEO4J_DATABASE`), un solo proceso y la evidencia.
 - **Verificador (Alex + Matías):** hecho (2026-11-25). Está protegido con `TOKEN_A2A`
   (`proteger_con_token_a2a`) y el principal manda el Bearer.
-- **`tests/test_humo.py::test_chat_sin_router_responde_501`:** se borra o se cambia a 200 cuando el router exista (Alex).
+- **`tests/test_humo.py::test_chat_sin_router_responde_501`:** hecho. La prueba ya no existe: el
+  router está en `main`.

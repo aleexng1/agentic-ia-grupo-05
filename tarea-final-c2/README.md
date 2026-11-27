@@ -8,9 +8,9 @@ ejecuta. Para leer las boletas le delega el trabajo, por **A2A**, a un segundo a
 **verificador de boletas**. Cada ejecución queda registrada en Postgres, con la ruta que corrió
 y cómo terminó.
 
-> **Estado (2026-11-25):** el código de las cuatro partes está unido en `main` y la suite pasa
-> (385 tests, con Gemini y Postgres de prueba). **Falta:** el despliegue en Heroku, el acceso a
-> Redis y Neo4j, y varias evidencias. El detalle está en
+> **Estado (2026-11-26):** el código de las cuatro partes está unido en `main` y la suite pasa
+> (481 tests sin Gemini y 6 con Gemini). Redis y Neo4j responden en local y el evaluador dio 57/57.
+> **Falta:** completar el despliegue en Heroku (Config Vars) y varias evidencias. El detalle está en
 > [docs/mapa-evidencias.md](docs/mapa-evidencias.md) y en el issue #100 del repositorio.
 > Lo que todavía no está hecho va marcado como **PENDIENTE (dueño)**.
 
@@ -45,7 +45,7 @@ Reglas que valen siempre:
 
 | Mensaje | Ruta esperada | Resultado esperado |
 |---|---|---|
-| «¿Cuál es el plazo máximo para rendir un gasto que hice en octubre?» | `consulta_politica` | La regla del plazo (RG-03), citando la fuente. **PENDIENTE (Eduardo):** sin acceso a Redis, hoy responde 502 «No se pudo completar la búsqueda documental (Redis o embeddings)» |
+| «¿Cuál es el plazo máximo para rendir un gasto que hice en octubre?» | `consulta_politica` | La regla del plazo (RG-03), citando la fuente (ver `evidencias/dos-recorridos/01-consulta-politica.md`) |
 | «Revisa este gasto rendido.» + `gasto` = GS-01 (peaje de $7.800, fondo FR-001) | `revisar_gasto` | `APROBAR`, P02 / Peaje / CTA-6100 (ver `evidencias/dos-recorridos/03-revisar-gasto.md`) |
 | «Revisa este gasto y su boleta adjunta.» + `gasto` + `boleta-02-monto-distinto.png` | `revisar_gasto` | El verificador lee $62.000 contra $52.000 declarados (`cuadra.monto = "no"`): `OBSERVAR`, y el registro también queda en «observar» |
 | «Escríbeme un poema sobre el lago Llanquihue.» | `fuera_de_alcance` | El texto fijo con lo que sí puede hacer; `estado_final = "ok"` |
@@ -201,7 +201,7 @@ Respuesta final (abreviada): la fila de `ejecuciones` más el estado y el `resul
   `(id_ejecucion: …)`. Nunca hay un resultado inventado.
 - **Tope global:** si la ejecución pasa de `TIEMPO_MAX_EJECUCION_SEG` (90 s), queda en `error` sin
   resultado. También vale con `?esperar=true`. La hora límite se le pasa al ReAct (`hora_limite`) para
-  que, pasado el tope, no registre el veredicto. **PENDIENTE (Matías):** que `revisar_caso` lo acepte.
+  que, pasado el tope, no registre el veredicto (hecho en #108).
 - **Modo síncrono** (como antes, para uso local, pruebas o el evaluador): `POST "$URL/chat?esperar=true"`
   responde `200` con la respuesta completa. En Heroku no sirve para `revisar_gasto` (corte a los 30 s).
 - **Límite:** el estado y la respuesta completa se guardan en la memoria del proceso. Tras un
@@ -211,8 +211,8 @@ Respuesta final (abreviada): la fila de `ejecuciones` más el estado y el `resul
   `--workers`, como en el `Procfile` actual) hasta que el registro guarde `en_proceso` y la respuesta.
   Si hubiera dos procesos, el `GET /registro/{id}` podría llegar al que no tiene esa ejecución y
   responder 404 o «sin resultado».
-- **PENDIENTE (Eduardo):** que el chat web consulte `/registro/{id}` hasta que termine. Hoy espera la
-  respuesta completa en el `POST`.
+- El chat web sigue el mismo flujo: manda el `POST`, recibe el `202` y consulta `/registro/{id}`
+  hasta que termine (#111).
 
 Revisar un gasto con su boleta (la imagen va en base64; aquí en modo síncrono, en local):
 
@@ -231,7 +231,7 @@ EOF
 ```
 
 Formato completo de la solicitud, la respuesta y los errores (401, 422, 502 con `id_ejecucion`):
-[docs/contratos.md](docs/contratos.md), secciones 2 y 11.1.
+[docs/contratos.md](docs/contratos.md), sección 2.
 
 ---
 
@@ -266,14 +266,15 @@ git ignora; en Heroku van como Config Vars. **Nunca** se suben valores reales.
 | `URL_VERIFICADOR` | Dirección del verificador, sin barra final | `http://127.0.0.1:8001` |
 | `TIMEOUT_A2A_SEG` | Segundos que el principal espera al verificador; si vence, «observar» + `fallback` | `20` (ver presupuesto en `docs/medicion-tiempos.md`) |
 | `FORZAR_FALLO_A2A` | `1` simula que el verificador falla (evidencia de fallo controlado) | `0` |
-| `MAX_PASOS_REACT` | Máximo de vueltas del ReAct por turno (condición de parada) | `10` |
+| `MAX_PASOS_REACT` | Máximo de vueltas del ReAct por turno (condición de parada) | `6` (10 si se omite) |
 | `TIEMPO_MAX_EJECUCION_SEG` | Tope global de una ejecución de `/chat`; si se pasa, queda en `error` sin resultado | `90` |
 | `MAX_EJECUCIONES_SIMULTANEAS` | Ejecuciones de `/chat` a la vez en el proceso; las demás esperan su turno | `4` |
 | `NIVEL_RAZONAMIENTO` | Razonamiento interno de Gemini en el router y el verificador (`minimal`, `low`, `medium`, `high` o `predeterminado`) | `minimal` |
 | `DATABASE_URL` | Postgres: `ejecuciones`, `veredictos` y memoria. Heroku la crea sola | ver sección 2 |
-| `REDIS_URL` | Redis con el índice de la política (RAG) | *(secreta)* · **PENDIENTE (Eduardo)** |
+| `REDIS_URL` | Redis con el índice de la política (RAG) | *(secreta)* · responde en local; en Heroku, **PENDIENTE (Sebastián)** |
 | `REDIS_PREFIJO` | Índice del grupo en Redis (no es secreto) | `grupo05_v15` |
-| `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j del GraphRAG | *(secretas)* · **PENDIENTE (Eduardo)** |
+| `NEO4J_URI` / `NEO4J_USER` / `NEO4J_PASSWORD` | Neo4j del GraphRAG | *(secretas)* · responde en local; en Heroku, **PENDIENTE (Sebastián)** |
+| `NEO4J_DATABASE` | Nombre de la base de Neo4j. En Aura es el id de la instancia, no «neo4j» | *(el de la instancia)* |
 | `N8N_WEBHOOK_URL` | Webhook del caso A2A adicional con n8n | **PENDIENTE (Alex)** |
 | `APP_MODULE` | Qué app levanta el `Procfile`: `api.app:app` o `src.verificador.app:app` | `api.app:app` |
 | `MOSTRAR_TRAZAS` | `1` muestra en la terminal cada paso del ReAct | `0` o `1` |
@@ -305,11 +306,11 @@ imágenes.
 
 | Ampliación | Puntos | Estado | Cómo reproducirla |
 |---|---|---|---|
-| RAG documental | 0,5 | Código en `main`. **PENDIENTE (Eduardo):** acceso a Redis y evidencia | Con `REDIS_URL`, `REDIS_PREFIJO` y `EMBEDDING_MODEL`: mandar a `/chat` «¿Cuál es el plazo máximo para rendir un gasto?» → la respuesta cita `[Fuente: …]` |
-| Evaluación con golden set | 0,5 | Set v1.0 y evaluador en `main`; primera corrida en `evidencias/ampliacion-evaluacion/`. **PENDIENTE (Alex):** corrida completa con todo unido | `python -m evaluacion.evaluar --validar` (formato), luego `python -m evaluacion.evaluar --pausa 20` con `DATABASE_URL` y el verificador levantado. Si se corta por cuota: `--retomar --pausa 20` |
+| RAG documental | 0,5 | Código en `main`; Redis responde en local. **PENDIENTE (Eduardo):** la evidencia propia en `evidencias/ampliacion-rag/` (`capturar_consultas.py` ya está) | Con `REDIS_URL`, `REDIS_PREFIJO` y `EMBEDDING_MODEL`: mandar a `/chat` «¿Cuál es el plazo máximo para rendir un gasto?» → la respuesta cita `[Fuente: …]` |
+| Evaluación con golden set | 0,5 | Hecho. Corrida final con todo unido: **57/57** casos, router 59/59 (`evidencias/ampliacion-evaluacion/informe-20261126T193234.md`) | `python -m evaluacion.evaluar --validar` (formato), luego `python -m evaluacion.evaluar --pausa 20` con `DATABASE_URL` y el verificador levantado. Si se corta por cuota: `--retomar --pausa 20` |
 | Memoria persistente | 0,5 | Checkpointer en Postgres en `main`. **PENDIENTE (Sebastián):** evidencia | Mandar dos mensajes con el mismo `thread_id`, reiniciar el principal y comprobar que el tercero recuerda la conversación |
-| MCP | 0,5 | Hecho (servidor stdio `fondos-los-alerces`, con `consultar_fondo`). Falta el `id_ejecucion` en la evidencia (Matías) | `python -m src.mcp_fondos.servidor --listar`, y una revisión de gasto en la que el ReAct llama a `consultar_fondo` |
-| GraphRAG | 1,0 | Código y catálogo en `main`. **PENDIENTE (Eduardo):** cargar Neo4j y evidencia | `python -m src.conocimiento.grafo.cargar_grafo --plan` (sin Neo4j). La carga real va con autorización (ver `src/conocimiento/grafo/README.md`). Después, «¿Cuál es el tope de hotel para un jefe de tienda?» por `/chat` |
+| MCP | 0,5 | Hecho (servidor stdio `fondos-los-alerces`, con `consultar_fondo`). El ReAct lo llama por `/chat`, con `id_ejecucion`, en `evidencias/dos-recorridos/03-revisar-gasto.md` | `python -m src.mcp_fondos.servidor --listar`, y una revisión de gasto en la que el ReAct llama a `consultar_fondo` |
+| GraphRAG | 1,0 | Código y catálogo en `main`; Neo4j responde en local (24 nodos, con `NEO4J_DATABASE`). **PENDIENTE (Eduardo):** aprobar el catálogo y la evidencia | `python -m src.conocimiento.grafo.cargar_grafo --plan` (sin Neo4j). La carga real va con autorización (ver `src/conocimiento/grafo/README.md`). Después, «¿Cuál es el tope de hotel para un jefe de tienda?» por `/chat` |
 | **De respaldo:** n8n A2A | 1,0 | **PENDIENTE (Alex):** no empezado | Un caso A2A adicional con n8n que **no** rehace la delegación al verificador (ver `n8n/README.md`) |
 
 ---
@@ -318,10 +319,10 @@ imágenes.
 
 | Integrante | Rama | Aportes |
 |---|---|---|
-| **Alex** | `c2tf/alex-integracion` | Caso, estructura y contratos. Router y grafo principal (`src/principal/router.py`, `grafo.py`, `fuera_de_alcance`). Verificador A2A (`src/verificador/`, `delegar_verificador`, cliente y executor A2A, canal con `TOKEN_A2A`). Golden set v1.0 y evaluador con retoma por cuota (`evaluacion/`). Evidencias de recorridos, A2A y evaluación. Medición de tiempos, mapa de evidencias y este README. **Pendiente:** n8n y la corrida final del evaluador |
-| **Matías Muñoz** | `c2tf/matias-react-seguridad` | Flujo `revisar_gasto` (ReAct con parada por veredicto o `MAX_PASOS_REACT`, piso por verificación antes de registrar, respaldo de modelo), juez, seguridad (acciones permitidas, bloqueo y `revisar_token_a2a` / `proteger_con_token_a2a`) y servidor MCP de fondos. **Pendiente:** evidencia del bloqueo en vivo y `id_ejecucion` en las evidencias del ReAct |
-| **Eduardo Basaure** | `c2tf/eduardo-conocimiento` | RAG de solo lectura sobre Redis, GraphRAG (catálogo de 24 nodos y 27 relaciones, carga y consulta en Neo4j), flujo `consulta_politica` con fuentes verificadas y chat web (`web/`). **Pendiente:** acceso a Redis y Neo4j, y sus evidencias |
-| **Sebastián Mardones** | `c2tf/sebastian-despliegue` | Persistencia en Postgres (tabla `ejecuciones`, registro de veredictos y checkpointer de memoria) y modelo de respaldo (`obtener_llm_con_respaldo`). **Pendiente:** despliegue en Heroku (dos apps y Config Vars) y las evidencias de despliegue, resiliencia y memoria |
+| **Alex** | `c2tf/alex-integracion` | Caso, estructura y contratos. Router y grafo principal (`src/principal/router.py`, `grafo.py`, `fuera_de_alcance`). Verificador A2A (`src/verificador/`, `delegar_verificador`, cliente y executor A2A, canal con `TOKEN_A2A`). Golden set v1.0 y evaluador con retoma por cuota (`evaluacion/`). Evidencias de recorridos, A2A y evaluación. Medición de tiempos, mapa de evidencias y este README. **Pendiente:** n8n |
+| **Matías Muñoz** | `c2tf/matias-react-seguridad` | Flujo `revisar_gasto` (ReAct con parada por veredicto o `MAX_PASOS_REACT`, piso por verificación antes de registrar, respaldo de modelo), juez, seguridad (acciones permitidas, bloqueo y `revisar_token_a2a` / `proteger_con_token_a2a`) y servidor MCP de fondos. Evidencias del ReAct y del bloqueo en vivo hechas (#109, #115) |
+| **Eduardo Basaure** | `c2tf/eduardo-conocimiento` | RAG de solo lectura sobre Redis, GraphRAG (catálogo de 24 nodos y 27 relaciones, carga y consulta en Neo4j), flujo `consulta_politica` con fuentes verificadas y chat web (`web/`). **Pendiente:** las evidencias de RAG y GraphRAG (Redis y Neo4j ya responden) |
+| **Sebastián Mardones** | `c2tf/sebastian-despliegue` | Persistencia en Postgres (tabla `ejecuciones`, registro de veredictos y checkpointer de memoria) y modelo de respaldo (`obtener_llm_con_respaldo`). **Pendiente:** completar el despliegue en Heroku (Config Vars, un solo proceso), `sin_ruta` en el `CHECK` y las evidencias de despliegue, resiliencia y memoria |
 
 ## Estructura
 
