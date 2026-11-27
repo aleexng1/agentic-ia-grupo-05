@@ -1,7 +1,7 @@
 # Decisiones de Alex (router, verificador A2A, delegar_verificador y golden set)
 
-Cada decisión con su motivo. Lo que cambia contratos está además en `contratos.md` §11
-(«agregado por Alex, revisar»).
+Cada decisión con su motivo. Lo que cambia contratos está además en `contratos.md`. Los agregados
+de Alex (§11) quedaron integrados el 2026-11-26 en §2, §5, §7 y §8; §11 dice dónde quedó cada uno.
 
 ## Etapa 1: router + grafo + /chat
 
@@ -73,6 +73,7 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     (el grafo corre en un hilo con su propio `asyncio.run`).
 18. **Las dos cabeceras a la vez** (X-API-Key provisoria + Bearer de `TOKEN_A2A` si existe): el
     cambio a `proteger_con_token_a2a` en el verificador queda en una línea, sin tocar el cliente.
+    *(Reemplazada por la decisión 35: hoy solo va el Bearer.)*
 19. **`tipo_fallo` en el error estructurado**, para que la resiliencia (Sebastián) y las evidencias
     distingan un timeout de un rechazo o de un verificador apagado.
 20. **Pillow no va a `requirements.txt`**: solo sirve para regenerar las boletas, que ya están en el
@@ -169,30 +170,31 @@ Cada decisión con su motivo. Lo que cambia contratos está además en `contrato
     - **El modo síncrono también respeta el tope** desde ahora. Si no, con `?esperar=true` el ReAct
       dejaría de registrar mientras `/chat` igual entregaría un veredicto.
 
-## Pendientes que dependen de otros (al 2026-11-24)
+## Pendientes que dependen de otros (escritos el 2026-11-24; estado al 2026-11-26)
 
-- **Matías:** el ReAct registra su veredicto (`registro_veredictos`) antes de que el grafo aplique
+Siguen abiertos solo `sin_ruta` y el `DATABASE_URL` local (los dos de Sebastián, en el #100). Los
+demás se resolvieron; se dejan tachados para que se vea de dónde salió cada cambio.
+
+- ~~**Matías:** el ReAct registra su veredicto (`registro_veredictos`) antes de que el grafo aplique
   el piso por verificación. Si la boleta no cuadra, `/chat` responde «observar», pero el registro
-  queda en «aprobar». Propuesta: que `revisar_caso` reciba el resultado del verificador y aplique
-  el piso antes de registrar (o que el grafo vuelva a registrar). Comprobado con una prueba de
-  integración local (grafo + ReAct real con LLM guionado + A2A real), que no se subió.
+  queda en «aprobar».~~ **Resuelto en #103:** `revisar_caso` recibe `verificacion` y aplica el piso
+  (`motivo_piso_verificacion` en `nodo_cerrar`) antes de registrar.
 - ~~Cambiar `proteger_app` por `proteger_con_token_a2a` en `src/verificador/app.py`~~: hecho en
   `c2tf/alex-token-a2a` (decisión 35).
-- **Eduardo:** `responder_consulta`. Mientras no exista, `consulta_politica` termina en «Flujo
-  consulta_politica todavía no implementado» y sus casos del golden set salen como pendientes.
-- **Sebastián:** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
-  `ruta = "sin_ruta"` cuando el turno falla antes del router (§11.1). **Choque con #94:** su tabla
+- ~~**Eduardo:** `responder_consulta`. Mientras no existía, `consulta_politica` terminaba en «Flujo
+  consulta_politica todavía no implementado».~~ **Resuelto:** está en `main`.
+- **Sebastián (abierto):** `guardar_ejecucion` ya recibe las 8 columnas del contrato; con
+  `ruta = "sin_ruta"` cuando el turno falla antes del router (contratos §7). **Choque con #94:** su tabla
   tiene `CHECK (ruta IN (consulta_politica, revisar_gasto, fuera_de_alcance))`, así que esa fila se
   rechaza (queda solo el log de error). Comprobado con un Postgres local de prueba. Hay que elegir
   una salida: agregar `sin_ruta` al CHECK (propuesta) o que yo no guarde esas filas.
-- **Matías + Sebastián:** con #94, `registrar_veredicto` exige `DATABASE_URL`. Sin ella, todo
+- **Sebastián (abierto):** con #94, `registrar_veredicto` exige `DATABASE_URL`. Sin ella, todo
   `revisar_gasto` que llega a un veredicto falla con 502 («Falta DATABASE_URL»). En local hay que
   tener un Postgres para correr el flujo completo y el evaluador.
-- **Matías:** `revisar_caso` devuelve `estado_final = "ok"` con `veredicto = None` cuando el
-  modelo cierra sin `emitir_veredicto`. En la corrida integrada pasó con V-04 (boleta ilegible).
-  §8 dice que «ok» es la parada por veredicto válido.
-- **Contrato §3 (después de unir):** la fila de `delegar_verificador` todavía dice «esqueleto». No
-  la cambio en mi PR porque la fila de al lado la cambió #95 y habría conflicto.
-- **Alex:** las evidencias con Gemini y `pytest -m necesita_llm` ya están hechas (2026-11-24).
-  Falta volver a capturar `dos-recorridos/01` y volver a correr el evaluador cuando estén unidos
-  #95 (Matías) y el flujo de Eduardo.
+- ~~**Matías:** `revisar_caso` devuelve `estado_final = "ok"` con `veredicto = None` cuando el
+  modelo cierra sin `emitir_veredicto` (V-04, boleta ilegible).~~ **Resuelto en #103:** ahora es
+  `"error"` (contratos §8).
+- ~~**Contrato §3 (después de unir):** la fila de `delegar_verificador` todavía dice «esqueleto».~~
+  **Resuelto en #101.**
+- ~~**Alex:** volver a capturar `dos-recorridos/01` y volver a correr el evaluador.~~ **Resuelto en
+  #113** (recorridos 01 y 03 con Redis) **y #114** (evaluador 57/57).
