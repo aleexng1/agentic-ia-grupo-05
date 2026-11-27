@@ -12,15 +12,18 @@ from typing import Literal
 
 from langchain_core.exceptions import OutputParserException
 from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.tools import ToolException
 from pydantic import BaseModel, ConfigDict, Field, ValidationError
 
 from src.comun import modelos
 from src.comun.contrato import Fragmento
 from src.comun.errores import ErrorDeServicio, ocultar_secretos
+from src.conocimiento.grafo import fondos
 from src.conocimiento.grafo.catalogo import RUTA_CATALOGO, fuente_para, leer_catalogo, normalizar, slug
+from src.conocimiento.grafo.conexion import ErrorGrafo
 from src.conocimiento.grafo.consultar import tope_para
-from src.conocimiento.rag.cargar_indice import RUTA_POLITICA, _preparar_documentos
-from src.conocimiento.rag.rag import buscar_politica
+from src.conocimiento.rag.rag import ErrorIntegridadDocumental, buscar_politica
+from src.conocimiento.rag.referencia import coincide_con_referencia
 
 _SIN_EVIDENCIA = "No encontré evidencia suficiente en la política de rendiciones para responder esa consulta."
 _SOLO_LECTURA = "Solo puedo consultar la política de rendiciones; no revelo credenciales ni ejecuto cambios."
@@ -82,6 +85,15 @@ _NO_CARGO = {
     "rendicion", "proveedor", "cliente", "gasto", "gastos", "ir", "traslado",
 }
 _CORTE = re.compile(r"\s+(?:para|durante|en|entre|segun|p[0-9]{2})\b\s*|[¿?.,;()]")
+_FONDO = re.compile(r"\bfr-[0-9]{3}(?![\w-])")
+_SALDO_INICIAL = re.compile(r"\bsaldo inicial(?: ficticio)?\b")
+_SALDO_OPERATIVO = re.compile(
+    r"\b(?:saldos?|disponib(?:le|les|ilidad)|queda[n]?|remanente|restante|en tiempo real)\b"
+)
+_SALDO_ACTUAL = re.compile(
+    r"\b(?:saldo (?:inicial(?: ficticio)? (?:y|o|versus) (?:el )?)?"
+    r"(?:actual|disponible|operativo|vigente)|cuanto (?:le )?queda)\b"
+)
 
 
 @dataclass(frozen=True)
@@ -110,18 +122,6 @@ def _resultado(respuesta: str, usadas: list[str], fuentes=()) -> dict:
         "fuentes": list(dict.fromkeys(fuentes)),
         "herramientas_usadas": usadas,
     }
-
-
-@lru_cache(maxsize=1)
-def _referencia() -> dict[str, tuple[str, str]]:
-    """Referencia de integridad: nunca se usa como sustituto de una recuperación."""
-    try:
-        return {
-            doc["fuente"]: (doc["politica"], doc["texto_completo"])
-            for doc in _preparar_documentos(RUTA_POLITICA.read_text(encoding="utf-8"))
-        }
-    except (OSError, ValueError):
-        raise ErrorDeServicio("No se pudo verificar la referencia documental de rendiciones.") from None
 
 
 @lru_cache(maxsize=1)
@@ -198,19 +198,22 @@ def _recuperar(consulta: str, usadas: list[str]) -> tuple[list[Fragmento], set[s
             for f in fragmentos
         ):
             raise ValueError
+    except ErrorIntegridadDocumental as error:
+        raise ErrorDeServicio(str(error)) from None
     except Exception:
         raise ErrorDeServicio("No se pudo completar la búsqueda documental (Redis o embeddings).") from None
 
     if not fragmentos:
         return [], set()
-    referencia = _referencia()
     verificados, descartados = [], set()
-    for frag in fragmentos:
-        texto = frag["texto"].replace("\r\n", "\n").strip()
-        if referencia.get(frag["fuente"]) == (frag["politica"], texto):
-            verificados.append(frag)
-        else:
-            descartados.add(frag["fuente"])
+    try:
+        for frag in fragmentos:
+            if coincide_con_referencia(frag["fuente"], frag["politica"], frag["texto"]):
+                verificados.append(frag)
+            else:
+                descartados.add(frag["fuente"])
+    except (OSError, ValueError):
+        raise ErrorDeServicio("No se pudo verificar la referencia documental de rendiciones.") from None
     return verificados, descartados
 
 
@@ -324,8 +327,7 @@ def _recorrido(peticion: _Tope, usadas: list[str]) -> dict | None:
     return grafo
 
 
-def _responder_tope(peticion: _Tope, usadas: list[str]) -> dict:
-    grafo = None
+def _responder_tope(peticion: _Tope, usadas: list[str], grafo: dict | None = None) -> dict:
     if peticion.cargo:
         grafo = _recorrido(peticion, usadas)
         if grafo is None:
@@ -357,6 +359,21 @@ def _responder_tope(peticion: _Tope, usadas: list[str]) -> dict:
         f"El tope documental para {categoria} en {peticion.politica} "
         f"({documento['politica']}) es ${pesos} CLP por documento. [Fuente: {fuente}]"
     )
+    if grafo is not None and "fondo" in grafo:
+        saldo = grafo["saldo_inicial_ficticio_clp"]
+        comparacion = "supera" if monto > saldo else "es igual a" if monto == saldo else "es menor que"
+        saldo_pesos = f"{saldo:,}".replace(",", ".")
+        fuente_saldo = grafo["fuente_saldo_inicial"]
+        respuesta += (
+            f" GraphRAG recuperó {grafo['fondo']} → {grafo['cargo']} → {grafo['nivel']} → "
+            f"{grafo['categoria_id']} → Tope ({grafo['tope_id']}). "
+            "El vínculo fondo–cargo pertenece a la propuesta académica ficticia y no sale del documento normativo. "
+            f"El tope documental {comparacion} el saldo inicial ficticio de ${saldo_pesos} CLP "
+            f"[Fuente del saldo inicial: {fuente_saldo}]. "
+            "El saldo inicial no es el saldo actual; el saldo operativo corresponde al MCP de fondos. "
+            "Esta comparación no autoriza un gasto."
+        )
+        return _resultado(respuesta, usadas, [fuente, fuente_saldo])
     if grafo is not None:
         respuesta += (
             f" En GraphRAG, {grafo['cargo']} → {grafo['nivel']} → {peticion.politica}:{slug(peticion.categoria)} "
@@ -364,6 +381,32 @@ def _responder_tope(peticion: _Tope, usadas: list[str]) -> dict:
             "El monto no depende del nivel y el recorrido no autoriza un gasto."
         )
     return _resultado(respuesta, usadas, [fuente])
+
+
+def _responder_fondo(clave: str, ids: list[str], usadas: list[str]) -> dict:
+    if _SALDO_ACTUAL.search(clave) or _SALDO_OPERATIVO.search(_SALDO_INICIAL.sub("", clave)):
+        return _resultado("El saldo actual corresponde al MCP de fondos; esta consulta de política no lo consulta.", usadas)
+    if not fondos.CONSULTA_FONDOS_HABILITADA:
+        return _resultado("La consulta de GraphRAG con fondos aún no está habilitada.", usadas)
+    if len(ids) != 1:
+        return _resultado("¿Qué fondo quieres consultar? Indica un solo identificador FR-000.", usadas)
+    peticion = _interpretar_tope(f"tope {clave}")
+    if isinstance(peticion, str):
+        return _resultado(peticion, usadas)
+    if peticion is None:
+        return _resultado("Indica una categoría y su política, por ejemplo P03:hotel.", usadas)
+    usadas.append("recorrido_fondo")
+    try:
+        recorrido = fondos.recorrido_fondo(ids[0], f"{peticion.politica}:{slug(peticion.categoria)}")
+    except ToolException as error:
+        return _resultado(str(error), usadas)
+    except ErrorGrafo as error:
+        raise ErrorDeServicio(str(error)) from None
+    if recorrido is None:
+        return _resultado(
+            "No existe un vínculo propuesto para ese fondo y categoría en el grafo de rendiciones.", usadas,
+        )
+    return _responder_tope(_Tope(peticion.politica, peticion.categoria, None), usadas, recorrido)
 
 
 def responder_consulta(texto: str, thread_id: str) -> dict:
@@ -380,6 +423,9 @@ def responder_consulta(texto: str, thread_id: str) -> dict:
     usadas = []
     if _ACCIONES.search(clave) or ocultar_secretos(texto) != texto:
         return _resultado(_SOLO_LECTURA, usadas)
+    ids = list(dict.fromkeys(_FONDO.findall(clave)))
+    if re.search(r"\bfr-", clave) or (re.search(r"\bfondos?\b", clave) and _SALDO_ACTUAL.search(clave)):
+        return _responder_fondo(clave, ids, usadas)
     peticion = _interpretar_tope(clave)
     if isinstance(peticion, str):
         return _resultado(peticion, usadas)
