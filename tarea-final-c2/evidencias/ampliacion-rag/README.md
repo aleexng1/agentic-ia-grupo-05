@@ -101,3 +101,25 @@ los fragmentos brutos recuperados ni sustituye una captura de Neo4j.
 Revisar manualmente los JSON antes de versionarlos: el filtro no cubre todo
 dato personal (por ejemplo, correos o rutas locales en texto libre). Se verificó
 `--help` y se revisó el código, sin llamadas de red ni nueva suite.
+
+
+## Evidencia integrada del equipo (26-11-2026)
+
+- ID: a65dab23-1152-4a93-b336-31c2a99db0bd.
+- POST /chat: HTTP 202.
+- GET /registro: HTTP 200.
+- Ruta: consulta_politica.
+- Estado final: ok.
+- Herramienta: buscar_politica.
+- Duracion: 9654 ms.
+- Fuente: RG-03.
+
+[ evidencia original ](../dos-recorridos/01-consulta-politica.md).
+
+Caso GS-33 aprobado:
+ID 7f70fe18-74a0-47a5-bb7e-c315c5bf0ebc.
+
+[Informe de evaluacion](../ampliacion-evaluacion/informe-20261126T193234.json).
+
+Evidencia historica del equipo mediante API local.
+No acredita Heroku, H03 real ni la extension de fondos.
