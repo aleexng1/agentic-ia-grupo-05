@@ -86,7 +86,10 @@ Respuesta completa (el `200` síncrono, y el `resultado` de `GET /registro/{id}`
 }
 ```
 En la ruta `revisar_gasto` se agrega `"veredicto": {Veredicto}` (§4) cuando lo hay y, si hubo
-boleta, `"verificacion"` (lo que devolvió `delegar_verificador`, §5).
+boleta, `"verificacion"` (lo que devolvió `delegar_verificador`, §5). Si el turno terminó en
+`"error"` sin veredicto y alguna herramienta del ReAct falló (y no se recuperó después), se agrega
+`"herramientas_con_error": [{"herramienta": "consultar_fondo", "motivo": "…"}]`. `motivo` es el
+mensaje de la `ToolException`, sin claves, o `null`.
 
 Errores (todos con el formato `{"detail": "mensaje en una línea"}`):
 
@@ -118,12 +121,36 @@ su turno, dentro del mismo tope.
 - **en proceso:** `{"id_ejecucion", "estado": "en_proceso", "thread_id", "inicio", "segundos", "resultado": null}`;
 - **terminada:** los campos de la fila de `ejecuciones` (§7) más:
   - `"estado"` (`ok` / `bloqueado` / `fallback` / `error`);
-  - `"resultado"` (la respuesta completa) o `"detail"` (el mensaje de error, que termina con
-    `(id_ejecucion: …)`);
+  - `"resultado"` (la respuesta completa, o `null` si falló sin salida);
+  - `"detail"`: `null` si hubo resultado normal. Si terminó en `"error"` sin veredicto, o falló sin
+    salida, un mensaje para la persona que dice qué pasó. Termina con `(id_ejecucion: …)`, no trae
+    trazas ni claves y nunca inventa un veredicto (tabla de abajo);
   - `"inicio"`, `"fin"` y `"segundos"`;
 - **si el proceso se reinició:** solo queda la fila: `"estado" = estado_final` y `"resultado": null`.
 
 `404` si no existe. `503` si la ejecución no está en la memoria del proceso y la base no responde.
+
+**`detail` cuando no hay veredicto** (`src/principal/en_segundo_plano.py`, `detalle_sin_veredicto` y
+`detalle_de_falla`). Se arma con lo que ya devuelven el ReAct y el grafo, sin cambiar el ReAct:
+
+| Caso | Cómo se reconoce | `detail` (antes de `(id_ejecucion: …)`) |
+|---|---|---|
+| Tope de pasos | «Me detuve: alcancé el máximo de N pasos…» (nodo `parada`) | «No se pudo completar la revisión: el agente llegó al máximo de N pasos sin emitir un veredicto. El gasto no fue registrado.» |
+| Hora límite | «Me detuve: se acabó el tiempo máximo…» (`hora_limite`, §8) | «No se pudo completar la revisión: se acabó el tiempo máximo de la ejecución (N s) antes de terminar. El gasto no fue registrado. El fondo no cambió.» |
+| Falla de una herramienta | `herramientas_con_error` (observación con `status="error"`) | «No se pudo completar la revisión: la herramienta consultar_fondo falló (motivo). El gasto no fue registrado.» |
+| El modelo cerró sin veredicto | `error` sin veredicto y sin lo anterior | «No se pudo completar la revisión: el modelo terminó sin emitir un veredicto. El gasto no fue registrado.» |
+| Falla del modelo | `ErrorDeEjecucion` con un mensaje de Gemini (clave, cuota, permiso, modelo, no disponible) | En `revisar_gasto`: «No se pudo completar la revisión: el modelo no respondió. <mensaje>. El gasto no fue registrado.» Antes de elegir ruta: «No se pudo completar la solicitud: el modelo no respondió. <mensaje>.» |
+| Falla de otro servicio | `ErrorDeEjecucion` con otro mensaje (Postgres, tiempo agotado, sin conexión) | En `revisar_gasto`: «No se pudo completar la revisión: <mensaje>. No se entregó ningún veredicto.» |
+| Tope global | «La ejecución superó el tiempo máximo de N s…» | «La ejecución superó el tiempo máximo de N s y se dio por terminada sin resultado. No se entrega ningún veredicto; vuelve a intentarlo.» |
+| Flujo no implementado | «Flujo X todavía no implementado» | «No se pudo completar: el flujo X todavía no está implementado.» |
+
+Si el tope de pasos o la hora límite llegan después de que falló una herramienta, se agrega
+«Antes, la herramienta X falló (motivo).».
+
+«El gasto no fue registrado» se dice solo cuando es seguro: un `error` sin veredicto del ReAct nunca
+registra (§8), y una falla del modelo ocurre antes del cierre. Con el tope global o la falla de otro
+servicio no se afirma: el ReAct pudo alcanzar a registrar antes. `bloqueado` y una solicitud sin
+datos del gasto (`ok`, pide los campos) no llevan `detail`; su `respuesta` ya lo explica.
 
 **El estado y la respuesta completa viven en la memoria del proceso** (las últimas 500), porque la
 tabla `ejecuciones` no admite `en_proceso` ni guarda la respuesta. Con más de un proceso o dyno no

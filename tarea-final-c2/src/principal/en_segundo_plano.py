@@ -15,9 +15,13 @@ cliente consulta GET /registro/{id} hasta que el estado deje de ser "en_proceso"
   "error" con un mensaje claro y su fila se registra como "error" en ese momento. Python no
   permite matar un hilo: si el turno termina después, su resultado se descarta (nunca reemplaza
   al error) y su propio registro se ignora (mismo id_ejecucion).
+- Si la ejecución termina en "error" sin veredicto, GET /registro/{id} trae un `detail` para la
+  persona que dice qué pasó (detalle_sin_veredicto y detalle_de_falla). Nunca inventa un veredicto
+  ni copia trazas internas o claves (docs/contratos.md §2).
 """
 
 import os
+import re
 import threading
 import time
 from collections import OrderedDict
@@ -25,7 +29,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timezone
 from uuid import uuid4
 
-from src.comun.errores import traducir_error
+from src.comun.errores import ocultar_secretos, traducir_error
 from src.comun.registro import obtener_registro
 from src.principal import grafo as modulo_grafo
 from src.principal import router
@@ -54,6 +58,85 @@ def _grupo() -> ThreadPoolExecutor:
         if _GRUPO is None:
             _GRUPO = ThreadPoolExecutor(max_workers=_max_simultaneas(), thread_name_prefix="chat")
         return _GRUPO
+
+
+# ---------------------------------------------------------------------------
+# El `detail` de una ejecución que terminó sin veredicto
+# ---------------------------------------------------------------------------
+
+REVISION = "No se pudo completar la revisión"
+NO_REGISTRADO = "El gasto no fue registrado."
+# Textos que ya devuelven el ReAct (Matías) y el grafo; se reconocen sin cambiar esas piezas.
+_MAX_PASOS = re.compile(r"Me detuve: alcancé el máximo de (\d+) pasos")
+_HORA_LIMITE = "Me detuve: se acabó el tiempo máximo de la ejecución"
+_TOPE_GLOBAL = "La ejecución superó el tiempo máximo de"
+_NO_IMPLEMENTADO = re.compile(r"Flujo (\w+) todavía no implementado")
+
+
+def _con_id(texto: str, id_ejecucion: str) -> str:
+    return f"{texto} (id_ejecucion: {id_ejecucion})"
+
+
+def _herramientas_fallidas(resultado: dict) -> str | None:
+    """«la herramienta X falló (motivo)» o «las herramientas X e Y fallaron», o None."""
+    fallidas = [h for h in resultado.get("herramientas_con_error") or [] if isinstance(h, dict) and h.get("herramienta")]
+    if not fallidas:
+        return None
+    if len(fallidas) == 1:
+        motivo = fallidas[0].get("motivo")
+        return f"la herramienta {fallidas[0]['herramienta']} falló" + (f" ({motivo})" if motivo else "")
+    nombres = [h["herramienta"] for h in fallidas]
+    return f"las herramientas {', '.join(nombres[:-1])} y {nombres[-1]} fallaron"
+
+
+def detalle_sin_veredicto(resultado: dict, id_ejecucion: str, tope_seg: float) -> str | None:
+    """Mensaje para la persona cuando la ejecución terminó en "error" sin veredicto; None si no aplica.
+
+    Usa solo lo que ya devuelve el grafo: `respuesta` (los mensajes fijos del ReAct y del grafo),
+    `ruta`, `veredicto` y `herramientas_con_error`. En revisar_gasto, un "error" sin veredicto
+    nunca registra el gasto (contratos §8), por eso se puede decir. Con el tope global no: el
+    ReAct pudo alcanzar a registrar antes de que venciera.
+    """
+    if resultado.get("estado_final") != "error" or resultado.get("veredicto"):
+        return None
+    respuesta = str(resultado.get("respuesta") or "")
+    ruta = resultado.get("ruta")
+    if _TOPE_GLOBAL in respuesta:
+        return _con_id(f"La ejecución superó el tiempo máximo de {tope_seg:g} s y se dio por terminada sin resultado."
+                       " No se entrega ningún veredicto; vuelve a intentarlo.", id_ejecucion)
+    if (encontrado := _NO_IMPLEMENTADO.search(respuesta)):
+        return _con_id(f"No se pudo completar: el flujo {encontrado.group(1)} todavía no está implementado.", id_ejecucion)
+    if ruta != "revisar_gasto":
+        primera = ocultar_secretos(respuesta.strip().splitlines()[0][:200]) if respuesta.strip() else ""
+        return _con_id("No se pudo completar la solicitud" + (f": {primera}" if primera else "."), id_ejecucion)
+    herramienta = _herramientas_fallidas(resultado)
+    antes = f" Antes, {herramienta}." if herramienta else ""
+    if (encontrado := _MAX_PASOS.search(respuesta)):
+        texto = (f"{REVISION}: el agente llegó al máximo de {encontrado.group(1)} pasos sin emitir un veredicto."
+                 f"{antes} {NO_REGISTRADO}")
+    elif _HORA_LIMITE in respuesta:
+        texto = (f"{REVISION}: se acabó el tiempo máximo de la ejecución ({tope_seg:g} s) antes de terminar."
+                 f"{antes} {NO_REGISTRADO} El fondo no cambió.")
+    elif herramienta:
+        texto = f"{REVISION}: {herramienta}. {NO_REGISTRADO}"
+    else:
+        texto = f"{REVISION}: el modelo terminó sin emitir un veredicto. {NO_REGISTRADO}"
+    return _con_id(texto, id_ejecucion)
+
+
+def detalle_de_falla(error: Exception, id_ejecucion: str) -> str:
+    """Mensaje para una ejecución que falló sin salida (ErrorDeEjecucion del grafo)."""
+    mensaje = str(error).rstrip(".")
+    ruta = getattr(error, "ruta", None)
+    if getattr(error, "del_modelo", False):
+        # Falló Gemini (router, ReAct o lectura): ningún paso llegó a registrar.
+        if ruta == "revisar_gasto":
+            return _con_id(f"{REVISION}: el modelo no respondió. {mensaje}. {NO_REGISTRADO}", id_ejecucion)
+        return _con_id(f"No se pudo completar la solicitud: el modelo no respondió. {mensaje}.", id_ejecucion)
+    if ruta == "revisar_gasto":
+        mensaje = mensaje.removeprefix("No se pudo completar la consulta: ")
+        return _con_id(f"{REVISION}: {mensaje}. No se entregó ningún veredicto.", id_ejecucion)
+    return _con_id(f"{mensaje}.", id_ejecucion)
 
 
 def _ahora() -> str:
@@ -98,10 +181,11 @@ def _trabajar(id_ejecucion: str, thread_id: str, texto: str, imagen, gasto, limi
         if time.monotonic() > limite:  # esperó en la cola más que el tope: ni siquiera se empieza
             return
         resultado = modulo_grafo.ejecutar(thread_id, texto, imagen, gasto, id_ejecucion=id_ejecucion, limite=limite)
-        if not _terminar(id_ejecucion, resultado.get("estado_final", "error"), resultado=resultado):
+        detail = detalle_sin_veredicto(resultado, id_ejecucion, modulo_grafo.tiempo_max_ejecucion_seg())
+        if not _terminar(id_ejecucion, resultado.get("estado_final", "error"), resultado=resultado, detail=detail):
             _REGISTRO.warning("ejecución %s · terminó después del tope: se descarta su resultado", id_ejecucion)
     except modulo_grafo.ErrorDeEjecucion as error:
-        _terminar(id_ejecucion, "error", detail=f"{error} (id_ejecucion: {id_ejecucion})")
+        _terminar(id_ejecucion, "error", detail=detalle_de_falla(error, id_ejecucion))
     except router.MensajeInvalido as error:
         _terminar(id_ejecucion, "error", detail=str(error))
     except NotImplementedError as error:
