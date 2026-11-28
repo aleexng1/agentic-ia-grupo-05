@@ -10,6 +10,11 @@ from langchain_core.tools import ToolException, tool
 from src.comun.config import CARPETA_PROYECTO
 from src.comun.contrato import Fragmento
 from src.conocimiento.rag.lector_redis import ErrorLectura, LectorRedis
+from src.conocimiento.rag.referencia import coincide_con_referencia
+
+
+class ErrorIntegridadDocumental(ToolException):
+    """La evidencia recuperada no pudo contrastarse con la fuente versionada."""
 
 
 @lru_cache(maxsize=1)
@@ -71,6 +76,16 @@ def buscar_politica(consulta: str, k: int = 3) -> list[Fragmento]:
             raise ToolException("Redis devolvió una puntuación incompatible.") from None
         if not isfinite(puntaje_seguro):
             raise ToolException("Redis devolvió una puntuación incompatible.")
+        try:
+            coincide = coincide_con_referencia(fuente, politica, texto)
+        except (OSError, ValueError):
+            raise ErrorIntegridadDocumental(
+                "No se pudo verificar la referencia documental de rendiciones."
+            ) from None
+        if not coincide:
+            raise ErrorIntegridadDocumental(
+                "El fragmento recuperado no coincide con la referencia documental de rendiciones."
+            )
         fragmentos.append({
             "politica": politica,
             "texto": texto,

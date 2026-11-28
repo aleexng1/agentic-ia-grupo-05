@@ -1,6 +1,7 @@
 """Pruebas sin red: el cliente real traduce las operaciones a comandos simulados."""
 
 import json
+from hashlib import sha256
 from types import SimpleNamespace
 from unittest.mock import Mock, call
 
@@ -9,10 +10,14 @@ from langchain_core.tools import ToolException
 from redis.exceptions import NoPermissionError, ResponseError, TimeoutError
 
 from src.conocimiento.rag import lector_redis, rag
+from src.conocimiento.rag.cargar_indice import RUTA_POLITICA, _preparar_documentos
 
 INDICE = "grupo05_v15"
 MODELO = "models/gemini-embedding-001"
 FUENTE = "datos/politica_ficticia.md#P02"
+P02 = next(
+    d for d in _preparar_documentos(RUTA_POLITICA.read_text(encoding="utf-8")) if d["fuente"] == FUENTE
+)
 
 
 def esquema():
@@ -31,7 +36,7 @@ def esquema():
 
 def fila(distancia="0.2", metadata=None):
     if metadata is None:
-        metadata = json.dumps({"politica": "Viajes Internos", "texto_completo": "Política", "fuente": FUENTE})
+        metadata = json.dumps({k: P02[k] for k in ("politica", "texto_completo", "fuente")})
     return ["text", "Índice", "_metadata_json", metadata, "vector_distance", distancia]
 
 
@@ -68,7 +73,7 @@ def test_solo_info_y_search_parametrizada_en_orden(simulado):
     resultados = rag.buscar_politica.invoke({"consulta": "  hotel interno  ", "k": 2})
 
     assert [frag["puntaje"] for frag in resultados] == [-0.2, -0.4]
-    assert all(frag["fuente"] == FUENTE and frag["texto"] == "Política" for frag in resultados)
+    assert all(frag["fuente"] == FUENTE and frag["texto"] == P02["texto_completo"] for frag in resultados)
     assert eventos.mock_calls[:2] == [call.redis("FT.INFO", INDICE), call.gemini.embed_query("hotel interno")]
     assert len(eventos.mock_calls) == 3
     comando, indice, consulta, *opciones = eventos.redis.call_args.args
@@ -90,6 +95,33 @@ def test_sin_campo_de_filtro_preserva_busqueda_sin_filtro_y_k_predeterminado(sim
     assert rag.buscar_politica.invoke({"consulta": "hotel"}) == []
     consulta = eventos.redis.call_args.args[2]
     assert consulta.startswith("*=>[KNN 3") and "_index_name" not in consulta
+
+
+@pytest.mark.parametrize("campo,valor", [
+    ("texto_completo", lambda texto: texto.replace("$445.000", "$999.000")),
+    ("politica", lambda _: "Viajes Externos"),
+    ("fuente", lambda _: "datos/politica_ficticia.md#P03"),
+])
+def test_buscar_rechaza_fragmento_alterado_aun_con_hash_coherente(simulado, campo, valor):
+    _, datos, _ = simulado
+    metadata = {k: P02[k] for k in ("politica", "texto_completo", "fuente")}
+    metadata[campo] = valor(metadata[campo])
+    metadata["contenido_sha256"] = sha256(metadata["texto_completo"].encode()).hexdigest()
+    datos[:] = [1, "doc-alterado", fila(metadata=json.dumps(metadata))]
+    with pytest.raises(ToolException, match="referencia documental"):
+        rag.buscar_politica.invoke({"consulta": "hotel interno"})
+
+
+def test_consulta_real_no_confirma_el_monto_alterado(simulado):
+    from src.principal.flujos import consulta_politica
+
+    _, datos, _ = simulado
+    metadata = {k: P02[k] for k in ("politica", "texto_completo", "fuente")}
+    metadata["texto_completo"] = metadata["texto_completo"].replace("$445.000", "$999.000")
+    datos[:] = [1, "doc-alterado", fila(metadata=json.dumps(metadata))]
+    with pytest.raises(consulta_politica.ErrorDeServicio, match="referencia documental") as error:
+        consulta_politica.responder_consulta("¿Cuál es el tope P02 de hotel?", "prueba")
+    assert "$999.000" not in str(error.value)
 
 
 @pytest.mark.parametrize("campo,valor", [

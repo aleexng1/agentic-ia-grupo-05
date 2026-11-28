@@ -6,14 +6,12 @@ from langchain_core.tools import ToolException
 from neo4j import READ_ACCESS
 
 from src.conocimiento.grafo.catalogo import (
-    DOCUMENTO,
-    ESTADO_PROPUESTA,
-    POLITICAS,
     PROYECTO,
     RELACIONES,
-    VERSION,
-    fuente_para,
+    RUTA_CATALOGO,
+    ErrorCatalogo,
     id_tope,
+    leer_catalogo,
     normalizar,
     slug,
 )
@@ -26,19 +24,21 @@ MATCH (cat:Grupo05C2GraphRAG:Categoria {proyecto: $proyecto})
 WHERE ($categoria_id IS NULL AND cat.clave = $categoria_clave)
    OR ($categoria_id IS NOT NULL AND cat.id = $categoria_id)
 RETURN cargo.id AS cargo_id, cat.id AS categoria_id
-LIMIT 2
+LIMIT 3
 """
 _RECORRIDO = """
 MATCH camino =
     (cargo:Grupo05C2GraphRAG:Cargo {proyecto: $proyecto, id: $cargo_id})
-    -[:TIENE_NIVEL {proyecto: $proyecto}]->(nivel:Grupo05C2GraphRAG:Nivel {proyecto: $proyecto})
+    -[tn:TIENE_NIVEL {proyecto: $proyecto}]->(nivel:Grupo05C2GraphRAG:Nivel {proyecto: $proyecto})
     -[e:PUEDE_RENDIR {proyecto: $proyecto}]->(cat:Grupo05C2GraphRAG:Categoria {proyecto: $proyecto, id: $categoria_id})
-    -[:TIENE_TOPE {proyecto: $proyecto}]->(tope:Grupo05C2GraphRAG:Tope {proyecto: $proyecto})
-RETURN cargo.nombre AS cargo, nivel.nombre AS nivel, cat.nombre AS categoria,
+    -[tt:TIENE_TOPE {proyecto: $proyecto}]->(tope:Grupo05C2GraphRAG:Tope {proyecto: $proyecto})
+RETURN cargo.id AS cargo_id, nivel.id AS nivel_id,
+       cargo.nombre AS cargo, nivel.nombre AS nivel, cat.nombre AS categoria,
        cat.id AS categoria_id, cat.politica AS politica,
        tope.id AS tope_id, tope.tope_clp AS tope_clp, tope.fuente AS fuente,
        tope.codigo AS documento, tope.version AS version, tope.base AS base,
        e.origen_datos AS estado_elegibilidad,
+       tn.origen_datos AS origen_nivel, tt.origen_datos AS origen_tope,
        [rel IN relationships(camino) | type(rel)] AS relaciones
 LIMIT 2
 """
@@ -64,35 +64,24 @@ def _categoria(categoria: str) -> tuple[str | None, str]:
     return f"{politica.upper()}:{slug(nombre)}", nombre
 
 
-def _validar_recorrido(fila: dict, cargo_clave: str, categoria_id: str) -> None:
-    politica, _, _ = categoria_id.partition(":")
-    monto = fila.get("tope_clp")
-    textos_validos = all(
-        isinstance(fila.get(campo), str) and fila[campo].strip() and fila[campo].isprintable()
-        for campo in ("cargo", "nivel", "categoria")
-    )
-    if not (
-        textos_validos
-        and normalizar(fila["cargo"]) == cargo_clave
-        and fila.get("categoria_id") == categoria_id == f"{politica}:{slug(fila['categoria'])}"
-        and politica in POLITICAS
-        and fila.get("politica") == politica
-        and type(monto) is int and 0 < monto < 2**63
-        and fila.get("tope_id") == id_tope(categoria_id)
-        and fila.get("fuente") == fuente_para(politica)
-        and fila.get("documento") == DOCUMENTO
-        and fila.get("version") == VERSION
-        and fila.get("base") == "por_documento"
-        and fila.get("estado_elegibilidad") == ESTADO_PROPUESTA
-        and fila.get("relaciones") == list(RELACIONES)
-    ):
-        raise ToolException(_INCOMPATIBLE)
-
-
 def _consultar_recorrido(cargo: str, categoria: str) -> dict | None:
     """Diagnóstico interno: recupera el recorrido de Neo4j, no del JSON."""
     cargo_clave = _entrada(cargo, "El cargo")
     categoria_id, categoria_clave = _categoria(categoria)
+    try:
+        catalogo = leer_catalogo(str(RUTA_CATALOGO))
+    except ErrorCatalogo:
+        raise ToolException("No se pudo verificar el catálogo de GraphRAG.") from None
+    org, normativa = catalogo.organizacion_ficticia, catalogo.normativa
+    cargo_ref = next((c for c in org.cargos if normalizar(c.nombre) == cargo_clave), None)
+    categorias_ref = {
+        c.id: c for c in normativa.categorias
+        if (c.id == categoria_id if categoria_id else normalizar(c.nombre) == categoria_clave)
+    }
+    candidatos_ref = [
+        {"cargo_id": cargo_ref.id, "categoria_id": id_} for id_ in sorted(categorias_ref)
+    ] if cargo_ref else []
+
     try:
         with sesion_neo4j(configuracion(), READ_ACCESS) as sesion:
             with sesion.begin_transaction(timeout=5) as tx:
@@ -100,37 +89,42 @@ def _consultar_recorrido(cargo: str, categoria: str) -> dict | None:
                     _CANDIDATOS, proyecto=PROYECTO, cargo_clave=cargo_clave,
                     categoria_id=categoria_id, categoria_clave=categoria_clave,
                 ).data()
-                if not candidatos:
-                    return None
-                if any(not isinstance(fila, dict) for fila in candidatos):
-                    raise ToolException(_INCOMPATIBLE)
-                ids = [(fila.get("cargo_id"), fila.get("categoria_id")) for fila in candidatos]
-                if any(
-                    not isinstance(c, str) or not c.startswith("cargo:")
-                    or not isinstance(cat, str)
-                    or (categoria_id is not None and cat != categoria_id)
-                    or (categoria_id is None and cat.partition(":")[2] != slug(categoria_clave))
-                    for c, cat in ids
+                if len(candidatos) != len(candidatos_ref) or any(
+                    candidatos.count(esperado) != 1 for esperado in candidatos_ref
                 ):
                     raise ToolException(_INCOMPATIBLE)
-                if len(ids) != 1:
-                    if (
-                        categoria_id is None and len(ids) == 2
-                        and ids[0][0] == ids[1][0] and ids[0][1] != ids[1][1]
-                    ):
-                        raise ToolException("La categoría es ambigua. Indica la política, por ejemplo P02:hotel o P03:hotel.")
-                    raise ToolException(_INCOMPATIBLE)
-                cargo_id, categoria_id = ids[0]
+                if not candidatos:
+                    return None
+                if len(candidatos) > 1:
+                    raise ToolException("La categoría es ambigua. Indica la política, por ejemplo P02:hotel o P03:hotel.")
+                cargo_id = candidatos[0]["cargo_id"]
+                categoria_id = candidatos[0]["categoria_id"]
                 filas = tx.run(
                     _RECORRIDO, proyecto=PROYECTO, cargo_id=cargo_id, categoria_id=categoria_id
                 ).data()
     except ErrorGrafo as error:
         raise ToolException(str(error)) from None
-    if not filas:
+
+    elegible = any(
+        e.nivel_id == cargo_ref.nivel_id and categoria_id in e.categorias
+        for e in org.elegibilidad_propuesta
+    )
+    if not elegible and not filas:
         return None
-    if len(filas) != 1 or not isinstance(filas[0], dict):
+    if not elegible or len(filas) != 1 or not isinstance(filas[0], dict):
         raise ToolException(_INCOMPATIBLE)
-    _validar_recorrido(filas[0], cargo_clave, categoria_id)
+    nivel = next(n for n in org.niveles if n.id == cargo_ref.nivel_id)
+    cat = categorias_ref[categoria_id]
+    esperado = {
+        "cargo_id": cargo_ref.id, "cargo": cargo_ref.nombre, "nivel_id": nivel.id, "nivel": nivel.nombre,
+        "categoria_id": cat.id, "categoria": cat.nombre, "politica": cat.id.split(":")[0],
+        "tope_id": id_tope(cat.id), "tope_clp": cat.tope_clp, "fuente": cat.fuente,
+        "documento": normativa.codigo, "version": normativa.version, "base": "por_documento",
+        "estado_elegibilidad": catalogo.estado, "origen_nivel": catalogo.estado,
+        "origen_tope": normativa.codigo, "relaciones": list(RELACIONES),
+    }
+    if filas[0] != esperado or type(filas[0]["tope_clp"]) is not int:
+        raise ToolException(_INCOMPATIBLE)
     return filas[0]
 
 

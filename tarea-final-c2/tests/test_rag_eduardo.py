@@ -6,7 +6,7 @@ from unittest.mock import Mock
 
 import pytest
 from langchain_core.documents import Document
-from langchain_core.messages import AIMessage, ToolMessage
+from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import ToolException
 from langgraph.graph import MessagesState, StateGraph
 from langgraph.prebuilt import ToolNode
@@ -14,6 +14,7 @@ from redis.exceptions import ConnectionError
 
 from src.comun.contrato import Fragmento
 from src.conocimiento.rag import rag
+from src.conocimiento.rag.cargar_indice import RUTA_POLITICA, _preparar_documentos
 from src.principal.flujos import revisar_gasto
 from src.principal.herramientas.buscar_politica import buscar_politica
 
@@ -50,21 +51,28 @@ def documento(politica, texto, fuente):
     )
 
 
-def test_recupera_fragmentos_completos_y_cita_fuentes(indice_simulado):
+@pytest.fixture(scope="module")
+def documentos_fuente():
+    return {d["fuente"]: d for d in _preparar_documentos(RUTA_POLITICA.read_text(encoding="utf-8"))}
+
+
+def test_recupera_fragmentos_completos_y_cita_fuentes(indice_simulado, documentos_fuente):
     fuente_politica = "datos/politica_ficticia.md#P02"
     fuente_regla = "datos/politica_ficticia.md#reglas-generales/RG-05"
+    texto_politica = documentos_fuente[fuente_politica]["texto_completo"]
+    texto_regla = documentos_fuente[fuente_regla]["texto_completo"]
     indice_simulado.similarity_search_with_score.return_value = [
-        (documento("Viajes Internos", "Tope de hotel por documento.", fuente_politica), 0.15),
-        (documento("Reglas generales", "Regla general de topes.", fuente_regla), "0.35"),
+        (documento("Viajes Internos", texto_politica, fuente_politica), 0.15),
+        (documento("Reglas generales", texto_regla, fuente_regla), "0.35"),
     ]
 
     resultado = buscar_politica.invoke({"consulta": "  tope de hotel  ", "k": 2})
 
     indice_simulado.similarity_search_with_score.assert_called_once_with("tope de hotel", k=2)
     assert resultado == [
-        {"politica": "Viajes Internos", "texto": "Tope de hotel por documento.",
+        {"politica": "Viajes Internos", "texto": texto_politica,
          "fuente": fuente_politica, "puntaje": -0.15},
-        {"politica": "Reglas generales", "texto": "Regla general de topes.",
+        {"politica": "Reglas generales", "texto": texto_regla,
          "fuente": fuente_regla, "puntaje": -0.35},
     ]
     assert all(set(fragmento) == Fragmento.__required_keys__ for fragmento in resultado)
@@ -144,8 +152,10 @@ def test_puntaje_incompatible_produce_error_controlado(indice_simulado, puntaje)
         buscar_politica.invoke({"consulta": "hotel"})
 
 
-def test_metadatos_validos_conservan_su_texto_original(indice_simulado):
-    doc = documento(" Viajes Internos ", "\nTexto completo\n", " datos/politica_ficticia.md#P02 ")
+def test_metadatos_validos_conservan_su_texto_original(indice_simulado, documentos_fuente):
+    fuente = "datos/politica_ficticia.md#P02"
+    texto = documentos_fuente[fuente]["texto_completo"].replace("\n", "\r\n")
+    doc = documento("Viajes Internos", f"\r\n{texto}\r\n", fuente)
     indice_simulado.similarity_search_with_score.return_value = [(doc, 0.2)]
 
     assert buscar_politica.invoke({"consulta": "hotel"}) == [
@@ -167,7 +177,7 @@ def test_error_de_redis_no_expone_detalles(indice_simulado, fallo_inicializacion
     assert error.value.__suppress_context__
 
 
-def test_toolnode_react_recibe_fragmentos_o_error_controlado(indice_simulado):
+def test_toolnode_react_recibe_fragmentos_o_error_controlado(indice_simulado, documentos_fuente):
     nodo = ToolNode(revisar_gasto.HERRAMIENTAS, handle_tool_errors=(ToolException,))
     grafo = StateGraph(MessagesState)
     # ToolNode necesita el runtime que provee un grafo compilado, igual que en ReAct.
@@ -179,8 +189,9 @@ def test_toolnode_react_recibe_fragmentos_o_error_controlado(indice_simulado):
         {"name": "buscar_politica", "args": {"consulta": "hotel"}, "id": "rag-1"},
     ])
     fuente = "datos/politica_ficticia.md#P02"
+    texto = documentos_fuente[fuente]["texto_completo"]
     indice_simulado.similarity_search_with_score.return_value = [
-        (documento("Viajes Internos", "Texto completo", fuente), 0.1),
+        (documento("Viajes Internos", texto, fuente), 0.1),
     ]
 
     respuesta = agente.invoke({"messages": [llamada]})["messages"][-1]
@@ -188,6 +199,16 @@ def test_toolnode_react_recibe_fragmentos_o_error_controlado(indice_simulado):
     assert respuesta.tool_call_id == "rag-1"
     assert respuesta.status == "success"
     assert json.loads(respuesta.content)[0]["fuente"] == fuente
+    turno = [HumanMessage(content="Hotel interno"), llamada]
+    assert revisar_gasto._fragmentos_en_historial([*turno, respuesta]) == json.loads(respuesta.content)
+
+    indice_simulado.similarity_search_with_score.return_value = [
+        (documento("Viajes Internos", texto.replace("$445.000", "$999.000"), fuente), 0.1),
+    ]
+    respuesta = agente.invoke({"messages": [llamada]})["messages"][-1]
+    assert respuesta.status == "error"
+    assert "referencia documental" in respuesta.content and "$999.000" not in respuesta.content
+    assert revisar_gasto._fragmentos_en_historial([*turno, respuesta]) == []
 
     indice_simulado.similarity_search_with_score.side_effect = ConnectionError("detalle-interno")
     respuesta = agente.invoke({"messages": [llamada]})["messages"][-1]

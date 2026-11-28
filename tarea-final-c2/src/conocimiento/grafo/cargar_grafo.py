@@ -10,7 +10,6 @@ from neo4j import WRITE_ACCESS
 
 from src.conocimiento.grafo.catalogo import (
     PROYECTO,
-    RELACIONES,
     RUTA_CATALOGO,
     Catalogo,
     ErrorCatalogo,
@@ -26,12 +25,6 @@ _RESTRICCION = """
 CREATE CONSTRAINT g05_c2_graphrag_proyecto_id IF NOT EXISTS
 FOR (n:Grupo05C2GraphRAG) REQUIRE (n.proyecto, n.id) IS UNIQUE
 """
-_OTRA_HUELLA = """
-MATCH (n:Grupo05C2GraphRAG {proyecto: $proyecto})
-WHERE n.huella IS NULL OR n.huella <> $huella
-RETURN count(n) AS total
-"""
-
 # Solo se interpola estructura fija del código. Los datos entran exclusivamente por parámetros.
 _NODOS = {
     etiqueta: f"""
@@ -55,14 +48,20 @@ _ARISTAS = {
         ("TIENE_TOPE", "Categoria", "Tope"),
     )
 }
-_CONTAR_NODOS = """
-MATCH (n:Grupo05C2GraphRAG {proyecto: $proyecto}) RETURN count(n) AS total
-"""
-_CONTAR_RELACIONES = """
-MATCH (:Grupo05C2GraphRAG {proyecto: $proyecto})-[r {proyecto: $proyecto}]->
-      (:Grupo05C2GraphRAG {proyecto: $proyecto})
-WHERE type(r) IN $tipos
-RETURN count(r) AS total
+# Incluye aristas internas aunque pierdan su propiedad proyecto, y aristas del
+# proyecto conectadas a un nodo ajeno. Un vínculo de otra extensión queda fuera.
+_INVENTARIO = """
+MATCH (n:Grupo05C2GraphRAG {proyecto: $proyecto})
+RETURN labels(n) AS etiquetas, properties(n) AS propiedades,
+       null AS tipo, null AS origen, null AS destino
+UNION ALL
+MATCH (n:Grupo05C2GraphRAG {proyecto: $proyecto})-[r]-(vecino)
+WHERE r.proyecto = $proyecto OR (vecino:Grupo05C2GraphRAG AND vecino.proyecto = $proyecto)
+WITH DISTINCT r
+WITH r, startNode(r) AS a, endNode(r) AS b
+RETURN null AS etiquetas, properties(r) AS propiedades, type(r) AS tipo,
+       CASE WHEN a:Grupo05C2GraphRAG AND a.proyecto = $proyecto THEN a.id END AS origen,
+       CASE WHEN b:Grupo05C2GraphRAG AND b.proyecto = $proyecto THEN b.id END AS destino
 """
 
 
@@ -113,6 +112,41 @@ def _filas(catalogo: Catalogo) -> tuple[dict, dict]:
     return nodos, aristas
 
 
+def _validar_inventario(inventario: list[dict], nodos: dict, aristas: dict, huella: str) -> None:
+    esperados = {
+        (None, fila["id"], None): (
+            {"Grupo05C2GraphRAG", etiqueta}, {**fila, "proyecto": PROYECTO, "huella": huella},
+        )
+        for etiqueta, filas in nodos.items() for fila in filas
+    }
+    esperados.update({
+        (tipo, fila["origen"], fila["destino"]): (
+            set(), {"proyecto": PROYECTO, "origen_datos": fila["origen_datos"]},
+        )
+        for tipo, filas in aristas.items() for fila in filas
+    })
+    mensaje = "El inventario de GraphRAG no coincide con el catálogo; no se repararán datos existentes."
+    for fila in inventario:
+        propiedades = fila["propiedades"]
+        if fila["tipo"] is None:
+            if propiedades.get("huella") != huella:
+                raise ErrorGrafo("Ya existe otro catálogo del proyecto. No se actualizará automáticamente.")
+            clave = (None, propiedades.get("id"), None)
+        else:
+            clave = (fila["tipo"], fila["origen"], fila["destino"])
+        if not all(p is None or isinstance(p, str) for p in clave):
+            raise ErrorGrafo(mensaje)
+        etiquetas_ref, propiedades_ref = esperados.pop(clave, (None, {}))
+        if (
+            set(fila["etiquetas"] or ()) != etiquetas_ref
+            or propiedades != propiedades_ref
+            or any(type(propiedades[k]) is not type(valor) for k, valor in propiedades_ref.items())
+        ):
+            raise ErrorGrafo(mensaje)
+    if esperados:
+        raise ErrorGrafo(mensaje)
+
+
 def cargar_grafo(ruta_datos: str) -> dict:
     """Carga una propuesta validada, solo con confirmación humana del destino exacto."""
     confirmado = _DESTINO_CONFIRMADO.get()
@@ -130,22 +164,16 @@ def cargar_grafo(ruta_datos: str) -> dict:
             tx.run(_RESTRICCION).consume()
             tx.commit()
         with sesion.begin_transaction(timeout=10) as tx:
-            if tx.run(_OTRA_HUELLA, proyecto=PROYECTO, huella=huella).single(strict=True)["total"]:
-                raise ErrorGrafo("Ya existe otro catálogo del proyecto. No se actualizará automáticamente.")
-            for etiqueta, filas in nodos.items():
-                tx.run(_NODOS[etiqueta], proyecto=PROYECTO, filas=filas, huella=huella).consume()
-            for tipo, filas in aristas.items():
-                tx.run(_ARISTAS[tipo], proyecto=PROYECTO, filas=filas).consume()
-            totales = {
-                "nodos": tx.run(_CONTAR_NODOS, proyecto=PROYECTO).single(strict=True)["total"],
-                "relaciones": tx.run(
-                    _CONTAR_RELACIONES, proyecto=PROYECTO, tipos=list(RELACIONES)
-                ).single(strict=True)["total"],
-            }
-            if totales != conteos(catalogo):
-                raise ErrorGrafo("Los conteos del proyecto no coinciden; se canceló la carga de datos.")
+            inventario = tx.run(_INVENTARIO, proyecto=PROYECTO).data()
+            if not inventario:
+                for etiqueta, filas in nodos.items():
+                    tx.run(_NODOS[etiqueta], proyecto=PROYECTO, filas=filas, huella=huella).consume()
+                for tipo, filas in aristas.items():
+                    tx.run(_ARISTAS[tipo], proyecto=PROYECTO, filas=filas).consume()
+                inventario = tx.run(_INVENTARIO, proyecto=PROYECTO).data()
+            _validar_inventario(inventario, nodos, aristas, huella)
             tx.commit()
-    return totales
+    return conteos(catalogo)
 
 
 def main(argv: list[str] | None = None) -> None:
