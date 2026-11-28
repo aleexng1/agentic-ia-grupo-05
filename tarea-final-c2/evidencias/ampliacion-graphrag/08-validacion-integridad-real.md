@@ -44,3 +44,16 @@ El catalogo organizacional sigue pendiente de aprobacion.
 - La autenticacion remota de Heroku sigue pendiente.
 
 Resultados transcritos desde la salida de PowerShell.
+
+
+## Verificacion previa de la extension
+
+Fecha: 2026-11-27.
+
+- Inventario base: 24 nodos y 27 relaciones.
+- Extension instalada: false.
+- Cambio realizado: false.
+- Resultado: PASS.
+
+Verificacion remota exclusivamente de lectura.
+No constituye una aprobacion ni una migracion.
