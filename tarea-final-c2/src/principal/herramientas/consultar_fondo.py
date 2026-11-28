@@ -12,6 +12,7 @@ el ReAct lo ve como observación y no recibe un saldo inventado.
 
 import asyncio
 import json
+import os
 import sys
 from concurrent.futures import ThreadPoolExecutor
 
@@ -31,11 +32,17 @@ _CAMPOS = ("id_fondo", "responsable", "saldo_inicial", "saldo_actual", "gastos_a
 
 
 def _parametros_servidor() -> StdioServerParameters:
-    """Cómo arrancar el servidor MCP: el mismo Python, como módulo, desde tarea-final-c2/."""
+    """Cómo arrancar el servidor MCP: el mismo Python, como módulo, desde tarea-final-c2/.
+
+    Se le pasa el entorno completo del proceso. Sin `env`, la librería MCP solo copia unas
+    pocas variables (HOME, PATH...) y deja fuera LD_LIBRARY_PATH; en Heroku el Python hijo
+    no encontraba libpython3.12.so.1.0 y cada consultar_fondo fallaba al arrancar.
+    """
     return StdioServerParameters(
         command=sys.executable,
         args=["-m", "src.mcp_fondos.servidor"],
         cwd=str(CARPETA_PROYECTO),
+        env=dict(os.environ),
     )
 
 
