@@ -13,13 +13,14 @@ autorizada (`bloqueado`) o tiempo agotado (`error`). Cada parada tiene su eviden
 
 ## 1. Parada por veredicto válido, por `/chat` (la versión para la nota)
 
-`../dos-recorridos/03-revisar-gasto.md`, capturada por Alex el 2026-11-26 18:33 con el servidor real
-(`uvicorn api.app:app`), Redis del grupo (RAG), el MCP de fondos, el juez y Postgres.
+`../dos-recorridos/03-revisar-gasto.md`, capturada por Alex el 2026-11-26 21:34 con el servidor real
+(`uvicorn api.app:app`), Redis del grupo (RAG), el MCP de fondos, el juez y Postgres. Muestra el ReAct
+paso a paso: herramienta → resultado → decisión → parada.
 
 - **Entrada:** `POST /chat` con «Revisa este gasto rendido.» y el gasto GS-01 del golden set de c1
-  (peaje de $7.800, fondo FR-001). Respuesta 202 con `id_ejecucion = 785ff949-e96b-43dc-bdf3-3088cda484bb`.
-- **Ejecución observada:** el log del servidor con ese `id_ejecucion`:
-  `ruta=revisar_gasto · estado=ok · 25546 ms · herramientas=buscar_politica,consultar_fondo,validar_gasto,emitir_veredicto`.
+  (peaje de $7.800, fondo FR-001). Respuesta 202 con `id_ejecucion = a078d302-b429-4448-9774-cdaafe74343d`.
+- **Ejecución observada:** la traza de cada paso y el log del servidor con ese `id_ejecucion`:
+  `ruta=revisar_gasto · estado=ok · 11395 ms · herramientas=buscar_politica,consultar_fondo,validar_gasto,emitir_veredicto`.
 - **Resultado:** **APROBAR / P02 / Peaje / CTA-6100** en **4 pasos**, igual a lo esperado de GS-01;
   `estado_final = "ok"`. `GET /registro/{id}` devuelve la misma fila desde la tabla `ejecuciones`.
 

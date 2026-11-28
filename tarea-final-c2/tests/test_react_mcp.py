@@ -53,6 +53,14 @@ def test_el_servidor_mcp_publica_solo_consultar_fondo():
     assert asyncio.run(listar()) == ["consultar_fondo"]
 
 
+def test_el_servidor_mcp_hereda_el_entorno_del_proceso(monkeypatch):
+    """En Heroku el Python hijo necesita LD_LIBRARY_PATH para cargar libpython (2026-11-27)."""
+    monkeypatch.setenv("LD_LIBRARY_PATH", "/app/.heroku/python/lib")
+    env = modulo_consultar._parametros_servidor().env
+    assert env is not None
+    assert env["LD_LIBRARY_PATH"] == "/app/.heroku/python/lib"
+
+
 def test_consultar_fondo_por_mcp_devuelve_el_estado_del_fondo():
     assert modulo_consultar.consultar_fondo.invoke({"id_fondo": "FR-001"}) == FONDO_FR001
 
