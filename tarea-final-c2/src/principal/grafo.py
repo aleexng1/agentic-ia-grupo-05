@@ -32,6 +32,7 @@ from uuid import uuid4
 from langgraph.checkpoint.memory import InMemorySaver
 from langgraph.graph import END, START, StateGraph
 
+from src.comun import errores
 from src.comun.contrato import Gasto
 from src.comun.errores import traducir_error
 from src.comun.registro import obtener_registro, recortar
@@ -72,14 +73,30 @@ class EstadoPrincipal(TypedDict):
     veredicto: NotRequired[dict | None]
     verificacion: NotRequired[dict | None]
     hora_limite: NotRequired[str | None]  # ISO UTC: inicio + TIEMPO_MAX_EJECUCION_SEG (se pasa a revisar_caso)
+    # Herramientas del ReAct que fallaron en un turno que terminó en "error" sin veredicto.
+    herramientas_con_error: NotRequired[list[dict]]
+
+
+# Mensajes de errores.py que solo puede dar el modelo (Gemini): clave, cuota, permiso, modelo y
+# no disponible. «Tiempo agotado» y «sin conexión» quedan fuera: también los da Postgres o un agente.
+_MENSAJES_DEL_MODELO = (
+    errores.MENSAJE_CLAVE_GEMINI, errores.MENSAJE_SIN_CLAVE_GEMINI, errores.MENSAJE_SIN_CUOTA,
+    errores.MENSAJE_SIN_PERMISO, errores.MENSAJE_MODELO, errores.MENSAJE_NO_DISPONIBLE,
+)
 
 
 class ErrorDeEjecucion(Exception):
-    """La ejecución falló sin salida (por ejemplo, el proveedor del router). Lleva su id_ejecucion."""
+    """La ejecución falló sin salida (por ejemplo, el proveedor del router). Lleva su id_ejecucion.
 
-    def __init__(self, mensaje: str, id_ejecucion: str):
+    `ruta`: la que el router alcanzó a elegir (None si falló antes). `del_modelo`: True si la falla
+    es del modelo (Gemini), según el mensaje traducido por errores.traducir_error.
+    """
+
+    def __init__(self, mensaje: str, id_ejecucion: str, *, ruta: str | None = None, del_modelo: bool = False):
         super().__init__(mensaje)
         self.id_ejecucion = id_ejecucion
+        self.ruta = ruta
+        self.del_modelo = del_modelo
 
 
 # ---------------------------------------------------------------------------
@@ -251,6 +268,38 @@ def _verificar_boleta(id_ejecucion: str, gasto: dict) -> dict | None:
 _AVISADOS: set[str] = set()
 
 
+def _motivo_de_herramienta(contenido: str) -> str | None:
+    """El mensaje de la ToolException dentro de la observación, sin el envoltorio del ToolNode."""
+    encontrado = re.search(r"ToolException\((['\"])(.*?)\1\)", str(contenido), re.DOTALL)
+    if not encontrado:
+        return None
+    motivo = errores.ocultar_secretos(" ".join(encontrado.group(2).replace("\\n", " ").split()))
+    return motivo[:157].rstrip() + "…" if len(motivo) > 160 else motivo
+
+
+def herramientas_con_error(agente, hilo: str) -> list[dict]:
+    """Herramientas que fallaron en el último turno del ReAct y no se recuperaron después.
+
+    Lee el estado que el ReAct ya guarda (el mismo que usa revisar_caso): las observaciones
+    (ToolMessage) desde el último mensaje de la persona. El ToolNode marca con status="error"
+    la de una herramienta que lanzó ToolException. Si después la misma herramienta respondió
+    bien, no cuenta. Devuelve [{"herramienta", "motivo"}]; [] si no se puede leer el estado.
+    """
+    from langchain_core.messages import HumanMessage, ToolMessage
+
+    try:
+        mensajes = agente.get_state({"configurable": {"thread_id": hilo}}).values.get("messages", [])
+    except Exception:  # noqa: BLE001 (sin estado legible no se inventa una causa)
+        return []
+    inicio = max((i for i, m in enumerate(mensajes) if isinstance(m, HumanMessage)), default=-1)
+    ultima: dict[str, dict | None] = {}
+    for mensaje in mensajes[inicio + 1 :]:
+        if isinstance(mensaje, ToolMessage) and mensaje.name:
+            fallo = getattr(mensaje, "status", "success") == "error"
+            ultima[mensaje.name] = {"herramienta": mensaje.name, "motivo": _motivo_de_herramienta(mensaje.content)} if fallo else None
+    return [datos for datos in ultima.values() if datos]
+
+
 def _argumentos_admitidos(funcion, opcionales: dict) -> dict:
     """Los argumentos opcionales que la firma de `funcion` acepta; avisa una vez por cada uno que no.
 
@@ -329,6 +378,10 @@ def crear_nodo_revisar_gasto(checkpointer):
             return {**salida, "herramientas_usadas": herramientas, "hubo_a2a": hubo_a2a, "verificacion": verificacion}
 
         veredicto, nota = aplicar_verificacion(resultado.get("veredicto"), verificacion)
+        con_error = []
+        if resultado.get("estado_final") == "error" and not resultado.get("veredicto"):
+            # Para explicar en GET /registro qué falló (en_segundo_plano.detalle_sin_veredicto).
+            con_error = herramientas_con_error(_agente_react(modulo_react, checkpointer), f"{estado['thread_id']}:revisar_gasto")
         partes = [str(resultado.get("respuesta", ""))]
         if linea_verificacion:
             partes.append(linea_verificacion)
@@ -342,6 +395,7 @@ def crear_nodo_revisar_gasto(checkpointer):
             "pasos": int(resultado.get("pasos") or 0),
             "veredicto": veredicto,
             "verificacion": verificacion,
+            "herramientas_con_error": con_error,
         }
 
     return nodo_revisar_gasto
@@ -474,7 +528,7 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         "gasto": gasto if isinstance(gasto, dict) else None,
         "ruta": None, "motivo": None, "modelo_router": None, "respuesta": None, "estado_final": None,
         "herramientas_usadas": [], "hubo_a2a": False, "pasos": 0, "veredicto": None, "verificacion": None,
-        "hora_limite": hora_limite.isoformat(),
+        "hora_limite": hora_limite.isoformat(), "herramientas_con_error": [],
     }
     if imagen:
         with _CANDADO_ADJUNTOS:
@@ -504,7 +558,7 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         ruta = _ruta_alcanzada(grafo, configuracion)
         _REGISTRO.error("ejecución %s · ruta=%s · falló sin salida: %s", id_ejecucion, ruta or "sin_ruta", mensaje)
         _registrar_ejecucion(fila({"ruta": ruta, "estado_final": "error"}))
-        raise ErrorDeEjecucion(mensaje, id_ejecucion) from None
+        raise ErrorDeEjecucion(mensaje, id_ejecucion, ruta=ruta, del_modelo=mensaje in _MENSAJES_DEL_MODELO) from None
     finally:
         with _CANDADO_ADJUNTOS:
             _ADJUNTOS.pop(id_ejecucion, None)
@@ -519,7 +573,7 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         segundos = round(time.monotonic() - inicio, 1)
         _REGISTRO.error("ejecución %s · terminó en %s s, después del tiempo máximo: queda como error", id_ejecucion, segundos)
         estado = {**estado, "estado_final": "error", "respuesta": mensaje_tope(tiempo_max_ejecucion_seg()),
-                  "veredicto": None, "verificacion": None}
+                  "veredicto": None, "verificacion": None, "herramientas_con_error": []}
         estado_final = "error"
     _registrar_ejecucion(fila(estado))
     respuesta = {
@@ -537,6 +591,8 @@ def ejecutar(thread_id: str | None, texto: str, imagen: dict | None = None, gast
         respuesta["veredicto"] = estado["veredicto"]
     if estado.get("verificacion"):
         respuesta["verificacion"] = estado["verificacion"]
+    if estado.get("herramientas_con_error"):
+        respuesta["herramientas_con_error"] = estado["herramientas_con_error"]
     _REGISTRO.info("chat · %s · «%s» → %s", id_ejecucion, recortar(texto), estado["ruta"])
     return respuesta
 
